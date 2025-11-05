@@ -1,4 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-html,body,#root{height:100%}
+
+:root {
+  --brand: theme(colors.brand);
+}
+
+html, body {
+  @apply bg-white text-neutral-900;
+}

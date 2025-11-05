@@ -1,214 +1,177 @@
 import { useState } from "react";
 
-https://formspree.io/f/mrbonpno
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/XXXXXXXX";
+/** Formspree endpoint — заявки придут на твою почту */
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/mzzklwdb";
 
 const t = {
   fr: {
-    lang: "FR",
-    switchHint: "FR → EN → RU",
+    lang: "FR", switchTo: "EN",
     hero: "Lot d’essai pour HoReCa",
     sub: "Torréfaction de spécialité pour cafés et restaurants à Paris.",
+    cta: "Envoyer la demande",
     benefits: "Pourquoi nous ?",
     b1: "Qualité stable, profils clairs",
-    b2: "Prix B2B adaptés HoReCa",
+    b2: "Prix B2B transparents",
     b3: "Livraison rapide sur Paris",
     assortment: "Assortiment",
-    assortmentText:
-      "Espresso & filtre : Brésil, Colombie, Éthiopie, Honduras (selon récolte).",
+    assortmentText: "Espresso & filtre : Brésil, Colombie, Éthiopie, Honduras (selon récolte). Profil HoReCa.",
     terms: "Conditions",
     termsList: [
-      "Fixation des profils après dégustation.",
-      "Volumes d’essai flexibles et calendrier de livraison discuté.",
+      "Volumes d’essai flexibles (lot pilote HoReCa).",
+      "Contrats B2B simples, facturation mensuelle.",
+      "Livraison sur Paris intra-muros sous 24–72 h."
     ],
-    formTitle: "Envoyer la demande",
-    f_company: "Société",
-    f_person: "Contact",
-    f_email: "E-mail",
-    f_address: "Adresse",
-    f_phone: "Téléphone",
-    f_volume: "Volume mensuel estimé",
-    f_comment: "Commentaire (optionnel)",
-    send: "Envoyer",
-    sentOk: "Merci ! Votre demande a été envoyée.",
-    sentErr: "Échec d’envoi. Réessayez."
+    form: {
+      title: "Laissez votre demande",
+      company: "Société",
+      contact: "Personne de contact",
+      email: "E-mail",
+      address: "Adresse",
+      phone: "Téléphone",
+      volume: "Volume mensuel attendu (kg)",
+      comment: "Commentaire",
+      submit: "Envoyer la demande",
+      ok: "Merci ! Votre demande a été envoyée."
+    },
+    footer: "© 2025 NÉORA — Paris · neora-b2b.app"
   },
   en: {
-    lang: "EN",
-    switchHint: "EN → RU → FR",
+    lang: "EN", switchTo: "FR",
     hero: "Trial batch for HoReCa",
     sub: "Specialty roasting for cafés & restaurants in Paris.",
+    cta: "Send request",
     benefits: "Why us?",
-    b1: "Consistent quality, clear profiles",
-    b2: "HoReCa-friendly pricing",
-    b3: "Fast delivery across Paris",
+    b1: "Consistent quality & clear profiles",
+    b2: "Transparent B2B pricing",
+    b3: "Fast delivery in Paris",
     assortment: "Assortment",
-    assortmentText:
-      "Espresso & filter: Brazil, Colombia, Ethiopia, Honduras (by harvest).",
+    assortmentText: "Espresso & filter: Brazil, Colombia, Ethiopia, Honduras (by harvest). HoReCa-tuned.",
     terms: "Terms",
     termsList: [
-      "Lock profiles after tasting feedback.",
-      "Flexible pilot volumes and agreed delivery cadence.",
+      "Flexible pilot volumes (HoReCa trial).",
+      "Simple B2B contracts, monthly invoicing.",
+      "Paris delivery within 24–72 h."
     ],
-    formTitle: "Send request",
-    f_company: "Company",
-    f_person: "Contact person",
-    f_email: "E-mail",
-    f_address: "Address",
-    f_phone: "Phone",
-    f_volume: "Expected monthly volume",
-    f_comment: "Comment (optional)",
-    send: "Send",
-    sentOk: "Thank you! Your request has been sent.",
-    sentErr: "Couldn’t send. Please try again."
+    form: {
+      title: "Leave a request",
+      company: "Company",
+      contact: "Contact person",
+      email: "E-mail",
+      address: "Address",
+      phone: "Phone",
+      volume: "Expected monthly volume (kg)",
+      comment: "Comment",
+      submit: "Send request",
+      ok: "Thanks! Your request has been sent."
+    },
+    footer: "© 2025 NÉORA — Paris · neora-b2b.app"
   },
   ru: {
-    lang: "RU",
-    switchHint: "RU → FR → EN",
+    lang: "RU", switchTo: "FR",
     hero: "Пробная партия для HoReCa",
-    sub: "Спешелти-обжарка для кофеен и ресторанов в Париже.",
+    sub: "Спешиалти-обжарка для кофеен и ресторанов в Париже.",
+    cta: "Отправить заявку",
     benefits: "Почему мы?",
-    b1: "Стабильное качество, понятные профили",
-    b2: "Цены под HoReCa",
+    b1: "Стабильное качество, ясные профили",
+    b2: "Прозрачные B2B-цены",
     b3: "Быстрая доставка по Парижу",
     assortment: "Ассортимент",
-    assortmentText:
-      "Эспрессо и фильтр: Бразилия, Колумбия, Эфиопия, Гондурас (по урожаю).",
+    assortmentText: "Эспрессо и фильтр: Бразилия, Колумбия, Эфиопия, Гондурас (по урожаю). Профиль HoReCa.",
     terms: "Условия",
     termsList: [
-      "Фиксируем профиль после дегустации.",
-      "Гибкая пробная партия и согласованный график поставок.",
+      "Гибкие тестовые объёмы (пилот для HoReCa).",
+      "Простые B2B-договоры, помесячная отчётность.",
+      "Доставка по Парижу 24–72 ч."
     ],
-    formTitle: "Оставить заявку",
-    f_company: "Компания",
-    f_person: "Контактное лицо",
-    f_email: "E-mail",
-    f_address: "Адрес",
-    f_phone: "Контактный телефон",
-    f_volume: "Ожидаемый объём в месяц",
-    f_comment: "Комментарий (необязательно)",
-    send: "Отправить заявку",
-    sentOk: "Спасибо! Ваша заявка отправлена.",
-    sentErr: "Не удалось отправить. Попробуйте ещё раз."
+    form: {
+      title: "Оставить заявку",
+      company: "Компания",
+      contact: "Контактное лицо",
+      email: "E-mail",
+      address: "Адрес",
+      phone: "Телефон",
+      volume: "Ожидаемый объём в месяц (кг)",
+      comment: "Комментарий",
+      submit: "Отправить заявку",
+      ok: "Спасибо! Ваша заявка отправлена."
+    },
+    footer: "© 2025 NÉORA — Paris · neora-b2b.app"
   }
 };
 
-const order = ["ru", "fr", "en"];
-const nextLang = (cur) => order[(order.indexOf(cur) + 1) % order.length];
-
 export default function App() {
-  const defaultLang = "ru"; // ← если хочешь старт с FR, поставь "fr"
-  const [lang, setLang] = useState(defaultLang);
+  const [lang, setLang] = useState<"fr" | "en" | "ru">("fr");
+  const [ok, setOk] = useState(false);
   const L = t[lang];
-
-  const [sending, setSending] = useState(false);
-  const [status, setStatus] = useState(null); // "ok" | "err" | null
 
   async function onSubmit(e) {
     e.preventDefault();
-    setStatus(null);
-    setSending(true);
+    const form = e.currentTarget;
+    const data = Object.fromEntries(new FormData(form).entries());
 
-    const formData = Object.fromEntries(new FormData(e.currentTarget).entries());
+    const resp = await fetch(FORMSPREE_ENDPOINT, {
+      method: "POST",
+      headers: { "Accept": "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
 
-    // собираем полезный payload для Formspree
-    const payload = {
-      ...formData,
-      lang,
-      _subject: `NEORA B2B — заявка (${lang.toUpperCase()}) — ${formData["company"] || formData["Компания"] || ""}`,
-    };
-
-    try {
-      const r = await fetch(FORMSPREE_ENDPOINT, {
-        method: "POST",
-        headers: { "Accept": "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!r.ok) throw new Error("bad status");
-      setStatus("ok");
-      e.currentTarget.reset();
-    } catch {
-      setStatus("err");
-    } finally {
-      setSending(false);
+    if (resp.ok) {
+      setOk(true);
+      form.reset();
+      setTimeout(() => setOk(false), 5000);
+    } else {
+      alert("Submit error. Try again or email hello@neora.coffee");
     }
   }
 
   return (
-    <div className="min-h-screen bg-white text-neutral-900">
-      {/* HEADER */}
+    <div className="min-h-screen">
+      {/* Header — логотип одним словом, без кружка */}
       <header className="sticky top-0 z-50 backdrop-blur bg-white/80 border-b">
         <div className="max-w-5xl mx-auto px-5 py-3 flex items-center justify-between">
-          {/* логотип: только слово NÉORA (в svg), без кружка */}
-          <img src="/logo.svg" alt="NÉORA" className="h-10 w-auto" />
-          <button
-            onClick={() => setLang(nextLang(lang))}
-            className="text-xs md:text-sm border px-3 py-1.5 rounded-lg bg-white hover:bg-neutral-50"
-            title={L.switchHint}
-          >
-            {L.lang}
-          </button>
+          <div className="text-2xl font-bold tracking-tight">
+            <span style={{ letterSpacing: "0.5px" }}>
+              N<span style={{ color: "var(--brand, #C58A44)" }}>É</span>ORA
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setLang(lang === "fr" ? "en" : lang === "en" ? "ru" : "fr")}
+              className="text-sm border px-3 py-2 rounded-lg bg-white"
+              title={L.switchTo}
+            >
+              {L.lang}
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* HERO */}
+      {/* Hero */}
       <section className="max-w-5xl mx-auto grid md:grid-cols-2 gap-7 px-5 pt-10">
+        {/* Форма заявки */}
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{L.hero}</h1>
           <p className="mt-2 text-neutral-600">{L.sub}</p>
 
-          {/* ФОРМА — Formspree (AJAX) */}
-          <form onSubmit={onSubmit} className="mt-6 grid md:grid-cols-2 gap-4 max-w-3xl">
-            {/* имя полей на английском — удобно для email-писем; плейсхолдеры — локализованные */}
-            <input
-              required name="company"
-              placeholder={L.f_company}
-              className="border rounded-lg px-3 py-2"
-            />
-            <input
-              required name="person"
-              placeholder={L.f_person}
-              className="border rounded-lg px-3 py-2"
-            />
-            <input
-              required type="email" name="email"
-              placeholder={L.f_email}
-              className="border rounded-lg px-3 py-2"
-            />
-            <input
-              required name="phone"
-              placeholder={L.f_phone}
-              className="border rounded-lg px-3 py-2"
-            />
-            <input
-              required name="address"
-              placeholder={L.f_address}
-              className="border rounded-lg px-3 py-2 md:col-span-2"
-            />
-            <input
-              required name="volume"
-              placeholder={L.f_volume}
-              className="border rounded-lg px-3 py-2 md:col-span-2"
-            />
-            <textarea
-              name="comment"
-              placeholder={L.f_comment}
-              className="border rounded-lg px-3 py-2 min-h-[110px] md:col-span-2"
-            />
-            <button
-              type="submit"
-              disabled={sending}
-              className="bg-[var(--brand)] text-white font-semibold rounded-lg px-4 py-2 md:col-span-2 hover:opacity-90 transition disabled:opacity-60"
-            >
-              {sending ? "…" : L.send}
+          <form onSubmit={onSubmit} className="mt-5 flex flex-col gap-3 max-w-md">
+            <input name="company" required placeholder={L.form.company} className="border rounded-lg px-3 py-2" />
+            <input name="contact" required placeholder={L.form.contact} className="border rounded-lg px-3 py-2" />
+            <input type="email" name="email" required placeholder={L.form.email} className="border rounded-lg px-3 py-2" />
+            <input name="address" placeholder={L.form.address} className="border rounded-lg px-3 py-2" />
+            <input name="phone" placeholder={L.form.phone} className="border rounded-lg px-3 py-2" />
+            <input name="monthlyVolume" placeholder={L.form.volume} className="border rounded-lg px-3 py-2" />
+            <textarea name="comment" placeholder={L.form.comment} className="border rounded-lg px-3 py-2 min-h-[90px]" />
+
+            <button className="bg-[var(--brand,#C58A44)] text-white font-semibold rounded-lg px-4 py-2">
+              {L.form.submit}
             </button>
 
-            {status === "ok"  && <p className="text-green-600 md:col-span-2">{L.sentOk}</p>}
-            {status === "err" && <p className="text-red-600 md:col-span-2">{L.sentErr}</p>}
+            {ok && <p className="text-green-600 font-medium">{L.form.ok}</p>}
           </form>
         </div>
 
-        {/* справа — просто placeholder-карточка, НЕ «контакты» */}
+        {/* Правый блок (мок изображения) */}
         <div className="border rounded-2xl p-4">
           <div className="aspect-[4/3] w-full rounded-xl border grid place-items-center text-sm text-neutral-500">
             Image / pack mock (optional)
@@ -216,7 +179,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* BENEFITS */}
+      {/* Почему мы */}
       <section className="max-w-5xl mx-auto px-5 pt-6">
         <h2 className="text-lg font-semibold">{L.benefits}</h2>
         <div className="grid md:grid-cols-3 gap-4 mt-3">
@@ -226,23 +189,23 @@ export default function App() {
         </div>
       </section>
 
-      {/* ASSORTMENT */}
+      {/* Ассортимент */}
       <section className="max-w-5xl mx-auto px-5 pt-6">
         <h2 className="text-lg font-semibold">{L.assortment}</h2>
         <p className="text-neutral-700 mt-2">{L.assortmentText}</p>
       </section>
 
-      {/* TERMS — без «помесячной платы» */}
-      <section className="max-w-5xl mx-auto px-5 pt-6 pb-10">
+      {/* Условия */}
+      <section className="max-w-5xl mx-auto px-5 pt-6 pb-12">
         <h2 className="text-lg font-semibold">{L.terms}</h2>
         <ul className="list-disc pl-5 mt-2 space-y-1">
           {L.termsList.map((x, i) => <li key={i}>{x}</li>)}
         </ul>
       </section>
 
-      {/* НИЗ СТРАНИЦЫ: без «контактов» — только аккуратный футер */}
+      {/* Контакты/подвал — убрали «контакты» блок, только сдержанный футер */}
       <footer className="border-t text-center text-sm text-neutral-600 py-4">
-        © 2025 NÉORA — Paris · neora-b2b.app
+        {L.footer}
       </footer>
     </div>
   );

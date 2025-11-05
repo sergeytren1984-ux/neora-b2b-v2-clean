@@ -2,7 +2,9 @@ import { useState, useMemo } from "react";
 
 // Formspree endpoint — заявки придут на твою почту
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/mrbonpno";
-const t = {
+
+const t = { /* …оставь свой объект переводов… */ };
+
   fr: {
     lang: "FR", switchTo: "EN",
     hero: "Lot d’essai pour HoReCa",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 /** Formspree endpoint — заявки придут на твою почту */
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/mrbonpno";
@@ -97,49 +97,76 @@ const t = {
     },
     footer: "© 2025 NÉORA — Paris · neora-b2b.app"
   }
-};
+} as const;
+
+type Lang = keyof typeof t;
 
 export default function App() {
-  const [lang, setLang] = useState<"fr" | "en" | "ru">("fr");
+  const [lang, setLang] = useState<Lang>("fr");
   const [ok, setOk] = useState(false);
+  const [sending, setSending] = useState(false);
   const L = t[lang];
 
-  async function onSubmit(e) {
+  const pageUrl = useMemo(() => (typeof window !== "undefined" ? window.location.href : ""), []);
+
+  function nextLang(l: Lang): Lang {
+    return l === "fr" ? "en" : l === "en" ? "ru" : "fr";
+  }
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = e.currentTarget;
-    const data = Object.fromEntries(new FormData(form).entries());
+    if (sending) return;
+    setSending(true);
 
-    const resp = await fetch(FORMSPREE_ENDPOINT, {
-      method: "POST",
-      headers: { "Accept": "application/json", "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
+    try {
+      const form = e.currentTarget;
+      const data = Object.fromEntries(new FormData(form).entries());
 
-    if (resp.ok) {
-      setOk(true);
-      form.reset();
-      setTimeout(() => setOk(false), 5000);
-    } else {
-      alert("Submit error. Try again or email hello@neora.coffee");
+      // Дополняем служебными полями для удобства в почте
+      const payload = {
+        ...data,
+        _subject: "NÉORA — HoReCa lead",
+        lang,
+        page: pageUrl
+      };
+
+      const resp = await fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (resp.ok) {
+        setOk(true);
+        form.reset();
+        setTimeout(() => setOk(false), 4500);
+      } else {
+        alert("Submit error. Try again or email hello@neora.coffee");
+      }
+    } catch {
+      alert("Network error. Try again or email hello@neora.coffee");
+    } finally {
+      setSending(false);
     }
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white" style={{ ["--brand" as any]: "#C58A44" }}>
       {/* Header — логотип одним словом, без кружка */}
       <header className="sticky top-0 z-50 backdrop-blur bg-white/80 border-b">
         <div className="max-w-5xl mx-auto px-5 py-3 flex items-center justify-between">
-          <div className="text-2xl font-bold tracking-tight">
+          <div className="text-3xl md:text-4xl font-bold tracking-tight select-none">
             <span style={{ letterSpacing: "0.5px" }}>
-              N<span style={{ color: "var(--brand, #C58A44)" }}>É</span>ORA
+              N<span style={{ color: "var(--brand)" }}>É</span>ORA
             </span>
           </div>
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setLang(lang === "fr" ? "en" : lang === "en" ? "ru" : "fr")}
-              className="text-sm border px-3 py-2 rounded-lg bg-white"
+              onClick={() => setLang(nextLang(lang))}
+              className="text-sm border px-3 py-2 rounded-lg bg-white hover:bg-neutral-50"
               title={L.switchTo}
+              aria-label={`Switch language to ${L.switchTo}`}
             >
               {L.lang}
             </button>
@@ -151,20 +178,30 @@ export default function App() {
       <section className="max-w-5xl mx-auto grid md:grid-cols-2 gap-7 px-5 pt-10">
         {/* Форма заявки */}
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{L.hero}</h1>
+          {/* Заголовок чуть спокойнее, чем логотип */}
+          <h1 className="text-xl md:text-2xl font-semibold tracking-tight">{L.hero}</h1>
           <p className="mt-2 text-neutral-600">{L.sub}</p>
 
           <form onSubmit={onSubmit} className="mt-5 flex flex-col gap-3 max-w-md">
-            <input name="company" required placeholder={L.form.company} className="border rounded-lg px-3 py-2" />
+            {/* honeypot для ботов */}
+            <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
+            <input type="hidden" name="_subject" value="NÉORA — HoReCa lead" />
+            <input type="hidden" name="lang" value={lang} />
+            <input type="hidden" name="page" value={pageUrl} />
+
+            <input name="company" required minLength={2} placeholder={L.form.company} className="border rounded-lg px-3 py-2" />
             <input name="contact" required placeholder={L.form.contact} className="border rounded-lg px-3 py-2" />
             <input type="email" name="email" required placeholder={L.form.email} className="border rounded-lg px-3 py-2" />
             <input name="address" placeholder={L.form.address} className="border rounded-lg px-3 py-2" />
             <input name="phone" placeholder={L.form.phone} className="border rounded-lg px-3 py-2" />
-            <input name="monthlyVolume" placeholder={L.form.volume} className="border rounded-lg px-3 py-2" />
+            <input name="monthlyVolume" inputMode="numeric" placeholder={L.form.volume} className="border rounded-lg px-3 py-2" />
             <textarea name="comment" placeholder={L.form.comment} className="border rounded-lg px-3 py-2 min-h-[90px]" />
 
-            <button className="bg-[var(--brand,#C58A44)] text-white font-semibold rounded-lg px-4 py-2">
-              {L.form.submit}
+            <button
+              className="bg-[var(--brand)] text-white font-semibold rounded-lg px-4 py-2 disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled={sending}
+            >
+              {sending ? "…" : L.form.submit}
             </button>
 
             {ok && <p className="text-green-600 font-medium">{L.form.ok}</p>}
@@ -199,11 +236,13 @@ export default function App() {
       <section className="max-w-5xl mx-auto px-5 pt-6 pb-12">
         <h2 className="text-lg font-semibold">{L.terms}</h2>
         <ul className="list-disc pl-5 mt-2 space-y-1">
-          {L.termsList.map((x, i) => <li key={i}>{x}</li>)}
+          {L.termsList.map((x, i) => (
+            <li key={i}>{x}</li>
+          ))}
         </ul>
       </section>
 
-      {/* Контакты/подвал — убрали «контакты» блок, только сдержанный футер */}
+      {/* Футер */}
       <footer className="border-t text-center text-sm text-neutral-600 py-4">
         {L.footer}
       </footer>
@@ -211,7 +250,7 @@ export default function App() {
   );
 }
 
-function Card({ children }) {
+function Card({ children }: { children: React.ReactNode }) {
   return (
     <div className="border rounded-2xl p-4 shadow-sm bg-white font-medium">
       {children}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-/** ← ВСТАВЬ сюда свой endpoint из Formspree, например: "https://formspree.io/f/mabcd123" */
+https://formspree.io/f/mzzklwdb
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/XXXXXXXX";
 
 const t = {

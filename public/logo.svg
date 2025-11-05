@@ -1,8 +1,11 @@
-<svg width="170" height="28" viewBox="0 0 170 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="150" height="28" viewBox="0 0 150 28" xmlns="http://www.w3.org/2000/svg">
   <style>
-    .word { font: 700 22px/1.1 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; letter-spacing: .5px; }
+    .word {
+      font: 800 22px 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      letter-spacing: -0.5px; /* сближает буквы, убирает зазор между É и O */
+    }
   </style>
   <text x="0" y="21" class="word" fill="#111111">N</text>
-  <text x="18" y="21" class="word" fill="#C58A44">É</text>
-  <text x="36" y="21" class="word" fill="#111111">ORA</text>
+  <text x="17" y="21" class="word" fill="#C58A44">É</text>
+  <text x="33" y="21" class="word" fill="#111111">ORA</text>
 </svg>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 /** Formspree endpoint — заявки придут на твою почту */
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/mzzklwdb";
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/mrbonpno";
 
 const t = {
   fr: {

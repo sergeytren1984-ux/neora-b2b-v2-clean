@@ -6,44 +6,194 @@
   --bg: #ffffff;
 }
 
-* { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-a { color: inherit; text-decoration: none; }
+* {
+  box-sizing: border-box;
+}
 
-.container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
-.header { position: sticky; top: 0; backdrop-filter: blur(6px); background: rgba(255,255,255,.8); border-bottom: 1px solid var(--border); }
-.header-inner { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
-.brand { font-weight: 800; letter-spacing: .3px; font-size: 28px; }
-.brand .accent { color: var(--brand); }
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
 
-.lang-btn { font-size: 14px; border: 1px solid var(--border); padding: 8px 12px; border-radius: 10px; background: #fff; cursor: pointer; }
+a {
+  color: inherit;
+  text-decoration: none;
+}
 
-.grid { display: grid; grid-template-columns: 1fr; gap: 28px; }
-@media (min-width: 860px) { .grid { grid-template-columns: 1fr 1fr; } }
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
 
-.section { padding-top: 24px; }
-.h1 { font-size: 22px; font-weight: 700; margin: 0; }
-.sub { margin-top: 8px; color: var(--muted); }
+.header {
+  position: sticky;
+  top: 0;
+  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.8);
+  border-bottom: 1px solid var(--border);
+}
 
-.form { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; max-width: 520px; }
-.input, .textarea { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font: inherit; }
-.textarea { min-height: 96px; resize: vertical; }
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+}
 
-.btn { background: var(--brand); color: #fff; font-weight: 700; border: none; border-radius: 10px; padding: 10px 14px; cursor: pointer; }
-.btn:disabled { opacity: .6; cursor: default; }
+.brand {
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  font-size: 28px;
+}
 
-.ok { color: #16a34a; font-weight: 600; }
+.brand .accent {
+  color: var(--brand);
+}
 
-.card { border: 1px solid var(--border); border-radius: 16px; padding: 16px; background: #fff; font-weight: 600; }
-.cards { display: grid; gap: 14px; }
-@media (min-width: 860px) { .cards { grid-template-columns: repeat(3, 1fr); } }
+.lang-btn {
+  font-size: 14px;
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+}
 
-.mock { border: 1px dashed var(--border); border-radius: 12px; aspect-ratio: 4 / 3; display: grid; place-items: center; color: var(--muted); }
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 28px;
+}
 
-.h2 { font-size: 18px; font-weight: 700; margin: 0; }
-.p { margin: 8px 0 0; color: #374151; }
+@media (min-width: 860px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
 
-.ul { margin: 8px 0 0; padding-left: 18px; }
-.li { margin: 4px 0; }
+.section {
+  padding-top: 24px;
+}
 
-.footer { border-top: 1px solid var(--border); text-align: center; font-size: 14px; color: var(--muted); padding: 14px 0 20px; margin-top: 28px; }
+.h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.sub {
+  margin-top: 8px;
+  color: var(--muted);
+}
+
+.form {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 520px;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.btn {
+  background: var(--brand);
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.ok {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  background: #fff;
+  font-weight: 600;
+}
+
+.cards {
+  display: grid;
+  gap: 24px;
+}
+
+@media (min-width: 860px) {
+  .cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 48px;
+  padding: 24px 0;
+  border-top: 1px solid var(--border);
+}
+
+/* ============================= */
+/*   Дополнительные улучшения    */
+/* ============================= */
+
+/* --- визуальное улучшение правого инфоблока --- */
+/* затрагивает только правый блок в hero-секции */
+.section.grid > .card {
+  background: #fff;
+  border: 1px solid var(--border);
+}
+
+/* общий стиль текста внутри правой карточки */
+.section.grid > .card .p,
+.section.grid > .card .li {
+  font-weight: 400;
+  color: #333;
+  line-height: 1.65;
+  font-size: 15px;
+  letter-spacing: 0.1px;
+  margin-bottom: 10px;
+}
+
+/* заголовок внутри блока */
+.section.grid > .card .h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 6px 0 10px;
+  color: #111;
+}
+
+/* списки внутри правой карточки */
+.section.grid > .card .ul {
+  margin-top: 10px;
+  padding-left: 22px;
+}
+

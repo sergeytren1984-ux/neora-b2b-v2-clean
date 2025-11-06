@@ -3,9 +3,10 @@
 @tailwind utilities;
 
 :root {
-  --brand: theme(colors.brand);
+  --brand: #C58A44; /* фирменный цвет */
 }
 
+/* базовые цвета страницы */
 html, body {
   @apply bg-white text-neutral-900;
 }

@@ -1,6 +1,5 @@
-import { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 
-// Formspree endpoint — заявки придут на твою почту
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/mrbonpno";
 
 const t = {
@@ -8,7 +7,6 @@ const t = {
     lang: "FR", switchTo: "EN",
     hero: "Lot d’essai pour HoReCa",
     sub: "Torréfaction de spécialité pour cafés et restaurants à Paris.",
-    cta: "Envoyer la demande",
     benefits: "Pourquoi nous ?",
     b1: "Qualité stable, profils clairs",
     b2: "Prix B2B transparents",
@@ -39,7 +37,6 @@ const t = {
     lang: "EN", switchTo: "FR",
     hero: "Trial batch for HoReCa",
     sub: "Specialty roasting for cafés & restaurants in Paris.",
-    cta: "Send request",
     benefits: "Why us?",
     b1: "Consistent quality & clear profiles",
     b2: "Transparent B2B pricing",
@@ -70,7 +67,6 @@ const t = {
     lang: "RU", switchTo: "FR",
     hero: "Пробная партия для HoReCa",
     sub: "Спешиалти-обжарка для кофеен и ресторанов в Париже.",
-    cta: "Отправить заявку",
     benefits: "Почему мы?",
     b1: "Стабильное качество, ясные профили",
     b2: "Прозрачные B2B-цены",
@@ -106,24 +102,16 @@ export default function App() {
   const L = t[lang];
 
   const pageUrl = useMemo(() => (typeof window !== "undefined" ? window.location.href : ""), []);
-
   const nextLang = (l) => (l === "fr" ? "en" : l === "en" ? "ru" : "fr");
 
   async function onSubmit(e) {
     e.preventDefault();
     if (sending) return;
     setSending(true);
-
     try {
       const form = e.currentTarget;
       const data = Object.fromEntries(new FormData(form).entries());
-
-      const payload = {
-        ...data,
-        _subject: "NÉORA — HoReCa lead",
-        lang,
-        page: pageUrl
-      };
+      const payload = { ...data, _subject: "NÉORA — HoReCa lead", lang, page: pageUrl };
 
       const resp = await fetch(FORMSPREE_ENDPOINT, {
         method: "POST",
@@ -146,102 +134,77 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-white" style={{ ["--brand"]: "#C58A44" }}>
-      {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur bg-white/80 border-b">
-        <div className="max-w-5xl mx-auto px-5 py-3 flex items-center justify-between">
-          <div className="text-3xl md:text-4xl font-bold tracking-tight select-none">
-            <span style={{ letterSpacing: "0.5px" }}>
-              N<span style={{ color: "var(--brand)" }}>É</span>ORA
-            </span>
+    <>
+      <header className="header">
+        <div className="container header-inner">
+          <div className="brand">
+            N<span className="accent">É</span>ORA
           </div>
-          <button
-            onClick={() => setLang(nextLang(lang))}
-            className="text-sm border px-3 py-2 rounded-lg bg-white hover:bg-neutral-50"
-            title={L.switchTo}
-          >
+          <button className="lang-btn" onClick={() => setLang(nextLang(lang))} title={L.switchTo}>
             {L.lang}
           </button>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="max-w-5xl mx-auto grid md:grid-cols-2 gap-7 px-5 pt-10">
-        {/* Form */}
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight">{L.hero}</h1>
-          <p className="mt-2 text-neutral-600">{L.sub}</p>
+      <main className="container">
+        <section className="section grid">
+          {/* левая колонка — форма */}
+          <div>
+            <h1 className="h1">{L.hero}</h1>
+            <p className="sub">{L.sub}</p>
 
-          <form onSubmit={onSubmit} className="mt-5 flex flex-col gap-3 max-w-md">
-            <input type="hidden" name="_subject" value="NÉORA — HoReCa lead" />
-            <input type="hidden" name="lang" value={lang} />
-            <input type="hidden" name="page" value={pageUrl} />
+            <form className="form" onSubmit={onSubmit}>
+              <input type="hidden" name="_subject" value="NÉORA — HoReCa lead" />
+              <input type="hidden" name="lang" value={lang} />
+              <input type="hidden" name="page" value={pageUrl} />
 
-            <input name="company" required placeholder={L.form.company} className="border rounded-lg px-3 py-2" />
-            <input name="contact" required placeholder={L.form.contact} className="border rounded-lg px-3 py-2" />
-            <input type="email" name="email" required placeholder={L.form.email} className="border rounded-lg px-3 py-2" />
-            <input name="address" placeholder={L.form.address} className="border rounded-lg px-3 py-2" />
-            <input name="phone" placeholder={L.form.phone} className="border rounded-lg px-3 py-2" />
-            <input name="monthlyVolume" placeholder={L.form.volume} className="border rounded-lg px-3 py-2" />
-            <textarea name="comment" placeholder={L.form.comment} className="border rounded-lg px-3 py-2 min-h-[90px]" />
+              <input className="input" name="company" required placeholder={L.form.company} />
+              <input className="input" name="contact" required placeholder={L.form.contact} />
+              <input className="input" type="email" name="email" required placeholder={L.form.email} />
+              <input className="input" name="address" placeholder={L.form.address} />
+              <input className="input" name="phone" placeholder={L.form.phone} />
+              <input className="input" name="monthlyVolume" placeholder={L.form.volume} />
+              <textarea className="textarea" name="comment" placeholder={L.form.comment} />
 
-            <button
-              className="bg-[var(--brand)] text-white font-semibold rounded-lg px-4 py-2 disabled:opacity-60"
-              disabled={sending}
-            >
-              {sending ? "…" : L.form.submit}
-            </button>
+              <button className="btn" disabled={sending}>
+                {sending ? "…" : L.form.submit}
+              </button>
 
-            {ok && <p className="text-green-600 font-medium">{L.form.ok}</p>}
-          </form>
-        </div>
-
-        {/* Right block */}
-        <div className="border rounded-2xl p-4">
-          <div className="aspect-[4/3] w-full rounded-xl border grid place-items-center text-sm text-neutral-500">
-            Image / pack mock (optional)
+              {ok && <p className="ok">{L.form.ok}</p>}
+            </form>
           </div>
-        </div>
-      </section>
 
-      {/* Why us */}
-      <section className="max-w-5xl mx-auto px-5 pt-6">
-        <h2 className="text-lg font-semibold">{L.benefits}</h2>
-        <div className="grid md:grid-cols-3 gap-4 mt-3">
-          <Card>{L.b1}</Card>
-          <Card>{L.b2}</Card>
-          <Card>{L.b3}</Card>
-        </div>
-      </section>
+          {/* правая колонка — заглушка под мок */}
+          <div className="card">
+            <div className="mock">Image / pack mock (optional)</div>
+          </div>
+        </section>
 
-      {/* Assortment */}
-      <section className="max-w-5xl mx-auto px-5 pt-6">
-        <h2 className="text-lg font-semibold">{L.assortment}</h2>
-        <p className="text-neutral-700 mt-2">{L.assortmentText}</p>
-      </section>
+        <section className="section">
+          <h2 className="h2">{L.benefits}</h2>
+          <div className="cards">
+            <div className="card">{L.b1}</div>
+            <div className="card">{L.b2}</div>
+            <div className="card">{L.b3}</div>
+          </div>
+        </section>
 
-      {/* Terms */}
-      <section className="max-w-5xl mx-auto px-5 pt-6 pb-12">
-        <h2 className="text-lg font-semibold">{L.terms}</h2>
-        <ul className="list-disc pl-5 mt-2 space-y-1">
-          {L.termsList.map((x, i) => (
-            <li key={i}>{x}</li>
-          ))}
-        </ul>
-      </section>
+        <section className="section">
+          <h2 className="h2">{L.assortment}</h2>
+          <p className="p">{L.assortmentText}</p>
+        </section>
 
-      {/* Footer */}
-      <footer className="border-t text-center text-sm text-neutral-600 py-4">
-        {L.footer}
-      </footer>
-    </div>
-  );
-}
+        <section className="section">
+          <h2 className="h2">{L.terms}</h2>
+          <ul className="ul">
+            {L.termsList.map((x, i) => (
+              <li className="li" key={i}>{x}</li>
+            ))}
+          </ul>
+        </section>
+      </main>
 
-function Card({ children }) {
-  return (
-    <div className="border rounded-2xl p-4 shadow-sm bg-white font-medium">
-      {children}
-    </div>
+      <footer className="footer">{L.footer}</footer>
+    </>
   );
 }

@@ -7,7 +7,7 @@ const t = {
     lang: "FR",
     switchTo: "EN",
 
-    heroTitle: "Lot d’essai pour HoReCa",
+   heroTitle: "Lot d’essai pour HoReCa — TEST 777",
     heroSubtitle: "Torréfaction de spécialité pour cafés et restaurants à Paris.",
 
     sections: {

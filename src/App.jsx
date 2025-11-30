@@ -493,9 +493,7 @@ export default function App() {
               >
                 {L.form.cooperationTitle}
               </p>
-              <p className="p" style={{ margin: "0 0 6px" }}>
-                {L.form.cooperationReadyLabel}
-              </p>
+
               <select className="input" name="readyToTest" defaultValue="">
                 <option value="" disabled>
                   {L.form.selectPlaceholder}

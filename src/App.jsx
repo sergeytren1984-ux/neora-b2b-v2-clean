@@ -276,6 +276,7 @@ export default function App() {
   const [lang, setLang] = useState("fr");
   const [ok, setOk] = useState(false);
   const [sending, setSending] = useState(false);
+  const [btnHover, setBtnHover] = useState(false);
   const L = t[lang];
 
   const pageUrl = useMemo(
@@ -321,8 +322,9 @@ export default function App() {
     }
   }
 
+  // чуть более плотные отступы между блоками формы
   const sectionTitleStyle = {
-    marginTop: 28,
+    marginTop: 24,
     marginBottom: 4,
     fontWeight: 700,
     fontSize: 16
@@ -333,6 +335,23 @@ export default function App() {
     marginBottom: 4,
     fontWeight: 700,
     fontSize: 16
+  };
+
+  // стиль для кнопки с hover-анимацией
+  const btnStyle = {
+    backgroundColor: btnHover ? "#905f2f" : "#A97738",
+    borderColor: btnHover ? "#905f2f" : "#A97738",
+    boxShadow: btnHover
+      ? "0 8px 20px rgba(0,0,0,0.16)"
+      : "0 4px 12px rgba(0,0,0,0.10)",
+    transform: btnHover ? "translateY(-1px)" : "translateY(0)",
+    transition:
+      "background-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease"
+  };
+
+  // лёгкая тень для карточек "Почему мы?"
+  const benefitCardStyle = {
+    boxShadow: "0 6px 18px rgba(15,23,42,0.06)"
   };
 
   return (
@@ -355,7 +374,7 @@ export default function App() {
 
       <main className="container">
         {/* Hero grid */}
-        <section className="section grid">
+        <section className="section grid" style={{ gap: 40 }}>
           {/* Left: form */}
           <div>
             <h1 className="h1">{L.hero}</h1>
@@ -551,10 +570,9 @@ export default function App() {
               <button
                 className="btn"
                 disabled={sending}
-                style={{
-                  backgroundColor: "#A97738",
-                  borderColor: "#A97738"
-                }}
+                style={btnStyle}
+                onMouseEnter={() => setBtnHover(true)}
+                onMouseLeave={() => setBtnHover(false)}
               >
                 {sending ? "…" : L.form.submit}
               </button>
@@ -585,19 +603,19 @@ export default function App() {
         <section className="section">
           <h2 className="h2">{L.benefits}</h2>
           <div className="cards">
-            <div className="card">
+            <div className="card" style={benefitCardStyle}>
               <div style={{ fontWeight: 600, marginBottom: 4 }}>{L.b1}</div>
               <p className="p" style={{ fontSize: 13, margin: 0 }}>
                 {L.b1sub}
               </p>
             </div>
-            <div className="card">
+            <div className="card" style={benefitCardStyle}>
               <div style={{ fontWeight: 600, marginBottom: 4 }}>{L.b2}</div>
               <p className="p" style={{ fontSize: 13, margin: 0 }}>
                 {L.b2sub}
               </p>
             </div>
-            <div className="card">
+            <div className="card" style={benefitCardStyle}>
               <div style={{ fontWeight: 600, marginBottom: 4 }}>{L.b3}</div>
               <p className="p" style={{ fontSize: 13, margin: 0 }}>
                 {L.b3sub}

@@ -389,11 +389,7 @@ export default function App() {
               <p className="p" style={{ margin: "6px 0" }}>
                 {L.form.priceQ1}
               </p>
-              <select
-                className="input"
-                name="priceCurrent"
-                defaultValue=""
-              >
+              <select className="input" name="priceCurrent" defaultValue="">
                 <option value="" disabled>
                   {L.form.selectPlaceholder}
                 </option>
@@ -408,11 +404,7 @@ export default function App() {
               <p className="p" style={{ margin: "10px 0 6px" }}>
                 {L.form.priceQ2}
               </p>
-              <select
-                className="input"
-                name="priceReady"
-                defaultValue=""
-              >
+              <select className="input" name="priceReady" defaultValue="">
                 <option value="" disabled>
                   {L.form.selectPlaceholder}
                 </option>
@@ -443,11 +435,7 @@ export default function App() {
               <p className="p" style={{ margin: "10px 0 6px" }}>
                 {L.form.priceQ3}
               </p>
-              <select
-                className="input"
-                name="priceTooHigh"
-                defaultValue=""
-              >
+              <select className="input" name="priceTooHigh" defaultValue="">
                 <option value="" disabled>
                   {L.form.selectPlaceholder}
                 </option>
@@ -465,11 +453,7 @@ export default function App() {
               <p className="p" style={{ margin: "0 0 6px" }}>
                 {L.form.volumeQuestion}
               </p>
-              <select
-                className="input"
-                name="monthlyVolume"
-                defaultValue=""
-              >
+              <select className="input" name="monthlyVolume" defaultValue="">
                 <option value="" disabled>
                   {L.form.selectPlaceholder}
                 </option>
@@ -480,28 +464,10 @@ export default function App() {
                 ))}
               </select>
 
-              {/* 5. Готовность к сотрудничеству */}
+              {/* 5. Готовность к сотрудничеству — только способ связи */}
               <p className="p" style={{ marginTop: 16, marginBottom: 4 }}>
                 {L.form.cooperationTitle}
               </p>
-              <p className="p" style={{ margin: "0 0 6px" }}>
-                {L.form.cooperationReadyLabel}
-              </p>
-              <select
-                className="input"
-                name="readyToTest"
-                defaultValue=""
-              >
-                <option value="" disabled>
-                  {L.form.selectPlaceholder}
-                </option>
-                {L.form.cooperationReadyOptions.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-
               <p className="p" style={{ margin: "10px 0 6px" }}>
                 {L.form.preferredContactLabel}
               </p>
@@ -520,13 +486,7 @@ export default function App() {
                 ))}
               </select>
 
-              {/* Дополнительно — свободное поле по цене и комментарий */}
-              <input
-                className="input"
-                name="targetPrice"
-                placeholder={L.form.targetPrice}
-              />
-
+              {/* Комментарий */}
               <textarea
                 className="textarea"
                 name="comment"

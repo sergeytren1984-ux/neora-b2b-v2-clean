@@ -14,7 +14,7 @@ const t = {
     sections: {
       general: "1. Informations générales sur l’établissement",
       currentCoffee: "2. Informations sur votre café actuel",
-      priceBlock: "3. Bloc Prix",
+      priceBlock: "3. Bloc Prix (optionnel)",
       volume: "4. Volume mensuel",
       collaboration: "5. Disponibilité / Collaboration",
     },
@@ -87,6 +87,10 @@ const t = {
       contactOptions: ["Téléphone", "Email", "WhatsApp", "Visite en personne"],
     },
 
+    priceToggleShow: "Afficher les questions détaillées sur le prix",
+    priceToggleHide: "Masquer le bloc prix",
+    priceHint: "Bloc optionnel : si vous avez le temps, ces questions nous aident à mieux adapter l’offre.",
+
     submit: "Envoyer la demande",
 
     right: {
@@ -125,7 +129,7 @@ const t = {
     sections: {
       general: "1. Venue information",
       currentCoffee: "2. Your current coffee",
-      priceBlock: "3. Price block",
+      priceBlock: "3. Price block (optional)",
       volume: "4. Monthly volume",
       collaboration: "5. Readiness to collaborate",
     },
@@ -199,6 +203,11 @@ const t = {
       contactOptions: ["Phone", "Email", "WhatsApp", "In-person visit"],
     },
 
+    priceToggleShow: "Show detailed price questions",
+    priceToggleHide: "Hide price block",
+    priceHint:
+      "Optional block: if you have time, these questions help us fine-tune the offer.",
+
     submit: "Send request",
 
     right: {
@@ -229,6 +238,7 @@ const t = {
 
 export default function App() {
   const [lang, setLang] = useState("fr");
+  const [showPrice, setShowPrice] = useState(false);
   const tr = t[lang];
 
   return (
@@ -303,6 +313,8 @@ export default function App() {
               </div>
             </section>
 
+            <hr className="border-neutral-200" />
+
             {/* 2. ТЕКУЩИЙ КОФЕ */}
             <section>
               <h2 className="mb-4 text-sm font-semibold tracking-wide uppercase text-neutral-800">
@@ -334,44 +346,62 @@ export default function App() {
               </div>
             </section>
 
-            {/* 3. ЦЕНОВОЙ БЛОК */}
+            <hr className="border-neutral-200" />
+
+            {/* 3. ЦЕНОВОЙ БЛОК (ОПЦИОНАЛЬНО) */}
             <section>
-              <h2 className="mb-4 text-sm font-semibold tracking-wide uppercase text-neutral-800">
-                {tr.sections.priceBlock}
-              </h2>
-
-              <div className="space-y-5">
-                <fieldset className="space-y-2">
-                  <legend className="mb-1 text-xs font-medium text-neutral-700">
-                    {tr.price.q1Title}
-                  </legend>
-                  <RadioGroup
-                    name={tr.price.q1Name}
-                    options={tr.price.q1Options}
-                  />
-                </fieldset>
-
-                <fieldset className="space-y-2">
-                  <legend className="mb-1 text-xs font-medium text-neutral-700">
-                    {tr.price.q2Title}
-                  </legend>
-                  <RadioGroup
-                    name={tr.price.q2Name}
-                    options={tr.price.q2Options}
-                  />
-                </fieldset>
-
-                <fieldset className="space-y-2">
-                  <legend className="mb-1 text-xs font-medium text-neutral-700">
-                    {tr.price.q3Title}
-                  </legend>
-                  <RadioGroup
-                    name={tr.price.q3Name}
-                    options={tr.price.q3Options}
-                  />
-                </fieldset>
+              <div className="flex items-start justify-between gap-4 mb-3">
+                <h2 className="text-sm font-semibold tracking-wide uppercase text-neutral-800">
+                  {tr.sections.priceBlock}
+                </h2>
               </div>
+              <p className="mb-3 text-xs text-neutral-500">
+                {tr.priceHint}
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowPrice((v) => !v)}
+                className="mb-4 inline-flex items-center justify-center rounded-full border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-800 hover:bg-neutral-100 transition"
+              >
+                {showPrice ? tr.priceToggleHide : tr.priceToggleShow}
+              </button>
+
+              {showPrice && (
+                <div className="mt-4 space-y-5">
+                  <fieldset className="space-y-2">
+                    <legend className="mb-1 text-xs font-medium text-neutral-700">
+                      {tr.price.q1Title}
+                    </legend>
+                    <RadioGroup
+                      name={tr.price.q1Name}
+                      options={tr.price.q1Options}
+                    />
+                  </fieldset>
+
+                  <fieldset className="space-y-2">
+                    <legend className="mb-1 text-xs font-medium text-neutral-700">
+                      {tr.price.q2Title}
+                    </legend>
+                    <RadioGroup
+                      name={tr.price.q2Name}
+                      options={tr.price.q2Options}
+                    />
+                  </fieldset>
+
+                  <fieldset className="space-y-2">
+                    <legend className="mb-1 text-xs font-medium text-neutral-700">
+                      {tr.price.q3Title}
+                    </legend>
+                    <RadioGroup
+                      name={tr.price.q3Name}
+                      options={tr.price.q3Options}
+                    />
+                  </fieldset>
+                </div>
+              )}
             </section>
+
+            <hr className="border-neutral-200" />
 
             {/* 4. ОБЪЁМ */}
             <section>
@@ -386,6 +416,8 @@ export default function App() {
                 />
               </fieldset>
             </section>
+
+            <hr className="border-neutral-200" />
 
             {/* 5. ГОТОВНОСТЬ */}
             <section>

@@ -7,16 +7,15 @@ const t = {
     lang: "FR",
     switchTo: "EN",
 
-    brand: "NÉORA",
     heroTitle: "Lot d’essai pour HoReCa",
     heroSubtitle: "Torréfaction de spécialité pour cafés et restaurants à Paris.",
 
     sections: {
-      general: "1. Informations générales sur l’établissement",
-      currentCoffee: "2. Informations sur votre café actuel",
-      priceBlock: "3. Bloc Prix (optionnel)",
-      volume: "4. Volume mensuel",
-      collaboration: "5. Disponibilité / Collaboration",
+      general: "Informations générales sur l’établissement",
+      currentCoffee: "Informations sur votre café actuel",
+      priceBlock: "Bloc Prix (optionnel)",
+      volume: "Volume mensuel",
+      collaboration: "Disponibilité / Collaboration",
     },
 
     general: {
@@ -39,7 +38,7 @@ const t = {
     },
 
     price: {
-      q1Title: "Question 1 — Prix d’achat habituel (1 kg spécialité)",
+      q1Title: "Prix d’achat habituel (1 kg spécialité)",
       q1Name: "price_current",
       q1Options: [
         "Jusqu’à 22 €/kg",
@@ -49,7 +48,8 @@ const t = {
         "28+ €/kg",
       ],
 
-      q2Title: "Question 2 — Prix souhaité pour un café 83+ pts (qualité stable)",
+      q2Title:
+        "Prix souhaité pour un café 83+ pts (qualité stable)",
       q2Name: "price_expected",
       q2Options: [
         "≤ 23 €/kg",
@@ -59,7 +59,7 @@ const t = {
         "À étudier individuellement",
       ],
 
-      q3Title: "Question 3 — Prix jugé trop élevé (achat impossible)",
+      q3Title: "Prix jugé trop élevé (achat impossible)",
       q3Name: "price_too_high",
       q3Options: ["24 €/kg", "26 €/kg", "28 €/kg", "30 €/kg"],
     },
@@ -89,30 +89,31 @@ const t = {
 
     priceToggleShow: "Afficher les questions détaillées sur le prix",
     priceToggleHide: "Masquer le bloc prix",
-    priceHint: "Bloc optionnel : si vous avez le temps, ces questions nous aident à mieux adapter l’offre.",
+    priceHint:
+      "Bloc optionnel : si vous avez le temps, ces questions nous aident à adapter l’offre.",
 
     submit: "Envoyer la demande",
 
     right: {
-      lotTitle: "Lot d’essai — qu’est-ce que c’est ?",
+      lotTitle: "Comment est composé le lot ?",
       lotBullets: [
-        "Un lot d’essai personnalisé de cafés de spécialité pour votre établissement.",
-        "3 références possibles (espresso / filtre) selon votre profil et vos volumes.",
-        "Un sourcing transparent et une torréfaction pensée pour la HoReCa parisienne.",
+        "Trois paquets d’essai de 250 g (origines / terroirs variés), profils espresso.",
+        "Torréfaction la semaine de l’envoi ; chaque lot avec profil et date.",
+        "Retour d’expérience : ce qui a plu / moins plu — on fixe ensuite le profil pour les livraisons régulières.",
       ],
       assortmentTitle: "Notre assortiment",
       assortmentText:
-        "Sélection de cafés de spécialité (Brésil, Colombie, Honduras, Éthiopie selon récolte) en profils espresso et filtre, adaptée à la restauration.",
+        "Cafés de spécialité (Brésil, Colombie, Honduras, Éthiopie selon récolte), profils espresso et filtre pour la restauration.",
       whyTitle: "Pourquoi nous ?",
       whyBullets: [
-        "Profil de tasse stable et reproductible.",
-        "Process B2B simple : facturation mensuelle, livraison sur Paris.",
-        "Accompagnement dans la transition depuis votre torréfacteur actuel.",
+        "Qualité stable, profils clairs.",
+        "Prix B2B transparents.",
+        "Livraison rapide sur Paris.",
       ],
       termsTitle: "Conditions",
       termsBullets: [
         "Volumes d’essai flexibles selon votre débit.",
-        "Livraison sur Paris intra-muros sous 24–72 h.",
+        "Livraison intra-muros sous 24–72 h.",
         "Support pour calibrage espresso / filtre si besoin.",
       ],
     },
@@ -122,16 +123,15 @@ const t = {
     lang: "EN",
     switchTo: "FR",
 
-    brand: "NÉORA",
     heroTitle: "Trial batch for HoReCa",
     heroSubtitle: "Specialty coffee roasting for cafés and restaurants in Paris.",
 
     sections: {
-      general: "1. Venue information",
-      currentCoffee: "2. Your current coffee",
-      priceBlock: "3. Price block (optional)",
-      volume: "4. Monthly volume",
-      collaboration: "5. Readiness to collaborate",
+      general: "Venue information",
+      currentCoffee: "Your current coffee",
+      priceBlock: "Price block (optional)",
+      volume: "Monthly volume",
+      collaboration: "Readiness to collaborate",
     },
 
     general: {
@@ -154,7 +154,7 @@ const t = {
     },
 
     price: {
-      q1Title: "Question 1 — Usual purchase price (1 kg specialty)",
+      q1Title: "Usual purchase price (1 kg specialty)",
       q1Name: "price_current",
       q1Options: [
         "Up to 22 €/kg",
@@ -165,7 +165,7 @@ const t = {
       ],
 
       q2Title:
-        "Question 2 — Desired price for 83+ pts coffee (stable quality)",
+        "Desired price for 83+ pts coffee (stable quality)",
       q2Name: "price_expected",
       q2Options: [
         "≤ 23 €/kg",
@@ -175,7 +175,7 @@ const t = {
         "Case-by-case discussion",
       ],
 
-      q3Title: "Question 3 — Price that is too high (no purchase)",
+      q3Title: "Price that is too high (no purchase)",
       q3Name: "price_too_high",
       q3Options: ["24 €/kg", "26 €/kg", "28 €/kg", "30 €/kg"],
     },
@@ -211,20 +211,20 @@ const t = {
     submit: "Send request",
 
     right: {
-      lotTitle: "Trial batch — what is it?",
+      lotTitle: "How is the trial batch composed?",
       lotBullets: [
-        "A tailored trial batch of specialty coffee for your venue.",
-        "Up to 3 references (espresso / filter) depending on your profile and volumes.",
-        "Transparent sourcing and roasting designed for Paris HoReCa.",
+        "Three 250 g trial bags (different origins / terroirs), espresso profiles.",
+        "Roasted in the week of shipping; each lot with profile and roast date.",
+        "Feedback session: what you liked / didn’t like — we lock the profile for regular deliveries.",
       ],
       assortmentTitle: "Our assortment",
       assortmentText:
-        "Selection of specialty coffees (Brazil, Colombia, Honduras, Ethiopia depending on harvest) in espresso and filter profiles, tailored for restaurants.",
+        "Specialty coffees (Brazil, Colombia, Honduras, Ethiopia depending on harvest), espresso and filter profiles for restaurants.",
       whyTitle: "Why us?",
       whyBullets: [
-        "Stable and repeatable cup profile.",
-        "Simple B2B process: monthly invoicing, delivery in Paris.",
-        "Support when switching from your current roaster.",
+        "Stable quality, clear profiles.",
+        "Transparent B2B pricing.",
+        "Fast delivery within Paris.",
       ],
       termsTitle: "Terms",
       termsBullets: [
@@ -237,60 +237,56 @@ const t = {
 };
 
 export default function App() {
-  const [lang, setLang] = useState("fr");
+  const [lang, setLang] = useState<"fr" | "en">("fr");
   const [showPrice, setShowPrice] = useState(false);
   const tr = t[lang];
 
   return (
-    <div className="min-h-screen bg-neutral-50 text-neutral-900">
-      <header className="border-b border-neutral-200">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-5">
-          <div className="text-sm tracking-[0.35em] font-semibold">
-            {tr.brand}
+    <div className="min-h-screen bg-[#f5f5f5] px-3 py-6 md:px-4 md:py-10">
+      <div className="mx-auto max-w-5xl rounded-[32px] bg-white shadow-md border border-neutral-200 px-5 py-6 md:px-10 md:py-8">
+        {/* HEADER ВНУТРИ КАРТОЧКИ */}
+        <header className="mb-6 flex items-center justify-between">
+          <div className="text-lg font-semibold tracking-[0.35em]">
+            N<span className="text-[#C58A44]">É</span>ORA
           </div>
           <button
             type="button"
             onClick={() => setLang(lang === "fr" ? "en" : "fr")}
-            className="text-xs font-medium tracking-wide border border-neutral-300 rounded-full px-3 py-1 hover:bg-neutral-100 transition"
+            className="rounded-full border border-neutral-300 px-3 py-1 text-xs font-medium tracking-wide hover:bg-neutral-100 transition"
           >
             {tr.lang} · {tr.switchTo}
           </button>
-        </div>
-      </header>
+        </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-10">
-        <div className="mb-10 max-w-3xl">
-          <h1 className="mb-3 text-3xl font-semibold tracking-tight md:text-4xl">
+        {/* HERO */}
+        <div className="mb-7 max-w-xl">
+          <h1 className="mb-2 text-2xl font-semibold tracking-tight md:text-3xl">
             {tr.heroTitle}
           </h1>
-          <p className="text-sm md:text-base text-neutral-700">
+          <p className="text-sm md:text-[15px] text-neutral-700">
             {tr.heroSubtitle}
           </p>
         </div>
 
-        <div className="grid gap-10 md:grid-cols-[minmax(0,2fr)_minmax(0,1.1fr)]">
-          {/* ЛЕВЫЙ СТОЛБЕЦ — ФОРМА */}
+        {/* ДВЕ КОЛОНКИ КАК РАНЬШЕ */}
+        <div className="grid gap-8 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+          {/* ФОРМА */}
           <form
             method="POST"
             action={FORMSPREE_ENDPOINT}
-            className="space-y-8 bg-white rounded-2xl shadow-sm border border-neutral-200 px-5 py-6 md:px-7 md:py-7"
+            className="space-y-6"
           >
             <input type="hidden" name="lang" value={lang} />
 
             {/* 1. ОБЩАЯ ИНФА */}
-            <section>
-              <h2 className="mb-4 text-sm font-semibold tracking-wide uppercase text-neutral-800">
+            <section className="space-y-4">
+              <h2 className="text-sm font-semibold text-neutral-900">
                 {tr.sections.general}
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <TextField
                   label={tr.general.cafeName}
                   name="cafe_name"
-                  required
-                />
-                <TextField
-                  label={tr.general.address}
-                  name="cafe_address"
                   required
                 />
                 <TextField
@@ -305,6 +301,11 @@ export default function App() {
                   required
                 />
                 <TextField
+                  label={tr.general.address}
+                  name="cafe_address"
+                  required
+                />
+                <TextField
                   label={tr.general.phone}
                   name="phone"
                   type="tel"
@@ -313,14 +314,12 @@ export default function App() {
               </div>
             </section>
 
-            <hr className="border-neutral-200" />
-
             {/* 2. ТЕКУЩИЙ КОФЕ */}
-            <section>
-              <h2 className="mb-4 text-sm font-semibold tracking-wide uppercase text-neutral-800">
+            <section className="space-y-3 pt-1 border-t border-neutral-200">
+              <h2 className="pt-4 text-sm font-semibold text-neutral-900">
                 {tr.sections.currentCoffee}
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <TextField
                   label={tr.current.supplierLabel}
                   name="current_supplier"
@@ -329,9 +328,8 @@ export default function App() {
                   label={tr.current.originLabel}
                   name="current_origin"
                 />
-
                 <fieldset className="space-y-2">
-                  <legend className="mb-1 text-xs font-medium text-neutral-700">
+                  <legend className="text-xs font-medium text-neutral-700">
                     {tr.current.roastProfileLabel}
                   </legend>
                   <RadioGroup
@@ -346,30 +344,26 @@ export default function App() {
               </div>
             </section>
 
-            <hr className="border-neutral-200" />
-
-            {/* 3. ЦЕНОВОЙ БЛОК (ОПЦИОНАЛЬНО) */}
-            <section>
-              <div className="flex items-start justify-between gap-4 mb-3">
-                <h2 className="text-sm font-semibold tracking-wide uppercase text-neutral-800">
+            {/* 3. ЦЕНОВОЙ БЛОК — СКРЫТ ПО УМОЛЧАНИЮ */}
+            <section className="space-y-3 pt-1 border-t border-neutral-200">
+              <div className="flex flex-col gap-2 pt-4">
+                <h2 className="text-sm font-semibold text-neutral-900">
                   {tr.sections.priceBlock}
                 </h2>
+                <p className="text-xs text-neutral-500">{tr.priceHint}</p>
+                <button
+                  type="button"
+                  onClick={() => setShowPrice((v) => !v)}
+                  className="inline-flex w-max items-center justify-center rounded-full border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-800 hover:bg-neutral-100 transition"
+                >
+                  {showPrice ? tr.priceToggleHide : tr.priceToggleShow}
+                </button>
               </div>
-              <p className="mb-3 text-xs text-neutral-500">
-                {tr.priceHint}
-              </p>
-              <button
-                type="button"
-                onClick={() => setShowPrice((v) => !v)}
-                className="mb-4 inline-flex items-center justify-center rounded-full border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-800 hover:bg-neutral-100 transition"
-              >
-                {showPrice ? tr.priceToggleHide : tr.priceToggleShow}
-              </button>
 
               {showPrice && (
-                <div className="mt-4 space-y-5">
+                <div className="space-y-4">
                   <fieldset className="space-y-2">
-                    <legend className="mb-1 text-xs font-medium text-neutral-700">
+                    <legend className="text-xs font-medium text-neutral-700">
                       {tr.price.q1Title}
                     </legend>
                     <RadioGroup
@@ -379,7 +373,7 @@ export default function App() {
                   </fieldset>
 
                   <fieldset className="space-y-2">
-                    <legend className="mb-1 text-xs font-medium text-neutral-700">
+                    <legend className="text-xs font-medium text-neutral-700">
                       {tr.price.q2Title}
                     </legend>
                     <RadioGroup
@@ -389,7 +383,7 @@ export default function App() {
                   </fieldset>
 
                   <fieldset className="space-y-2">
-                    <legend className="mb-1 text-xs font-medium text-neutral-700">
+                    <legend className="text-xs font-medium text-neutral-700">
                       {tr.price.q3Title}
                     </legend>
                     <RadioGroup
@@ -401,11 +395,9 @@ export default function App() {
               )}
             </section>
 
-            <hr className="border-neutral-200" />
-
             {/* 4. ОБЪЁМ */}
-            <section>
-              <h2 className="mb-3 text-sm font-semibold tracking-wide uppercase text-neutral-800">
+            <section className="space-y-3 pt-1 border-t border-neutral-200">
+              <h2 className="pt-4 text-sm font-semibold text-neutral-900">
                 {tr.sections.volume}
               </h2>
               <fieldset className="space-y-2">
@@ -417,17 +409,14 @@ export default function App() {
               </fieldset>
             </section>
 
-            <hr className="border-neutral-200" />
-
             {/* 5. ГОТОВНОСТЬ */}
-            <section>
-              <h2 className="mb-4 text-sm font-semibold tracking-wide uppercase text-neutral-800">
+            <section className="space-y-4 pt-1 border-t border-neutral-200">
+              <h2 className="pt-4 text-sm font-semibold text-neutral-900">
                 {tr.sections.collaboration}
               </h2>
-
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <fieldset className="space-y-2">
-                  <legend className="mb-1 text-xs font-medium text-neutral-700">
+                  <legend className="text-xs font-medium text-neutral-700">
                     {tr.collab.readyTitle}
                   </legend>
                   <RadioGroup
@@ -437,7 +426,7 @@ export default function App() {
                 </fieldset>
 
                 <fieldset className="space-y-2">
-                  <legend className="mb-1 text-xs font-medium text-neutral-700">
+                  <legend className="text-xs font-medium text-neutral-700">
                     {tr.collab.contactTitle}
                   </legend>
                   <RadioGroup
@@ -448,20 +437,21 @@ export default function App() {
               </div>
             </section>
 
+            {/* КНОПКА КАК РАНЬШЕ — ЗОЛОТАЯ */}
             <div className="pt-2">
               <button
                 type="submit"
-                className="w-full rounded-full bg-neutral-900 px-5 py-3 text-sm font-medium tracking-wide text-white hover:bg-black focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2 focus:ring-offset-white transition"
+                className="w-full rounded-full bg-[#C58A44] px-5 py-3 text-sm font-semibold tracking-wide text-white hover:bg-[#b5783b] focus:outline-none focus:ring-2 focus:ring-[#C58A44] focus:ring-offset-2 focus:ring-offset-white transition"
               >
                 {tr.submit}
               </button>
             </div>
           </form>
 
-          {/* ПРАВЫЙ СТОЛБЕЦ — ИНФО */}
-          <aside className="space-y-8 text-sm text-neutral-800">
-            <section>
-              <h3 className="mb-2 text-base font-semibold">
+          {/* ПРАВЫЙ ИНФО-БЛОК — ЧИСТЫЙ, КАК БЫЛО */}
+          <aside className="rounded-3xl border border-neutral-200 bg-neutral-50 px-4 py-4 md:px-6 md:py-6 text-sm text-neutral-800">
+            <section className="mb-4">
+              <h3 className="mb-2 text-sm font-semibold">
                 {tr.right.lotTitle}
               </h3>
               <ul className="space-y-1 list-disc pl-5">
@@ -471,17 +461,17 @@ export default function App() {
               </ul>
             </section>
 
-            <section>
-              <h3 className="mb-2 text-base font-semibold">
+            <section className="mb-4">
+              <h3 className="mb-2 text-sm font-semibold">
                 {tr.right.assortmentTitle}
               </h3>
-              <p className="text-sm text-neutral-700">
+              <p className="text-xs text-neutral-700">
                 {tr.right.assortmentText}
               </p>
             </section>
 
-            <section>
-              <h3 className="mb-2 text-base font-semibold">
+            <section className="mb-4">
+              <h3 className="mb-2 text-sm font-semibold">
                 {tr.right.whyTitle}
               </h3>
               <ul className="space-y-1 list-disc pl-5">
@@ -492,7 +482,7 @@ export default function App() {
             </section>
 
             <section>
-              <h3 className="mb-2 text-base font-semibold">
+              <h3 className="mb-2 text-sm font-semibold">
                 {tr.right.termsTitle}
               </h3>
               <ul className="space-y-1 list-disc pl-5">
@@ -503,13 +493,19 @@ export default function App() {
             </section>
           </aside>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
 
-function TextField(props) {
-  const { label, name, type = "text", required } = props;
+type TextFieldProps = {
+  label: string;
+  name: string;
+  type?: string;
+  required?: boolean;
+};
+
+function TextField({ label, name, type = "text", required }: TextFieldProps) {
   return (
     <label className="block text-xs font-medium text-neutral-700">
       <span className="mb-1 inline-block">{label}</span>
@@ -517,16 +513,20 @@ function TextField(props) {
         type={type}
         name={name}
         required={required}
-        className="mt-1 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm outline-none ring-0 transition placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
+        className="mt-0.5 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm outline-none ring-0 transition placeholder:text-neutral-400 focus:border-[#C58A44] focus:ring-1 focus:ring-[#C58A44]"
       />
     </label>
   );
 }
 
-function RadioGroup(props) {
-  const { name, options } = props;
+type RadioGroupProps = {
+  name: string;
+  options: string[];
+};
+
+function RadioGroup({ name, options }: RadioGroupProps) {
   return (
-    <div className="space-y-1">
+    <div className="flex flex-col gap-1">
       {options.map((opt) => (
         <label
           key={opt}
@@ -536,7 +536,7 @@ function RadioGroup(props) {
             type="radio"
             name={name}
             value={opt}
-            className="h-3.5 w-3.5 border-neutral-400 text-neutral-900 focus:ring-neutral-900"
+            className="h-3.5 w-3.5 border-neutral-400 text-[#C58A44] focus:ring-[#C58A44]"
           />
           <span>{opt}</span>
         </label>

@@ -41,7 +41,48 @@ const t = {
       targetPrice: "Prix souhaité / kg (€)",
       comment: "Commentaire",
       submit: "Envoyer la demande",
-      ok: "Merci ! Votre demande a été envoyée."
+      ok: "Merci ! Votre demande a été envoyée.",
+      // блок 2 — текущий кофе
+      currentCoffeeTitle: "2. Informations sur votre café actuel",
+      currentSupplier: "Torréfacteur / marque actuelle",
+      currentOrigin: "Pays / région utilisés d’habitude",
+      currentProfile: "Profil de torréfaction actuel (espresso / omni / filtre)",
+      // блок 3 — цены
+      priceBlockTitle: "3. Bloc prix",
+      priceQ1:
+        "À quel prix achetez-vous habituellement 1 kg de café de spécialité ?",
+      priceQ1Options: [
+        "Jusqu’à 22 €/kg",
+        "22–24 €/kg",
+        "24–26 €/kg",
+        "26–28 €/kg",
+        "28+ €/kg"
+      ],
+      priceQ2:
+        "À quel prix êtes-vous prêt à acheter un café de spécialité 83+ pts (qualité stable) ?",
+      priceQ2Options: ["≤ 23 €/kg", "23–25 €/kg", "25–27 €/kg", "27–29 €/kg"],
+      priceQ2Individual: "À discuter individuellement",
+      priceQ3:
+        "Quel prix est trop élevé pour que l’achat soit impossible ?",
+      priceQ3Options: ["24 €/kg", "26 €/kg", "28 €/kg", "30 €/kg"],
+      // блок 4 — объём
+      volumeTitle: "4. Volume mensuel",
+      volumeQuestion: "Combien de kilos de café achetez-vous par mois ?",
+      volumeOptions: [
+        "Jusqu’à 10 kg",
+        "10–20 kg",
+        "20–35 kg",
+        "35–50 kg",
+        "50–100 kg",
+        "100+ kg"
+      ],
+      // блок 5 — готовность к сотрудничеству
+      cooperationTitle: "5. Disponibilité à coopérer",
+      cooperationReadyLabel: "Prêt à tester notre café",
+      cooperationReadyOptions: ["Oui", "Peut-être", "Non"],
+      preferredContactLabel: "Mode de contact préféré",
+      preferredContactOptions: ["Téléphone", "E-mail", "WhatsApp", "Visite"],
+      selectPlaceholder: "Choisir une option"
     },
     footer: "© 2025 NÉORA — Paris"
   },
@@ -82,7 +123,48 @@ const t = {
       targetPrice: "Desired price / kg (€)",
       comment: "Comment",
       submit: "Send request",
-      ok: "Thanks! Your request has been sent."
+      ok: "Thanks! Your request has been sent.",
+      // block 2 — current coffee
+      currentCoffeeTitle: "2. Current coffee details",
+      currentSupplier: "Current supplier / roaster (brand)",
+      currentOrigin: "Country / region you usually use",
+      currentProfile: "Roast profile (espresso / omni / filter)",
+      // block 3 — pricing
+      priceBlockTitle: "3. Pricing block",
+      priceQ1:
+        "At what price do you usually buy 1 kg of specialty coffee?",
+      priceQ1Options: [
+        "Up to €22/kg",
+        "€22–24/kg",
+        "€24–26/kg",
+        "€26–28/kg",
+        "€28+/kg"
+      ],
+      priceQ2:
+        "At what price are you ready to buy 83+ pts specialty coffee (stable quality)?",
+      priceQ2Options: ["≤ €23/kg", "€23–25/kg", "€25–27/kg", "€27–29/kg"],
+      priceQ2Individual: "Consider individually",
+      priceQ3:
+        "At what price is the coffee too expensive for you to buy?",
+      priceQ3Options: ["€24/kg", "€26/kg", "€28/kg", "€30/kg"],
+      // block 4 — volume
+      volumeTitle: "4. Monthly volume",
+      volumeQuestion: "How many kilograms of coffee do you buy per month?",
+      volumeOptions: [
+        "Up to 10 kg",
+        "10–20 kg",
+        "20–35 kg",
+        "35–50 kg",
+        "50–100 kg",
+        "100+ kg"
+      ],
+      // block 5 — cooperation
+      cooperationTitle: "5. Willingness to cooperate",
+      cooperationReadyLabel: "Ready to test our coffee",
+      cooperationReadyOptions: ["Yes", "Maybe", "No"],
+      preferredContactLabel: "Preferred way of contact",
+      preferredContactOptions: ["Phone", "E-mail", "WhatsApp", "In-person visit"],
+      selectPlaceholder: "Select an option"
     },
     footer: "© 2025 NÉORA — Paris"
   },
@@ -124,7 +206,48 @@ const t = {
       targetPrice: "Желаемая цена / кг (€)",
       comment: "Комментарий",
       submit: "Отправить заявку",
-      ok: "Спасибо! Ваша заявка отправлена."
+      ok: "Спасибо! Ваша заявка отправлена.",
+      // блок 2 — текущий кофе
+      currentCoffeeTitle: "2. Сведения о текущем кофе",
+      currentSupplier: "Текущий поставщик (бренд / обжарщик)",
+      currentOrigin: "Страна / регион, который вы обычно используете",
+      currentProfile: "Профиль обжарки (espresso / omni / filtre)",
+      // блок 3 — ценовой
+      priceBlockTitle: "3. ЦЕНОВОЙ БЛОК",
+      priceQ1:
+        "По какой цене вы обычно закупаете 1 кг спешлти-кофе?",
+      priceQ1Options: [
+        "До 22 €/кг",
+        "22–24 €/кг",
+        "24–26 €/кг",
+        "26–28 €/кг",
+        "28+ €/кг"
+      ],
+      priceQ2:
+        "По какой цене вы готовы закупать спешлти-кофе 83+ pts (стабильное качество)?",
+      priceQ2Options: ["≤ 23 €/кг", "23–25 €/кг", "25–27 €/кг", "27–29 €/кг"],
+      priceQ2Individual: "Рассматриваю индивидуально",
+      priceQ3:
+        "Какая цена является для вас слишком высокой, при которой закупка невозможна?",
+      priceQ3Options: ["24 €/кг", "26 €/кг", "28 €/кг", "30 €/кг"],
+      // блок 4 — объём
+      volumeTitle: "4. Месячный объём",
+      volumeQuestion: "Сколько килограммов кофе вы закупаете в месяц?",
+      volumeOptions: [
+        "До 10 кг",
+        "10–20 кг",
+        "20–35 кг",
+        "35–50 кг",
+        "50–100 кг",
+        "100+ кг"
+      ],
+      // блок 5 — сотрудничество
+      cooperationTitle: "5. Готовность к сотрудничеству",
+      cooperationReadyLabel: "Готов протестировать наш кофе",
+      cooperationReadyOptions: ["Да", "Возможно", "Нет"],
+      preferredContactLabel: "Желаемый способ связи",
+      preferredContactOptions: ["Телефон", "E-mail", "WhatsApp", "Личный визит"],
+      selectPlaceholder: "Выберите вариант"
     },
     footer: "© 2025 NÉORA — Париж"
   }
@@ -210,6 +333,7 @@ export default function App() {
               <input type="hidden" name="lang" value={lang} />
               <input type="hidden" name="page" value={pageUrl} />
 
+              {/* 1. Базовые данные о компании */}
               <input
                 className="input"
                 name="company"
@@ -235,12 +359,168 @@ export default function App() {
                 placeholder={L.form.address}
               />
               <input className="input" name="phone" placeholder={L.form.phone} />
+
+              {/* 2. Сведения о текущем кофе */}
+              <p className="p" style={{ marginTop: 16, marginBottom: 4 }}>
+                {L.form.currentCoffeeTitle}
+              </p>
               <input
                 className="input"
-                name="monthlyVolume"
-                placeholder={L.form.volume}
+                name="currentSupplier"
+                placeholder={L.form.currentSupplier}
               />
-              {/* Новое поле: желаемая цена за кг */}
+              <input
+                className="input"
+                name="currentOrigin"
+                placeholder={L.form.currentOrigin}
+              />
+              <input
+                className="input"
+                name="currentProfile"
+                placeholder={L.form.currentProfile}
+              />
+
+              {/* 3. Ценовой блок */}
+              <p className="p" style={{ marginTop: 16, marginBottom: 4 }}>
+                {L.form.priceBlockTitle}
+              </p>
+
+              {/* Вопрос 1 */}
+              <p className="p" style={{ margin: "6px 0" }}>
+                {L.form.priceQ1}
+              </p>
+              <select
+                className="input"
+                name="priceCurrent"
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  {L.form.selectPlaceholder}
+                </option>
+                {L.form.priceQ1Options.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+
+              {/* Вопрос 2 */}
+              <p className="p" style={{ margin: "10px 0 6px" }}>
+                {L.form.priceQ2}
+              </p>
+              <select
+                className="input"
+                name="priceReady"
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  {L.form.selectPlaceholder}
+                </option>
+                {L.form.priceQ2Options.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+              <label
+                className="p"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  fontSize: 12,
+                  marginTop: 4
+                }}
+              >
+                <input
+                  type="checkbox"
+                  name="priceReadyIndividual"
+                  style={{ marginRight: 6 }}
+                />
+                {L.form.priceQ2Individual}
+              </label>
+
+              {/* Вопрос 3 */}
+              <p className="p" style={{ margin: "10px 0 6px" }}>
+                {L.form.priceQ3}
+              </p>
+              <select
+                className="input"
+                name="priceTooHigh"
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  {L.form.selectPlaceholder}
+                </option>
+                {L.form.priceQ3Options.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+
+              {/* 4. Месячный объём */}
+              <p className="p" style={{ marginTop: 16, marginBottom: 4 }}>
+                {L.form.volumeTitle}
+              </p>
+              <p className="p" style={{ margin: "0 0 6px" }}>
+                {L.form.volumeQuestion}
+              </p>
+              <select
+                className="input"
+                name="monthlyVolume"
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  {L.form.selectPlaceholder}
+                </option>
+                {L.form.volumeOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+
+              {/* 5. Готовность к сотрудничеству */}
+              <p className="p" style={{ marginTop: 16, marginBottom: 4 }}>
+                {L.form.cooperationTitle}
+              </p>
+              <p className="p" style={{ margin: "0 0 6px" }}>
+                {L.form.cooperationReadyLabel}
+              </p>
+              <select
+                className="input"
+                name="readyToTest"
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  {L.form.selectPlaceholder}
+                </option>
+                {L.form.cooperationReadyOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+
+              <p className="p" style={{ margin: "10px 0 6px" }}>
+                {L.form.preferredContactLabel}
+              </p>
+              <select
+                className="input"
+                name="preferredContact"
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  {L.form.selectPlaceholder}
+                </option>
+                {L.form.preferredContactOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+
+              {/* Дополнительно — свободное поле по цене и комментарий */}
               <input
                 className="input"
                 name="targetPrice"
@@ -312,4 +592,3 @@ export default function App() {
     </>
   );
 }
-

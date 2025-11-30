@@ -6,15 +6,21 @@ const t = {
   fr: {
     lang: "FR",
     switchTo: "EN",
+    kicker: "Pour cafés, restaurants, coffee-shops et hôtels de Paris.",
     hero: "Lot d’essai pour HoReCa",
     sub: "Torréfaction de spécialité pour cafés et restaurants à Paris.",
     benefits: "Pourquoi nous ?",
     b1: "Café de spécialité 83+ pts, profils stables",
+    b1sub: "Sélection lot par lot, torréfaction régulière.",
     b2: "Tarifs B2B pensés pour la HoReCa",
+    b2sub: "Prix adaptés aux volumes 15–100+ kg/mois.",
     b3: "Accompagnement pour choisir vos profils",
+    b3sub: "On ajuste le profil selon votre machine et votre menu.",
     assortment: "Assortiment",
-    assortmentText:
-      "Espresso & filtre : Brésil, Colombie, Éthiopie, Honduras, Kenya, Pérou, Burundi, Salvador, Rwanda. Profils adaptés à l’espresso, aux boissons lactées et au filtre pour la HoReCa.",
+    assortmentLine1:
+      "Espresso & filtre : Brésil, Colombie, Éthiopie, Honduras, Kenya, Pérou, Burundi, Salvador, Rwanda.",
+    assortmentLine2:
+      "Profils adaptés à l’espresso, aux boissons lactées et au filtre pour la HoReCa.",
     terms: "Conditions",
     termsList: [
       "Lot pilote sans engagement lourd.",
@@ -26,7 +32,7 @@ const t = {
     rightTitle: "Comment est composé le lot ?",
     rightList: [
       "Trois paquets d’essai de 250 g (origines/terroirs variés), profils espresso.",
-      "Torréfaction la semaine de l’envoi ; chaque lot avec profil et date.",
+      "Torréfaction fraîche chaque semaine : profil et date sur chaque paquet.",
       "Retour d’expérience : ce qui a plu / moins plu — on fixe le profil pour les livraisons régulières."
     ],
     // форма
@@ -49,6 +55,8 @@ const t = {
       currentSupplier: "Torréfacteur / marque actuelle",
       currentOrigin: "Pays / région utilisés d’habitude",
       currentProfile: "Profil de torréfaction actuel (espresso / omni / filtre)",
+      currentHint:
+        "Si vous n’avez pas ces informations sous la main, vous pouvez laisser ces champs vides.",
       // блок 3 — цены
       priceBlockTitle: "3. Bloc prix",
       priceQ1:
@@ -92,15 +100,21 @@ const t = {
   en: {
     lang: "EN",
     switchTo: "FR",
+    kicker: "For cafés, restaurants, coffee shops and hotels in Paris.",
     hero: "Trial batch for HoReCa",
     sub: "Specialty roasting for cafés & restaurants in Paris.",
     benefits: "Why us?",
     b1: "83+ pts specialty, consistent profiles",
+    b1sub: "Lot-by-lot selection, regular roasting.",
     b2: "B2B pricing tuned for HoReCa",
+    b2sub: "Pricing aligned with 15–100+ kg/month volumes.",
     b3: "Help in selecting profiles for your bar",
+    b3sub: "We tune the profile to your machine and menu.",
     assortment: "Assortment",
-    assortmentText:
-      "Espresso & filter: Brazil, Colombia, Ethiopia, Honduras, Kenya, Peru, Burundi, El Salvador, Rwanda. Profiles tuned for espresso, milk drinks and filter in HoReCa.",
+    assortmentLine1:
+      "Espresso & filter: Brazil, Colombia, Ethiopia, Honduras, Kenya, Peru, Burundi, El Salvador, Rwanda.",
+    assortmentLine2:
+      "Profiles tuned for espresso, milk drinks and filter in HoReCa.",
     terms: "Terms",
     termsList: [
       "Pilot lot with no heavy commitment.",
@@ -111,7 +125,7 @@ const t = {
     rightTitle: "What’s inside the set?",
     rightList: [
       "Three 250 g trial bags (different origins/terroirs), espresso profiles.",
-      "Roasted the week of dispatch; each lot with profile and roast date.",
+      "Fresh roast weekly: profile and roast date on each bag.",
       "Feedback on what you liked / didn’t — we lock the profile for regular supply."
     ],
     form: {
@@ -133,6 +147,8 @@ const t = {
       currentSupplier: "Current supplier / roaster (brand)",
       currentOrigin: "Country / region you usually use",
       currentProfile: "Roast profile (espresso / omni / filter)",
+      currentHint:
+        "If you don’t have these details handy, you can leave these fields empty.",
       // block 3 — pricing
       priceBlockTitle: "3. Pricing block",
       priceQ1:
@@ -176,15 +192,21 @@ const t = {
   ru: {
     lang: "RU",
     switchTo: "FR",
+    kicker: "Для кофеен, ресторанов и отелей Парижа.",
     hero: "Пробная партия для HoReCa",
     sub: "Спешиалти-обжарка для кофеен и ресторанов в Париже.",
     benefits: "Почему мы?",
     b1: "Спешиалти 83+ pts, стабильные профили",
+    b1sub: "Отбор по лотам, регулярная обжарка.",
     b2: "B2B-фокус: цены под HoReCa",
+    b2sub: "Ценообразование под объёмы 15–100+ кг в месяц.",
     b3: "Помогаем подобрать профиль под вашу кофейню",
+    b3sub: "Подстраиваем профиль под вашу машину и карту напитков.",
     assortment: "Ассортимент",
-    assortmentText:
-      "Эспрессо и фильтр: Бразилия, Колумбия, Эфиопия, Гондурас, Кения, Перу, Бурунди, Сальвадор, Руанда. Профили под эспрессо, напитки с молоком и фильтр для HoReCa.",
+    assortmentLine1:
+      "Эспрессо и фильтр: Бразилия, Колумбия, Эфиопия, Гондурас, Кения, Перу, Бурунди, Сальвадор, Руанда.",
+    assortmentLine2:
+      "Профили под эспрессо, напитки с молоком и фильтр для HoReCa.",
     terms: "Условия",
     termsList: [
       "Пилотный лот без жёстких обязательств.",
@@ -196,7 +218,7 @@ const t = {
     rightTitle: "Как устроена партия?",
     rightList: [
       "Три пробные упаковки по 250 г (разные регионы/терруары), профили под эспрессо.",
-      "Обжарка в неделю отгрузки; у каждого лота есть профиль и дата.",
+      "Свежая обжарка каждую неделю: профиль и дата на каждой пачке.",
       "Обратная связь: что понравилось/не понравилось — закрепим профиль для регулярных поставок."
     ],
     form: {
@@ -218,6 +240,8 @@ const t = {
       currentSupplier: "Текущий поставщик (бренд / обжарщик)",
       currentOrigin: "Страна / регион, который вы обычно используете",
       currentProfile: "Профиль обжарки (espresso / omni / filtre)",
+      currentHint:
+        "Если не уверены в данных — эти поля можно оставить пустыми.",
       // блок 3 — ценовой
       priceBlockTitle: "3. Ценовой блок",
       priceQ1:
@@ -331,6 +355,9 @@ export default function App() {
         <section className="section grid">
           {/* Left: form */}
           <div>
+            <p className="sub" style={{ fontSize: 13, marginBottom: 4 }}>
+              {L.kicker}
+            </p>
             <h1 className="h1">{L.hero}</h1>
             <p className="sub">{L.sub}</p>
 
@@ -380,6 +407,16 @@ export default function App() {
               >
                 {L.form.currentCoffeeTitle}
               </p>
+              <p
+                className="p"
+                style={{
+                  fontSize: 12,
+                  margin: "0 0 6px",
+                  opacity: 0.7
+                }}
+              >
+                {L.form.currentHint}
+              </p>
               <input
                 className="input"
                 name="currentSupplier"
@@ -399,7 +436,7 @@ export default function App() {
               {/* 3. Ценовой блок */}
               <p
                 className="p"
-                style={{ marginTop: 16, marginBottom: 4, fontWeight: 600 }}
+                style={{ marginTop: 28, marginBottom: 4, fontWeight: 600 }}
               >
                 {L.form.priceBlockTitle}
               </p>
@@ -468,7 +505,7 @@ export default function App() {
               {/* 4. Месячный объём */}
               <p
                 className="p"
-                style={{ marginTop: 16, marginBottom: 4, fontWeight: 600 }}
+                style={{ marginTop: 28, marginBottom: 4, fontWeight: 600 }}
               >
                 {L.form.volumeTitle}
               </p>
@@ -489,7 +526,7 @@ export default function App() {
               {/* 5. Готовность к сотрудничеству */}
               <p
                 className="p"
-                style={{ marginTop: 16, marginBottom: 4, fontWeight: 600 }}
+                style={{ marginTop: 28, marginBottom: 4, fontWeight: 600 }}
               >
                 {L.form.cooperationTitle}
               </p>
@@ -560,18 +597,36 @@ export default function App() {
         <section className="section">
           <h2 className="h2">{L.benefits}</h2>
           <div className="cards">
-            <div className="card">{L.b1}</div>
-            <div className="card">{L.b2}</div>
-            <div className="card">{L.b3}</div>
+            <div className="card">
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>{L.b1}</div>
+              <p className="p" style={{ fontSize: 13, margin: 0 }}>
+                {L.b1sub}
+              </p>
+            </div>
+            <div className="card">
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>{L.b2}</div>
+              <p className="p" style={{ fontSize: 13, margin: 0 }}>
+                {L.b2sub}
+              </p>
+            </div>
+            <div className="card">
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>{L.b3}</div>
+              <p className="p" style={{ fontSize: 13, margin: 0 }}>
+                {L.b3sub}
+              </p>
+            </div>
           </div>
         </section>
 
         {/* Assortment */}
         <section className="section">
           <h2 className="h2">{L.assortment}</h2>
-          <p className="p">{L.assortmentText}</p>
+          <p className="p" style={{ marginBottom: 4 }}>
+            {L.assortmentLine1}
+          </p>
+          <p className="p">{L.assortmentLine2}</p>
         </section>
-        {/* Блок "Условия" визуально убран */}
+        {/* "Условия" визуально убраны */}
       </main>
 
       <footer className="footer">{L.footer}</footer>

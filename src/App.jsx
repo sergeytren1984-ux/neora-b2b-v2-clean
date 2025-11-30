@@ -10,7 +10,7 @@ const t = {
     sub: "Torréfaction de spécialité pour cafés et restaurants à Paris.",
     benefits: "Pourquoi nous ?",
     b1: "Café de spécialité 83+ pts, profils stables",
-    b1sub: "Sélection lot par lot, torréfaction régulière.",
+    b1sub: "Sélection lot par lot, torréfaction fraîche chaque semaine.",
     b2: "Tarifs B2B pensés pour la HoReCa",
     b2sub: "Prix adaptés aux volumes 15–100+ kg/mois.",
     b3: "Accompagnement pour choisir vos profils",
@@ -99,7 +99,7 @@ const t = {
     sub: "Specialty roasting for cafés & restaurants in Paris.",
     benefits: "Why us?",
     b1: "83+ pts specialty, consistent profiles",
-    b1sub: "Lot-by-lot selection, regular roasting.",
+    b1sub: "Lot-by-lot selection, fresh weekly roasting.",
     b2: "B2B pricing tuned for HoReCa",
     b2sub: "Pricing aligned with 15–100+ kg/month volumes.",
     b3: "Help in selecting profiles for your bar",
@@ -188,7 +188,7 @@ const t = {
     sub: "Спешиалти-обжарка для кофеен и ресторанов в Париже.",
     benefits: "Почему мы?",
     b1: "Спешиалти 83+ pts, стабильные профили",
-    b1sub: "Отбор по лотам, регулярная обжарка.",
+    b1sub: "Отбор по лотам, свежая еженедельная обжарка.",
     b2: "B2B-фокус: цены под HoReCa",
     b2sub: "Ценообразование под объёмы 15–100+ кг в месяц.",
     b3: "Помогаем подобрать профиль под вашу кофейню",
@@ -322,7 +322,6 @@ export default function App() {
     }
   }
 
-  // чуть более плотные отступы между блоками формы
   const sectionTitleStyle = {
     marginTop: 24,
     marginBottom: 4,
@@ -337,7 +336,6 @@ export default function App() {
     fontSize: 16
   };
 
-  // стиль для кнопки с hover-анимацией
   const btnStyle = {
     backgroundColor: btnHover ? "#905f2f" : "#A97738",
     borderColor: btnHover ? "#905f2f" : "#A97738",
@@ -349,14 +347,12 @@ export default function App() {
       "background-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease"
   };
 
-  // лёгкая тень для карточек "Почему мы?"
   const benefitCardStyle = {
     boxShadow: "0 6px 18px rgba(15,23,42,0.06)"
   };
 
   return (
     <>
-      {/* Header */}
       <header className="header">
         <div className="container header-inner">
           <div className="brand">
@@ -373,9 +369,7 @@ export default function App() {
       </header>
 
       <main className="container">
-        {/* Hero grid */}
         <section className="section grid" style={{ gap: 40 }}>
-          {/* Left: form */}
           <div>
             <h1 className="h1">{L.hero}</h1>
             <p className="sub">{L.sub}</p>
@@ -385,7 +379,6 @@ export default function App() {
               <input type="hidden" name="lang" value={lang} />
               <input type="hidden" name="page" value={pageUrl} />
 
-              {/* 1. Общая информация */}
               <p className="p" style={firstSectionTitleStyle}>
                 {L.form.generalTitle}
               </p>
@@ -416,7 +409,6 @@ export default function App() {
               />
               <input className="input" name="phone" placeholder={L.form.phone} />
 
-              {/* 2. Сведения о текущем кофе */}
               <p className="p" style={firstSectionTitleStyle}>
                 {L.form.currentCoffeeTitle}
               </p>
@@ -446,7 +438,6 @@ export default function App() {
                 placeholder={L.form.currentProfile}
               />
 
-              {/* 3. Ценовой блок */}
               <p className="p" style={sectionTitleStyle}>
                 {L.form.priceBlockTitle}
               </p>
@@ -509,7 +500,6 @@ export default function App() {
                 ))}
               </select>
 
-              {/* 4. Месячный объём */}
               <p className="p" style={sectionTitleStyle}>
                 {L.form.volumeTitle}
               </p>
@@ -527,7 +517,6 @@ export default function App() {
                 ))}
               </select>
 
-              {/* 5. Готовность к сотрудничеству */}
               <p className="p" style={sectionTitleStyle}>
                 {L.form.cooperationTitle}
               </p>
@@ -581,7 +570,6 @@ export default function App() {
             </form>
           </div>
 
-          {/* Right: info card */}
           <div className="card">
             <p className="p" style={{ marginTop: 0 }}>
               {L.rightLead}
@@ -599,7 +587,6 @@ export default function App() {
           </div>
         </section>
 
-        {/* Benefits */}
         <section className="section">
           <h2 className="h2">{L.benefits}</h2>
           <div className="cards">
@@ -624,7 +611,6 @@ export default function App() {
           </div>
         </section>
 
-        {/* Assortment */}
         <section className="section">
           <h2 className="h2">{L.assortment}</h2>
           <p className="p" style={{ marginBottom: 4 }}>
@@ -633,7 +619,6 @@ export default function App() {
           <p className="p">{L.assortmentLine2}</p>
         </section>
 
-        {/* About NÉORA */}
         <section className="section">
           <h2 className="h2">{L.aboutTitle}</h2>
           <p className="p">{L.aboutText}</p>

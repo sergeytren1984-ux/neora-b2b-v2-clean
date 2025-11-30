@@ -11,13 +11,14 @@ const t = {
     heroSubtitle: "Torréfaction de spécialité pour cafés et restaurants à Paris.",
 
     sections: {
-      general: "Informations générales sur l’établissement",
-      currentCoffee: "Informations sur votre café actuel",
-      priceBlock: "Bloc Prix (optionnel)",
-      volume: "Volume mensuel",
-      collaboration: "Disponibilité / Collaboration",
+      general: "1. Informations générales sur l’établissement",
+      currentCoffee: "2. Informations sur votre café actuel",
+      priceBlock: "3. Bloc Prix",
+      volume: "4. Volume mensuel",
+      collaboration: "5. Disponibilité / Collaboration",
     },
 
+    // 1. Общая информация
     general: {
       cafeName: "Nom du café / établissement",
       address: "Adresse complète",
@@ -26,6 +27,7 @@ const t = {
       phone: "Téléphone",
     },
 
+    // 2. Текущий кофе
     current: {
       supplierLabel: "Fournisseur actuel (marque / torréfacteur)",
       originLabel: "Origine utilisée habituellement (pays / région)",
@@ -37,6 +39,7 @@ const t = {
       },
     },
 
+    // 3. Ценовой блок
     price: {
       q1Title: "Prix d’achat habituel (1 kg spécialité)",
       q1Name: "price_current",
@@ -48,8 +51,7 @@ const t = {
         "28+ €/kg",
       ],
 
-      q2Title:
-        "Prix souhaité pour un café 83+ pts (qualité stable)",
+      q2Title: "Prix souhaité pour un café 83+ pts (qualité stable)",
       q2Name: "price_expected",
       q2Options: [
         "≤ 23 €/kg",
@@ -64,6 +66,7 @@ const t = {
       q3Options: ["24 €/kg", "26 €/kg", "28 €/kg", "30 €/kg"],
     },
 
+    // 4. Объём
     volume: {
       title: "Volume mensuel",
       name: "volume_monthly",
@@ -77,6 +80,7 @@ const t = {
       ],
     },
 
+    // 5. Готовность / контакт
     collab: {
       readyTitle: "Prêt à tester notre café ?",
       readyName: "ready_to_test",
@@ -87,14 +91,11 @@ const t = {
       contactOptions: ["Téléphone", "Email", "WhatsApp", "Visite en personne"],
     },
 
-    priceToggleShow: "Afficher les questions détaillées sur le prix",
-    priceToggleHide: "Masquer le bloc prix",
-    priceHint:
-      "Bloc optionnel : si vous avez le temps, ces questions nous aident à adapter l’offre.",
-
     submit: "Envoyer la demande",
 
+    // Правый инфоблок — как в старом сайте
     right: {
+      introTitle: "Si l’échantillon vous plaît, laissez une demande d’achat.",
       lotTitle: "Comment est composé le lot ?",
       lotBullets: [
         "Trois paquets d’essai de 250 g (origines / terroirs variés), profils espresso.",
@@ -103,7 +104,7 @@ const t = {
       ],
       assortmentTitle: "Notre assortiment",
       assortmentText:
-        "Cafés de spécialité (Brésil, Colombie, Honduras, Éthiopie selon récolte), profils espresso et filtre pour la restauration.",
+        "Cafés de spécialité (Brésil, Colombie, Honduras, Éthiopie selon récolte) en profils espresso et filtre, pensés pour la restauration.",
       whyTitle: "Pourquoi nous ?",
       whyBullets: [
         "Qualité stable, profils clairs.",
@@ -113,7 +114,7 @@ const t = {
       termsTitle: "Conditions",
       termsBullets: [
         "Volumes d’essai flexibles selon votre débit.",
-        "Livraison intra-muros sous 24–72 h.",
+        "Livraison sur Paris intra-muros sous 24–72 h.",
         "Support pour calibrage espresso / filtre si besoin.",
       ],
     },
@@ -127,11 +128,11 @@ const t = {
     heroSubtitle: "Specialty coffee roasting for cafés and restaurants in Paris.",
 
     sections: {
-      general: "Venue information",
-      currentCoffee: "Your current coffee",
-      priceBlock: "Price block (optional)",
-      volume: "Monthly volume",
-      collaboration: "Readiness to collaborate",
+      general: "1. Venue information",
+      currentCoffee: "2. Your current coffee",
+      priceBlock: "3. Price block",
+      volume: "4. Monthly volume",
+      collaboration: "5. Readiness to collaborate",
     },
 
     general: {
@@ -203,32 +204,29 @@ const t = {
       contactOptions: ["Phone", "Email", "WhatsApp", "In-person visit"],
     },
 
-    priceToggleShow: "Show detailed price questions",
-    priceToggleHide: "Hide price block",
-    priceHint:
-      "Optional block: if you have time, these questions help us fine-tune the offer.",
-
     submit: "Send request",
 
     right: {
+      introTitle:
+        "If you like the sample, you can leave a purchase request.",
       lotTitle: "How is the trial batch composed?",
       lotBullets: [
         "Three 250 g trial bags (different origins / terroirs), espresso profiles.",
         "Roasted in the week of shipping; each lot with profile and roast date.",
-        "Feedback session: what you liked / didn’t like — we lock the profile for regular deliveries.",
+        "Feedback session to fix the profile for regular deliveries.",
       ],
       assortmentTitle: "Our assortment",
       assortmentText:
-        "Specialty coffees (Brazil, Colombia, Honduras, Ethiopia depending on harvest), espresso and filter profiles for restaurants.",
+        "Specialty coffees (Brazil, Colombia, Honduras, Ethiopia depending on harvest) in espresso and filter profiles for restaurants.",
       whyTitle: "Why us?",
       whyBullets: [
         "Stable quality, clear profiles.",
         "Transparent B2B pricing.",
-        "Fast delivery within Paris.",
+        "Fast delivery in Paris.",
       ],
       termsTitle: "Terms",
       termsBullets: [
-        "Flexible trial volumes depending on your consumption.",
+        "Flexible trial volumes.",
         "Delivery in inner Paris within 24–72 h.",
         "Support for espresso / filter calibration if needed.",
       ],
@@ -237,8 +235,7 @@ const t = {
 };
 
 export default function App() {
-  const [lang, setLang] = useState<"fr" | "en">("fr");
-  const [showPrice, setShowPrice] = useState(false);
+  const [lang, setLang] = useState("fr");
   const tr = t[lang];
 
   return (
@@ -268,9 +265,9 @@ export default function App() {
           </p>
         </div>
 
-        {/* ДВЕ КОЛОНКИ КАК РАНЬШЕ */}
-        <div className="grid gap-8 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-          {/* ФОРМА */}
+        {/* ДВЕ КОЛОНКИ КАК В СТАРОМ МАКЕТЕ */}
+        <div className="grid gap-8 md:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
+          {/* ЛЕВАЯ КОЛОНКА — ФОРМА */}
           <form
             method="POST"
             action={FORMSPREE_ENDPOINT}
@@ -279,7 +276,7 @@ export default function App() {
             <input type="hidden" name="lang" value={lang} />
 
             {/* 1. ОБЩАЯ ИНФА */}
-            <section className="space-y-4">
+            <section className="space-y-3">
               <h2 className="text-sm font-semibold text-neutral-900">
                 {tr.sections.general}
               </h2>
@@ -344,55 +341,41 @@ export default function App() {
               </div>
             </section>
 
-            {/* 3. ЦЕНОВОЙ БЛОК — СКРЫТ ПО УМОЛЧАНИЮ */}
+            {/* 3. ЦЕНОВОЙ БЛОК */}
             <section className="space-y-3 pt-1 border-t border-neutral-200">
-              <div className="flex flex-col gap-2 pt-4">
-                <h2 className="text-sm font-semibold text-neutral-900">
-                  {tr.sections.priceBlock}
-                </h2>
-                <p className="text-xs text-neutral-500">{tr.priceHint}</p>
-                <button
-                  type="button"
-                  onClick={() => setShowPrice((v) => !v)}
-                  className="inline-flex w-max items-center justify-center rounded-full border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-800 hover:bg-neutral-100 transition"
-                >
-                  {showPrice ? tr.priceToggleHide : tr.priceToggleShow}
-                </button>
-              </div>
+              <h2 className="pt-4 text-sm font-semibold text-neutral-900">
+                {tr.sections.priceBlock}
+              </h2>
 
-              {showPrice && (
-                <div className="space-y-4">
-                  <fieldset className="space-y-2">
-                    <legend className="text-xs font-medium text-neutral-700">
-                      {tr.price.q1Title}
-                    </legend>
-                    <RadioGroup
-                      name={tr.price.q1Name}
-                      options={tr.price.q1Options}
-                    />
-                  </fieldset>
+              <fieldset className="space-y-2">
+                <legend className="text-xs font-medium text-neutral-700">
+                  {tr.price.q1Title}
+                </legend>
+                <RadioGroup
+                  name={tr.price.q1Name}
+                  options={tr.price.q1Options}
+                />
+              </fieldset>
 
-                  <fieldset className="space-y-2">
-                    <legend className="text-xs font-medium text-neutral-700">
-                      {tr.price.q2Title}
-                    </legend>
-                    <RadioGroup
-                      name={tr.price.q2Name}
-                      options={tr.price.q2Options}
-                    />
-                  </fieldset>
+              <fieldset className="space-y-2">
+                <legend className="text-xs font-medium text-neutral-700">
+                  {tr.price.q2Title}
+                </legend>
+                <RadioGroup
+                  name={tr.price.q2Name}
+                  options={tr.price.q2Options}
+                />
+              </fieldset>
 
-                  <fieldset className="space-y-2">
-                    <legend className="text-xs font-medium text-neutral-700">
-                      {tr.price.q3Title}
-                    </legend>
-                    <RadioGroup
-                      name={tr.price.q3Name}
-                      options={tr.price.q3Options}
-                    />
-                  </fieldset>
-                </div>
-              )}
+              <fieldset className="space-y-2">
+                <legend className="text-xs font-medium text-neutral-700">
+                  {tr.price.q3Title}
+                </legend>
+                <RadioGroup
+                  name={tr.price.q3Name}
+                  options={tr.price.q3Options}
+                />
+              </fieldset>
             </section>
 
             {/* 4. ОБЪЁМ */}
@@ -409,7 +392,7 @@ export default function App() {
               </fieldset>
             </section>
 
-            {/* 5. ГОТОВНОСТЬ */}
+            {/* 5. ГОТОВНОСТЬ / КОНТАКТ */}
             <section className="space-y-4 pt-1 border-t border-neutral-200">
               <h2 className="pt-4 text-sm font-semibold text-neutral-900">
                 {tr.sections.collaboration}
@@ -437,7 +420,7 @@ export default function App() {
               </div>
             </section>
 
-            {/* КНОПКА КАК РАНЬШЕ — ЗОЛОТАЯ */}
+            {/* КНОПКА — ЗОЛОТАЯ, КАК В СТАРОМ МАКЕТЕ */}
             <div className="pt-2">
               <button
                 type="submit"
@@ -448,9 +431,12 @@ export default function App() {
             </div>
           </form>
 
-          {/* ПРАВЫЙ ИНФО-БЛОК — ЧИСТЫЙ, КАК БЫЛО */}
+          {/* ПРАВАЯ КОЛОНКА — ИНФОБЛОК */}
           <aside className="rounded-3xl border border-neutral-200 bg-neutral-50 px-4 py-4 md:px-6 md:py-6 text-sm text-neutral-800">
             <section className="mb-4">
+              <p className="text-xs text-neutral-700 mb-3">
+                {tr.right.introTitle}
+              </p>
               <h3 className="mb-2 text-sm font-semibold">
                 {tr.right.lotTitle}
               </h3>
@@ -498,14 +484,8 @@ export default function App() {
   );
 }
 
-type TextFieldProps = {
-  label: string;
-  name: string;
-  type?: string;
-  required?: boolean;
-};
-
-function TextField({ label, name, type = "text", required }: TextFieldProps) {
+function TextField(props) {
+  const { label, name, type = "text", required } = props;
   return (
     <label className="block text-xs font-medium text-neutral-700">
       <span className="mb-1 inline-block">{label}</span>
@@ -519,12 +499,8 @@ function TextField({ label, name, type = "text", required }: TextFieldProps) {
   );
 }
 
-type RadioGroupProps = {
-  name: string;
-  options: string[];
-};
-
-function RadioGroup({ name, options }: RadioGroupProps) {
+function RadioGroup(props) {
+  const { name, options } = props;
   return (
     <div className="flex flex-col gap-1">
       {options.map((opt) => (

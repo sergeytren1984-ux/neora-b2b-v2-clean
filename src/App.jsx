@@ -26,7 +26,6 @@ const t = {
       "Contrats B2B simples, facturation mensuelle.",
       "Livraison sur Paris intra-muros sous 24–72 h."
     ],
-    // правый блок
     rightLead: "Si l’échantillon vous plaît, laissez une demande d’achat.",
     rightTitle: "Comment est composé le lot ?",
     rightList: [
@@ -34,7 +33,6 @@ const t = {
       "Torréfaction fraîche chaque semaine : profil et date sur chaque paquet.",
       "Retour d’expérience : ce qui a plu / moins plu — on fixe le profil pour les livraisons régulières."
     ],
-    // форма
     form: {
       title: "Laissez votre demande",
       company: "Société",
@@ -47,16 +45,13 @@ const t = {
       comment: "Commentaire",
       submit: "Envoyer la demande",
       ok: "Merci ! Votre demande a été envoyée.",
-      // блоки
       generalTitle: "1. Informations générales",
-      // блок 2 — текущий кофе
       currentCoffeeTitle: "2. Informations sur votre café actuel",
       currentSupplier: "Torréfacteur / marque actuelle",
       currentOrigin: "Pays / région utilisés d’habitude",
       currentProfile: "Profil de torréfaction actuel (espresso / omni / filtre)",
       currentHint:
         "Si vous n’avez pas ces informations sous la main, vous pouvez laisser ces champs vides.",
-      // блок 3 — цены
       priceBlockTitle: "3. Bloc prix",
       priceQ1:
         "À quel prix achetez-vous habituellement 1 kg de café de spécialité ?",
@@ -74,7 +69,6 @@ const t = {
       priceQ3:
         "Quel prix est trop élevé pour que l’achat soit impossible ?",
       priceQ3Options: ["24 €/kg", "26 €/kg", "28 €/kg", "30 €/kg"],
-      // блок 4 — объём
       volumeTitle: "4. Volume mensuel",
       volumeQuestion: "Combien de kilos de café achetez-vous par mois ?",
       volumeOptions: [
@@ -85,7 +79,6 @@ const t = {
         "50–100 kg",
         "100+ kg"
       ],
-      // блок 5 — готовность к сотрудничеству
       cooperationTitle: "5. Disponibilité à coopérer",
       cooperationReadyLabel: "Prêt à tester notre café",
       cooperationReadyOptions: ["Oui", "Peut-être", "Non"],
@@ -141,16 +134,13 @@ const t = {
       comment: "Comment",
       submit: "Send request",
       ok: "Thanks! Your request has been sent.",
-      // blocks
       generalTitle: "1. General information",
-      // block 2 — current coffee
       currentCoffeeTitle: "2. Current coffee details",
       currentSupplier: "Current supplier / roaster (brand)",
       currentOrigin: "Country / region you usually use",
       currentProfile: "Roast profile (espresso / omni / filter)",
       currentHint:
         "If you don’t have these details handy, you can leave these fields empty.",
-      // block 3 — pricing
       priceBlockTitle: "3. Pricing block",
       priceQ1:
         "At what price do you usually buy 1 kg of specialty coffee?",
@@ -168,7 +158,6 @@ const t = {
       priceQ3:
         "At what price is the coffee too expensive for you to buy?",
       priceQ3Options: ["€24/kg", "€26/kg", "€28/kg", "€30/kg"],
-      // block 4 — volume
       volumeTitle: "4. Monthly volume",
       volumeQuestion: "How many kilograms of coffee do you buy per month?",
       volumeOptions: [
@@ -179,7 +168,6 @@ const t = {
         "50–100 kg",
         "100+ kg"
       ],
-      // block 5 — cooperation
       cooperationTitle: "5. Willingness to cooperate",
       cooperationReadyLabel: "Ready to test our coffee",
       cooperationReadyOptions: ["Yes", "Maybe", "No"],
@@ -236,16 +224,13 @@ const t = {
       comment: "Комментарий",
       submit: "Отправить заявку",
       ok: "Спасибо! Ваша заявка отправлена.",
-      // блоки
       generalTitle: "1. Общая информация",
-      // блок 2 — текущий кофе
       currentCoffeeTitle: "2. Сведения о текущем кофе",
       currentSupplier: "Текущий поставщик (бренд / обжарщик)",
       currentOrigin: "Страна / регион, который вы обычно используете",
       currentProfile: "Профиль обжарки (espresso / omni / filtre)",
       currentHint:
         "Если не уверены в данных — эти поля можно оставить пустыми.",
-      // блок 3 — ценовой
       priceBlockTitle: "3. Ценовой блок",
       priceQ1:
         "По какой цене вы обычно закупаете 1 кг спешлти-кофе?",
@@ -263,7 +248,6 @@ const t = {
       priceQ3:
         "Какая цена является для вас слишком высокой, при которой закупка невозможна?",
       priceQ3Options: ["24 €/кг", "26 €/кг", "28 €/кг", "30 €/кг"],
-      // блок 4 — объём
       volumeTitle: "4. Месячный объём",
       volumeQuestion: "Сколько килограммов кофе вы закупаете в месяц?",
       volumeOptions: [
@@ -274,7 +258,6 @@ const t = {
         "50–100 кг",
         "100+ кг"
       ],
-      // блок 5 — сотрудничество
       cooperationTitle: "5. Готовность к сотрудничеству",
       cooperationReadyLabel: "Готов протестировать наш кофе",
       cooperationReadyOptions: ["Да", "Возможно", "Нет"],
@@ -338,6 +321,20 @@ export default function App() {
     }
   }
 
+  const sectionTitleStyle = {
+    marginTop: 28,
+    marginBottom: 4,
+    fontWeight: 700,
+    fontSize: 16
+  };
+
+  const firstSectionTitleStyle = {
+    marginTop: 16,
+    marginBottom: 4,
+    fontWeight: 700,
+    fontSize: 16
+  };
+
   return (
     <>
       {/* Header */}
@@ -370,10 +367,7 @@ export default function App() {
               <input type="hidden" name="page" value={pageUrl} />
 
               {/* 1. Общая информация */}
-              <p
-                className="p"
-                style={{ marginTop: 16, marginBottom: 4, fontWeight: 600 }}
-              >
+              <p className="p" style={firstSectionTitleStyle}>
                 {L.form.generalTitle}
               </p>
 
@@ -404,10 +398,7 @@ export default function App() {
               <input className="input" name="phone" placeholder={L.form.phone} />
 
               {/* 2. Сведения о текущем кофе */}
-              <p
-                className="p"
-                style={{ marginTop: 16, marginBottom: 4, fontWeight: 600 }}
-              >
+              <p className="p" style={firstSectionTitleStyle}>
                 {L.form.currentCoffeeTitle}
               </p>
               <p
@@ -437,14 +428,10 @@ export default function App() {
               />
 
               {/* 3. Ценовой блок */}
-              <p
-                className="p"
-                style={{ marginTop: 28, marginBottom: 4, fontWeight: 600 }}
-              >
+              <p className="p" style={sectionTitleStyle}>
                 {L.form.priceBlockTitle}
               </p>
 
-              {/* Вопрос 1 */}
               <p className="p" style={{ margin: "6px 0" }}>
                 {L.form.priceQ1}
               </p>
@@ -459,7 +446,6 @@ export default function App() {
                 ))}
               </select>
 
-              {/* Вопрос 2 */}
               <p className="p" style={{ margin: "10px 0 6px" }}>
                 {L.form.priceQ2}
               </p>
@@ -490,7 +476,6 @@ export default function App() {
                 {L.form.priceQ2Individual}
               </label>
 
-              {/* Вопрос 3 */}
               <p className="p" style={{ margin: "10px 0 6px" }}>
                 {L.form.priceQ3}
               </p>
@@ -506,10 +491,7 @@ export default function App() {
               </select>
 
               {/* 4. Месячный объём */}
-              <p
-                className="p"
-                style={{ marginTop: 28, marginBottom: 4, fontWeight: 600 }}
-              >
+              <p className="p" style={sectionTitleStyle}>
                 {L.form.volumeTitle}
               </p>
               <p className="p" style={{ margin: "0 0 6px" }}>
@@ -527,10 +509,7 @@ export default function App() {
               </select>
 
               {/* 5. Готовность к сотрудничеству */}
-              <p
-                className="p"
-                style={{ marginTop: 28, marginBottom: 4, fontWeight: 600 }}
-              >
+              <p className="p" style={sectionTitleStyle}>
                 {L.form.cooperationTitle}
               </p>
 
@@ -563,14 +542,20 @@ export default function App() {
                 ))}
               </select>
 
-              {/* Комментарий */}
               <textarea
                 className="textarea"
                 name="comment"
                 placeholder={L.form.comment}
               />
 
-              <button className="btn" disabled={sending}>
+              <button
+                className="btn"
+                disabled={sending}
+                style={{
+                  backgroundColor: "#A97738",
+                  borderColor: "#A97738"
+                }}
+              >
                 {sending ? "…" : L.form.submit}
               </button>
 

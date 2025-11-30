@@ -6,7 +6,6 @@ const t = {
   fr: {
     lang: "FR",
     switchTo: "EN",
-    kicker: "Pour cafés, restaurants, coffee-shops et hôtels de Paris.",
     hero: "Lot d’essai pour HoReCa",
     sub: "Torréfaction de spécialité pour cafés et restaurants à Paris.",
     benefits: "Pourquoi nous ?",
@@ -94,13 +93,15 @@ const t = {
       preferredContactOptions: ["Téléphone", "E-mail", "WhatsApp", "Visite"],
       selectPlaceholder: "Choisir une option"
     },
+    aboutTitle: "À propos de NÉORA",
+    aboutText:
+      "Torréfaction de spécialité basée à Paris, avec un focus HoReCa. Petits lots, profils ajustés pour chaque établissement.",
     footer: "© 2025 NÉORA — Paris"
   },
 
   en: {
     lang: "EN",
     switchTo: "FR",
-    kicker: "For cafés, restaurants, coffee shops and hotels in Paris.",
     hero: "Trial batch for HoReCa",
     sub: "Specialty roasting for cafés & restaurants in Paris.",
     benefits: "Why us?",
@@ -186,13 +187,15 @@ const t = {
       preferredContactOptions: ["Phone", "E-mail", "WhatsApp", "In-person visit"],
       selectPlaceholder: "Select an option"
     },
+    aboutTitle: "About NÉORA",
+    aboutText:
+      "Paris-based specialty roastery focused on HoReCa. Small batches, profiles tailored for each café.",
     footer: "© 2025 NÉORA — Paris"
   },
 
   ru: {
     lang: "RU",
     switchTo: "FR",
-    kicker: "Для кофеен, ресторанов и отелей Парижа.",
     hero: "Пробная партия для HoReCa",
     sub: "Спешиалти-обжарка для кофеен и ресторанов в Париже.",
     benefits: "Почему мы?",
@@ -279,6 +282,9 @@ const t = {
       preferredContactOptions: ["Телефон", "E-mail", "WhatsApp", "Личный визит"],
       selectPlaceholder: "Выберите вариант"
     },
+    aboutTitle: "О NÉORA",
+    aboutText:
+      "Парижская спешиалти-обжарка с фокусом на HoReCa. Работаем малыми партиями, профили настраиваем под каждую кофейню.",
     footer: "© 2025 NÉORA — Париж"
   }
 };
@@ -355,9 +361,6 @@ export default function App() {
         <section className="section grid">
           {/* Left: form */}
           <div>
-            <p className="sub" style={{ fontSize: 13, marginBottom: 4 }}>
-              {L.kicker}
-            </p>
             <h1 className="h1">{L.hero}</h1>
             <p className="sub">{L.sub}</p>
 
@@ -626,7 +629,12 @@ export default function App() {
           </p>
           <p className="p">{L.assortmentLine2}</p>
         </section>
-        {/* "Условия" визуально убраны */}
+
+        {/* About NÉORA */}
+        <section className="section">
+          <h2 className="h2">{L.aboutTitle}</h2>
+          <p className="p">{L.aboutText}</p>
+        </section>
       </main>
 
       <footer className="footer">{L.footer}</footer>

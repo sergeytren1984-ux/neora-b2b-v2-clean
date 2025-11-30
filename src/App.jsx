@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-/** Formspree endpoint — заявки придут на твою почту */
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/mrbonpno";
 
 const t = {
@@ -12,7 +11,6 @@ const t = {
     heroTitle: "Lot d’essai pour HoReCa",
     heroSubtitle: "Torréfaction de spécialité pour cafés et restaurants à Paris.",
 
-    /** LEFT COLUMN — FORM */
     sections: {
       general: "1. Informations générales sur l’établissement",
       currentCoffee: "2. Informations sur votre café actuel",
@@ -21,7 +19,6 @@ const t = {
       collaboration: "5. Disponibilité / Collaboration",
     },
 
-    // 1. GENERAL INFO
     general: {
       cafeName: "Nom du café / établissement",
       address: "Adresse complète",
@@ -30,7 +27,6 @@ const t = {
       phone: "Téléphone",
     },
 
-    // 2. CURRENT COFFEE
     current: {
       supplierLabel: "Fournisseur actuel (marque / torréfacteur)",
       originLabel: "Origine utilisée habituellement (pays / région)",
@@ -42,7 +38,6 @@ const t = {
       },
     },
 
-    // 3. PRICE BLOCK
     price: {
       q1Title: "Question 1 — Prix d’achat habituel (1 kg spécialité)",
       q1Name: "price_current",
@@ -69,7 +64,6 @@ const t = {
       q3Options: ["24 €/kg", "26 €/kg", "28 €/kg", "30 €/kg"],
     },
 
-    // 4. VOLUME
     volume: {
       title: "Volume mensuel",
       name: "volume_monthly",
@@ -83,7 +77,6 @@ const t = {
       ],
     },
 
-    // 5. COLLABORATION
     collab: {
       readyTitle: "Prêt à tester notre café ?",
       readyName: "ready_to_test",
@@ -96,7 +89,6 @@ const t = {
 
     submit: "Envoyer la demande",
 
-    /** RIGHT COLUMN — INFO BLOCK */
     right: {
       lotTitle: "Lot d’essai — qu’est-ce que c’est ?",
       lotBullets: [
@@ -168,7 +160,8 @@ const t = {
         "28+ €/kg",
       ],
 
-      q2Title: "Question 2 — Desired price for 83+ pts coffee (stable quality)",
+      q2Title:
+        "Question 2 — Desired price for 83+ pts coffee (stable quality)",
       q2Name: "price_expected",
       q2Options: [
         "≤ 23 €/kg",
@@ -235,7 +228,7 @@ const t = {
 };
 
 export default function App() {
-  const [lang, setLang] = useState<"fr" | "en">("fr");
+  const [lang, setLang] = useState("fr");
   const tr = t[lang];
 
   return (
@@ -266,16 +259,15 @@ export default function App() {
         </div>
 
         <div className="grid gap-10 md:grid-cols-[minmax(0,2fr)_minmax(0,1.1fr)]">
-          {/* LEFT: FORM */}
+          {/* ЛЕВЫЙ СТОЛБЕЦ — ФОРМА */}
           <form
             method="POST"
             action={FORMSPREE_ENDPOINT}
             className="space-y-8 bg-white rounded-2xl shadow-sm border border-neutral-200 px-5 py-6 md:px-7 md:py-7"
           >
-            {/* скрытое поле с языком */}
             <input type="hidden" name="lang" value={lang} />
 
-            {/* 1. GENERAL */}
+            {/* 1. ОБЩАЯ ИНФА */}
             <section>
               <h2 className="mb-4 text-sm font-semibold tracking-wide uppercase text-neutral-800">
                 {tr.sections.general}
@@ -311,7 +303,7 @@ export default function App() {
               </div>
             </section>
 
-            {/* 2. CURRENT COFFEE */}
+            {/* 2. ТЕКУЩИЙ КОФЕ */}
             <section>
               <h2 className="mb-4 text-sm font-semibold tracking-wide uppercase text-neutral-800">
                 {tr.sections.currentCoffee}
@@ -342,14 +334,13 @@ export default function App() {
               </div>
             </section>
 
-            {/* 3. PRICE BLOCK */}
+            {/* 3. ЦЕНОВОЙ БЛОК */}
             <section>
               <h2 className="mb-4 text-sm font-semibold tracking-wide uppercase text-neutral-800">
                 {tr.sections.priceBlock}
               </h2>
 
               <div className="space-y-5">
-                {/* Q1 */}
                 <fieldset className="space-y-2">
                   <legend className="mb-1 text-xs font-medium text-neutral-700">
                     {tr.price.q1Title}
@@ -360,7 +351,6 @@ export default function App() {
                   />
                 </fieldset>
 
-                {/* Q2 */}
                 <fieldset className="space-y-2">
                   <legend className="mb-1 text-xs font-medium text-neutral-700">
                     {tr.price.q2Title}
@@ -371,7 +361,6 @@ export default function App() {
                   />
                 </fieldset>
 
-                {/* Q3 */}
                 <fieldset className="space-y-2">
                   <legend className="mb-1 text-xs font-medium text-neutral-700">
                     {tr.price.q3Title}
@@ -384,7 +373,7 @@ export default function App() {
               </div>
             </section>
 
-            {/* 4. VOLUME */}
+            {/* 4. ОБЪЁМ */}
             <section>
               <h2 className="mb-3 text-sm font-semibold tracking-wide uppercase text-neutral-800">
                 {tr.sections.volume}
@@ -398,7 +387,7 @@ export default function App() {
               </fieldset>
             </section>
 
-            {/* 5. COLLABORATION */}
+            {/* 5. ГОТОВНОСТЬ */}
             <section>
               <h2 className="mb-4 text-sm font-semibold tracking-wide uppercase text-neutral-800">
                 {tr.sections.collaboration}
@@ -427,7 +416,6 @@ export default function App() {
               </div>
             </section>
 
-            {/* SUBMIT */}
             <div className="pt-2">
               <button
                 type="submit"
@@ -438,7 +426,7 @@ export default function App() {
             </div>
           </form>
 
-          {/* RIGHT: INFO BLOCK */}
+          {/* ПРАВЫЙ СТОЛБЕЦ — ИНФО */}
           <aside className="space-y-8 text-sm text-neutral-800">
             <section>
               <h3 className="mb-2 text-base font-semibold">
@@ -488,16 +476,8 @@ export default function App() {
   );
 }
 
-/* ------------ МАЛЕНЬКИЕ ПОДКОМПОНЕНТЫ ---------------- */
-
-type TextFieldProps = {
-  label: string;
-  name: string;
-  type?: string;
-  required?: boolean;
-};
-
-function TextField({ label, name, type = "text", required }: TextFieldProps) {
+function TextField(props) {
+  const { label, name, type = "text", required } = props;
   return (
     <label className="block text-xs font-medium text-neutral-700">
       <span className="mb-1 inline-block">{label}</span>
@@ -511,12 +491,8 @@ function TextField({ label, name, type = "text", required }: TextFieldProps) {
   );
 }
 
-type RadioGroupProps = {
-  name: string;
-  options: string[];
-};
-
-function RadioGroup({ name, options }: RadioGroupProps) {
+function RadioGroup(props) {
+  const { name, options } = props;
   return (
     <div className="space-y-1">
       {options.map((opt) => (
@@ -536,5 +512,3 @@ function RadioGroup({ name, options }: RadioGroupProps) {
     </div>
   );
 }
-
-

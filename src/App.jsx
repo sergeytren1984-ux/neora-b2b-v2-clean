@@ -1,315 +1,540 @@
-import React, { useMemo, useState } from "react";
+import { useState } from "react";
 
+/** Formspree endpoint — заявки придут на твою почту */
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/mrbonpno";
 
 const t = {
   fr: {
     lang: "FR",
     switchTo: "EN",
-    hero: "Lot d’essai pour HoReCa",
-    sub: "Torréfaction de spécialité pour cafés et restaurants à Paris.",
-    benefits: "Pourquoi nous ?",
-    b1: "Qualité stable, profils clairs",
-    b2: "Prix B2B transparents",
-    b3: "Livraison rapide sur Paris",
-    assortment: "Assortiment",
-    assortmentText:
-      "Espresso & filtre : Brésil, Colombie, Éthiopie, Honduras, Kenya, Pérou, Burundi, Salvador, Rwanda. Profil HoReCa.",
-    terms: "Conditions",
-    termsList: [
-      "Volumes d’essai flexibles (lot pilote HoReCa).",
-      "Contrats B2B simples, facturation mensuelle.",
-      "Livraison sur Paris intra-muros sous 24–72 h."
-    ],
-    // правый блок
-    rightLead: "Si l’échantillon vous plaît, laissez une demande d’achat.",
-    rightTitle: "Comment est composé le lot ?",
-    rightList: [
-      "Trois paquets d’essai de 250 g (origines/terroirs variés), profils espresso.",
-      "Torréfaction la semaine de l’envoi ; chaque lot avec profil et date.",
-      "Retour d’expérience : ce qui a plu / moins plu — on fixe le profil pour les livraisons régulières."
-    ],
-    // форма
-    form: {
-      title: "Laissez votre demande",
-      company: "Société",
-      contact: "Personne de contact",
-      email: "E-mail",
-      address: "Adresse",
-      phone: "Téléphone",
-      volume: "Volume mensuel attendu (kg)",
-      targetPrice: "Prix souhaité / kg (€)",
-      comment: "Commentaire",
-      submit: "Envoyer la demande",
-      ok: "Merci ! Votre demande a été envoyée."
+
+    brand: "NÉORA",
+    heroTitle: "Lot d’essai pour HoReCa",
+    heroSubtitle: "Torréfaction de spécialité pour cafés et restaurants à Paris.",
+
+    /** LEFT COLUMN — FORM */
+    sections: {
+      general: "1. Informations générales sur l’établissement",
+      currentCoffee: "2. Informations sur votre café actuel",
+      priceBlock: "3. Bloc Prix",
+      volume: "4. Volume mensuel",
+      collaboration: "5. Disponibilité / Collaboration",
     },
-    footer: "© 2025 NÉORA — Paris"
+
+    // 1. GENERAL INFO
+    general: {
+      cafeName: "Nom du café / établissement",
+      address: "Adresse complète",
+      contactPerson: "Personne de contact (propriétaire / manager)",
+      email: "Email professionnel",
+      phone: "Téléphone",
+    },
+
+    // 2. CURRENT COFFEE
+    current: {
+      supplierLabel: "Fournisseur actuel (marque / torréfacteur)",
+      originLabel: "Origine utilisée habituellement (pays / région)",
+      roastProfileLabel: "Profil de torréfaction utilisé",
+      roastOptions: {
+        espresso: "Espresso",
+        omni: "Omni",
+        filter: "Filtre",
+      },
+    },
+
+    // 3. PRICE BLOCK
+    price: {
+      q1Title: "Question 1 — Prix d’achat habituel (1 kg spécialité)",
+      q1Name: "price_current",
+      q1Options: [
+        "Jusqu’à 22 €/kg",
+        "22–24 €/kg",
+        "24–26 €/kg",
+        "26–28 €/kg",
+        "28+ €/kg",
+      ],
+
+      q2Title: "Question 2 — Prix souhaité pour un café 83+ pts (qualité stable)",
+      q2Name: "price_expected",
+      q2Options: [
+        "≤ 23 €/kg",
+        "23–25 €/kg",
+        "25–27 €/kg",
+        "27–29 €/kg",
+        "À étudier individuellement",
+      ],
+
+      q3Title: "Question 3 — Prix jugé trop élevé (achat impossible)",
+      q3Name: "price_too_high",
+      q3Options: ["24 €/kg", "26 €/kg", "28 €/kg", "30 €/kg"],
+    },
+
+    // 4. VOLUME
+    volume: {
+      title: "Volume mensuel",
+      name: "volume_monthly",
+      options: [
+        "Jusqu’à 10 kg",
+        "10–20 kg",
+        "20–35 kg",
+        "35–50 kg",
+        "50–100 kg",
+        "100+ kg",
+      ],
+    },
+
+    // 5. COLLABORATION
+    collab: {
+      readyTitle: "Prêt à tester notre café ?",
+      readyName: "ready_to_test",
+      readyOptions: ["Oui", "Peut-être", "Non"],
+
+      contactTitle: "Mode de contact préféré",
+      contactName: "contact_method",
+      contactOptions: ["Téléphone", "Email", "WhatsApp", "Visite en personne"],
+    },
+
+    submit: "Envoyer la demande",
+
+    /** RIGHT COLUMN — INFO BLOCK */
+    right: {
+      lotTitle: "Lot d’essai — qu’est-ce que c’est ?",
+      lotBullets: [
+        "Un lot d’essai personnalisé de cafés de spécialité pour votre établissement.",
+        "3 références possibles (espresso / filtre) selon votre profil et vos volumes.",
+        "Un sourcing transparent et une torréfaction pensée pour la HoReCa parisienne.",
+      ],
+      assortmentTitle: "Notre assortiment",
+      assortmentText:
+        "Sélection de cafés de spécialité (Brésil, Colombie, Honduras, Éthiopie selon récolte) en profils espresso et filtre, adaptée à la restauration.",
+      whyTitle: "Pourquoi nous ?",
+      whyBullets: [
+        "Profil de tasse stable et reproductible.",
+        "Process B2B simple : facturation mensuelle, livraison sur Paris.",
+        "Accompagnement dans la transition depuis votre torréfacteur actuel.",
+      ],
+      termsTitle: "Conditions",
+      termsBullets: [
+        "Volumes d’essai flexibles selon votre débit.",
+        "Livraison sur Paris intra-muros sous 24–72 h.",
+        "Support pour calibrage espresso / filtre si besoin.",
+      ],
+    },
   },
 
   en: {
     lang: "EN",
     switchTo: "FR",
-    hero: "Trial batch for HoReCa",
-    sub: "Specialty roasting for cafés & restaurants in Paris.",
-    benefits: "Why us?",
-    b1: "Consistent quality & clear profiles",
-    b2: "Transparent B2B pricing",
-    b3: "Fast delivery in Paris",
-    assortment: "Assortment",
-    assortmentText:
-      "Espresso & filter: Brazil, Colombia, Ethiopia, Honduras, Kenya, Peru, Burundi, El Salvador, Rwanda. HoReCa-tuned.",
-    terms: "Terms",
-    termsList: [
-      "Flexible pilot volumes (HoReCa trial).",
-      "Simple B2B contracts, monthly invoicing.",
-      "Paris delivery within 24–72 h."
-    ],
-    rightLead: "If you liked the tasting set, leave a purchase request.",
-    rightTitle: "What’s inside the set?",
-    rightList: [
-      "Three 250 g trial bags (different origins/terroirs), espresso profiles.",
-      "Roasted the week of dispatch; each lot with profile and roast date.",
-      "Feedback on what you liked / didn’t — we lock the profile for regular supply."
-    ],
-    form: {
-      title: "Leave a request",
-      company: "Company",
-      contact: "Contact person",
-      email: "E-mail",
-      address: "Address",
-      phone: "Phone",
-      volume: "Expected monthly volume (kg)",
-      targetPrice: "Desired price / kg (€)",
-      comment: "Comment",
-      submit: "Send request",
-      ok: "Thanks! Your request has been sent."
-    },
-    footer: "© 2025 NÉORA — Paris"
-  },
 
-  ru: {
-    lang: "RU",
-    switchTo: "FR",
-    hero: "Пробная партия для HoReCa",
-    sub: "Спешиалти-обжарка для кофеен и ресторанов в Париже.",
-    benefits: "Почему мы?",
-    b1: "Стабильное качество, ясные профили",
-    b2: "Прозрачные B2B-цены",
-    b3: "Быстрая доставка по Парижу",
-    assortment: "Ассортимент",
-    assortmentText:
-      "Эспрессо и фильтр: Бразилия, Колумбия, Эфиопия, Гондурас, Кения, Перу, Бурунди, Сальвадор, Руанда. Профиль HoReCa.",
-    terms: "Условия",
-    termsList: [
-      "Гибкие тестовые объёмы (пилот для HoReCa).",
-      "Простые B2B-договоры, помесячная отчётность.",
-      "Доставка по Парижу 24–72 ч."
-    ],
-    rightLead:
-      "Если дегустационный набор понравился — оставьте заявку на закупку.",
-    rightTitle: "Как устроена партия?",
-    rightList: [
-      "Три пробные упаковки по 250 г (разные регионы/терруары), профили под эспрессо.",
-      "Обжарка в неделю отгрузки; у каждого лота есть профиль и дата.",
-      "Обратная связь: что понравилось/не понравилось — закрепим профиль для регулярных поставок."
-    ],
-    form: {
-      title: "Оставить заявку",
-      company: "Компания",
-      contact: "Контактное лицо",
-      email: "E-mail",
-      address: "Адрес",
-      phone: "Телефон",
-      volume: "Ожидаемый объём в месяц (кг)",
-      targetPrice: "Желаемая цена / кг (€)",
-      comment: "Комментарий",
-      submit: "Отправить заявку",
-      ok: "Спасибо! Ваша заявка отправлена."
+    brand: "NÉORA",
+    heroTitle: "Trial batch for HoReCa",
+    heroSubtitle: "Specialty coffee roasting for cafés and restaurants in Paris.",
+
+    sections: {
+      general: "1. Venue information",
+      currentCoffee: "2. Your current coffee",
+      priceBlock: "3. Price block",
+      volume: "4. Monthly volume",
+      collaboration: "5. Readiness to collaborate",
     },
-    footer: "© 2025 NÉORA — Париж"
-  }
+
+    general: {
+      cafeName: "Name of café / venue",
+      address: "Full address",
+      contactPerson: "Contact person (owner / manager)",
+      email: "Business email",
+      phone: "Phone",
+    },
+
+    current: {
+      supplierLabel: "Current supplier (brand / roaster)",
+      originLabel: "Origin usually used (country / region)",
+      roastProfileLabel: "Roast profile used",
+      roastOptions: {
+        espresso: "Espresso",
+        omni: "Omni",
+        filter: "Filter",
+      },
+    },
+
+    price: {
+      q1Title: "Question 1 — Usual purchase price (1 kg specialty)",
+      q1Name: "price_current",
+      q1Options: [
+        "Up to 22 €/kg",
+        "22–24 €/kg",
+        "24–26 €/kg",
+        "26–28 €/kg",
+        "28+ €/kg",
+      ],
+
+      q2Title: "Question 2 — Desired price for 83+ pts coffee (stable quality)",
+      q2Name: "price_expected",
+      q2Options: [
+        "≤ 23 €/kg",
+        "23–25 €/kg",
+        "25–27 €/kg",
+        "27–29 €/kg",
+        "Case-by-case discussion",
+      ],
+
+      q3Title: "Question 3 — Price that is too high (no purchase)",
+      q3Name: "price_too_high",
+      q3Options: ["24 €/kg", "26 €/kg", "28 €/kg", "30 €/kg"],
+    },
+
+    volume: {
+      title: "Monthly volume",
+      name: "volume_monthly",
+      options: [
+        "Up to 10 kg",
+        "10–20 kg",
+        "20–35 kg",
+        "35–50 kg",
+        "50–100 kg",
+        "100+ kg",
+      ],
+    },
+
+    collab: {
+      readyTitle: "Ready to test our coffee?",
+      readyName: "ready_to_test",
+      readyOptions: ["Yes", "Maybe", "No"],
+
+      contactTitle: "Preferred way to contact you",
+      contactName: "contact_method",
+      contactOptions: ["Phone", "Email", "WhatsApp", "In-person visit"],
+    },
+
+    submit: "Send request",
+
+    right: {
+      lotTitle: "Trial batch — what is it?",
+      lotBullets: [
+        "A tailored trial batch of specialty coffee for your venue.",
+        "Up to 3 references (espresso / filter) depending on your profile and volumes.",
+        "Transparent sourcing and roasting designed for Paris HoReCa.",
+      ],
+      assortmentTitle: "Our assortment",
+      assortmentText:
+        "Selection of specialty coffees (Brazil, Colombia, Honduras, Ethiopia depending on harvest) in espresso and filter profiles, tailored for restaurants.",
+      whyTitle: "Why us?",
+      whyBullets: [
+        "Stable and repeatable cup profile.",
+        "Simple B2B process: monthly invoicing, delivery in Paris.",
+        "Support when switching from your current roaster.",
+      ],
+      termsTitle: "Terms",
+      termsBullets: [
+        "Flexible trial volumes depending on your consumption.",
+        "Delivery in inner Paris within 24–72 h.",
+        "Support for espresso / filter calibration if needed.",
+      ],
+    },
+  },
 };
 
 export default function App() {
-  const [lang, setLang] = useState("fr");
-  const [ok, setOk] = useState(false);
-  const [sending, setSending] = useState(false);
-  const L = t[lang];
-
-  const pageUrl = useMemo(
-    () => (typeof window !== "undefined" ? window.location.href : ""),
-    []
-  );
-  const nextLang = (l) => (l === "fr" ? "en" : l === "en" ? "ru" : "fr");
-
-  async function onSubmit(e) {
-    e.preventDefault();
-    if (sending) return;
-    setSending(true);
-    try {
-      const form = e.currentTarget;
-      const data = Object.fromEntries(new FormData(form).entries());
-      const payload = {
-        ...data,
-        _subject: "NÉORA — HoReCa lead",
-        lang,
-        page: pageUrl
-      };
-
-      const resp = await fetch(FORMSPREE_ENDPOINT, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (resp.ok) {
-        setOk(true);
-        form.reset();
-        setTimeout(() => setOk(false), 4500);
-      } else {
-        alert("Submit error. Try again or email hello@neora.coffee");
-      }
-    } catch {
-      alert("Network error. Try again or email hello@neora.coffee");
-    } finally {
-      setSending(false);
-    }
-  }
+  const [lang, setLang] = useState<"fr" | "en">("fr");
+  const tr = t[lang];
 
   return (
-    <>
-      {/* Header */}
-      <header className="header">
-        <div className="container header-inner">
-          <div className="brand">
-            N<span className="accent">É</span>ORA
+    <div className="min-h-screen bg-neutral-50 text-neutral-900">
+      <header className="border-b border-neutral-200">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-5">
+          <div className="text-sm tracking-[0.35em] font-semibold">
+            {tr.brand}
           </div>
           <button
-            className="lang-btn"
-            onClick={() => setLang(nextLang(lang))}
-            title={L.switchTo}
+            type="button"
+            onClick={() => setLang(lang === "fr" ? "en" : "fr")}
+            className="text-xs font-medium tracking-wide border border-neutral-300 rounded-full px-3 py-1 hover:bg-neutral-100 transition"
           >
-            {L.lang}
+            {tr.lang} · {tr.switchTo}
           </button>
         </div>
       </header>
 
-      <main className="container">
-        {/* Hero grid */}
-        <section className="section grid">
-          {/* Left: form */}
-          <div>
-            <h1 className="h1">{L.hero}</h1>
-            <p className="sub">{L.sub}</p>
+      <main className="mx-auto max-w-5xl px-4 py-10">
+        <div className="mb-10 max-w-3xl">
+          <h1 className="mb-3 text-3xl font-semibold tracking-tight md:text-4xl">
+            {tr.heroTitle}
+          </h1>
+          <p className="text-sm md:text-base text-neutral-700">
+            {tr.heroSubtitle}
+          </p>
+        </div>
 
-            <form className="form" onSubmit={onSubmit}>
-              <input type="hidden" name="_subject" value="NÉORA — HoReCa lead" />
-              <input type="hidden" name="lang" value={lang} />
-              <input type="hidden" name="page" value={pageUrl} />
+        <div className="grid gap-10 md:grid-cols-[minmax(0,2fr)_minmax(0,1.1fr)]">
+          {/* LEFT: FORM */}
+          <form
+            method="POST"
+            action={FORMSPREE_ENDPOINT}
+            className="space-y-8 bg-white rounded-2xl shadow-sm border border-neutral-200 px-5 py-6 md:px-7 md:py-7"
+          >
+            {/* скрытое поле с языком */}
+            <input type="hidden" name="lang" value={lang} />
 
-              <input
-                className="input"
-                name="company"
-                required
-                placeholder={L.form.company}
-              />
-              <input
-                className="input"
-                name="contact"
-                required
-                placeholder={L.form.contact}
-              />
-              <input
-                className="input"
-                type="email"
-                name="email"
-                required
-                placeholder={L.form.email}
-              />
-              <input
-                className="input"
-                name="address"
-                placeholder={L.form.address}
-              />
-              <input className="input" name="phone" placeholder={L.form.phone} />
-              <input
-                className="input"
-                name="monthlyVolume"
-                placeholder={L.form.volume}
-              />
-              {/* Новое поле: желаемая цена за кг */}
-              <input
-                className="input"
-                name="targetPrice"
-                placeholder={L.form.targetPrice}
-              />
+            {/* 1. GENERAL */}
+            <section>
+              <h2 className="mb-4 text-sm font-semibold tracking-wide uppercase text-neutral-800">
+                {tr.sections.general}
+              </h2>
+              <div className="space-y-4">
+                <TextField
+                  label={tr.general.cafeName}
+                  name="cafe_name"
+                  required
+                />
+                <TextField
+                  label={tr.general.address}
+                  name="cafe_address"
+                  required
+                />
+                <TextField
+                  label={tr.general.contactPerson}
+                  name="contact_person"
+                  required
+                />
+                <TextField
+                  label={tr.general.email}
+                  name="email"
+                  type="email"
+                  required
+                />
+                <TextField
+                  label={tr.general.phone}
+                  name="phone"
+                  type="tel"
+                  required
+                />
+              </div>
+            </section>
 
-              <textarea
-                className="textarea"
-                name="comment"
-                placeholder={L.form.comment}
-              />
+            {/* 2. CURRENT COFFEE */}
+            <section>
+              <h2 className="mb-4 text-sm font-semibold tracking-wide uppercase text-neutral-800">
+                {tr.sections.currentCoffee}
+              </h2>
+              <div className="space-y-4">
+                <TextField
+                  label={tr.current.supplierLabel}
+                  name="current_supplier"
+                />
+                <TextField
+                  label={tr.current.originLabel}
+                  name="current_origin"
+                />
 
-              <button className="btn" disabled={sending}>
-                {sending ? "…" : L.form.submit}
+                <fieldset className="space-y-2">
+                  <legend className="mb-1 text-xs font-medium text-neutral-700">
+                    {tr.current.roastProfileLabel}
+                  </legend>
+                  <RadioGroup
+                    name="roast_profile"
+                    options={[
+                      tr.current.roastOptions.espresso,
+                      tr.current.roastOptions.omni,
+                      tr.current.roastOptions.filter,
+                    ]}
+                  />
+                </fieldset>
+              </div>
+            </section>
+
+            {/* 3. PRICE BLOCK */}
+            <section>
+              <h2 className="mb-4 text-sm font-semibold tracking-wide uppercase text-neutral-800">
+                {tr.sections.priceBlock}
+              </h2>
+
+              <div className="space-y-5">
+                {/* Q1 */}
+                <fieldset className="space-y-2">
+                  <legend className="mb-1 text-xs font-medium text-neutral-700">
+                    {tr.price.q1Title}
+                  </legend>
+                  <RadioGroup
+                    name={tr.price.q1Name}
+                    options={tr.price.q1Options}
+                  />
+                </fieldset>
+
+                {/* Q2 */}
+                <fieldset className="space-y-2">
+                  <legend className="mb-1 text-xs font-medium text-neutral-700">
+                    {tr.price.q2Title}
+                  </legend>
+                  <RadioGroup
+                    name={tr.price.q2Name}
+                    options={tr.price.q2Options}
+                  />
+                </fieldset>
+
+                {/* Q3 */}
+                <fieldset className="space-y-2">
+                  <legend className="mb-1 text-xs font-medium text-neutral-700">
+                    {tr.price.q3Title}
+                  </legend>
+                  <RadioGroup
+                    name={tr.price.q3Name}
+                    options={tr.price.q3Options}
+                  />
+                </fieldset>
+              </div>
+            </section>
+
+            {/* 4. VOLUME */}
+            <section>
+              <h2 className="mb-3 text-sm font-semibold tracking-wide uppercase text-neutral-800">
+                {tr.sections.volume}
+              </h2>
+              <fieldset className="space-y-2">
+                <legend className="sr-only">{tr.volume.title}</legend>
+                <RadioGroup
+                  name={tr.volume.name}
+                  options={tr.volume.options}
+                />
+              </fieldset>
+            </section>
+
+            {/* 5. COLLABORATION */}
+            <section>
+              <h2 className="mb-4 text-sm font-semibold tracking-wide uppercase text-neutral-800">
+                {tr.sections.collaboration}
+              </h2>
+
+              <div className="space-y-4">
+                <fieldset className="space-y-2">
+                  <legend className="mb-1 text-xs font-medium text-neutral-700">
+                    {tr.collab.readyTitle}
+                  </legend>
+                  <RadioGroup
+                    name={tr.collab.readyName}
+                    options={tr.collab.readyOptions}
+                  />
+                </fieldset>
+
+                <fieldset className="space-y-2">
+                  <legend className="mb-1 text-xs font-medium text-neutral-700">
+                    {tr.collab.contactTitle}
+                  </legend>
+                  <RadioGroup
+                    name={tr.collab.contactName}
+                    options={tr.collab.contactOptions}
+                  />
+                </fieldset>
+              </div>
+            </section>
+
+            {/* SUBMIT */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                className="w-full rounded-full bg-neutral-900 px-5 py-3 text-sm font-medium tracking-wide text-white hover:bg-black focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2 focus:ring-offset-white transition"
+              >
+                {tr.submit}
               </button>
+            </div>
+          </form>
 
-              {ok && <p className="ok">{L.form.ok}</p>}
-            </form>
-          </div>
+          {/* RIGHT: INFO BLOCK */}
+          <aside className="space-y-8 text-sm text-neutral-800">
+            <section>
+              <h3 className="mb-2 text-base font-semibold">
+                {tr.right.lotTitle}
+              </h3>
+              <ul className="space-y-1 list-disc pl-5">
+                {tr.right.lotBullets.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </section>
 
-          {/* Right: info card */}
-          <div className="card">
-            <p className="p" style={{ marginTop: 0 }}>
-              {L.rightLead}
-            </p>
-            <h3 className="h2" style={{ fontSize: 16, marginTop: 10 }}>
-              {L.rightTitle}
-            </h3>
-            <ul className="ul">
-              {L.rightList.map((x, i) => (
-                <li className="li" key={i}>
-                  {x}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
+            <section>
+              <h3 className="mb-2 text-base font-semibold">
+                {tr.right.assortmentTitle}
+              </h3>
+              <p className="text-sm text-neutral-700">
+                {tr.right.assortmentText}
+              </p>
+            </section>
 
-        {/* Benefits */}
-        <section className="section">
-          <h2 className="h2">{L.benefits}</h2>
-          <div className="cards">
-            <div className="card">{L.b1}</div>
-            <div className="card">{L.b2}</div>
-            <div className="card">{L.b3}</div>
-          </div>
-        </section>
+            <section>
+              <h3 className="mb-2 text-base font-semibold">
+                {tr.right.whyTitle}
+              </h3>
+              <ul className="space-y-1 list-disc pl-5">
+                {tr.right.whyBullets.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </section>
 
-        {/* Assortment */}
-        <section className="section">
-          <h2 className="h2">{L.assortment}</h2>
-          <p className="p">{L.assortmentText}</p>
-        </section>
-
-        {/* Terms */}
-        <section className="section">
-          <h2 className="h2">{L.terms}</h2>
-          <ul className="ul">
-            {L.termsList.map((x, i) => (
-              <li className="li" key={i}>
-                {x}
-              </li>
-            ))}
-          </ul>
-        </section>
+            <section>
+              <h3 className="mb-2 text-base font-semibold">
+                {tr.right.termsTitle}
+              </h3>
+              <ul className="space-y-1 list-disc pl-5">
+                {tr.right.termsBullets.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </section>
+          </aside>
+        </div>
       </main>
-
-      <footer className="footer">{L.footer}</footer>
-    </>
+    </div>
   );
 }
+
+/* ------------ МАЛЕНЬКИЕ ПОДКОМПОНЕНТЫ ---------------- */
+
+type TextFieldProps = {
+  label: string;
+  name: string;
+  type?: string;
+  required?: boolean;
+};
+
+function TextField({ label, name, type = "text", required }: TextFieldProps) {
+  return (
+    <label className="block text-xs font-medium text-neutral-700">
+      <span className="mb-1 inline-block">{label}</span>
+      <input
+        type={type}
+        name={name}
+        required={required}
+        className="mt-1 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm outline-none ring-0 transition placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
+      />
+    </label>
+  );
+}
+
+type RadioGroupProps = {
+  name: string;
+  options: string[];
+};
+
+function RadioGroup({ name, options }: RadioGroupProps) {
+  return (
+    <div className="space-y-1">
+      {options.map((opt) => (
+        <label
+          key={opt}
+          className="flex items-center gap-2 text-xs text-neutral-800"
+        >
+          <input
+            type="radio"
+            name={name}
+            value={opt}
+            className="h-3.5 w-3.5 border-neutral-400 text-neutral-900 focus:ring-neutral-900"
+          />
+          <span>{opt}</span>
+        </label>
+      ))}
+    </div>
+  );
+}
+
 

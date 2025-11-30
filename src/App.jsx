@@ -9,15 +9,15 @@ const t = {
     hero: "Lot d’essai pour HoReCa",
     sub: "Torréfaction de spécialité pour cafés et restaurants à Paris.",
     benefits: "Pourquoi nous ?",
-    b1: "Qualité stable, profils clairs",
-    b2: "Prix B2B transparents",
-    b3: "Livraison rapide sur Paris",
+    b1: "Café de spécialité 83+ pts, profils stables",
+    b2: "Tarifs B2B pensés pour la HoReCa",
+    b3: "Accompagnement pour choisir vos profils",
     assortment: "Assortiment",
     assortmentText:
-      "Espresso & filtre : Brésil, Colombie, Éthiopie, Honduras, Kenya, Pérou, Burundi, Salvador, Rwanda. Profil HoReCa.",
+      "Espresso & filtre : Brésil, Colombie, Éthiopie, Honduras, Kenya, Pérou, Burundi, Salvador, Rwanda. Profils adaptés à l’espresso, aux boissons lactées et au filtre pour la HoReCa.",
     terms: "Conditions",
     termsList: [
-      "Volumes d’essai flexibles (lot pilote HoReCa).",
+      "Lot pilote sans engagement lourd.",
       "Contrats B2B simples, facturation mensuelle.",
       "Livraison sur Paris intra-muros sous 24–72 h."
     ],
@@ -95,15 +95,15 @@ const t = {
     hero: "Trial batch for HoReCa",
     sub: "Specialty roasting for cafés & restaurants in Paris.",
     benefits: "Why us?",
-    b1: "Consistent quality & clear profiles",
-    b2: "Transparent B2B pricing",
-    b3: "Fast delivery in Paris",
+    b1: "83+ pts specialty, consistent profiles",
+    b2: "B2B pricing tuned for HoReCa",
+    b3: "Help in selecting profiles for your bar",
     assortment: "Assortment",
     assortmentText:
-      "Espresso & filter: Brazil, Colombia, Ethiopia, Honduras, Kenya, Peru, Burundi, El Salvador, Rwanda. HoReCa-tuned.",
+      "Espresso & filter: Brazil, Colombia, Ethiopia, Honduras, Kenya, Peru, Burundi, El Salvador, Rwanda. Profiles tuned for espresso, milk drinks and filter in HoReCa.",
     terms: "Terms",
     termsList: [
-      "Flexible pilot volumes (HoReCa trial).",
+      "Pilot lot with no heavy commitment.",
       "Simple B2B contracts, monthly invoicing.",
       "Paris delivery within 24–72 h."
     ],
@@ -179,15 +179,15 @@ const t = {
     hero: "Пробная партия для HoReCa",
     sub: "Спешиалти-обжарка для кофеен и ресторанов в Париже.",
     benefits: "Почему мы?",
-    b1: "Стабильное качество, ясные профили",
-    b2: "Прозрачные B2B-цены",
-    b3: "Быстрая доставка по Парижу",
+    b1: "Спешиалти 83+ pts, стабильные профили",
+    b2: "B2B-фокус: цены под HoReCa",
+    b3: "Помогаем подобрать профиль под вашу кофейню",
     assortment: "Ассортимент",
     assortmentText:
-      "Эспрессо и фильтр: Бразилия, Колумбия, Эфиопия, Гондурас, Кения, Перу, Бурунди, Сальвадор, Руанда. Профиль HoReCa.",
+      "Эспрессо и фильтр: Бразилия, Колумбия, Эфиопия, Гондурас, Кения, Перу, Бурунди, Сальвадор, Руанда. Профили под эспрессо, напитки с молоком и фильтр для HoReCa.",
     terms: "Условия",
     termsList: [
-      "Гибкие тестовые объёмы (пилот для HoReCa).",
+      "Пилотный лот без жёстких обязательств.",
       "Простые B2B-договоры, помесячная отчётность.",
       "Доставка по Парижу 24–72 ч."
     ],
@@ -571,18 +571,7 @@ export default function App() {
           <h2 className="h2">{L.assortment}</h2>
           <p className="p">{L.assortmentText}</p>
         </section>
-
-        {/* Terms */}
-        <section className="section">
-          <h2 className="h2">{L.terms}</h2>
-          <ul className="ul">
-            {L.termsList.map((x, i) => (
-              <li className="li" key={i}>
-                {x}
-              </li>
-            ))}
-          </ul>
-        </section>
+        {/* Блок "Условия" визуально убран */}
       </main>
 
       <footer className="footer">{L.footer}</footer>

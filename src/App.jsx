@@ -42,6 +42,8 @@ const t = {
       comment: "Commentaire",
       submit: "Envoyer la demande",
       ok: "Merci ! Votre demande a été envoyée.",
+      // блоки
+      generalTitle: "1. Informations générales",
       // блок 2 — текущий кофе
       currentCoffeeTitle: "2. Informations sur votre café actuel",
       currentSupplier: "Torréfacteur / marque actuelle",
@@ -124,6 +126,8 @@ const t = {
       comment: "Comment",
       submit: "Send request",
       ok: "Thanks! Your request has been sent.",
+      // blocks
+      generalTitle: "1. General information",
       // block 2 — current coffee
       currentCoffeeTitle: "2. Current coffee details",
       currentSupplier: "Current supplier / roaster (brand)",
@@ -207,13 +211,15 @@ const t = {
       comment: "Комментарий",
       submit: "Отправить заявку",
       ok: "Спасибо! Ваша заявка отправлена.",
+      // блоки
+      generalTitle: "1. Общая информация",
       // блок 2 — текущий кофе
       currentCoffeeTitle: "2. Сведения о текущем кофе",
       currentSupplier: "Текущий поставщик (бренд / обжарщик)",
       currentOrigin: "Страна / регион, который вы обычно используете",
       currentProfile: "Профиль обжарки (espresso / omni / filtre)",
       // блок 3 — ценовой
-      priceBlockTitle: "3. ЦЕНОВОЙ БЛОК",
+      priceBlockTitle: "3. Ценовой блок",
       priceQ1:
         "По какой цене вы обычно закупаете 1 кг спешлти-кофе?",
       priceQ1Options: [
@@ -333,7 +339,14 @@ export default function App() {
               <input type="hidden" name="lang" value={lang} />
               <input type="hidden" name="page" value={pageUrl} />
 
-              {/* 1. Базовые данные о компании */}
+              {/* 1. Общая информация */}
+              <p
+                className="p"
+                style={{ marginTop: 16, marginBottom: 4, fontWeight: 600 }}
+              >
+                {L.form.generalTitle}
+              </p>
+
               <input
                 className="input"
                 name="company"
@@ -361,7 +374,10 @@ export default function App() {
               <input className="input" name="phone" placeholder={L.form.phone} />
 
               {/* 2. Сведения о текущем кофе */}
-              <p className="p" style={{ marginTop: 16, marginBottom: 4 }}>
+              <p
+                className="p"
+                style={{ marginTop: 16, marginBottom: 4, fontWeight: 600 }}
+              >
                 {L.form.currentCoffeeTitle}
               </p>
               <input
@@ -381,7 +397,10 @@ export default function App() {
               />
 
               {/* 3. Ценовой блок */}
-              <p className="p" style={{ marginTop: 16, marginBottom: 4 }}>
+              <p
+                className="p"
+                style={{ marginTop: 16, marginBottom: 4, fontWeight: 600 }}
+              >
                 {L.form.priceBlockTitle}
               </p>
 
@@ -447,7 +466,10 @@ export default function App() {
               </select>
 
               {/* 4. Месячный объём */}
-              <p className="p" style={{ marginTop: 16, marginBottom: 4 }}>
+              <p
+                className="p"
+                style={{ marginTop: 16, marginBottom: 4, fontWeight: 600 }}
+              >
                 {L.form.volumeTitle}
               </p>
               <p className="p" style={{ margin: "0 0 6px" }}>
@@ -464,10 +486,27 @@ export default function App() {
                 ))}
               </select>
 
-              {/* 5. Готовность к сотрудничеству — только способ связи */}
-              <p className="p" style={{ marginTop: 16, marginBottom: 4 }}>
+              {/* 5. Готовность к сотрудничеству */}
+              <p
+                className="p"
+                style={{ marginTop: 16, marginBottom: 4, fontWeight: 600 }}
+              >
                 {L.form.cooperationTitle}
               </p>
+              <p className="p" style={{ margin: "0 0 6px" }}>
+                {L.form.cooperationReadyLabel}
+              </p>
+              <select className="input" name="readyToTest" defaultValue="">
+                <option value="" disabled>
+                  {L.form.selectPlaceholder}
+                </option>
+                {L.form.cooperationReadyOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+
               <p className="p" style={{ margin: "10px 0 6px" }}>
                 {L.form.preferredContactLabel}
               </p>

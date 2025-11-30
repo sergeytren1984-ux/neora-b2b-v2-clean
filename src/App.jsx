@@ -18,7 +18,6 @@ const t = {
       collaboration: "5. Disponibilité / Collaboration",
     },
 
-    // 1. Общая информация
     general: {
       cafeName: "Nom du café / établissement",
       address: "Adresse complète",
@@ -27,7 +26,6 @@ const t = {
       phone: "Téléphone",
     },
 
-    // 2. Текущий кофе
     current: {
       supplierLabel: "Fournisseur actuel (marque / torréfacteur)",
       originLabel: "Origine utilisée habituellement (pays / région)",
@@ -39,7 +37,6 @@ const t = {
       },
     },
 
-    // 3. Ценовой блок
     price: {
       q1Title: "Prix d’achat habituel (1 kg spécialité)",
       q1Name: "price_current",
@@ -66,7 +63,6 @@ const t = {
       q3Options: ["24 €/kg", "26 €/kg", "28 €/kg", "30 €/kg"],
     },
 
-    // 4. Объём
     volume: {
       title: "Volume mensuel",
       name: "volume_monthly",
@@ -80,7 +76,6 @@ const t = {
       ],
     },
 
-    // 5. Готовность / контакт
     collab: {
       readyTitle: "Prêt à tester notre café ?",
       readyName: "ready_to_test",
@@ -93,7 +88,6 @@ const t = {
 
     submit: "Envoyer la demande",
 
-    // Правый инфоблок — как в старом сайте
     right: {
       introTitle: "Si l’échantillon vous plaît, laissez une demande d’achat.",
       lotTitle: "Comment est composé le lot ?",
@@ -213,7 +207,7 @@ const t = {
       lotBullets: [
         "Three 250 g trial bags (different origins / terroirs), espresso profiles.",
         "Roasted in the week of shipping; each lot with profile and roast date.",
-        "Feedback session to fix the profile for regular deliveries.",
+        "Feedback session to lock the profile for regular deliveries.",
       ],
       assortmentTitle: "Our assortment",
       assortmentText:
@@ -241,7 +235,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#f5f5f5] px-3 py-6 md:px-4 md:py-10">
       <div className="mx-auto max-w-5xl rounded-[32px] bg-white shadow-md border border-neutral-200 px-5 py-6 md:px-10 md:py-8">
-        {/* HEADER ВНУТРИ КАРТОЧКИ */}
+        {/* Шапка */}
         <header className="mb-6 flex items-center justify-between">
           <div className="text-lg font-semibold tracking-[0.35em]">
             N<span className="text-[#C58A44]">É</span>ORA
@@ -255,230 +249,232 @@ export default function App() {
           </button>
         </header>
 
-        {/* HERO */}
-        <div className="mb-7 max-w-xl">
-          <h1 className="mb-2 text-2xl font-semibold tracking-tight md:text-3xl">
-            {tr.heroTitle}
-          </h1>
-          <p className="text-sm md:text-[15px] text-neutral-700">
-            {tr.heroSubtitle}
-          </p>
-        </div>
+        {/* Заголовок */}
+        <main>
+          <div className="mb-7 max-w-xl">
+            <h1 className="mb-2 text-2xl font-semibold tracking-tight md:text-3xl">
+              {tr.heroTitle}
+            </h1>
+            <p className="text-sm md:text-[15px] text-neutral-700">
+              {tr.heroSubtitle}
+            </p>
+          </div>
 
-        {/* ДВЕ КОЛОНКИ КАК В СТАРОМ МАКЕТЕ */}
-        <div className="grid gap-8 md:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
-          {/* ЛЕВАЯ КОЛОНКА — ФОРМА */}
-          <form
-            method="POST"
-            action={FORMSPREE_ENDPOINT}
-            className="space-y-6"
-          >
-            <input type="hidden" name="lang" value={lang} />
+          {/* Две колонки — форма + правый блок */}
+          <div className="grid gap-8 md:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
+            {/* Левая колонка — форма */}
+            <form
+              method="POST"
+              action={FORMSPREE_ENDPOINT}
+              className="space-y-6"
+            >
+              <input type="hidden" name="lang" value={lang} />
 
-            {/* 1. ОБЩАЯ ИНФА */}
-            <section className="space-y-3">
-              <h2 className="text-sm font-semibold text-neutral-900">
-                {tr.sections.general}
-              </h2>
-              <div className="space-y-3">
-                <TextField
-                  label={tr.general.cafeName}
-                  name="cafe_name"
-                  required
-                />
-                <TextField
-                  label={tr.general.contactPerson}
-                  name="contact_person"
-                  required
-                />
-                <TextField
-                  label={tr.general.email}
-                  name="email"
-                  type="email"
-                  required
-                />
-                <TextField
-                  label={tr.general.address}
-                  name="cafe_address"
-                  required
-                />
-                <TextField
-                  label={tr.general.phone}
-                  name="phone"
-                  type="tel"
-                  required
-                />
-              </div>
-            </section>
-
-            {/* 2. ТЕКУЩИЙ КОФЕ */}
-            <section className="space-y-3 pt-1 border-t border-neutral-200">
-              <h2 className="pt-4 text-sm font-semibold text-neutral-900">
-                {tr.sections.currentCoffee}
-              </h2>
-              <div className="space-y-3">
-                <TextField
-                  label={tr.current.supplierLabel}
-                  name="current_supplier"
-                />
-                <TextField
-                  label={tr.current.originLabel}
-                  name="current_origin"
-                />
-                <fieldset className="space-y-2">
-                  <legend className="text-xs font-medium text-neutral-700">
-                    {tr.current.roastProfileLabel}
-                  </legend>
-                  <RadioGroup
-                    name="roast_profile"
-                    options={[
-                      tr.current.roastOptions.espresso,
-                      tr.current.roastOptions.omni,
-                      tr.current.roastOptions.filter,
-                    ]}
+              {/* 1. Общая информация */}
+              <section className="space-y-3">
+                <h2 className="text-sm font-semibold text-neutral-900">
+                  {tr.sections.general}
+                </h2>
+                <div className="space-y-3">
+                  <TextField
+                    label={tr.general.cafeName}
+                    name="cafe_name"
+                    required
                   />
-                </fieldset>
-              </div>
-            </section>
+                  <TextField
+                    label={tr.general.contactPerson}
+                    name="contact_person"
+                    required
+                  />
+                  <TextField
+                    label={tr.general.email}
+                    name="email"
+                    type="email"
+                    required
+                  />
+                  <TextField
+                    label={tr.general.address}
+                    name="cafe_address"
+                    required
+                  />
+                  <TextField
+                    label={tr.general.phone}
+                    name="phone"
+                    type="tel"
+                    required
+                  />
+                </div>
+              </section>
 
-            {/* 3. ЦЕНОВОЙ БЛОК */}
-            <section className="space-y-3 pt-1 border-t border-neutral-200">
-              <h2 className="pt-4 text-sm font-semibold text-neutral-900">
-                {tr.sections.priceBlock}
-              </h2>
+              {/* 2. Текущий кофе */}
+              <section className="space-y-3 pt-1 border-t border-neutral-200">
+                <h2 className="pt-4 text-sm font-semibold text-neutral-900">
+                  {tr.sections.currentCoffee}
+                </h2>
+                <div className="space-y-3">
+                  <TextField
+                    label={tr.current.supplierLabel}
+                    name="current_supplier"
+                  />
+                  <TextField
+                    label={tr.current.originLabel}
+                    name="current_origin"
+                  />
+                  <fieldset className="space-y-2">
+                    <legend className="text-xs font-medium text-neutral-700">
+                      {tr.current.roastProfileLabel}
+                    </legend>
+                    <RadioGroup
+                      name="roast_profile"
+                      options={[
+                        tr.current.roastOptions.espresso,
+                        tr.current.roastOptions.omni,
+                        tr.current.roastOptions.filter,
+                      ]}
+                    />
+                  </fieldset>
+                </div>
+              </section>
 
-              <fieldset className="space-y-2">
-                <legend className="text-xs font-medium text-neutral-700">
-                  {tr.price.q1Title}
-                </legend>
-                <RadioGroup
-                  name={tr.price.q1Name}
-                  options={tr.price.q1Options}
-                />
-              </fieldset>
+              {/* 3. Ценовой блок */}
+              <section className="space-y-3 pt-1 border-t border-neutral-200">
+                <h2 className="pt-4 text-sm font-semibold text-neutral-900">
+                  {tr.sections.priceBlock}
+                </h2>
 
-              <fieldset className="space-y-2">
-                <legend className="text-xs font-medium text-neutral-700">
-                  {tr.price.q2Title}
-                </legend>
-                <RadioGroup
-                  name={tr.price.q2Name}
-                  options={tr.price.q2Options}
-                />
-              </fieldset>
-
-              <fieldset className="space-y-2">
-                <legend className="text-xs font-medium text-neutral-700">
-                  {tr.price.q3Title}
-                </legend>
-                <RadioGroup
-                  name={tr.price.q3Name}
-                  options={tr.price.q3Options}
-                />
-              </fieldset>
-            </section>
-
-            {/* 4. ОБЪЁМ */}
-            <section className="space-y-3 pt-1 border-t border-neutral-200">
-              <h2 className="pt-4 text-sm font-semibold text-neutral-900">
-                {tr.sections.volume}
-              </h2>
-              <fieldset className="space-y-2">
-                <legend className="sr-only">{tr.volume.title}</legend>
-                <RadioGroup
-                  name={tr.volume.name}
-                  options={tr.volume.options}
-                />
-              </fieldset>
-            </section>
-
-            {/* 5. ГОТОВНОСТЬ / КОНТАКТ */}
-            <section className="space-y-4 pt-1 border-t border-neutral-200">
-              <h2 className="pt-4 text-sm font-semibold text-neutral-900">
-                {tr.sections.collaboration}
-              </h2>
-              <div className="space-y-3">
                 <fieldset className="space-y-2">
                   <legend className="text-xs font-medium text-neutral-700">
-                    {tr.collab.readyTitle}
+                    {tr.price.q1Title}
                   </legend>
                   <RadioGroup
-                    name={tr.collab.readyName}
-                    options={tr.collab.readyOptions}
+                    name={tr.price.q1Name}
+                    options={tr.price.q1Options}
                   />
                 </fieldset>
 
                 <fieldset className="space-y-2">
                   <legend className="text-xs font-medium text-neutral-700">
-                    {tr.collab.contactTitle}
+                    {tr.price.q2Title}
                   </legend>
                   <RadioGroup
-                    name={tr.collab.contactName}
-                    options={tr.collab.contactOptions}
+                    name={tr.price.q2Name}
+                    options={tr.price.q2Options}
                   />
                 </fieldset>
+
+                <fieldset className="space-y-2">
+                  <legend className="text-xs font-medium text-neutral-700">
+                    {tr.price.q3Title}
+                  </legend>
+                  <RadioGroup
+                    name={tr.price.q3Name}
+                    options={tr.price.q3Options}
+                  />
+                </fieldset>
+              </section>
+
+              {/* 4. Объём */}
+              <section className="space-y-3 pt-1 border-t border-neutral-200">
+                <h2 className="pt-4 text-sm font-semibold text-neutral-900">
+                  {tr.sections.volume}
+                </h2>
+                <fieldset className="space-y-2">
+                  <legend className="sr-only">{tr.volume.title}</legend>
+                  <RadioGroup
+                    name={tr.volume.name}
+                    options={tr.volume.options}
+                  />
+                </fieldset>
+              </section>
+
+              {/* 5. Готовность / контакт */}
+              <section className="space-y-4 pt-1 border-t border-neutral-200">
+                <h2 className="pt-4 text-sm font-semibold text-neutral-900">
+                  {tr.sections.collaboration}
+                </h2>
+                <div className="space-y-3">
+                  <fieldset className="space-y-2">
+                    <legend className="text-xs font-medium text-neutral-700">
+                      {tr.collab.readyTitle}
+                    </legend>
+                    <RadioGroup
+                      name={tr.collab.readyName}
+                      options={tr.collab.readyOptions}
+                    />
+                  </fieldset>
+
+                  <fieldset className="space-y-2">
+                    <legend className="text-xs font-medium text-neutral-700">
+                      {tr.collab.contactTitle}
+                    </legend>
+                    <RadioGroup
+                      name={tr.collab.contactName}
+                      options={tr.collab.contactOptions}
+                    />
+                  </fieldset>
+                </div>
+              </section>
+
+              {/* Кнопка */}
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  className="w-full rounded-full bg-[#C58A44] px-5 py-3 text-sm font-semibold tracking-wide text-white hover:bg-[#b5783b] focus:outline-none focus:ring-2 focus:ring-[#C58A44] focus:ring-offset-2 focus:ring-offset-white transition"
+                >
+                  {tr.submit}
+                </button>
               </div>
-            </section>
+            </form>
 
-            {/* КНОПКА — ЗОЛОТАЯ, КАК В СТАРОМ МАКЕТЕ */}
-            <div className="pt-2">
-              <button
-                type="submit"
-                className="w-full rounded-full bg-[#C58A44] px-5 py-3 text-sm font-semibold tracking-wide text-white hover:bg-[#b5783b] focus:outline-none focus:ring-2 focus:ring-[#C58A44] focus:ring-offset-2 focus:ring-offset-white transition"
-              >
-                {tr.submit}
-              </button>
-            </div>
-          </form>
+            {/* Правая колонка — инфоблок */}
+            <aside className="rounded-3xl border border-neutral-200 bg-neutral-50 px-4 py-4 md:px-6 md:py-6 text-sm text-neutral-800">
+              <section className="mb-4">
+                <p className="text-xs text-neutral-700 mb-3">
+                  {tr.right.introTitle}
+                </p>
+                <h3 className="mb-2 text-sm font-semibold">
+                  {tr.right.lotTitle}
+                </h3>
+                <ul className="space-y-1 list-disc pl-5">
+                  {tr.right.lotBullets.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </section>
 
-          {/* ПРАВАЯ КОЛОНКА — ИНФОБЛОК */}
-          <aside className="rounded-3xl border border-neutral-200 bg-neutral-50 px-4 py-4 md:px-6 md:py-6 text-sm text-neutral-800">
-            <section className="mb-4">
-              <p className="text-xs text-neutral-700 mb-3">
-                {tr.right.introTitle}
-              </p>
-              <h3 className="mb-2 text-sm font-semibold">
-                {tr.right.lotTitle}
-              </h3>
-              <ul className="space-y-1 list-disc pl-5">
-                {tr.right.lotBullets.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </section>
+              <section className="mb-4">
+                <h3 className="mb-2 text-sm font-semibold">
+                  {tr.right.assortmentTitle}
+                </h3>
+                <p className="text-xs text-neutral-700">
+                  {tr.right.assortmentText}
+                </p>
+              </section>
 
-            <section className="mb-4">
-              <h3 className="mb-2 text-sm font-semibold">
-                {tr.right.assortmentTitle}
-              </h3>
-              <p className="text-xs text-neutral-700">
-                {tr.right.assortmentText}
-              </p>
-            </section>
+              <section className="mb-4">
+                <h3 className="mb-2 text-sm font-semibold">
+                  {tr.right.whyTitle}
+                </h3>
+                <ul className="space-y-1 list-disc pl-5">
+                  {tr.right.whyBullets.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </section>
 
-            <section className="mb-4">
-              <h3 className="mb-2 text-sm font-semibold">
-                {tr.right.whyTitle}
-              </h3>
-              <ul className="space-y-1 list-disc pl-5">
-                {tr.right.whyBullets.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </section>
-
-            <section>
-              <h3 className="mb-2 text-sm font-semibold">
-                {tr.right.termsTitle}
-              </h3>
-              <ul className="space-y-1 list-disc pl-5">
-                {tr.right.termsBullets.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </section>
-          </aside>
-        </div>
+              <section>
+                <h3 className="mb-2 text-sm font-semibold">
+                  {tr.right.termsTitle}
+                </h3>
+                <ul className="space-y-1 list-disc pl-5">
+                  {tr.right.termsBullets.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </section>
+            </aside>
+          </div>
+        </main>
       </div>
     </div>
   );

@@ -1,190 +1,184 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import "./App.css";
 
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/mrbonpno";
 
-const t = {
-  fr: {
-    lang: "FR",
-    switchTo: "EN",
-    hero: "Lot d’essai pour HoReCa",
-    sub: "Torréfaction de spécialité pour cafés et restaurants à Paris.",
-    cta: "Envoyer la demande",
-    benefits: "Pourquoi nous ?",
-    b1: "Qualité stable, profils clairs",
-    b2: "Prix B2B transparents",
-    b3: "Livraison rapide sur Paris",
-    conditions: "Conditions",
-    conditionsList: [
-      "Volumes d’essai flexibles selon votre débit.",
-      "Livraison sur Paris intra-muros sous 24–72 h.",
-      "Support pour calibrage espresso / filtre si besoin."
-    ],
-    form: {
-      company: "Nom du café / établissement",
-      contact: "Personne de contact",
-      email: "Email professionnel",
-      phone: "Téléphone",
-      address: "Adresse complète",
-      volume: "Volume mensuel (kg)",
-      priceTarget: "Prix cible pour 1 kg café spécialité (83+ pts)",
-      currentRoaster: "Fournisseur actuel (marque / torréfacteur)",
-      origin: "Origine utilisée habituellement (pays / région)",
-      profile: "Profil de torréfaction utilisé",
-      espresso: "Espresso",
-      omni: "Omni",
-      filtre: "Filtre",
-      collab: "Prêt à tester notre café ?",
-      yes: "Oui",
-      maybe: "Peut-être",
-      no: "Non",
-      contactPref: "Mode de contact préféré",
-      contactTel: "Téléphone",
-      contactMail: "Email",
-      contactWA: "WhatsApp",
-      contactVisit: "Visite en personne",
-      submit: "Envoyer"
-    }
-  }
-};
-
-function Input({ label, name, required = false, type = "text" }) {
-  return (
-    <label className="block mb-4 text-sm text-neutral-800">
-      {label}
-      <input
-        type={type}
-        name={name}
-        required={required}
-        className="mt-0.5 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm outline-none ring-0 transition placeholder:text-neutral-400"
-      />
-    </label>
-  );
-}
-
-function RadioGroup({ name, options }) {
-  return (
-    <div className="flex flex-col gap-1 mb-4">
-      {options.map((opt) => (
-        <label
-          key={opt}
-          className="flex items-center gap-2 text-xs text-neutral-800"
-        >
-          <input
-            type="radio"
-            name={name}
-            value={opt}
-            className="h-3.5 w-3.5 border-neutral-400 text-[#C58A44] focus:ring-[#C58A44]"
-          />
-          <span>{opt}</span>
-        </label>
-      ))}
-    </div>
-  );
-}
-
-export default function App() {
+function App() {
   const [lang, setLang] = useState("fr");
-  const tr = t[lang];
+  const t = {
+    fr: {
+      switchLang: "EN",
+      logo: "NÉORA",
+      hero: "Lot d’essai pour HoReCa",
+      sub: "Torréfaction de spécialité pour cafés et restaurants à Paris.",
+      form: {
+        general: "1. Informations générales sur l’établissement",
+        cafeName: "Nom du café / établissement",
+        contact: "Personne de contact (propriétaire / manager)",
+        email: "Email professionnel",
+        phone: "Téléphone",
+        address: "Adresse complète",
+
+        coffee: "2. Informations sur votre café actuel",
+        supplier: "Fournisseur actuel (marque / torréfacteur)",
+        origin: "Origine utilisée habituellement (pays / région)",
+        profile: "Profil de torréfaction utilisé",
+        espresso: "Espresso",
+        omni: "Omni",
+        filter: "Filtre",
+
+        pricing: "3. Bloc Prix",
+        priceCurrent: "Prix d’achat habituel (1 kg spécialité)",
+        opt1: "Jusqu’à 22 €",
+        opt2: "22–24 €",
+        opt3: "24–26 €",
+        opt4: "26–28 €",
+        opt5: "28+ €/kg",
+        priceTarget: "Prix souhaité pour un café 83+ pts (qualité stable)",
+        p1: "≤ 23 €",
+        p2: "23–25 €",
+        p3: "25–27 €",
+        p4: "27–29 €",
+        p5: "À étudier individuellement",
+        priceTooHigh: "Prix jugé trop élevé (achat impossible)",
+        t1: "≥24 €",
+        t2: "26 €",
+        t3: "28 €",
+        t4: "30 € /kg",
+
+        volume: "4. Volume mensuel",
+        volumeInput: "Volume mensuel (kg)",
+        volumeChoices: ["Jusqu’à 10 kg", "10–20 kg", "20–35 kg", "35–50 kg", "50–100 kg", "100+ kg"],
+
+        availability: "5. Disponibilité / Collaboration",
+        ready: "Prêt à tester notre café ?",
+        yes: "Oui",
+        maybe: "Peut-être",
+        no: "Non",
+        contactMode: "Mode de contact préféré",
+        phoneC: "Téléphone",
+        emailC: "Email",
+        whatsapp: "WhatsApp",
+        visit: "Visite en personne",
+        submit: "Envoyer"
+      },
+      right: {
+        lot: "Comment est composé le lot ?",
+        lotLines: [
+          "Trois paquets d’essai de 250 g (origines / terroirs variés), profils espresso.",
+          "Torréfaction la semaine de l’envoi ; chaque lot avec profil et date.",
+          "Retour d’expérience : ce qui a plu / moins plu — on fixe ensuite le profil pour les livraisons régulières."
+        ],
+        assortment: "Notre assortiment",
+        origins: "Cafés de spécialité (Brésil, Colombie, Honduras, Éthiopie selon récolte) en profils espresso et filtre, pensés pour la restauration.",
+        why: "Pourquoi nous ?",
+        whyList: [
+          "Qualité stable, profils clairs.",
+          "Prix B2B transparents.",
+          "Livraison rapide sur Paris."
+        ],
+        terms: "Conditions",
+        termsList: [
+          "Volumes d’essai flexibles selon votre débit.",
+          "Livraison sur Paris intra-muros sous 24–72 h.",
+          "Support pour calibrage espresso / filtre si besoin."
+        ]
+      }
+    }
+  };
+
+  const f = t[lang].form;
+  const r = t[lang].right;
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] px-3 py-6 md:px-10 md:py-10">
-      <div className="mx-auto max-w-4xl rounded-[32px] bg-white shadow-md border border-neutral-200 px-5 py-6 md:px-10 md:py-8">
-        <header className="mb-6 flex items-center justify-between">
-          <div className="text-lg font-semibold tracking-[-0.35em]">
-            N<span className="text-[#C58A44]">É</span>ORA
-          </div>
-          <button
-            type="button"
-            onClick={() => setLang(lang === "fr" ? "en" : "fr")}
-            className="rounded-full border border-neutral-300 px-3 py-1 text-xs font-medium tracking-wide hover:bg-neutral-100 transition"
-          >
-            {tr.lang} · {tr.switchTo}
-          </button>
-        </header>
+    <div className="container">
+      <header>
+        <div className="logo">{t[lang].logo}</div>
+        <div className="lang-switch" onClick={() => setLang("fr")}>{t[lang].switchLang}</div>
+      </header>
+      <main>
+        <h1>{t[lang].hero}</h1>
+        <p className="subtitle">{t[lang].sub}</p>
+        <div className="grid">
+          <form action={FORMSPREE_ENDPOINT} method="POST">
+            <h2>{f.general}</h2>
+            <input name="cafeName" placeholder={f.cafeName} required />
+            <input name="email" placeholder={f.email} required />
+            <input name="address" placeholder={f.address} required />
+            <input name="contact" placeholder={f.contact} required />
+            <input name="phone" placeholder={f.phone} required />
 
-        <main>
-          <h1 className="mb-2 text-2xl font-semibold tracking-tight md:text-3xl">
-            {tr.hero}
-          </h1>
-          <p className="mb-6 text-sm text-neutral-700 md:text-[15px]">
-            {tr.sub}
-          </p>
-
-          <form
-            method="POST"
-            action={FORMSPREE_ENDPOINT}
-            className="grid grid-cols-1 gap-5 md:grid-cols-2"
-          >
-            <Input label={tr.form.company} name="company" required />
-            <Input label={tr.form.contact} name="contact" required />
-            <Input label={tr.form.email} name="email" required type="email" />
-            <Input label={tr.form.phone} name="phone" required />
-            <Input label={tr.form.address} name="address" required />
-            <Input label={tr.form.volume} name="volume" required />
-            <Input label={tr.form.priceTarget} name="priceTarget" required />
-            <Input label={tr.form.currentRoaster} name="currentRoaster" />
-            <Input label={tr.form.origin} name="origin" />
-
-            <div>
-              <p className="mb-1 text-sm font-medium text-neutral-800">
-                {tr.form.profile}
-              </p>
-              <RadioGroup
-                name="roastProfile"
-                options={[tr.form.espresso, tr.form.omni, tr.form.filtre]}
-              />
+            <h2>{f.coffee}</h2>
+            <input name="supplier" placeholder={f.supplier} />
+            <input name="origin" placeholder={f.origin} />
+            <div className="radio-group">
+              <label>{f.profile}</label>
+              <label><input type="radio" name="profile" value="Espresso" /> {f.espresso}</label>
+              <label><input type="radio" name="profile" value="Omni" /> {f.omni}</label>
+              <label><input type="radio" name="profile" value="Filtre" /> {f.filter}</label>
             </div>
 
-            <div>
-              <p className="mb-1 text-sm font-medium text-neutral-800">
-                {tr.form.collab}
-              </p>
-              <RadioGroup
-                name="collab"
-                options={[tr.form.yes, tr.form.maybe, tr.form.no]}
-              />
-            </div>
+            <h2>{f.pricing}</h2>
+            <label>{f.priceCurrent}</label>
+            <select name="priceCurrent">
+              <option>{f.opt1}</option>
+              <option>{f.opt2}</option>
+              <option>{f.opt3}</option>
+              <option>{f.opt4}</option>
+              <option>{f.opt5}</option>
+            </select>
 
-            <div>
-              <p className="mb-1 text-sm font-medium text-neutral-800">
-                {tr.form.contactPref}
-              </p>
-              <RadioGroup
-                name="contactPref"
-                options={[tr.form.contactTel, tr.form.contactMail, tr.form.contactWA, tr.form.contactVisit]}
-              />
-            </div>
+            <label>{f.priceTarget}</label>
+            <select name="priceTarget">
+              <option>{f.p1}</option>
+              <option>{f.p2}</option>
+              <option>{f.p3}</option>
+              <option>{f.p4}</option>
+              <option>{f.p5}</option>
+            </select>
 
-            <div className="md:col-span-2">
-              <button
-                type="submit"
-                className="w-full rounded-xl bg-[#C58A44] px-4 py-3 text-center text-white transition hover:bg-[#b77d3c]"
-              >
-                {tr.form.submit}
-              </button>
-            </div>
+            <label>{f.priceTooHigh}</label>
+            <select name="priceTooHigh">
+              <option>{f.t1}</option>
+              <option>{f.t2}</option>
+              <option>{f.t3}</option>
+              <option>{f.t4}</option>
+            </select>
+
+            <h2>{f.volume}</h2>
+            <select name="volume">
+              {f.volumeChoices.map((v, i) => <option key={i}>{v}</option>)}
+            </select>
+
+            <h2>{f.availability}</h2>
+            <p>{f.ready}</p>
+            <label><input type="radio" name="ready" value="yes" /> {f.yes}</label>
+            <label><input type="radio" name="ready" value="maybe" /> {f.maybe}</label>
+            <label><input type="radio" name="ready" value="no" /> {f.no}</label>
+
+            <p>{f.contactMode}</p>
+            <label><input type="radio" name="contactMode" value="tel" /> {f.phoneC}</label>
+            <label><input type="radio" name="contactMode" value="email" /> {f.emailC}</label>
+            <label><input type="radio" name="contactMode" value="wa" /> {f.whatsapp}</label>
+            <label><input type="radio" name="contactMode" value="visit" /> {f.visit}</label>
+
+            <button type="submit">{f.submit}</button>
           </form>
 
-          <div className="mt-10 md:mt-12 grid gap-4 md:grid-cols-3 text-sm text-neutral-800">
-            <div>
-              <h2 className="mb-2 font-semibold">{tr.benefits}</h2>
-              <ul className="list-disc list-inside">
-                <li>{tr.b1}</li>
-                <li>{tr.b2}</li>
-                <li>{tr.b3}</li>
-              </ul>
-            </div>
-            <div className="md:col-span-2">
-              <h2 className="mb-2 font-semibold">{tr.conditions}</h2>
-              <ul className="list-disc list-inside">
-                {tr.conditionsList.map((line, i) => (
-                  <li key={i}>{line}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </main>
-      </div>
+          <aside>
+            <h2>{r.lot}</h2>
+            <ul>{r.lotLines.map((l, i) => <li key={i}>{l}</li>)}</ul>
+            <h2>{r.assortment}</h2>
+            <p>{r.origins}</p>
+            <h2>{r.why}</h2>
+            <ul>{r.whyList.map((l, i) => <li key={i}>{l}</li>)}</ul>
+            <h2>{r.terms}</h2>
+            <ul>{r.termsList.map((l, i) => <li key={i}>{l}</li>)}</ul>
+          </aside>
+        </div>
+      </main>
     </div>
   );
 }
+
+export default App;

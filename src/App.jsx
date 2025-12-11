@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/mrbonpno";
+const CONTACT_EMAIL = "sergeytren1984@gmail.com";
 
 const t = {
   fr: {
@@ -89,7 +90,11 @@ const t = {
     aboutTitle: "À propos de NÉORA",
     aboutText:
       "Torréfaction de spécialité basée à Paris, avec un focus HoReCa. Petits lots, profils ajustés pour chaque établissement.",
-    footer: "© 2025 NÉORA — Paris"
+    footer: "© 2025 NÉORA — Paris",
+    contactTop: "Contact",
+    emailAltPrefix: "Si c’est plus simple, vous pouvez aussi ",
+    emailAltLink: "nous écrire directement",
+    emailAltSuffix: ""
   },
 
   en: {
@@ -178,7 +183,11 @@ const t = {
     aboutTitle: "About NÉORA",
     aboutText:
       "Paris-based specialty roastery focused on HoReCa. Small batches, profiles tailored for each café.",
-    footer: "© 2025 NÉORA — Paris"
+    footer: "© 2025 NÉORA — Paris",
+    contactTop: "Contact",
+    emailAltPrefix: "If it’s easier, you can also ",
+    emailAltLink: "just email us directly",
+    emailAltSuffix: ""
   },
 
   ru: {
@@ -268,7 +277,11 @@ const t = {
     aboutTitle: "О NÉORA",
     aboutText:
       "Парижская спешиалти-обжарка с фокусом на HoReCa. Работаем малыми партиями, профили настраиваем под каждую кофейню.",
-    footer: "© 2025 NÉORA — Париж"
+    footer: "© 2025 NÉORA — Париж",
+    contactTop: "Контакты",
+    emailAltPrefix: "Если так удобнее, вы можете просто ",
+    emailAltLink: "написать нам на почту",
+    emailAltSuffix: ""
   }
 };
 
@@ -313,10 +326,10 @@ export default function App() {
         form.reset();
         setTimeout(() => setOk(false), 4500);
       } else {
-        alert("Submit error. Try again or email hello@neora.coffee");
+        alert(`Submit error. Try again or email ${CONTACT_EMAIL}`);
       }
     } catch {
-      alert("Network error. Try again or email hello@neora.coffee");
+      alert(`Network error. Try again or email ${CONTACT_EMAIL}`);
     } finally {
       setSending(false);
     }
@@ -351,6 +364,13 @@ export default function App() {
     boxShadow: "0 6px 18px rgba(15,23,42,0.06)"
   };
 
+  const footerContactLabel =
+    lang === "fr"
+      ? "Contact direct : "
+      : lang === "en"
+      ? "Direct contact: "
+      : "Прямой контакт: ";
+
   return (
     <>
       <header className="header">
@@ -358,13 +378,34 @@ export default function App() {
           <div className="brand">
             N<span className="accent">É</span>ORA
           </div>
-          <button
-            className="lang-btn"
-            onClick={() => setLang(nextLang(lang))}
-            title={L.switchTo}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 16
+            }}
           >
-            {L.lang}
-          </button>
+            {/* Вариант B: контакт наверху рядом с переключателем языка */}
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              style={{
+                fontSize: 12,
+                textTransform: "uppercase",
+                letterSpacing: "0.14em",
+                textDecoration: "none",
+                opacity: 0.85
+              }}
+            >
+              {L.contactTop}
+            </a>
+            <button
+              className="lang-btn"
+              onClick={() => setLang(nextLang(lang))}
+              title={L.switchTo}
+            >
+              {L.lang}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -567,6 +608,25 @@ export default function App() {
               </button>
 
               {ok && <p className="ok">{L.form.ok}</p>}
+
+              {/* Вариант A: дополнительная строка под кнопкой для ленивых */}
+              <p
+                className="p"
+                style={{
+                  fontSize: 12,
+                  marginTop: 8,
+                  opacity: 0.8
+                }}
+              >
+                <span>{L.emailAltPrefix}</span>
+                <a
+                  href={`mailto:${CONTACT_EMAIL}`}
+                  style={{ textDecoration: "underline" }}
+                >
+                  {L.emailAltLink}
+                </a>
+                {L.emailAltSuffix}
+              </p>
             </form>
           </div>
 
@@ -625,7 +685,20 @@ export default function App() {
         </section>
       </main>
 
-      <footer className="footer">{L.footer}</footer>
+      <footer className="footer">
+        <div>{L.footer}</div>
+        <div
+          style={{
+            marginTop: 4,
+            fontSize: 12,
+            opacity: 0.8
+          }}
+        >
+          {footerContactLabel}
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+        </div>
+      </footer>
     </>
   );
 }
+

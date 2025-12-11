@@ -91,9 +91,9 @@ const t = {
     aboutText:
       "Torréfaction de spécialité basée à Paris, avec un focus HoReCa. Petits lots, profils ajustés pour chaque établissement.",
     footer: "© 2025 NÉORA — Paris",
-    contactTop: "Contact",
-    emailAltPrefix: "Si c’est plus simple, vous pouvez aussi ",
-    emailAltLink: "nous écrire directement",
+    contactTop: "E-mail direct",
+    emailAltPrefix: "Pas le temps de remplir le formulaire ? ",
+    emailAltLink: "Écrivez-nous directement par e-mail",
     emailAltSuffix: ""
   },
 
@@ -184,9 +184,9 @@ const t = {
     aboutText:
       "Paris-based specialty roastery focused on HoReCa. Small batches, profiles tailored for each café.",
     footer: "© 2025 NÉORA — Paris",
-    contactTop: "Contact",
-    emailAltPrefix: "If it’s easier, you can also ",
-    emailAltLink: "just email us directly",
+    contactTop: "Direct e-mail",
+    emailAltPrefix: "No time to fill the form? ",
+    emailAltLink: "Email us directly",
     emailAltSuffix: ""
   },
 
@@ -278,9 +278,9 @@ const t = {
     aboutText:
       "Парижская спешиалти-обжарка с фокусом на HoReCa. Работаем малыми партиями, профили настраиваем под каждую кофейню.",
     footer: "© 2025 NÉORA — Париж",
-    contactTop: "Контакты",
-    emailAltPrefix: "Если так удобнее, вы можете просто ",
-    emailAltLink: "написать нам на почту",
+    contactTop: "E-mail напрямую",
+    emailAltPrefix: "Нет времени заполнять форму? ",
+    emailAltLink: "Напишите нам напрямую",
     emailAltSuffix: ""
   }
 };
@@ -366,10 +366,10 @@ export default function App() {
 
   const footerContactLabel =
     lang === "fr"
-      ? "Contact direct : "
+      ? "Contact HoReCa direct : "
       : lang === "en"
-      ? "Direct contact: "
-      : "Прямой контакт: ";
+      ? "Direct HoReCa contact: "
+      : "Прямой контакт для HoReCa: ";
 
   return (
     <>
@@ -385,15 +385,21 @@ export default function App() {
               gap: 16
             }}
           >
-            {/* Вариант B: контакт наверху рядом с переключателем языка */}
+            {/* Вариант B: аккуратная капсула E-mail direct */}
             <a
               href={`mailto:${CONTACT_EMAIL}`}
               style={{
-                fontSize: 12,
+                fontSize: 11,
                 textTransform: "uppercase",
-                letterSpacing: "0.14em",
+                letterSpacing: "0.18em",
+                padding: "5px 14px",
+                borderRadius: 9999,
+                border: "1px solid rgba(15,23,42,0.12)",
                 textDecoration: "none",
-                opacity: 0.85
+                backgroundColor: "rgba(255,255,255,0.85)",
+                backdropFilter: "blur(4px)",
+                display: "inline-flex",
+                alignItems: "center"
               }}
             >
               {L.contactTop}
@@ -609,7 +615,7 @@ export default function App() {
 
               {ok && <p className="ok">{L.form.ok}</p>}
 
-              {/* Вариант A: дополнительная строка под кнопкой для ленивых */}
+              {/* Вариант A: строка для тех, кто не хочет заполнять форму */}
               <p
                 className="p"
                 style={{
@@ -701,4 +707,3 @@ export default function App() {
     </>
   );
 }
-

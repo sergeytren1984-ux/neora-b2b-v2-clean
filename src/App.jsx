@@ -94,7 +94,8 @@ const t = {
     contactTop: "E-mail direct",
     emailAltPrefix: "Pas le temps de remplir le formulaire ? ",
     emailAltLink: "Écrivez-nous directement par e-mail",
-    emailAltSuffix: ""
+    emailAltSuffix: " (réponse sous 24 h en semaine).",
+    emailSubject: "NÉORA — contact HoReCa"
   },
 
   en: {
@@ -187,7 +188,8 @@ const t = {
     contactTop: "Direct e-mail",
     emailAltPrefix: "No time to fill the form? ",
     emailAltLink: "Email us directly",
-    emailAltSuffix: ""
+    emailAltSuffix: " (we respond within 24 h on business days).",
+    emailSubject: "NÉORA — HoReCa contact"
   },
 
   ru: {
@@ -281,7 +283,8 @@ const t = {
     contactTop: "E-mail напрямую",
     emailAltPrefix: "Нет времени заполнять форму? ",
     emailAltLink: "Напишите нам напрямую",
-    emailAltSuffix: ""
+    emailAltSuffix: " (отвечаем в течение 24 часов в будни).",
+    emailSubject: "NÉORA — контакт для HoReCa"
   }
 };
 
@@ -297,6 +300,10 @@ export default function App() {
     []
   );
   const nextLang = (l) => (l === "fr" ? "en" : l === "en" ? "ru" : "fr");
+
+  // mailto с темой в зависимости от выбранного языка
+  const contactSubject = encodeURIComponent(L.emailSubject);
+  const contactMailto = `mailto:${CONTACT_EMAIL}?subject=${contactSubject}`;
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -385,9 +392,9 @@ export default function App() {
               gap: 16
             }}
           >
-            {/* Вариант B: аккуратная капсула E-mail direct */}
+            {/* Капсула E-mail direct с hover-эффектом */}
             <a
-              href={`mailto:${CONTACT_EMAIL}`}
+              href={contactMailto}
               style={{
                 fontSize: 11,
                 textTransform: "uppercase",
@@ -399,7 +406,19 @@ export default function App() {
                 backgroundColor: "rgba(255,255,255,0.85)",
                 backdropFilter: "blur(4px)",
                 display: "inline-flex",
-                alignItems: "center"
+                alignItems: "center",
+                transition:
+                  "background-color 0.15s ease, box-shadow 0.15s ease"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#ffffff";
+                e.currentTarget.style.boxShadow =
+                  "0 4px 12px rgba(15,23,42,0.06)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  "rgba(255,255,255,0.85)";
+                e.currentTarget.style.boxShadow = "none";
               }}
             >
               {L.contactTop}
@@ -615,7 +634,7 @@ export default function App() {
 
               {ok && <p className="ok">{L.form.ok}</p>}
 
-              {/* Вариант A: строка для тех, кто не хочет заполнять форму */}
+              {/* Строка для тех, кто не хочет заполнять форму */}
               <p
                 className="p"
                 style={{
@@ -626,12 +645,12 @@ export default function App() {
               >
                 <span>{L.emailAltPrefix}</span>
                 <a
-                  href={`mailto:${CONTACT_EMAIL}`}
+                  href={contactMailto}
                   style={{ textDecoration: "underline" }}
                 >
                   {L.emailAltLink}
                 </a>
-                {L.emailAltSuffix}
+                <span>{L.emailAltSuffix}</span>
               </p>
             </form>
           </div>
@@ -701,7 +720,7 @@ export default function App() {
           }}
         >
           {footerContactLabel}
-          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+          <a href={contactMailto}>{CONTACT_EMAIL}</a>
         </div>
       </footer>
     </>

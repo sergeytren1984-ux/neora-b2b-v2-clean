@@ -87,15 +87,15 @@ const t = {
       preferredContactOptions: ["Téléphone", "E-mail", "WhatsApp", "Visite"],
       selectPlaceholder: "Choisir une option"
     },
-    aboutTitle: "À propos de NÉORA",
+    aboutTitle: "À propos de NÉORO",
     aboutText:
       "Torréfaction de spécialité basée à Paris, avec un focus HoReCa. Petits lots, profils ajustés pour chaque établissement.",
-    footer: "© 2025 NÉORA — Paris",
+    footer: "© 2025 NÉORO — Paris",
     contactTop: "E-mail direct",
     emailAltPrefix: "Pas le temps de remplir le formulaire ? ",
     emailAltLink: "Écrivez-nous directement par e-mail",
     emailAltSuffix: " (réponse sous 24 h en semaine).",
-    emailSubject: "NÉORA — contact HoReCa"
+    emailSubject: "NÉORO — contact HoReCa"
   },
 
   en: {
@@ -181,15 +181,15 @@ const t = {
       preferredContactOptions: ["Phone", "E-mail", "WhatsApp", "In-person visit"],
       selectPlaceholder: "Select an option"
     },
-    aboutTitle: "About NÉORA",
+    aboutTitle: "About NÉORO",
     aboutText:
       "Paris-based specialty roastery focused on HoReCa. Small batches, profiles tailored for each café.",
-    footer: "© 2025 NÉORA — Paris",
+    footer: "© 2025 NÉORO — Paris",
     contactTop: "Direct e-mail",
     emailAltPrefix: "No time to fill the form? ",
     emailAltLink: "Email us directly",
     emailAltSuffix: " (we respond within 24 h on business days).",
-    emailSubject: "NÉORA — HoReCa contact"
+    emailSubject: "NÉORO — HoReCa contact"
   },
 
   ru: {
@@ -276,15 +276,15 @@ const t = {
       preferredContactOptions: ["Телефон", "E-mail", "WhatsApp", "Личный визит"],
       selectPlaceholder: "Выберите вариант"
     },
-    aboutTitle: "О NÉORA",
+    aboutTitle: "О NÉORO",
     aboutText:
       "Парижская спешиалти-обжарка с фокусом на HoReCa. Работаем малыми партиями, профили настраиваем под каждую кофейню.",
-    footer: "© 2025 NÉORA — Париж",
+    footer: "© 2025 NÉORO — Париж",
     contactTop: "E-mail напрямую",
     emailAltPrefix: "Нет времени заполнять форму? ",
     emailAltLink: "Напишите нам напрямую",
     emailAltSuffix: " (отвечаем в течение 24 часов в будни).",
-    emailSubject: "NÉORA — контакт для HoReCa"
+    emailSubject: "NÉORO — контакт для HoReCa"
   }
 };
 
@@ -301,7 +301,6 @@ export default function App() {
   );
   const nextLang = (l) => (l === "fr" ? "en" : l === "en" ? "ru" : "fr");
 
-  // mailto с темой в зависимости от выбранного языка
   const contactSubject = encodeURIComponent(L.emailSubject);
   const contactMailto = `mailto:${CONTACT_EMAIL}?subject=${contactSubject}`;
 
@@ -314,7 +313,7 @@ export default function App() {
       const data = Object.fromEntries(new FormData(form).entries());
       const payload = {
         ...data,
-        _subject: "NÉORA — HoReCa lead",
+        _subject: "NÉORO — HoReCa lead",
         lang,
         page: pageUrl
       };
@@ -371,19 +370,12 @@ export default function App() {
     boxShadow: "0 6px 18px rgba(15,23,42,0.06)"
   };
 
-  const footerContactLabel =
-    lang === "fr"
-      ? "Contact HoReCa direct : "
-      : lang === "en"
-      ? "Direct HoReCa contact: "
-      : "Прямой контакт для HoReCa: ";
-
   return (
     <>
       <header className="header">
         <div className="container header-inner">
           <div className="brand">
-            N<span className="accent">É</span>ORA
+            N<span className="accent">É</span>ORO
           </div>
           <div
             style={{
@@ -392,7 +384,6 @@ export default function App() {
               gap: 16
             }}
           >
-            {/* Капсула E-mail direct с hover-эффектом */}
             <a
               href={contactMailto}
               style={{
@@ -441,7 +432,7 @@ export default function App() {
             <p className="sub">{L.sub}</p>
 
             <form className="form" onSubmit={onSubmit}>
-              <input type="hidden" name="_subject" value="NÉORA — HoReCa lead" />
+              <input type="hidden" name="_subject" value="NÉORO — HoReCa lead" />
               <input type="hidden" name="lang" value={lang} />
               <input type="hidden" name="page" value={pageUrl} />
 
@@ -634,7 +625,6 @@ export default function App() {
 
               {ok && <p className="ok">{L.form.ok}</p>}
 
-              {/* Строка для тех, кто не хочет заполнять форму */}
               <p
                 className="p"
                 style={{
@@ -710,19 +700,7 @@ export default function App() {
         </section>
       </main>
 
-      <footer className="footer">
-        <div>{L.footer}</div>
-        <div
-          style={{
-            marginTop: 4,
-            fontSize: 12,
-            opacity: 0.8
-          }}
-        >
-          {footerContactLabel}
-          <a href={contactMailto}>{CONTACT_EMAIL}</a>
-        </div>
-      </footer>
+      <footer className="footer">{L.footer}</footer>
     </>
   );
 }

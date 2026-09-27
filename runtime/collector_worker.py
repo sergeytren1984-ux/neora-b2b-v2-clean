@@ -344,8 +344,8 @@ def run_slot(protocol, schedule, anchor):
 
 
 def latest_overlay_state(horizon):
-    states = [e["state"] for e, _ in evidence()
-              if e["type"] == "LEARNING_APPLIED" and e["horizon"] == horizon]
+    states = [e["learning"]["state"] for e, _ in evidence()
+              if e["type"] == "OUTCOME_AND_LEARNING_APPLIED" and e["horizon"] == horizon]
     return states[-1] if states else {"horizon": horizon, "samples_seen": 0, "bias": [0.0, 0.0, 0.0]}
 
 
@@ -361,24 +361,20 @@ def overlay_probs(base, state):
     return {k: exponentials[i] / total for i, k in enumerate(classes)}
 
 
-def apply_learning(forecast_event, outcome_event):
+def learning_update(forecast_event, actual):
     horizon = forecast_event["horizon"]
     state = latest_overlay_state(horizon)
     base = forecast_event["base"]
     pred = overlay_probs(base, state)
     classes = ("upside", "range", "downside")
-    gradients = [pred[k] - float(k == outcome_event["class"]) for k in classes]
+    gradients = [pred[k] - float(k == actual) for k in classes]
     import math
     norm = math.sqrt(sum(x*x for x in gradients))
     scale = min(1.0, .08 / norm) if norm else 1.0
     lr = .025 if horizon == "4h" else .020
     updated = {"horizon": horizon, "samples_seen": state["samples_seen"] + 1,
                "bias": [max(-.75, min(.75, b - lr*scale*g)) for b, g in zip(state["bias"], gradients)]}
-    publish({"type": "LEARNING_APPLIED",
-             "idempotency_key": "learning:" + forecast_event["slot"] + ":" + horizon,
-             "slot": forecast_event["slot"], "horizon": horizon,
-             "outcome_event_hash": sha(canon(outcome_event) + b"\n"),
-             "previous_state_hash": sha(canon(state)), "state": updated})
+    return {"previous_state_hash": sha(canon(state)), "state": updated}
 
 
 def due_close(due):
@@ -421,15 +417,15 @@ def resolve_due():
             realized = 100 * (close / float(forecast_event["reference_price"]) - 1)
             threshold = float(forecast_event["threshold_pct"])
             actual = "upside" if realized > threshold else "downside" if realized < -threshold else "range"
-            outcome_event, _ = publish({"type": "OUTCOME_ATTESTED",
+            learning = learning_update(forecast_event, actual)
+            publish({"type": "OUTCOME_AND_LEARNING_APPLIED",
                 "idempotency_key": "outcome:" + key, "slot": forecast_event["slot"],
                 "horizon": forecast_event["horizon"], "due_utc": forecast_event["due_utc"],
                 "paired_issuance_hash": sha(canon(forecast_event) + b"\n"), "close": close,
                 "return_pct": realized, "threshold_pct": threshold, "class": actual,
-                "raw_sha256": sha(raw_bytes), "source_url": row["url"]},
+                "raw_sha256": sha(raw_bytes), "source_url": row["url"],
+                "learning": learning},
                 not_before=due, attachments=(path,))
-        if not any(e["idempotency_key"] == "learning:" + key for e, _ in evidence()):
-            apply_learning(forecast_event, outcome_event)
 
 
 def mark_missed(schedule):

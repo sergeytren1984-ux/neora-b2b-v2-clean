@@ -1,0 +1,68 @@
+{
+  "automatic_execution": false,
+  "frozen_feature_code_sha256": "c15f264a73c5efb9ac6123b4c51b4c21d6bcfff0cd84261b8c7876e25221e006",
+  "frozen_inference_code_sha256": "73404295144880a5bbb83234586431a9f3b017fa1d5360bc99b8753789ac93c1",
+  "frozen_v2930_artifact_sha256": "577017d19e6a2c607c8d7fb77b4ddce35dd8e3fc9be98db85e700d8862784a35",
+  "horizons": [
+    "4h",
+    "24h"
+  ],
+  "learning": {
+    "all_misses_and_abstentions_retained": true,
+    "eligible_24h_anchor": "UTC hour 00",
+    "eligible_4h_anchor": "UTC hour divisible by 4",
+    "minimum_admission_n": {
+      "24h": 90,
+      "4h": 120
+    },
+    "minimum_paired_brier_gain": 0.003,
+    "moving_block_bootstrap_95ci_lower_bound_gt": 0
+  },
+  "outcome": {
+    "must_be_after_due": true,
+    "no_manual_close": true,
+    "source": "official_binance_closed_1h_candle"
+  },
+  "probability_publication": false,
+  "schema": "btc-prospective-gh-rekor-v1",
+  "source_policy": {
+    "bls_ism_treasury_events": {
+      "class": "REQUIRED_IF_EVENT_ACTIVE",
+      "numeric_core_weight": 0.0,
+      "unknown_calendar_behavior": "withhold_event_factor_and_decision_context; retain valid frozen price forecast; prohibit artificial inactive claim"
+    },
+    "closed_1h_klines": {
+      "class": "REQUIRED",
+      "max_age_seconds": 5400,
+      "minimum_closed_contiguous": 169,
+      "source_hosts": [
+        "data-api.binance.vision",
+        "api.binance.com",
+        "api1.binance.com"
+      ]
+    },
+    "closed_4h_klines": {
+      "class": "REQUIRED",
+      "max_age_seconds": 18000,
+      "minimum_closed_contiguous": 15,
+      "source_hosts": [
+        "data-api.binance.vision",
+        "api.binance.com",
+        "api1.binance.com"
+      ]
+    },
+    "funding_oi_dxy_nasdaq_us10y_etf": {
+      "class": "OPTIONAL",
+      "missing_never_imputed": true,
+      "numeric_core_weight": 0.0
+    }
+  },
+  "status": "SHADOW_ONLY",
+  "trading_authority": false,
+  "trust": {
+    "github_branch": "btc-evidence",
+    "oidc_issuer": "https://token.actions.githubusercontent.com",
+    "public_rekor_inclusion_required": true,
+    "workflow_identity": "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-prospective-evidence.yml@refs/heads/main"
+  }
+}

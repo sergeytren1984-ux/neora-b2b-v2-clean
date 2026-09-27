@@ -1,0 +1,25 @@
+{
+  "anchor_24h_utc_hours": [
+    0
+  ],
+  "anchor_4h_utc_hours": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    20
+  ],
+  "end_exclusive_utc": "2027-02-06T00:00:00Z",
+  "horizons_hours": [
+    4,
+    24
+  ],
+  "id": "btc-gh-rekor-20260929",
+  "immutable_after_rekor_registration": true,
+  "issuance_max_delay_minutes": 45,
+  "missing_slots_recorded": true,
+  "schema": "btc-future-schedule-v1",
+  "slot_every_minutes": 60,
+  "start_utc": "2026-09-29T00:00:00Z"
+}

@@ -1,0 +1,45 @@
+name: BTC prospective evidence
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/btc-prospective-evidence.yml]
+  schedule:
+    - cron: '7 * * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: btc-prospective-evidence
+  cancel-in-progress: false
+
+jobs:
+  collect-sign-publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out evidence transport
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: btc-evidence
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Install pinned Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+      - name: Verify frozen runtime source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code fadf5896632efe4b7b658c7bca81971964a7ecf8 -- runtime/
+          test "$(git show fadf5896632efe4b7b658c7bca81971964a7ecf8:runtime/collector_worker.py | sha256sum | cut -d' ' -f1)" = "$(sha256sum runtime/collector_worker.py | cut -d' ' -f1)"
+          git config user.name 'btc-evidence[bot]'
+          git config user.email 'btc-evidence[bot]@users.noreply.github.com'
+      - name: Capture, verify, sign and publish evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 runtime/collector_worker.py

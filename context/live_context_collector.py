@@ -1,5 +1,5 @@
 from __future__ import annotations
-import hashlib, json, os, urllib.request, urllib.parse
+import hashlib, json, os, re, urllib.request, urllib.parse
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -68,10 +68,32 @@ def yahoo(symbol):
             "source_timestamp_utc":datetime.fromtimestamp(t,UTC).isoformat(),
             "receipt":{k:x[k] for k in ("requested_url","final_url","retrieved_at_utc","sha256")}}
 
+def _flow_number(text):
+    s=re.sub(r"<[^>]+>","",text).replace("&nbsp;"," ").strip().replace(",","")
+    if s in ("","-"): return None
+    neg=s.startswith("(") and s.endswith(")")
+    if neg: s=s[1:-1]
+    v=float(s)
+    return -v if neg else v
+
 def farside_raw():
     x=fetch("https://farside.co.uk/btc/")
-    return {"status":"RAW_ONLY","numeric_value":None,"unit":"USD_millions",
-            "note":"raw official table captured; parser intentionally withheld unless table schema validates",
+    html=x["raw"]
+    rows=re.findall(r"<tr[^>]*>(.*?)</tr>",html,flags=re.I|re.S)
+    parsed=[]
+    for row in rows:
+        cells=re.findall(r"<td[^>]*>(.*?)</td>",row,flags=re.I|re.S)
+        if len(cells)<3: continue
+        date_txt=re.sub(r"<[^>]+>","",cells[0]).strip()
+        if not re.fullmatch(r"\d{1,2} [A-Z][a-z]{2} 20\d{2}",date_txt): continue
+        vals=[_flow_number(x) for x in cells[1:]]
+        # A daily row is final only when every constituent is populated.
+        if not vals or any(v is None for v in vals): continue
+        parsed.append((datetime.strptime(date_txt,"%d %b %Y").replace(tzinfo=UTC),vals))
+    if not parsed: raise ValueError("no fully populated Farside daily row")
+    dt,vals=max(parsed,key=lambda z:z[0])
+    return {"numeric_value":float(vals[-1]),"unit":"USD_millions",
+            "flow_date_utc":dt.date().isoformat(),"constituent_values":vals[:-1],
             "receipt":{k:x[k] for k in ("requested_url","final_url","retrieved_at_utc","sha256")}}
 
 def calendar_context(at):

@@ -1,0 +1,111 @@
+{
+  "schema": "btc-macro-calendar-seed-2026q4-v1",
+  "timezone": "UTC",
+  "note": "Seed calendar from official publisher schedules. Refresh/verify against source before every forecast window; do not assume absence if source is unavailable.",
+  "events": [
+    {
+      "id": "JOLTS_2026_08",
+      "type": "JOLTS",
+      "scheduled_utc": "2026-09-29T14:00:00Z",
+      "msk": "2026-09-29T17:00:00+03:00",
+      "importance": "TIER1",
+      "source": "BLS"
+    },
+    {
+      "id": "ADP_2026_09",
+      "type": "ADP_MONTHLY",
+      "scheduled_utc": "2026-09-30T12:15:00Z",
+      "msk": "2026-09-30T15:15:00+03:00",
+      "importance": "TIER2",
+      "source": "ADP"
+    },
+    {
+      "id": "PCE_2026_08",
+      "type": "CORE_PCE",
+      "scheduled_utc": "2026-09-30T12:30:00Z",
+      "msk": "2026-09-30T15:30:00+03:00",
+      "importance": "TIER1",
+      "source": "BEA"
+    },
+    {
+      "id": "GDP_Q2_2026_THIRD",
+      "type": "GDP_REVISION",
+      "scheduled_utc": "2026-09-30T12:30:00Z",
+      "msk": "2026-09-30T15:30:00+03:00",
+      "importance": "TIER2",
+      "source": "BEA"
+    },
+    {
+      "id": "ISM_MFG_2026_09",
+      "type": "ISM_MANUFACTURING",
+      "scheduled_utc": "2026-10-01T14:00:00Z",
+      "msk": "2026-10-01T17:00:00+03:00",
+      "importance": "TIER2",
+      "source": "ISM"
+    },
+    {
+      "id": "EMPLOYMENT_2026_09",
+      "type": "EMPLOYMENT_SITUATION",
+      "scheduled_utc": "2026-10-02T12:30:00Z",
+      "msk": "2026-10-02T15:30:00+03:00",
+      "importance": "TIER1",
+      "source": "BLS"
+    },
+    {
+      "id": "ISM_SERVICES_2026_09",
+      "type": "ISM_SERVICES",
+      "scheduled_utc": "2026-10-05T14:00:00Z",
+      "msk": "2026-10-05T17:00:00+03:00",
+      "importance": "TIER2",
+      "source": "ISM"
+    },
+    {
+      "id": "FOMC_MINUTES_2026_09",
+      "type": "FOMC_MINUTES",
+      "scheduled_utc": "2026-10-07T18:00:00Z",
+      "msk": "2026-10-07T21:00:00+03:00",
+      "importance": "TIER2",
+      "source": "FED"
+    },
+    {
+      "id": "CPI_2026_09",
+      "type": "CPI",
+      "scheduled_utc": "2026-10-14T12:30:00Z",
+      "msk": "2026-10-14T15:30:00+03:00",
+      "importance": "TIER1",
+      "source": "BLS"
+    },
+    {
+      "id": "PPI_2026_09",
+      "type": "PPI",
+      "scheduled_utc": "2026-10-15T12:30:00Z",
+      "msk": "2026-10-15T15:30:00+03:00",
+      "importance": "TIER2",
+      "source": "BLS"
+    },
+    {
+      "id": "FOMC_DECISION_2026_10",
+      "type": "FOMC_DECISION",
+      "scheduled_utc": "2026-10-28T18:00:00Z",
+      "msk": "2026-10-28T21:00:00+03:00",
+      "importance": "TIER1",
+      "source": "FED"
+    },
+    {
+      "id": "GDP_Q3_2026_ADVANCE",
+      "type": "GDP_ADVANCE",
+      "scheduled_utc": "2026-10-29T12:30:00Z",
+      "msk": "2026-10-29T15:30:00+03:00",
+      "importance": "TIER1",
+      "source": "BEA"
+    },
+    {
+      "id": "PCE_2026_09",
+      "type": "CORE_PCE",
+      "scheduled_utc": "2026-10-29T12:30:00Z",
+      "msk": "2026-10-29T15:30:00+03:00",
+      "importance": "TIER1",
+      "source": "BEA"
+    }
+  ]
+}

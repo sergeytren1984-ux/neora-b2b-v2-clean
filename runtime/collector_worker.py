@@ -43,8 +43,8 @@ OPTIONAL_SOURCES = {
 PRECOMMITTED = {
     "frozen_v2930_candidate.json.gz": "577017d19e6a2c607c8d7fb77b4ddce35dd8e3fc9be98db85e700d8862784a35",
     "multi_horizon_features.py": "c15f264a73c5efb9ac6123b4c51b4c21d6bcfff0cd84261b8c7876e25221e006",
-    "protocol.json": "16eefa99ad3b1908f6af6615dc81026c74ec1e1a39a507ff0dd1294d6b869de3",
-    "schedule.json": "c886d8ee2de16b7062968452ce224b4a4d386e0f58aaa0990c503c3c52da4e20",
+    "protocol.json": "399d2eb51108bf697f4ede4837bcf9768d39fb3acc07bd7ea25737727a2c7719",
+    "schedule.json": "248d0a4a495f5f6438147c9de50df9eda572a9a7160d0b02e50d6ede88cb4dbd",
 }
 
 
@@ -134,7 +134,9 @@ def evidence():
 def publish(event, *, not_before=None, before=None, attachments=()):
     EVENTS.mkdir(exist_ok=True)
     prior = evidence()
-    if prior and event["type"] == "SCHEDULE_REGISTERED":
+    if event["type"] == "SCHEDULE_REGISTERED" and any(
+        x[0]["idempotency_key"] == event["idempotency_key"] for x in prior
+    ):
         raise ValueError("schedule already registered")
     event = {"schema": "btc-gh-rekor-event-v1", "sequence": len(prior) + 1,
              "previous_hash": sha(canon(prior[-1][0]) + b"\n") if prior else None,
@@ -233,7 +235,7 @@ def slot_anchor(schedule):
 
 
 def bootstrap(protocol, schedule):
-    if evidence():
+    if any(e["idempotency_key"] == schedule["id"] for e, _ in evidence()):
         return
     start = ts(schedule["start_utc"])
     if now() >= start:
@@ -450,13 +452,13 @@ def mark_missed(schedule):
 def main():
     protocol, schedule = verify_frozen()
     before = evidence()
-    if not before:
+    current = next((e for e, _ in before if e["idempotency_key"] == schedule["id"]), None)
+    if current is None:
         bootstrap(protocol, schedule)
         return
-    first = before[0][0]
-    if (first["workflow_commit"] != os.environ["GITHUB_SHA"] or
-        first["protocol_sha256"] != sha((RUNTIME / "protocol.json").read_bytes()) or
-        first["schedule_sha256"] != sha((RUNTIME / "schedule.json").read_bytes())):
+    if (current["workflow_commit"] != os.environ["GITHUB_SHA"] or
+        current["protocol_sha256"] != sha((RUNTIME / "protocol.json").read_bytes()) or
+        current["schedule_sha256"] != sha((RUNTIME / "schedule.json").read_bytes())):
         raise ValueError("frozen workflow/protocol/schedule changed")
     resolve_due()
     mark_missed(schedule)

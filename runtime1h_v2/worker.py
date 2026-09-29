@@ -165,6 +165,8 @@ def load():
         raise ValueError("1h inference code changed")
     if sha((HERE/"worker.py").read_bytes())!=protocol["worker_code_sha256"]:
         raise ValueError("1h worker code changed")
+    if sha((HERE/"selftest.py").read_bytes())!=protocol["selftest_code_sha256"]:
+        raise ValueError("1h selftest code changed")
     if a["horizons"]["1h"]["status"]!="CANDIDATE_ONLY":
         raise ValueError("wrong 1h artifact status")
     return protocol,schedule,a

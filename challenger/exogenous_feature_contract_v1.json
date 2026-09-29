@@ -1,0 +1,90 @@
+{
+  "schema": "btc-exogenous-feature-contract-v1",
+  "status": "SHADOW_CHALLENGER_ONLY",
+  "base_model": "v2.9.30-frozen-unchanged",
+  "purpose": "test whether verified external market context improves paired prospective probability quality",
+  "horizons": [
+    "1h",
+    "4h",
+    "24h"
+  ],
+  "features": [
+    {
+      "name": "dxy_return_vs_prev_close_pct",
+      "source": "context_live.dxy",
+      "transform": "100*(value/previous_close-1)",
+      "availability": "snapshot_time"
+    },
+    {
+      "name": "nasdaq_return_vs_prev_close_pct",
+      "source": "context_live.nasdaq_futures",
+      "transform": "100*(value/previous_close-1)",
+      "availability": "snapshot_time"
+    },
+    {
+      "name": "us10y_change_bp",
+      "source": "context_live.us10y",
+      "transform": "100*(value-previous_close)",
+      "availability": "snapshot_time"
+    },
+    {
+      "name": "funding_rate_bps",
+      "source": "context_live.funding",
+      "transform": "10000*value",
+      "availability": "snapshot_time"
+    },
+    {
+      "name": "oi_change_1h_pct",
+      "source": "context_live.open_interest",
+      "transform": "100*(current_btc/previous_1h_btc-1)",
+      "availability": "snapshot_time"
+    },
+    {
+      "name": "etf_last_complete_flow_usd_m",
+      "source": "context_live.etf_flows",
+      "transform": "numeric_value",
+      "availability": "last_completed_farside_day_only"
+    },
+    {
+      "name": "tier1_event_inside_horizon",
+      "source": "macro_calendar",
+      "transform": "binary",
+      "availability": "known_before_anchor"
+    },
+    {
+      "name": "tier2_event_inside_horizon",
+      "source": "macro_calendar",
+      "transform": "binary",
+      "availability": "known_before_anchor"
+    },
+    {
+      "name": "minutes_to_next_tier1",
+      "source": "macro_calendar",
+      "transform": "clip(minutes,0,horizon_minutes)/horizon_minutes",
+      "availability": "known_before_anchor"
+    }
+  ],
+  "prohibited": [
+    "future event actual before publication",
+    "future speech tone before remarks",
+    "backfilled revised macro value as if point-in-time",
+    "manual directional coefficient",
+    "surrogate DXY without explicit source identity"
+  ],
+  "missing_data": "ABSTAIN_EXOGENOUS_CHALLENGER; base frozen forecast may remain valid separately",
+  "model_form": "multinomial_logit_overlay_on_base_logits",
+  "initial_weights": "all_zero",
+  "training": "prospective_only_until_independent_historical_point_in_time_lineage_is_proven",
+  "admission": {
+    "minimum_paired_samples": {
+      "1h": 240,
+      "4h": 120,
+      "24h": 90
+    },
+    "minimum_brier_gain": 0.003,
+    "moving_block_bootstrap_95ci_lower_bound_gt": 0,
+    "no_regression_on_logloss": true,
+    "publication_authorized": false,
+    "trading_authority": false
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "schema": "btc-future-1h-schedule-v2",
+  "id": "btc-1h-rekor-20260930-v2",
+  "start_utc": "2026-09-30T00:00:00Z",
+  "end_exclusive_utc": "2027-02-06T00:00:00Z",
+  "slot_every_minutes": 60,
+  "horizon_hours": 1,
+  "issuance_max_delay_minutes": 20,
+  "missing_slots_recorded": true,
+  "event_sensitive_deadline": "min(anchor+20m,event_time-1m) for TIER1/TIER2 inside horizon",
+  "immutable_after_rekor_registration": true
+}

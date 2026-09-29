@@ -1,15 +1,31 @@
 {
-  "schema": "btc-macro-event-policy-v1",
+  "schema": "btc-market-event-policy-v2",
   "status": "SHADOW_CONTEXT_ACTIVE",
   "output_timezone": "Europe/Moscow",
   "numeric_core": "v2.9.30-frozen-unchanged",
   "probability_adjustment": "NONE_UNTIL_EVENT_CALIBRATION_PASSES",
   "fail_closed": true,
   "horizons": [
+    "1h",
     "4h",
     "24h"
   ],
+  "scope": [
+    "scheduled_macro_releases",
+    "central_bank_communications",
+    "treasury_rates_and_auctions",
+    "institutional_crypto_flows",
+    "crypto_regulatory_and_legal_actions",
+    "geopolitical_and_energy_shocks",
+    "systemic_financial_stress",
+    "crypto_market_structure_incidents"
+  ],
   "event_windows": {
+    "1h": {
+      "lookahead_minutes": 90,
+      "pre_release_guard_minutes": 45,
+      "post_release_observation_minutes": 60
+    },
     "4h": {
       "lookahead_minutes": 240,
       "pre_release_guard_minutes": 90,
@@ -28,7 +44,13 @@
       "CORE_PCE",
       "EMPLOYMENT_SITUATION",
       "JOLTS",
-      "GDP_ADVANCE"
+      "GDP_ADVANCE",
+      "FED_SPEECH_MONETARY_POLICY",
+      "FED_SPEECH_ECONOMIC_OUTLOOK",
+      "FED_TESTIMONY_MONETARY_POLICY",
+      "SYSTEMIC_FINANCIAL_STRESS",
+      "MAJOR_CRYPTO_REGULATORY_ACTION",
+      "MAJOR_GEOPOLITICAL_ENERGY_SHOCK"
     ],
     "TIER2": [
       "ADP_MONTHLY",
@@ -36,22 +58,45 @@
       "ISM_SERVICES",
       "PPI",
       "FOMC_MINUTES",
-      "GDP_REVISION"
+      "GDP_REVISION",
+      "FED_SPEECH_OTHER",
+      "TREASURY_AUCTION",
+      "TREASURY_REFUNDING",
+      "ETF_FLOW_DAILY",
+      "SEC_CFTC_CRYPTO_ACTION",
+      "OIL_SUPPLY_EVENT",
+      "MAJOR_EXCHANGE_INCIDENT"
+    ],
+    "TIER3": [
+      "FED_OPERATIONAL_SPEECH",
+      "ROUTINE_TREASURY_RELEASE",
+      "ROUTINE_REGULATORY_UPDATE"
     ]
+  },
+  "central_bank_speaker_rules": {
+    "economic_outlook_or_monetary_policy": "at_least_TIER1",
+    "inflation_rates_labour_growth_or_balance_sheet": "at_least_TIER1",
+    "payments_regulation_supervision_only": "TIER2_or_TIER3_unless_policy_comments_occur",
+    "unscripted_q_and_a": "raise_one_tier_when_monetary_policy_can_be_discussed",
+    "actual_remarks_override_calendar_title": true
   },
   "decision_policy": {
     "event_inside_horizon": "EVENT_SENSITIVE",
     "direction_before_release": "UNKNOWN_DO_NOT_INFER",
     "missing_calendar": "CALENDAR_UNVERIFIED",
+    "breaking_material_news": "EVENT_SENSITIVE_UNSCHEDULED",
     "after_release_without_actual": "WAIT_FOR_VERIFIED_ACTUAL",
-    "after_verified_release": "STORE_EVENT_SURPRISE_AND_MARKET_REACTION"
+    "after_verified_release": "STORE_EVENT_SURPRISE_AND_MARKET_REACTION",
+    "conflicting_news": "WITHHOLD_DIRECTION_UNTIL_VERIFIED"
   },
   "learning_policy": {
     "collect_event_conditioned_outcomes": true,
     "keep_base_and_event_context_separate": true,
     "no_numeric_event_weight_without_backtest_or_prospective_evidence": true,
+    "learn_by_event_type_and_surprise_sign": true,
     "required_fields": [
       "event_id",
+      "event_type",
       "scheduled_utc",
       "importance",
       "source",
@@ -61,17 +106,31 @@
       "actual",
       "consensus",
       "previous",
+      "surprise",
+      "dxy_change",
+      "us10y_change",
+      "nasdaq_change",
       "btc_return_15m",
       "btc_return_1h",
       "btc_return_to_horizon_due"
     ]
+  },
+  "source_rules": {
+    "official_source_preferred": true,
+    "unscheduled_breaking_news_requires": "official_confirmation_or_two_independent_high_quality_sources",
+    "do_not_infer_event_absence_from_source_failure": true,
+    "do_not_assign_direction_before_actual": true
   },
   "sources": {
     "BLS": "https://www.bls.gov/schedule/2026/",
     "BLS_ICS": "https://www.bls.gov/schedule/news_release/bls.ics",
     "BEA": "https://www.bea.gov/news/schedule",
     "ISM": "https://www.ismworld.org/supply-management-news-and-reports/reports/rob-report-calendar/",
-    "FED": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
-    "ADP": "https://adpemploymentreport.com/"
+    "FED_CALENDAR": "https://www.federalreserve.gov/newsevents/calendar.htm",
+    "FED_SPEECHES": "https://www.federalreserve.gov/newsevents/speeches.htm",
+    "TREASURY": "https://home.treasury.gov/resource-center/data-chart-center/quarterly-refunding",
+    "SEC": "https://www.sec.gov/newsroom",
+    "CFTC": "https://www.cftc.gov/PressRoom/PressReleases",
+    "ETF_FLOWS": "https://farside.co.uk/btc/"
   }
 }

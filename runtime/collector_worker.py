@@ -43,8 +43,8 @@ OPTIONAL_SOURCES = {
 PRECOMMITTED = {
     "frozen_v2930_candidate.json.gz": "577017d19e6a2c607c8d7fb77b4ddce35dd8e3fc9be98db85e700d8862784a35",
     "multi_horizon_features.py": "c15f264a73c5efb9ac6123b4c51b4c21d6bcfff0cd84261b8c7876e25221e006",
-    "protocol.json": "399d2eb51108bf697f4ede4837bcf9768d39fb3acc07bd7ea25737727a2c7719",
-    "schedule.json": "248d0a4a495f5f6438147c9de50df9eda572a9a7160d0b02e50d6ede88cb4dbd",
+    "protocol.json": "62b0370160a42c39dd268b725a23e1fcf90135681ab718b2b09a8f4a287b95fb",
+    "schedule.json": "fc4a97fddc5f11d9dac0201c339ab9aaf0d4e36fc1c88e23ebe3622fbcd7a5c4",
 }
 
 
@@ -456,10 +456,13 @@ def main():
     if current is None:
         bootstrap(protocol, schedule)
         return
-    if (current["workflow_commit"] != os.environ["GITHUB_SHA"] or
-        current["protocol_sha256"] != sha((RUNTIME / "protocol.json").read_bytes()) or
+    if (current["protocol_sha256"] != sha((RUNTIME / "protocol.json").read_bytes()) or
         current["schedule_sha256"] != sha((RUNTIME / "schedule.json").read_bytes())):
         raise ValueError("frozen workflow/protocol/schedule changed")
+    # A heartbeat may move main's HEAD. The registered workflow file itself
+    # must remain byte-identical to the commit signed in the preregistration.
+    run("git", "diff", "--exit-code", current["workflow_commit"],
+        os.environ["GITHUB_SHA"], "--", ".github/workflows/btc-prospective-evidence.yml")
     resolve_due()
     mark_missed(schedule)
     anchor = slot_anchor(schedule)

@@ -1,2 +1,2 @@
 BTC evidence transport trigger only. No market data or model output.
-UTC: 2026-09-29 08:36:07 UTC
+UTC: 2026-09-29 09:38:55 UTC

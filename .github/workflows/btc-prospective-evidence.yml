@@ -3,7 +3,7 @@ name: BTC prospective evidence
 on:
   push:
     branches: [main]
-    paths: [.github/workflows/btc-prospective-evidence.yml]
+    paths: [.github/workflows/btc-prospective-evidence.yml, btc-evidence-heartbeat.txt]
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch: {}
@@ -34,8 +34,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git diff --exit-code c1b1e658c75db45c1fb9b0f373d57ceb3f37d3bd -- runtime/
-          test "$(git show c1b1e658c75db45c1fb9b0f373d57ceb3f37d3bd:runtime/collector_worker.py | sha256sum | cut -d' ' -f1)" = "$(sha256sum runtime/collector_worker.py | cut -d' ' -f1)"
+          git diff --exit-code db2ed9cf80dd0cc0d4148b68428b3210666f3102 -- runtime/
+          test "$(git show db2ed9cf80dd0cc0d4148b68428b3210666f3102:runtime/collector_worker.py | sha256sum | cut -d' ' -f1)" = "$(sha256sum runtime/collector_worker.py | cut -d' ' -f1)"
+          git fetch origin main
           git config user.name 'btc-evidence[bot]'
           git config user.email 'btc-evidence[bot]@users.noreply.github.com'
       - name: Capture, verify, sign and publish evidence

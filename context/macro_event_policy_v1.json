@@ -1,0 +1,77 @@
+{
+  "schema": "btc-macro-event-policy-v1",
+  "status": "SHADOW_CONTEXT_ACTIVE",
+  "output_timezone": "Europe/Moscow",
+  "numeric_core": "v2.9.30-frozen-unchanged",
+  "probability_adjustment": "NONE_UNTIL_EVENT_CALIBRATION_PASSES",
+  "fail_closed": true,
+  "horizons": [
+    "4h",
+    "24h"
+  ],
+  "event_windows": {
+    "4h": {
+      "lookahead_minutes": 240,
+      "pre_release_guard_minutes": 90,
+      "post_release_observation_minutes": 120
+    },
+    "24h": {
+      "lookahead_minutes": 1440,
+      "pre_release_guard_minutes": 180,
+      "post_release_observation_minutes": 240
+    }
+  },
+  "importance": {
+    "TIER1": [
+      "FOMC_DECISION",
+      "CPI",
+      "CORE_PCE",
+      "EMPLOYMENT_SITUATION",
+      "JOLTS",
+      "GDP_ADVANCE"
+    ],
+    "TIER2": [
+      "ADP_MONTHLY",
+      "ISM_MANUFACTURING",
+      "ISM_SERVICES",
+      "PPI",
+      "FOMC_MINUTES",
+      "GDP_REVISION"
+    ]
+  },
+  "decision_policy": {
+    "event_inside_horizon": "EVENT_SENSITIVE",
+    "direction_before_release": "UNKNOWN_DO_NOT_INFER",
+    "missing_calendar": "CALENDAR_UNVERIFIED",
+    "after_release_without_actual": "WAIT_FOR_VERIFIED_ACTUAL",
+    "after_verified_release": "STORE_EVENT_SURPRISE_AND_MARKET_REACTION"
+  },
+  "learning_policy": {
+    "collect_event_conditioned_outcomes": true,
+    "keep_base_and_event_context_separate": true,
+    "no_numeric_event_weight_without_backtest_or_prospective_evidence": true,
+    "required_fields": [
+      "event_id",
+      "scheduled_utc",
+      "importance",
+      "source",
+      "forecast_anchor_utc",
+      "horizon",
+      "reference_price",
+      "actual",
+      "consensus",
+      "previous",
+      "btc_return_15m",
+      "btc_return_1h",
+      "btc_return_to_horizon_due"
+    ]
+  },
+  "sources": {
+    "BLS": "https://www.bls.gov/schedule/2026/",
+    "BLS_ICS": "https://www.bls.gov/schedule/news_release/bls.ics",
+    "BEA": "https://www.bea.gov/news/schedule",
+    "ISM": "https://www.ismworld.org/supply-management-news-and-reports/reports/rob-report-calendar/",
+    "FED": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+    "ADP": "https://adpemploymentreport.com/"
+  }
+}

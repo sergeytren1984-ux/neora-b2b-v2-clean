@@ -1,7 +1,7 @@
 {
-  "schema": "btc-macro-calendar-seed-2026q4-v1",
+  "schema": "btc-macro-calendar-seed-2026q4-v2",
   "timezone": "UTC",
-  "note": "Seed calendar from official publisher schedules. Refresh/verify against source before every forecast window; do not assume absence if source is unavailable.",
+  "note": "Seed calendar from official publisher schedules. Refresh and verify against source before every forecast window. Fed speeches are included because policy/economic-outlook remarks can move DXY, Treasury yields, Nasdaq and BTC. Do not infer direction before remarks.",
   "events": [
     {
       "id": "JOLTS_2026_08",
@@ -9,7 +9,31 @@
       "scheduled_utc": "2026-09-29T14:00:00Z",
       "msk": "2026-09-29T17:00:00+03:00",
       "importance": "TIER1",
-      "source": "BLS"
+      "source": "BLS",
+      "status": "RELEASED"
+    },
+    {
+      "id": "FED_BARR_ECON_OUTLOOK_2026_09_29",
+      "type": "FED_SPEECH_ECONOMIC_OUTLOOK",
+      "scheduled_utc": "2026-09-29T16:40:00Z",
+      "msk": "2026-09-29T19:40:00+03:00",
+      "importance": "TIER1",
+      "source": "FED_CALENDAR",
+      "speaker": "Michael S. Barr",
+      "title": "Economic Outlook",
+      "direction_before_release": "UNKNOWN"
+    },
+    {
+      "id": "FED_WALLER_PAYMENTS_2026_09_29",
+      "type": "FED_OPERATIONAL_SPEECH",
+      "scheduled_utc": "2026-09-29T19:00:00Z",
+      "msk": "2026-09-29T22:00:00+03:00",
+      "importance": "TIER3",
+      "source": "FED_CALENDAR",
+      "speaker": "Christopher J. Waller",
+      "title": "Payments",
+      "direction_before_release": "UNKNOWN",
+      "promotion_rule": "raise importance if monetary-policy, inflation, labour, growth or rate comments occur"
     },
     {
       "id": "ADP_2026_09",
@@ -65,7 +89,7 @@
       "scheduled_utc": "2026-10-07T18:00:00Z",
       "msk": "2026-10-07T21:00:00+03:00",
       "importance": "TIER2",
-      "source": "FED"
+      "source": "FED_CALENDAR"
     },
     {
       "id": "CPI_2026_09",
@@ -89,7 +113,7 @@
       "scheduled_utc": "2026-10-28T18:00:00Z",
       "msk": "2026-10-28T21:00:00+03:00",
       "importance": "TIER1",
-      "source": "FED"
+      "source": "FED_CALENDAR"
     },
     {
       "id": "GDP_Q3_2026_ADVANCE",

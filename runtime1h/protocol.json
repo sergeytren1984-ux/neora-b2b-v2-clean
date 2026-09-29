@@ -1,0 +1,50 @@
+{
+  "schema": "btc-prospective-1h-rekor-v1",
+  "status": "SHADOW_ONLY",
+  "horizon": "1h",
+  "frozen_v2930_artifact_sha256": "577017d19e6a2c607c8d7fb77b4ddce35dd8e3fc9be98db85e700d8862784a35",
+  "artifact_horizon": "1h",
+  "feature_contract": "runtime1h/inference.py",
+  "target_semantics": {
+    "reference": "latest_closed_1h_close_at_anchor",
+    "due": "anchor_plus_1h",
+    "outcome": "official_binance_closed_1h_candle_at_due",
+    "threshold": "clip(0.35*ATR4h/reference*100,0.05,6.0)"
+  },
+  "event_sensitive_issuance": {
+    "normal_max_delay_minutes": 20,
+    "if_event_inside_horizon": "deadline=min(normal_deadline,event_time_minus_1_minute)",
+    "calendar": "context/macro_calendar_seed_2026q4.json",
+    "tier_filter": [
+      "TIER1",
+      "TIER2"
+    ]
+  },
+  "source_policy": {
+    "closed_1h_klines": {
+      "class": "REQUIRED",
+      "minimum_closed_contiguous": 169
+    },
+    "closed_4h_klines": {
+      "class": "REQUIRED",
+      "minimum_closed_contiguous": 15
+    },
+    "external_context": {
+      "class": "SIDE_CAR_ONLY",
+      "branch": "btc-context",
+      "numeric_core_weight": 0
+    }
+  },
+  "admission": {
+    "prospective_minimum_n": 240,
+    "probability_publication": false,
+    "trading_authority": false,
+    "automatic_execution": false
+  },
+  "trust": {
+    "github_branch": "btc-1h",
+    "workflow_identity": "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-1h-evidence.yml@refs/heads/main",
+    "oidc_issuer": "https://token.actions.githubusercontent.com",
+    "public_rekor_inclusion_required": true
+  }
+}

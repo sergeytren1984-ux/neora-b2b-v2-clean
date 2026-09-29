@@ -1,0 +1,52 @@
+name: BTC context evidence
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/btc-context-evidence.yml
+      - btc-context-heartbeat.txt
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: btc-context-evidence
+  cancel-in-progress: false
+
+jobs:
+  capture-sign-publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out context evidence branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: btc-context
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Install pinned Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+      - name: Capture context
+        id: capture
+        shell: bash
+        run: |
+          set -euo pipefail
+          SNAP="$(python3 context/live_context_collector.py)"
+          echo "snapshot=$SNAP" >> "$GITHUB_OUTPUT"
+          cosign sign-blob --yes --bundle "$SNAP.sigstore.json" "$SNAP"
+      - name: Publish immutable context evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          SNAP="${{ steps.capture.outputs.snapshot }}"
+          git config user.name 'btc-context[bot]'
+          git config user.email 'btc-context[bot]@users.noreply.github.com'
+          git add "$SNAP" "$SNAP.sigstore.json"
+          git commit -m "BTC context snapshot $(basename "$SNAP" .json)"
+          git push origin HEAD:btc-context

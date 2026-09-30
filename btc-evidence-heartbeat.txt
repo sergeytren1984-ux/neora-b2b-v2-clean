@@ -1,1 +1,1 @@
-backup heartbeat for eligible 4h slot 2026-09-30T08:00:00Z; issue only before preregistered 08:45 UTC deadline; resolve due outcomes; never backfill
+backup heartbeat for eligible 4h slot 2026-09-30T12:00:00Z; issue only before preregistered 12:45 UTC deadline; resolve due outcomes; never backfill

@@ -1,0 +1,50 @@
+name: BTC 1h prospective evidence v3
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/btc-1h-evidence-v3.yml
+      - btc-1h-v3-heartbeat.txt
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: btc-1h-prospective-evidence-v3
+  cancel-in-progress: false
+
+jobs:
+  collect-sign-publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out 1h continuity evidence branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: btc-1h-v3
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Install pinned Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+      - name: Configure evidence identity
+        shell: bash
+        run: |
+          git config user.name 'btc-1h-v3-evidence[bot]'
+          git config user.email 'btc-1h-v3-evidence[bot]@users.noreply.github.com'
+      - name: Verify frozen 1h v3 runtime and selftest
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code a6eb13ee2f37be64fb2efb1ab863a6b081161c75 -- runtime1h_v3/
+          python3 runtime1h_v3/selftest.py
+      - name: Run preregistered 1h prospective worker v3
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 runtime1h_v3/worker.py

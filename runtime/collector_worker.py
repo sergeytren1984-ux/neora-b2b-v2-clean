@@ -479,7 +479,7 @@ def main():
     # A heartbeat may move main's HEAD. The registered workflow file itself
     # must remain byte-identical to the commit signed in the preregistration.
     run("git", "diff", "--exit-code", current["workflow_commit"],
-        os.environ["GITHUB_SHA"], "--", ".github/workflows/btc-prospective-evidence-v4.yml")
+        os.environ["GITHUB_SHA"], "--", ".github/workflows/btc-prospective-evidence-v5.yml")
     resolve_due()
     mark_missed(schedule)
     anchor = slot_anchor(schedule)

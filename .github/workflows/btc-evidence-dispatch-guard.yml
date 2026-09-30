@@ -1,0 +1,82 @@
+name: BTC evidence dispatch guard
+
+on:
+  schedule:
+    - cron: '6,14,25,32 * * * *'
+  workflow_dispatch: {}
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: btc-evidence-dispatch-guard
+  cancel-in-progress: false
+
+jobs:
+  dispatch-missing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check current slots and dispatch original evidence workflows
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64
+          import datetime as dt
+          import json
+          import os
+          import urllib.request
+
+          repo = os.environ["GITHUB_REPOSITORY"]
+          token = os.environ["GH_TOKEN"]
+          now = dt.datetime.now(dt.timezone.utc)
+          anchor = now.replace(minute=0, second=0, microsecond=0)
+          slot = anchor.strftime("%Y%m%dT%H%M%SZ")
+          minute = (now - anchor).total_seconds() / 60
+          headers = {"Accept": "application/vnd.github+json",
+                     "Authorization": "Bearer " + token,
+                     "User-Agent": "btc-evidence-dispatch-guard"}
+
+          def api(path, data=None):
+              url = f"https://api.github.com/repos/{repo}/{path}"
+              request = urllib.request.Request(url, data=data, headers=headers,
+                                               method="POST" if data is not None else "GET")
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  return json.load(response) if response.status != 204 else None
+
+          def present(branch, folder, wanted):
+              tree = api(f"git/trees/{branch}?recursive=1")["tree"]
+              paths = sorted((x["path"] for x in tree if x["path"].startswith(folder + "/")
+                              and len(x["path"].split("/")[-1]) == 13
+                              and x["path"].split("/")[-1].endswith(".json")), reverse=True)
+              found = set()
+              for path in paths[:16]:
+                  payload = api(f"contents/{path}?ref={branch}")
+                  event = json.loads(base64.b64decode(payload["content"]))
+                  key = event.get("idempotency_key")
+                  if key in wanted:
+                      found.add(key)
+                  if found == wanted:
+                      break
+              return found
+
+          def dispatch(workflow):
+              api(f"actions/workflows/{workflow}/dispatches", json.dumps({"ref": "main"}).encode())
+              print(f"Dispatched {workflow} for {slot}")
+
+          # The original signed workers enforce their registered deadlines and idempotency.
+          if minute < 17:
+              keys = {"forecast:" + slot + ":1h", "abstain:" + slot + ":1h"}
+              if not present("btc-1h-v2", "events1h_v2", keys):
+                  dispatch("btc-1h-evidence-v2.yml")
+          if anchor.hour % 4 == 0 and minute < 37:
+              keys = {"forecast:" + slot + ":4h"}
+              if anchor.hour == 0:
+                  keys.add("forecast:" + slot + ":24h")
+              if present("btc-evidence", "events", keys) != keys:
+                  dispatch("btc-prospective-evidence.yml")
+          PY

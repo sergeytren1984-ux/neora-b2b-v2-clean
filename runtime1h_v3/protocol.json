@@ -1,0 +1,73 @@
+{
+  "schema": "btc-prospective-1h-rekor-v3",
+  "status": "SHADOW_ONLY",
+  "horizon": "1h",
+  "frozen_v2930_artifact_sha256": "577017d19e6a2c607c8d7fb77b4ddce35dd8e3fc9be98db85e700d8862784a35",
+  "artifact_horizon": "1h",
+  "inference_code_sha256": "a814fb9805b72183f7cd46b7c5be4fa522ef42913c0f096893e8c9849cd8181c",
+  "worker_code_sha256": "f321afaedf310c4ef31cccb477cb1930442c43f399ad3e0b00d355c5d627f1fa",
+  "selftest_code_sha256": "a3507f22dacc2ada72748adc414a357885632b9a0f414fb0c29bc3dac803526f",
+  "feature_identity": {
+    "ema_contract": "last 100 closed 1h closes; seed EMA20/EMA50 with SMA of first span values; recurse over remainder",
+    "known_fixture_anchor_utc": "2026-09-29T16:00:00Z",
+    "known_fixture_probabilities": {
+      "upside": 0.215129,
+      "range": 0.603875,
+      "downside": 0.180996
+    },
+    "known_fixture_feature_hash": "a88b8013722a18b9fd601c8eb2c6b8a85bdc665100dce370696ddcfe9248393e",
+    "continuity": "169 admitted closed 1h candles must be exactly contiguous; gaps fail closed"
+  },
+  "target_semantics": {
+    "reference": "latest_closed_1h_close_at_anchor",
+    "due": "anchor_plus_1h",
+    "outcome": "official_binance_closed_1h_candle_at_due",
+    "threshold": "clip(0.35*ATR4h/reference*100,0.05,6.0)"
+  },
+  "event_sensitive_issuance": {
+    "normal_max_delay_minutes": 20,
+    "if_event_inside_horizon": "deadline=min(normal_deadline,event_time_minus_1_minute)",
+    "calendar": "context/macro_calendar_seed_2026q4.json",
+    "tier_filter": [
+      "TIER1",
+      "TIER2"
+    ]
+  },
+  "source_policy": {
+    "closed_1h_klines": {
+      "class": "REQUIRED",
+      "minimum_closed_contiguous": 169,
+      "dual_binance_transport_check": true
+    },
+    "closed_4h_klines": {
+      "class": "REQUIRED",
+      "minimum_closed_contiguous": 15,
+      "dual_binance_transport_check": true
+    },
+    "external_context": {
+      "class": "SIDE_CAR_ONLY",
+      "branch": "btc-context",
+      "numeric_core_weight": 0
+    }
+  },
+  "admission": {
+    "prospective_minimum_n": 240,
+    "probability_publication": false,
+    "trading_authority": false,
+    "automatic_execution": false
+  },
+  "trust": {
+    "github_branch": "btc-1h-v3",
+    "workflow_identity": "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-1h-evidence-v3.yml@refs/heads/main",
+    "oidc_issuer": "https://token.actions.githubusercontent.com",
+    "public_rekor_inclusion_required": true
+  },
+  "supersedes": "btc-1h-rekor-20260930-v2 from 2026-09-30T18:00:00Z; v2 retained as historical evidence",
+  "continuity_policy": {
+    "model_drift_behavior": "clip_standardized_features_and_publish_degraded_forecast",
+    "hard_abstain_on_model_drift": false,
+    "clip_limit_source": "registered max_abs_feature_z from frozen artifact",
+    "preserve_primary_status": true,
+    "fallback_is_not_frozen_v2_9_30_equivalence": true
+  }
+}

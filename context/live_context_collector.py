@@ -142,7 +142,30 @@ def apply_freshness(name,factor,at):
     max_age=QUOTE_MAX_AGE_SECONDS[name]
     factor["age_seconds"]=round(age,3)
     factor["max_age_seconds"]=max_age
-    factor["freshness_status"]="FRESH" if -60<=age<=max_age else "STALE"
+    if -60 <= age <= max_age:
+        factor["freshness_status"]="FRESH"
+        return factor
+
+    # Yahoo ^TNX is a US cash-session index rather than an overnight future.
+    # Outside the US cash session, the latest completed session is expected
+    # to be older than the generic 30 minute quote limit. Preserve that fact
+    # explicitly instead of falsely declaring the source stale.
+    if name=="us10y":
+        wd=at.weekday()  # Monday=0
+        minute=at.hour*60+at.minute
+        us_cash_open_utc=13*60+30   # Sep/EDT; status is conservative context only
+        us_cash_close_utc=20*60+30
+        market_closed = (
+            wd >= 5 or minute < us_cash_open_utc or minute > us_cash_close_utc
+        )
+        max_closed_age = 72*3600 if wd >= 5 else 18*3600
+        if market_closed and 0 <= age <= max_closed_age:
+            factor["freshness_status"]="MARKET_CLOSED_LAST_SESSION"
+            factor["market_session_note"]="US10Y cash-session last completed quote; not live intraday"
+            factor["max_closed_session_age_seconds"]=max_closed_age
+            return factor
+
+    factor["freshness_status"]="STALE"
     return factor
 
 def calendar_context(at):
@@ -178,7 +201,7 @@ def main():
 
     fresh_ok=all(
         factors[k].get("status")=="VALID" and
-        factors[k].get("freshness_status") in ("FRESH","LATEST_COMPLETE_SESSION")
+        factors[k].get("freshness_status") in ("FRESH","LATEST_COMPLETE_SESSION","MARKET_CLOSED_LAST_SESSION")
         for k in factors
     )
     doc={

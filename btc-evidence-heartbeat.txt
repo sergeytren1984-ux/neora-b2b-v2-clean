@@ -1,1 +1,1 @@
-manual recovery trigger 2026-09-30T05:58:00Z — resolve due outcomes and record missed 4h/24h slots only; no backfill
+backup heartbeat for eligible 4h slot 2026-09-30T08:00:00Z; issue only before preregistered 08:45 UTC deadline; resolve due outcomes; never backfill

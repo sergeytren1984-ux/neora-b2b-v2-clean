@@ -1,1 +1,1 @@
-recover overdue 1h ledger after 15:00 MSK deadline; do not backfill forecasts
+btc-1h-v2 primary guard heartbeat 2026-09-30T13:01:07Z anchor=20260930T130000Z

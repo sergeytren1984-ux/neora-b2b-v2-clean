@@ -67,29 +67,35 @@ jobs:
               hour_key = now.strftime("%Y%m%dT%H")
               minute = now.minute
 
-              for stage in one_h_stages:
-                  key = ("1h", hour_key, stage)
-                  if stage <= minute < 20 and key not in sent:
-                      try:
-                          dispatch("btc-1h-evidence-v2.yml")
-                          sent.add(key)
-                      except Exception as e:
-                          print(now.isoformat(), "ERROR", key, repr(e), flush=True)
+              if minute < 20:
+                  eligible = [s for s in one_h_stages if s <= minute]
+                  if eligible:
+                      stage = max(eligible)
+                      key = ("1h", hour_key, stage)
+                      if key not in sent:
+                          try:
+                              dispatch("btc-1h-evidence-v2.yml")
+                              sent.add(key)
+                          except Exception as e:
+                              print(now.isoformat(), "ERROR", key, repr(e), flush=True)
 
-              if now.hour % 4 == 0:
-                  for stage in four_h_stages:
+              if now.hour % 4 == 0 and minute < 40:
+                  eligible = [s for s in four_h_stages if s <= minute]
+                  if eligible:
+                      stage = max(eligible)
                       key = ("4h", hour_key, stage)
-                      if stage <= minute < 40 and key not in sent:
+                      if key not in sent:
                           try:
                               dispatch("btc-prospective-evidence.yml")
                               sent.add(key)
                           except Exception as e:
                               print(now.isoformat(), "ERROR", key, repr(e), flush=True)
 
-              for stage in context_stages:
+              eligible = [s for s in context_stages if s <= minute]
+              if eligible:
+                  stage = max(eligible)
                   key = ("context", hour_key, stage)
-                  upper = 30 if stage == 0 else 60
-                  if stage <= minute < upper and key not in sent:
+                  if key not in sent:
                       try:
                           dispatch("btc-context-evidence.yml")
                           sent.add(key)

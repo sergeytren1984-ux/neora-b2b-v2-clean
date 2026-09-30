@@ -74,7 +74,8 @@ jobs:
                       key = ("1h", hour_key, stage)
                       if key not in sent:
                           try:
-                              dispatch("btc-1h-evidence-v2.yml")\n                              dispatch("btc-1h-evidence-v3.yml")
+                              dispatch("btc-1h-evidence-v2.yml")
+                              dispatch("btc-1h-evidence-v3.yml")
                               sent.add(key)
                           except Exception as e:
                               print(now.isoformat(), "ERROR", key, repr(e), flush=True)
@@ -87,7 +88,8 @@ jobs:
                       if key not in sent:
                           try:
                               dispatch("btc-prospective-evidence.yml")
-                              dispatch("btc-prospective-evidence-v4.yml")\n                              dispatch("btc-prospective-evidence-v5.yml")
+                              dispatch("btc-prospective-evidence-v4.yml")
+                              dispatch("btc-prospective-evidence-v5.yml")
                               sent.add(key)
                           except Exception as e:
                               print(now.isoformat(), "ERROR", key, repr(e), flush=True)

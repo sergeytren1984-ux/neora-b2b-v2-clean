@@ -1,1 +1,1 @@
-manual context refresh 2026-09-30T05:59:00Z
+verify session-aware US10Y freshness 2026-09-30T06:02:00Z

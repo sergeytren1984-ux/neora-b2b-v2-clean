@@ -1,1 +1,1 @@
-verify session-aware US10Y freshness 2026-09-30T06:02:00Z
+verify updated Fed calendar 2026-09-30T06:35:28.727Z

@@ -1,1 +1,1 @@
-manual recovery trigger 2026-09-30T05:58:00Z — resolve due outcomes and record missed 1h slots only; no backfill
+timely rescue for 2026-09-30T06:00:00Z 1h slot; issued before 20m deadline

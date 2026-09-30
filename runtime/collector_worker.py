@@ -19,14 +19,15 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from frozen_inference import forecast, frozen_artifact
+from frozen_inference import frozen_artifact
+from continuity_inference import forecast_with_continuity
 
 UTC = timezone.utc
 RUNTIME = Path(__file__).resolve().parent
 ROOT = RUNTIME.parent
 EVENTS = ROOT / "events"
 RAW = ROOT / "raw"
-IDENTITY = "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-prospective-evidence-v4.yml@refs/heads/main"
+IDENTITY = "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-prospective-evidence-v5.yml@refs/heads/main"
 ISSUER = "https://token.actions.githubusercontent.com"
 HOSTS = ("data-api.binance.vision", "api.binance.com", "api1.binance.com")
 OPTIONAL_SOURCES = {
@@ -43,8 +44,9 @@ OPTIONAL_SOURCES = {
 PRECOMMITTED = {
     "frozen_v2930_candidate.json.gz": "577017d19e6a2c607c8d7fb77b4ddce35dd8e3fc9be98db85e700d8862784a35",
     "multi_horizon_features.py": "c15f264a73c5efb9ac6123b4c51b4c21d6bcfff0cd84261b8c7876e25221e006",
-    "protocol.json": "297dc5fc93bb525ee3f3ff9dd6fa7d5b45b96a2fec8c3fc2ea68aa99570b477f",
-    "schedule.json": "1751590e5ee4a6ca7029ee804e163792ed5bdf4c1245ff05eb2ab6919e00cc00",
+    "protocol.json": "a64c77f40b588ad00f7984ea1a8a7dd74947a608e42ea2e1b30d0ebb80c43b46",
+    "continuity_inference.py": "c7ff044b1b4b10b2cf72680206565556f98e98858413e47a5ecb986c60925664",
+    "schedule.json": "d3569375a4216fecd5529d1133614603366ab99ec8e40dcdfae7ee14184ae4af",
 }
 
 
@@ -155,7 +157,7 @@ def publish(event, *, not_before=None, before=None, attachments=()):
     for p in (path, bundle, *attachments):
         run("git", "add", str(Path(p).relative_to(ROOT)))
     run("git", "commit", "-m", f"BTC evidence #{event['sequence']}: {event['type']}")
-    run("git", "push", "origin", "HEAD:btc-evidence-v4")
+    run("git", "push", "origin", "HEAD:btc-evidence-v5")
     return event, integrated
 
 
@@ -303,7 +305,7 @@ def run_slot(protocol, schedule, anchor):
                  "slot": slot, "raw_sha256": sha(raw_bytes),
                  "source_receipts": [{k: r[k] for k in ("url", "retrieved_at_utc", "sha256")} for r in rows]},
                 before=anchor + timedelta(minutes=45), attachments=(raw_path,))
-    probs = forecast(candles[0], now())
+    probs = forecast_with_continuity(candles[0], now())
     reference = candles[0][-1]["close"]
     # The frozen target threshold uses the preceding 14 true-range 4h bars.
     q = candles[1]
@@ -350,6 +352,8 @@ def run_slot(protocol, schedule, anchor):
                  "slot": slot, "horizon": horizon, "anchor_utc": anchor.isoformat(),
                  "due_utc": due.isoformat(), "reference_price": reference,
                  "threshold_pct": threshold, "base": probs[horizon]["probabilities"],
+                 "model_status": probs[horizon]["status"],
+                 "continuity": probs[horizon].get("continuity"),
                  "overlay": overlay, "overlay_state_hash": sha(canon(state)),
                  "raw_sha256": sha(raw_bytes), "feature_hash": probs[horizon]["feature_hash"],
                  "model_sha256": protocol["frozen_v2930_artifact_sha256"],

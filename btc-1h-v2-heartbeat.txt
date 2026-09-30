@@ -1,1 +1,1 @@
-btc-1h-v2 primary guard heartbeat 2026-09-30T13:01:07Z anchor=20260930T130000Z
+btc-1h-v2 primary guard heartbeat 2026-09-30T14:01:51Z anchor=20260930T140000Z

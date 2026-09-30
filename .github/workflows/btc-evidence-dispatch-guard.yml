@@ -1,6 +1,9 @@
 name: BTC evidence dispatch guard
 
 on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/btc-evidence-dispatch-guard.yml]
   schedule:
     - cron: '6,14,25,32 * * * *'
   workflow_dispatch: {}

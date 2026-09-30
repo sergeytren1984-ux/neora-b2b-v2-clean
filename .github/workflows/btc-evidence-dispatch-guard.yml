@@ -87,6 +87,7 @@ jobs:
                       if key not in sent:
                           try:
                               dispatch("btc-prospective-evidence.yml")
+                              dispatch("btc-prospective-evidence-v4.yml")
                               sent.add(key)
                           except Exception as e:
                               print(now.isoformat(), "ERROR", key, repr(e), flush=True)

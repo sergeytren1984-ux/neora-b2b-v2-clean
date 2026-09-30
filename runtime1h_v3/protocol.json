@@ -5,7 +5,7 @@
   "frozen_v2930_artifact_sha256": "577017d19e6a2c607c8d7fb77b4ddce35dd8e3fc9be98db85e700d8862784a35",
   "artifact_horizon": "1h",
   "inference_code_sha256": "a814fb9805b72183f7cd46b7c5be4fa522ef42913c0f096893e8c9849cd8181c",
-  "worker_code_sha256": "f321afaedf310c4ef31cccb477cb1930442c43f399ad3e0b00d355c5d627f1fa",
+  "worker_code_sha256": "2cf5ee2038b228c8cfc2bef697441c69456af2124121803f5458f6a19fc00d5c",
   "selftest_code_sha256": "a3507f22dacc2ada72748adc414a357885632b9a0f414fb0c29bc3dac803526f",
   "feature_identity": {
     "ema_contract": "last 100 closed 1h closes; seed EMA20/EMA50 with SMA of first span values; recurse over remainder",

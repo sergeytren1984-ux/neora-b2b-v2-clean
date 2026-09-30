@@ -7,8 +7,7 @@ on:
       - .github/workflows/btc-1h-evidence-v2.yml
       - btc-1h-v2-heartbeat.txt
   schedule:
-    - cron: '1 * * * *'
-    - cron: '6 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch: {}
 
 permissions:

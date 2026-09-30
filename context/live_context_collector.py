@@ -84,16 +84,25 @@ def okx_oi():
             "unit":"BTC_and_USD","exchange":"OKX BTC-USDT-SWAP",
             "source_timestamp_utc":iso_ms(j["ts"]),"receipt":receipt(x)}
 
-def yahoo(symbol):
+def yahoo(symbol, chart_range="1d"):
     q=urllib.parse.quote(symbol,safe="")
-    x=fetch(f"https://query1.finance.yahoo.com/v8/finance/chart/{q}?interval=5m&range=1d&includePrePost=true")
-    z=json.loads(x["raw"])["chart"]["result"][0]; meta=z["meta"]
-    pts=[(t,v) for t,v in zip(z.get("timestamp",[]),z["indicators"]["quote"][0]["close"]) if v is not None]
-    if not pts: raise ValueError("no non-null quotes")
-    t,v=pts[-1]
+    x=fetch(f"https://query1.finance.yahoo.com/v8/finance/chart/{q}?interval=5m&range={chart_range}&includePrePost=true")
+    z=json.loads(x["raw"])["chart"]["result"][0]
+    meta=z["meta"]
+    quote=(z.get("indicators",{}).get("quote") or [{}])[0]
+    closes=quote.get("close") or []
+    ts=z.get("timestamp") or []
+    pts=[(t,v) for t,v in zip(ts,closes) if v is not None]
+    if pts:
+        t,v=pts[-1]
+    else:
+        v=meta.get("regularMarketPrice")
+        t=meta.get("regularMarketTime")
+        if v is None or t is None:
+            raise ValueError("no non-null quotes or regularMarketPrice/time")
     return {"value":float(v),"previous_close":meta.get("previousClose"),
             "unit":"index_or_yield",
-            "source_timestamp_utc":datetime.fromtimestamp(t,UTC).isoformat(),
+            "source_timestamp_utc":datetime.fromtimestamp(int(t),UTC).isoformat(),
             "receipt":receipt(x)}
 
 def _flow_number(text):
@@ -190,7 +199,7 @@ def main():
       "nasdaq_futures":first_success("nasdaq_futures",[
           ("YAHOO_NQ=F",lambda:yahoo("NQ=F"))]),
       "us10y":first_success("us10y",[
-          ("YAHOO_^TNX",lambda:yahoo("^TNX"))]),
+          ("YAHOO_^TNX",lambda:yahoo("^TNX","5d"))]),
       "etf_flows":first_success("etf_flows",[
           ("FARSIDE",farside_raw)]),
     }

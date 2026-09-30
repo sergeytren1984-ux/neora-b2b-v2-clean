@@ -15,11 +15,11 @@
     4,
     24
   ],
-  "id": "btc-gh-rekor-20260930-v4",
+  "id": "btc-gh-rekor-20260930-v5",
   "immutable_after_rekor_registration": true,
   "issuance_max_delay_minutes": 45,
   "missing_slots_recorded": true,
-  "schema": "btc-future-schedule-v4",
+  "schema": "btc-future-schedule-v5",
   "slot_every_minutes": 60,
   "start_utc": "2026-09-30T20:00:00Z"
 }

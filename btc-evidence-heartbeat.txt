@@ -1,2 +1,1 @@
-BTC evidence clock trigger only. No market data or model output.
-UTC: 2026-09-30 00:09:00 UTC
+manual recovery trigger 2026-09-30T05:58:00Z — resolve due outcomes and record missed 4h/24h slots only; no backfill

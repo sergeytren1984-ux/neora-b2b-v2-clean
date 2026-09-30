@@ -1,1 +1,1 @@
-verify hardened US10Y context fallback 2026-09-30 15:28 MSK
+post-ADP/PCE context refresh 2026-09-30T12:47:00Z

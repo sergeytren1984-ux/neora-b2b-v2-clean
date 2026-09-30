@@ -1,1 +1,1 @@
-timely rescue for 2026-09-30T06:00:00Z 1h slot; issued before 20m deadline
+recovery 2026-09-30T12:27:00Z; due outcomes and missed slots only

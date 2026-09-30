@@ -1,1 +1,1 @@
-retry corrected 1h v2 preregistration after final bound hashes
+manual recovery trigger 2026-09-30T05:58:00Z — resolve due outcomes and record missed 1h slots only; no backfill

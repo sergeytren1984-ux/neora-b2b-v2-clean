@@ -1,1 +1,1 @@
-recovery 2026-09-30T12:27:00Z; due outcomes and missed slots only
+recover overdue 1h ledger after 15:00 MSK deadline; do not backfill forecasts

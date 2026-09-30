@@ -1,6 +1,7 @@
 from __future__ import annotations
 import base64, hashlib, json, re, urllib.request, urllib.parse
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 UTC=timezone.utc
@@ -151,13 +152,10 @@ def apply_freshness(name,factor,at):
     # to be older than the generic 30 minute quote limit. Preserve that fact
     # explicitly instead of falsely declaring the source stale.
     if name=="us10y":
-        wd=at.weekday()  # Monday=0
-        minute=at.hour*60+at.minute
-        us_cash_open_utc=13*60+30   # Sep/EDT; status is conservative context only
-        us_cash_close_utc=20*60+30
-        market_closed = (
-            wd >= 5 or minute < us_cash_open_utc or minute > us_cash_close_utc
-        )
+        et=at.astimezone(ZoneInfo("America/New_York"))
+        wd=et.weekday()  # Monday=0
+        minute=et.hour*60+et.minute
+        market_closed = wd >= 5 or minute < 9*60+30 or minute > 16*60+30
         max_closed_age = 72*3600 if wd >= 5 else 18*3600
         if market_closed and 0 <= age <= max_closed_age:
             factor["freshness_status"]="MARKET_CLOSED_LAST_SESSION"

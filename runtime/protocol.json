@@ -1,5 +1,13 @@
 {
   "automatic_execution": false,
+  "continuity_policy": {
+    "clip_limit_source": "registered max_abs_feature_z from frozen artifact",
+    "continuity_inference_code_sha256": "c7ff044b1b4b10b2cf72680206565556f98e98858413e47a5ecb986c60925664",
+    "fallback_is_not_frozen_v2_9_30_equivalence": true,
+    "hard_abstain_on_model_drift": false,
+    "model_drift_behavior": "clip_standardized_features_and_publish_degraded_forecast",
+    "preserve_primary_status": true
+  },
   "frozen_feature_code_sha256": "c15f264a73c5efb9ac6123b4c51b4c21d6bcfff0cd84261b8c7876e25221e006",
   "frozen_inference_code_sha256": "73404295144880a5bbb83234586431a9f3b017fa1d5360bc99b8753789ac93c1",
   "frozen_v2930_artifact_sha256": "577017d19e6a2c607c8d7fb77b4ddce35dd8e3fc9be98db85e700d8862784a35",
@@ -24,7 +32,7 @@
     "source": "official_binance_closed_1h_candle"
   },
   "probability_publication": false,
-  "schema": "btc-prospective-gh-rekor-v4",
+  "schema": "btc-prospective-gh-rekor-v5",
   "source_policy": {
     "bls_ism_treasury_events": {
       "class": "REQUIRED_IF_EVENT_ACTIVE",
@@ -60,10 +68,10 @@
   "status": "SHADOW_ONLY",
   "trading_authority": false,
   "trust": {
-    "github_branch": "btc-evidence-v4",
+    "github_branch": "btc-evidence-v5",
     "oidc_issuer": "https://token.actions.githubusercontent.com",
     "public_rekor_inclusion_required": true,
-    "registration_epoch": 4,
-    "workflow_identity": "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-prospective-evidence-v4.yml@refs/heads/main"
+    "registration_epoch": 5,
+    "workflow_identity": "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-prospective-evidence-v5.yml@refs/heads/main"
   }
 }

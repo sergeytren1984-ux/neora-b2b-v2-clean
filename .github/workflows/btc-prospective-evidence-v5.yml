@@ -34,7 +34,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git diff --exit-code a67fd26aaf009a05ffca90e204f6c72652dd38ca -- runtime/
+          git diff --exit-code 2987a749fb3ffff333acdd6875fb09b26d8e6826 -- runtime/
           git fetch origin main
           git config user.name 'btc-evidence-v5[bot]'
           git config user.email 'btc-evidence-v5[bot]@users.noreply.github.com'

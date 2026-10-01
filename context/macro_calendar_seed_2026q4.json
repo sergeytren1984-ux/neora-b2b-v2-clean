@@ -72,6 +72,20 @@
       "direction_before_release": "UNKNOWN"
     },
     {
+      "id": "INITIAL_CLAIMS_2026_09_26",
+      "type": "INITIAL_JOBLESS_CLAIMS",
+      "scheduled_utc": "2026-10-01T12:30:00Z",
+      "msk": "2026-10-01T15:30:00+03:00",
+      "importance": "TIER2",
+      "source": "DOL_ETA",
+      "source_url": "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261543.pdf",
+      "status": "RELEASED",
+      "actual": 197000,
+      "consensus": 200000,
+      "previous_revised": 198000,
+      "continuing_claims": 1701000
+    },
+    {
       "id": "ISM_MFG_2026_09",
       "type": "ISM_MANUFACTURING",
       "scheduled_utc": "2026-10-01T14:00:00Z",

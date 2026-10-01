@@ -65,7 +65,8 @@
       "ETF_FLOW_DAILY",
       "SEC_CFTC_CRYPTO_ACTION",
       "OIL_SUPPLY_EVENT",
-      "MAJOR_EXCHANGE_INCIDENT"
+      "MAJOR_EXCHANGE_INCIDENT",
+      "INITIAL_JOBLESS_CLAIMS"
     ],
     "TIER3": [
       "FED_OPERATIONAL_SPEECH",
@@ -131,6 +132,7 @@
     "TREASURY": "https://home.treasury.gov/resource-center/data-chart-center/quarterly-refunding",
     "SEC": "https://www.sec.gov/newsroom",
     "CFTC": "https://www.cftc.gov/PressRoom/PressReleases",
-    "ETF_FLOWS": "https://farside.co.uk/btc/"
+    "ETF_FLOWS": "https://farside.co.uk/btc/",
+    "DOL_ETA": "https://www.dol.gov/agencies/eta/ui-claims"
   }
 }

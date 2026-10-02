@@ -1,1 +1,1 @@
-BTC regime v3 expert heartbeat. Updating this file is an independent permitted dispatch path.
+BTC regime v3 expert heartbeat. Independent prestart verification trigger at 2026-10-02T08:27:00Z.

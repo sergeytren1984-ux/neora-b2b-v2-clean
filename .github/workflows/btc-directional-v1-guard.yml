@@ -1,0 +1,39 @@
+name: BTC directional v1 independent guard
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/btc-directional-v1-guard.yml]
+  schedule:
+    - cron: '6,16,26,36 * * * *'
+  workflow_dispatch: {}
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: btc-directional-v1-guard
+  cancel-in-progress: false
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Dispatch before issuance deadline
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import json,os,urllib.request
+          url=f"https://api.github.com/repos/{os.environ['REPO_NAME']}/actions/workflows/btc-directional-v1.yml/dispatches"
+          data=json.dumps({'ref':'main'}).encode()
+          req=urllib.request.Request(url,data=data,method='POST',headers={
+              'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+              'Accept':'application/vnd.github+json','Content-Type':'application/json',
+              'User-Agent':'btc-directional-v1-guard'})
+          with urllib.request.urlopen(req,timeout=25) as response:
+              if response.status!=204:raise RuntimeError('dispatch failed '+str(response.status))
+          PY

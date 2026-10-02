@@ -1,1 +1,1 @@
-2026-10-02T16:14:00Z trigger frozen directional v1 worker for 19:00 MSK prospective slot
+2026-10-02T20:00:10Z trigger frozen directional v1 worker for 23:00 MSK prospective slot

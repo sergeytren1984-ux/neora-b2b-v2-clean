@@ -46,7 +46,12 @@ while t<=end:
 rows=[]
 for anchor in anchors:
     c=select(raw,anchor)
-    pair=context_pair(REPO,anchor,PROTOCOL,token)
+    try:
+        pair=context_pair(REPO,anchor,PROTOCOL,token)
+    except Exception as exc:
+        rows.append({"anchor_utc":anchor.isoformat(),"anchor_msk":(anchor+timedelta(hours=3)).strftime("%Y-%m-%d %H:%M"),
+                     "price":c[-1]["close"],"regime_state":"NO_VALID_CONTEXT","reason":type(exc).__name__+": "+str(exc)})
+        continue
     out=forecast(c,pair,PROTOCOL)
     rows.append({
         "anchor_utc":anchor.isoformat(),

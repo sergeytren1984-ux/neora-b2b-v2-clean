@@ -99,9 +99,9 @@ while anchor<=end:
         pair=fixed_pair(anchor,token); out=forecast(c,pair,PROTOCOL)
         rows.append({"anchor_msk":(anchor+timedelta(hours=3)).strftime("%Y-%m-%d %H:%M"),"price":c[-1]["close"],
                      "state":out["regime_state"],"score":out["regime_score"],
-                     "up_1h":out["horizons"]["1h"]["probabilities"]["upside"],
-                     "up_4h":out["horizons"]["4h"]["probabilities"]["upside"],
-                     "up_24h":out["horizons"]["24h"]["probabilities"]["upside"],
+                     "p1":out["horizons"]["1h"]["probabilities"],
+                     "p4":out["horizons"]["4h"]["probabilities"],
+                     "p24":out["horizons"]["24h"]["probabilities"],
                      "snapshots":pair["snapshot_names"]})
     except Exception as exc:
         rows.append({"anchor_msk":(anchor+timedelta(hours=3)).strftime("%Y-%m-%d %H:%M"),"price":c[-1]["close"],

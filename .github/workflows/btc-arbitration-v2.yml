@@ -1,0 +1,45 @@
+name: BTC arbitration v2 signed decisions
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/btc-arbitration-v2.yml, btc-arbitration-v2-heartbeat.txt]
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_run:
+    workflows: ['BTC directional 4h early warning v1', 'BTC regime v4 hardened challenger']
+    types: [completed]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: btc-arbitration-v2
+  cancel-in-progress: false
+
+jobs:
+  signed-decision:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: btc-arbitration-v2
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: Configure signed event author
+        run: |
+          git config user.name 'btc-arbitration-v2[bot]'
+          git config user.email 'btc-arbitration-v2[bot]@users.noreply.github.com'
+      - name: Frozen arbiter selftest
+        run: python3 arbiter_v2/selftest.py
+      - name: Verify sources and publish one decision
+        run: python3 arbiter_v2/worker.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

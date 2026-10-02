@@ -1,6 +1,7 @@
 from __future__ import annotations
 import math
-from datetime import datetime, timezone\nfrom macro_signal import macro_score
+from datetime import datetime, timezone
+from macro_signal import macro_score
 
 def clip(x,a=-1.0,b=1.0): return max(a,min(b,float(x)))
 def pct(a,b): return 100.0*(float(a)/float(b)-1.0) if float(b) else 0.0

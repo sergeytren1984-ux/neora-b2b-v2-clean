@@ -1,0 +1,31 @@
+name: BTC regime v3 independent replay audit
+
+on:
+  push:
+    branches: [btc-regime-v3-audit-repro]
+    paths:
+      - audit_v3_real_replay.py
+      - .github/workflows/btc-regime-v3-audit-replay.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout audit branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: btc-regime-v3-audit-repro
+          fetch-depth: 1
+      - name: Install pinned Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: Run real-market replay
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 audit_v3_real_replay.py

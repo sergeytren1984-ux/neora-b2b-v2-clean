@@ -22,6 +22,10 @@ bear=forecast(candles(-.0008),now,ctx(now-timedelta(minutes=1),30000,102.3,30400
 flat=forecast(candles(0),now,ctx(now-timedelta(minutes=1),29000,102,30700,5.28,0),ctx(now-timedelta(hours=1),29000,102,30700,5.28,0))
 assert bull["regime_probabilities"]["upside"]>bull["regime_probabilities"]["range"]
 assert bull["risk_waiting_for_lower_price_pct"]>=65
+for h in ("1h","4h","24h"):
+    assert set(bull["horizons"][h]["probabilities"])=={"upside","range","downside"}
+    assert abs(sum(bull["horizons"][h]["probabilities"].values())-1.0)<1e-9
+assert bull["horizons"]["4h"]["probabilities"]["upside"]>bull["horizons"]["4h"]["probabilities"]["downside"]
 assert bear["regime_probabilities"]["downside"]>bear["regime_probabilities"]["range"]
 assert flat["regime_probabilities"]["range"]>flat["regime_probabilities"]["upside"]
 assert flat["regime_probabilities"]["range"]>flat["regime_probabilities"]["downside"]

@@ -201,6 +201,7 @@ def required_context_ok(pair,protocol):
     return problems
 
 def main():
+    if not (RUNTIME/"ENABLED").exists(): return
     t=now(); protocol=read_protocol(); ev=events()
     if not ev:
         if t>=START: raise ValueError("cannot register schedule after start")

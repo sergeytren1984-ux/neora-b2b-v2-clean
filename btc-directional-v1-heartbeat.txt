@@ -1,1 +1,1 @@
-2026-10-02T15:00:00Z diagnostic trigger for frozen directional v1 worker
+2026-10-02T16:14:00Z trigger frozen directional v1 worker for 19:00 MSK prospective slot

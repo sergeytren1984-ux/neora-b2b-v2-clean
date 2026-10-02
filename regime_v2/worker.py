@@ -19,7 +19,7 @@ IDENTITY="https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workfl
 ISSUER="https://token.actions.githubusercontent.com"
 WORKFLOW_PATH=".github/workflows/btc-regime-v2-audit.yml"
 GUARD_PATH=".github/workflows/btc-evidence-dispatch-guard.yml"
-FROZEN_FILES=("model.py","barrier.py","context_trust.py","worker.py","selftest.py","protocol.json","schemas.json")
+FROZEN_FILES=("model.py","barrier.py","context_trust.py","worker.py","selftest.py","protocol.json","schemas.json","ENABLED")
 
 def now(): return datetime.now(UTC)
 def canon(x): return json.dumps(x,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode()+b"\n"

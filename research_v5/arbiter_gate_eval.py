@@ -33,3 +33,17 @@ for mask,name in ((valid,'validation'),(hold,'late_diagnostic')):
         print(k,'n',n,'precision',round(positives/n,4) if n else None,
               'recall',round(positives/yup[ix].sum(),4),
               'false_alarm_rate',round(np.mean(g[~yup[ix]]),4),flush=True)
+    # Resample complete calendar weeks so overlapping 4h labels are not iid.
+    weeks=np.array([datetime.fromisoformat(dates[i]).strftime('%G-W%V') for i in ix])
+    groups=[np.flatnonzero(weeks==w) for w in np.unique(weeks)]
+    rng=np.random.default_rng(42)
+    for k in ('up_tail','up_tail_regime_up'):
+        draws=[]
+        for _ in range(2000):
+            sel=np.concatenate([groups[j] for j in rng.integers(0,len(groups),len(groups))])
+            g=gates[k][sel]
+            if g.sum()==0:continue
+            yy=yup[ix][sel]
+            draws.append(yy[g].mean()-yy.mean())
+        print('weekly_bootstrap',k,'lift_precision_minus_prevalence',
+              np.round(np.quantile(draws,[.025,.5,.975]),4).tolist(),flush=True)

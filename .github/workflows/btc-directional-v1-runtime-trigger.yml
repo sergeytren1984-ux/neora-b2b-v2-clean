@@ -1,0 +1,38 @@
+name: BTC directional v1 runtime trigger
+
+on:
+  workflow_run:
+    workflows: ['BTC regime v4 hardened challenger', 'BTC context evidence']
+    types: [completed]
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: btc-directional-v1-runtime-trigger
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    if: github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Dispatch frozen directional worker
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import json,os,urllib.request
+          url=f"https://api.github.com/repos/{os.environ['REPO_NAME']}/actions/workflows/btc-directional-v1.yml/dispatches"
+          request=urllib.request.Request(
+              url,data=json.dumps({'ref':'main'}).encode(),method='POST',
+              headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+                       'Accept':'application/vnd.github+json',
+                       'Content-Type':'application/json',
+                       'User-Agent':'btc-directional-v1-runtime-trigger'})
+          with urllib.request.urlopen(request,timeout=25) as response:
+              if response.status!=204:raise RuntimeError(f"dispatch HTTP {response.status}")
+          PY

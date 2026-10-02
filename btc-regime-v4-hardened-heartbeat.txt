@@ -1,1 +1,1 @@
-btc-regime-v4-hardened guarded prospective shadow
+2026-10-02T20:00:15Z trigger frozen regime v4 worker for 23:00 MSK prospective slot

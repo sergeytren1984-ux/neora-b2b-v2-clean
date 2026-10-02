@@ -3,22 +3,30 @@
   "status": "PROSPECTIVE_SHADOW_ONLY",
   "start_utc": "2026-10-02T09:00:00Z",
   "issuance_deadline_minutes": 20,
-  "horizons": ["1h","4h","24h"],
-  "control_models": ["v2.9.30","btc-regime-v1"],
+  "horizons": [
+    "1h",
+    "4h",
+    "24h"
+  ],
+  "control_models": [
+    "v2.9.30",
+    "btc-regime-v1"
+  ],
   "purpose": [
     "detect regime transition without hindsight",
     "separate missing/stale external factors from true zero change",
     "collect calibrated barrier outcomes before exposing any waiting-risk probability"
   ],
   "regime_formula": {
-    "technical": 0.42,
-    "structure": 0.21,
-    "market_microstructure": 0.13,
-    "external_market": 0.16,
-    "macro_surprise": 0.08,
-    "transition": 0.10,
+    "technical": 0.32,
+    "structure": 0.18,
+    "market_microstructure": 0.1,
+    "external_market": 0.14,
+    "macro_surprise": 0,
+    "transition": 0.1,
     "breakout": 0.08,
-    "persistence": 0.05
+    "persistence": 0.06,
+    "change_point": 0.02
   },
   "external_context": {
     "identity": "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-context-evidence.yml@refs/heads/main",
@@ -31,24 +39,67 @@
     "user_decision_authority": false
   },
   "factor_policy": {
-    "open_interest": {"required": true, "freshness": ["FRESH"]},
-    "funding": {"required": true, "freshness": ["FRESH"]},
-    "dxy": {"required": false, "freshness": ["FRESH"]},
-    "nasdaq_futures": {"required": false, "freshness": ["FRESH"]},
-    "us10y": {"required": false, "freshness": ["FRESH"]},
-    "etf_flows": {"required": false, "freshness": ["LATEST_COMPLETE_SESSION"]}
+    "open_interest": {
+      "required": true,
+      "freshness": [
+        "FRESH"
+      ]
+    },
+    "funding": {
+      "required": true,
+      "freshness": [
+        "FRESH"
+      ]
+    },
+    "dxy": {
+      "required": false,
+      "freshness": [
+        "FRESH"
+      ]
+    },
+    "nasdaq_futures": {
+      "required": false,
+      "freshness": [
+        "FRESH"
+      ]
+    },
+    "us10y": {
+      "required": false,
+      "freshness": [
+        "FRESH"
+      ]
+    },
+    "etf_flows": {
+      "required": false,
+      "freshness": [
+        "LATEST_COMPLETE_SESSION"
+      ]
+    }
   },
   "macro_policy": {
     "missing_actual_consensus": "MISSING_NOT_ZERO",
     "universal_direction_assumption": false,
     "score_enabled": false,
-    "reason": "disabled until timestamped release ledger and train-only normalization are independently validated"
+    "reason": "disabled until timestamped release ledger and train-only normalization are independently validated",
+    "numeric_weight": 0
   },
   "barrier_policy": {
     "expose_probability_before_calibration": false,
-    "barriers_atr": [1.0,2.0],
-    "horizons_hours": [24,48,72],
-    "classes": ["LOWER_FIRST","UPPER_FIRST","NEITHER","BOTH_SAME_BAR"],
+    "barriers_atr": [
+      1,
+      2
+    ],
+    "horizons_hours": [
+      24,
+      48,
+      72
+    ],
+    "classes": [
+      "LOWER_FIRST",
+      "UPPER_FIRST",
+      "NEITHER",
+      "BOTH_SAME_BAR"
+    ],
     "same_bar_rule": "AMBIGUOUS_BOTH_SAME_BAR"
   },
   "rules": [
@@ -62,9 +113,21 @@
     "no trading authority"
   ],
   "admission": {
-    "minimum_closed_outcomes": {"1h": 240,"4h": 120,"24h": 60},
+    "minimum_closed_outcomes": {
+      "1h": 240,
+      "4h": 120,
+      "24h": 60
+    },
     "transition_episode_minimum": 30,
-    "metrics": ["brier","log_loss","ece","transition_recall","false_transition_rate","detection_delay_usd","barrier_brier"],
+    "metrics": [
+      "brier",
+      "log_loss",
+      "ece",
+      "transition_recall",
+      "false_transition_rate",
+      "detection_delay_usd",
+      "barrier_brier"
+    ],
     "block_bootstrap_required": true,
     "must_beat_control_on_predeclared_metrics": true
   },

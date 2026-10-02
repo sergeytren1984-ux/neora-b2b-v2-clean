@@ -1,45 +1,10 @@
-name: BTC arbitration v1 signed decisions
+name: BTC arbitration v1 retired
 
 on:
-  push:
-    branches: [main]
-    paths: [.github/workflows/btc-arbitration-v1.yml, btc-arbitration-v1-heartbeat.txt]
-  schedule:
-    - cron: '*/5 * * * *'
-  workflow_run:
-    workflows: ['BTC directional 4h early warning v1', 'BTC regime v4 hardened challenger']
-    types: [completed]
   workflow_dispatch: {}
 
-permissions:
-  contents: write
-  id-token: write
-
-concurrency:
-  group: btc-arbitration-v1
-  cancel-in-progress: false
-
 jobs:
-  signed-decision:
-    if: github.ref == 'refs/heads/main'
+  retired:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          ref: btc-arbitration-v1
-          fetch-depth: 0
-          persist-credentials: true
-      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
-        with:
-          cosign-release: v3.0.6
-      - name: Configure signed event author
-        run: |
-          git config user.name 'btc-arbitration-v1[bot]'
-          git config user.email 'btc-arbitration-v1[bot]@users.noreply.github.com'
-      - name: Frozen arbiter selftest
-        run: python3 arbiter_v1/selftest.py
-      - name: Verify sources and publish one decision
-        run: python3 arbiter_v1/worker.py
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: echo 'Arbitration v1 retired; btc-arbitration-v3 is the sole active arbiter.'

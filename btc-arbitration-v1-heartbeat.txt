@@ -1,0 +1,1 @@
+2026-10-02T19:58:00Z manual operational heartbeat; recover missed slots without backfill.

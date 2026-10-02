@@ -1,13 +1,16 @@
 name: BTC directional v1 runtime trigger
 
 on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/btc-directional-v1-runtime-trigger.yml]
   workflow_run:
     workflows: ['BTC regime v4 hardened challenger', 'BTC context evidence']
     types: [completed]
 
 permissions:
   actions: write
-  contents: read
+  contents: write
 
 concurrency:
   group: btc-directional-v1-runtime-trigger
@@ -15,24 +18,36 @@ concurrency:
 
 jobs:
   dispatch:
-    if: github.event.workflow_run.head_branch == 'main'
+    if: github.event_name == 'push' || github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-latest
     timeout-minutes: 4
     steps:
-      - name: Dispatch frozen directional worker
+      - name: Dispatch frozen directional worker and record receipt
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_NAME: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           python3 - <<'PY'
-          import json,os,urllib.request
-          url=f"https://api.github.com/repos/{os.environ['REPO_NAME']}/actions/workflows/btc-directional-v1.yml/dispatches"
-          request=urllib.request.Request(
-              url,data=json.dumps({'ref':'main'}).encode(),method='POST',
-              headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],
-                       'Accept':'application/vnd.github+json',
-                       'Content-Type':'application/json',
-                       'User-Agent':'btc-directional-v1-runtime-trigger'})
+          import base64,datetime,json,os,urllib.request
+          repo=os.environ['REPO_NAME']
+          headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+                   'Accept':'application/vnd.github+json','Content-Type':'application/json',
+                   'User-Agent':'btc-directional-v1-runtime-trigger'}
+          dispatch=f"https://api.github.com/repos/{repo}/actions/workflows/btc-directional-v1.yml/dispatches"
+          request=urllib.request.Request(dispatch,data=json.dumps({'ref':'main'}).encode(),method='POST',headers=headers)
           with urllib.request.urlopen(request,timeout=25) as response:
               if response.status!=204:raise RuntimeError(f"dispatch HTTP {response.status}")
+          receipt={'schema':'btc-directional-v1-operational-dispatch-v1',
+                   'dispatched_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                   'trigger_run_id':os.environ['RUN_ID'],'trigger_event':os.environ['EVENT_NAME'],
+                   'dispatch_http_status':204,'target_workflow':'btc-directional-v1.yml'}
+          path=f"directional_v1_dispatch_receipts/{os.environ['RUN_ID']}.json"
+          url=f"https://api.github.com/repos/{repo}/contents/{path}"
+          body={'message':f"Record directional v1 dispatch from run {os.environ['RUN_ID']}",
+                'branch':'main','content':base64.b64encode((json.dumps(receipt,sort_keys=True)+'\n').encode()).decode()}
+          request=urllib.request.Request(url,data=json.dumps(body).encode(),method='PUT',headers=headers)
+          with urllib.request.urlopen(request,timeout=25) as response:
+              if response.status!=201:raise RuntimeError(f"receipt HTTP {response.status}")
           PY

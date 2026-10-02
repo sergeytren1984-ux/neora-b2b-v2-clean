@@ -1,1 +1,1 @@
-2026-10-02 post-freeze manifest verification trigger
+2026-10-02T16:01:59Z primary guard regime-v2 anchor=20261002T160000Z

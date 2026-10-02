@@ -1,0 +1,139 @@
+{
+  "schema": "btc-regime-v4-hardened-protocol-v1",
+  "status": "PROSPECTIVE_SHADOW_ONLY",
+  "epoch": "btc-regime-v4-hardened",
+  "start_utc": "2026-10-02T11:00:00Z",
+  "issuance_deadline_minutes": 45,
+  "horizons": ["1h", "4h", "24h"],
+  "probability_publication": "WITHHELD_UNTIL_INDEPENDENT_CALIBRATION",
+  "shadow_class_scores_are_probabilities": false,
+  "control_models": ["v2.9.30", "btc-regime-v2-audit"],
+  "purpose": [
+    "detect transition from range to directional BTC regime without hindsight",
+    "retain a confirmed breakout while price continues to hold the broken level",
+    "distinguish transition, continuation, exhaustion, false breakout and range",
+    "collect barrier outcomes before exposing waiting-risk probabilities"
+  ],
+  "regime_formula": {
+    "technical": 0.20,
+    "structure": 0.12,
+    "market_microstructure": 0.08,
+    "external_market": 0.10,
+    "transition": 0.10,
+    "breakout": 0.16,
+    "persistence": 0.12,
+    "change_point": 0.05,
+    "trend_quality": 0.07
+  },
+  "horizon_formula": {
+    "1h": {
+      "technical": 0.18,
+      "structure": 0.05,
+      "market_microstructure": 0.24,
+      "external_market": 0.18,
+      "transition": 0.15,
+      "breakout": 0.05,
+      "persistence": 0.03,
+      "change_point": 0.08,
+      "trend_quality": 0.04
+    },
+    "4h": {
+      "technical": 0.18,
+      "structure": 0.13,
+      "market_microstructure": 0.10,
+      "external_market": 0.12,
+      "transition": 0.10,
+      "breakout": 0.16,
+      "persistence": 0.10,
+      "change_point": 0.04,
+      "trend_quality": 0.07
+    },
+    "24h": {
+      "technical": 0.16,
+      "structure": 0.18,
+      "market_microstructure": 0.04,
+      "external_market": 0.14,
+      "transition": 0.05,
+      "breakout": 0.15,
+      "persistence": 0.13,
+      "change_point": 0.02,
+      "trend_quality": 0.13
+    }
+  },
+  "exhaustion_penalty": {"1h": 0.24, "4h": 0.14, "24h": 0.08},
+  "breakout_memory_score_boost": {"1h": 0.05, "4h": 0.25, "24h": 0.20},
+  "probability_mapping": {
+    "1h": {"direction_scale": 2.5, "range_bias": 2.7, "range_penalty": 2.0, "confirmed_breakout_range_penalty": 0.50, "temperature": 1.8},
+    "4h": {"direction_scale": 2.8, "range_bias": 2.7, "range_penalty": 1.8, "confirmed_breakout_range_penalty": 1.40, "temperature": 2.1},
+    "24h": {"direction_scale": 2.4, "range_bias": 2.7, "range_penalty": 1.5, "confirmed_breakout_range_penalty": 1.10, "temperature": 2.8}
+  },
+  "state_policy": {
+    "states": [
+      "UP_TRANSITION", "UP_CONTINUATION", "UP_EXHAUSTION", "FALSE_BREAKOUT_UP",
+      "RANGE", "FALSE_BREAKOUT_DOWN", "DOWN_EXHAUSTION", "DOWN_CONTINUATION", "DOWN_TRANSITION"
+    ],
+    "breakout_memory_hours": 18,
+    "breakout_decay_hours": 30,
+    "hold_tolerance_atr": 0.20,
+    "probability_status": "UNCALIBRATED_SHADOW_SCORE"
+  },
+  "external_context": {
+    "identity": "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-context-evidence.yml@refs/heads/main",
+    "oidc_issuer": "https://token.actions.githubusercontent.com",
+    "snapshot_max_age_seconds": 1800,
+    "comparison_window_seconds": 3600,
+    "comparison_tolerance_seconds": 900,
+    "clock_skew_tolerance_seconds": 2,
+    "shadow_use_of_signed_unadmitted_context": true,
+    "user_decision_authority": false
+  },
+  "factor_policy": {
+    "open_interest": {"required": true, "freshness": ["FRESH"]},
+    "funding": {"required": true, "freshness": ["FRESH"]},
+    "dxy": {"required": false, "freshness": ["FRESH"]},
+    "nasdaq_futures": {"required": false, "freshness": ["FRESH"]},
+    "us10y": {"required": false, "freshness": ["FRESH"]},
+    "etf_flows": {"required": false, "freshness": ["LATEST_COMPLETE_SESSION"]}
+  },
+  "macro_policy": {
+    "missing_actual_consensus": "MISSING_NOT_ZERO",
+    "universal_direction_assumption": false,
+    "score_enabled": false,
+    "reason": "disabled until timestamped release ledger and train-only normalization are independently validated",
+    "numeric_weight": 0
+  },
+  "barrier_policy": {
+    "expose_probability_before_calibration": false,
+    "barriers_atr": [1, 2],
+    "horizons_hours": [24, 48, 72],
+    "classes": ["LOWER_FIRST", "UPPER_FIRST", "NEITHER", "BOTH_SAME_BAR"],
+    "same_bar_rule": "AMBIGUOUS_BOTH_SAME_BAR"
+  },
+  "rules": [
+    "no future context",
+    "no backfilled forecasts",
+    "SLOT_MISSED is mandatory after deadline",
+    "outcomes are resolved even if no new forecast is eligible",
+    "missing or stale factor is excluded and never coerced to numerical zero",
+    "available score components are renormalized by their declared weights",
+    "all configuration and workflow hashes must match frozen manifest before inference",
+    "v1 and v2 remain immutable",
+    "no trading authority"
+  ],
+  "admission": {
+    "minimum_closed_outcomes": {"1h": 240, "4h": 120, "24h": 60},
+    "transition_episode_minimum": 30,
+    "metrics": ["brier", "log_loss", "ece", "transition_recall", "false_transition_rate", "detection_delay_usd", "barrier_brier"],
+    "block_bootstrap_required": true,
+    "must_beat_control_on_predeclared_metrics": true
+  },
+  "availability_semantics": {
+    "current_snapshot": "captured_at <= anchor, integrated_at <= anchor, age <= 1800 seconds",
+    "comparison_snapshot": "captured_at within 900 seconds of anchor minus 3600 seconds; both snapshots signed by context workflow before anchor",
+    "factor_freshness": "source timestamp and max_age_seconds checked against each snapshot's captured_at; future source over 2 seconds excluded",
+    "macro_numeric_weight": 0,
+    "etf": "last completed dated session only; no current-day flow admitted",
+    "missing_required_factor": "ABSTAIN_DATA_INVALID retryable before deadline, then SLOT_MISSED if no forecast"
+  },
+  "trading_authority": false
+}

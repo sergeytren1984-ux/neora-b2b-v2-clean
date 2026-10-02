@@ -1,0 +1,77 @@
+name: BTC regime v4 independent dispatch guard
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/btc-regime-v4-dispatch-guard.yml]
+  schedule:
+    - cron: '1 * * * *'
+  workflow_run:
+    workflows: ['BTC context evidence']
+    types: [completed]
+  workflow_dispatch: {}
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: btc-regime-v3-independent-dispatch-guard
+  cancel-in-progress: true
+
+jobs:
+  continuous-dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Dispatch v4 independently before each deadline
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPOSITORY: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import datetime as dt
+          import json
+          import os
+          import time
+          import urllib.request
+
+          repo = os.environ["GH_REPOSITORY"]
+          token = os.environ["GH_TOKEN"]
+          stages = (2, 12, 22, 32, 40)
+          sent = set()
+          stop = time.monotonic() + 330 * 60
+
+          def dispatch(workflow):
+              url = f"https://api.github.com/repos/{repo}/actions/workflows/{workflow}/dispatches"
+              body = json.dumps({"ref": "main"}).encode()
+              request = urllib.request.Request(url, data=body, method="POST", headers={
+                  "Authorization": f"Bearer {token}",
+                  "Accept": "application/vnd.github+json",
+                  "Content-Type": "application/json",
+                  "User-Agent": "btc-regime-v3-independent-guard",
+              })
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  if response.status != 204:
+                      raise RuntimeError(f"dispatch {workflow}: HTTP {response.status}")
+
+          while time.monotonic() < stop:
+              now = dt.datetime.now(dt.timezone.utc)
+              eligible = [stage for stage in stages if stage <= now.minute]
+              if now.minute < 45 and eligible:
+                  key = (now.strftime("%Y%m%dT%H"), max(eligible))
+                  if key not in sent:
+                      try:
+                          dispatch("btc-regime-v4-hardened.yml")
+                          sent.add(key)
+                          print(now.isoformat(), "DISPATCH", key, flush=True)
+                      except Exception as error:
+                          print(now.isoformat(), "ERROR", key, repr(error), flush=True)
+              time.sleep(45)
+
+          try:
+              dispatch("btc-regime-v4-dispatch-guard.yml")
+          except Exception as error:
+              print("ERROR self-dispatch", repr(error), flush=True)
+              raise
+          PY

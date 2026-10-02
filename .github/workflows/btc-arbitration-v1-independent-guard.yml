@@ -1,56 +1,10 @@
-name: BTC arbitration v1 independent guard
+name: BTC arbitration v1 independent guard retired
 
 on:
-  push:
-    branches: [main]
-    paths: [.github/workflows/btc-arbitration-v1-independent-guard.yml]
-  schedule:
-    - cron: '7,17,27,37 * * * *'
-  workflow_run:
-    workflows: ['BTC 1h prospective evidence v3', 'BTC prospective evidence v5', 'BTC context evidence']
-    types: [completed]
   workflow_dispatch: {}
 
-permissions:
-  actions: write
-  contents: write
-
-concurrency:
-  group: btc-arbitration-v1-independent-guard
-  cancel-in-progress: false
-
 jobs:
-  dispatch:
+  retired:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
     steps:
-      - name: Dispatch frozen arbiter and record operational receipt
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO_NAME: ${{ github.repository }}
-          RUN_ID: ${{ github.run_id }}
-        run: |
-          python3 - <<'PY'
-          import base64,datetime,json,os,urllib.request
-          repo=os.environ['REPO_NAME']
-          headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],
-                   'Accept':'application/vnd.github+json','Content-Type':'application/json',
-                   'User-Agent':'btc-arbitration-v1-independent-guard'}
-          targets=('btc-directional-v1.yml','btc-regime-v4-hardened.yml','btc-arbitration-v1.yml')
-          for target in targets:
-              url=f"https://api.github.com/repos/{repo}/actions/workflows/{target}/dispatches"
-              req=urllib.request.Request(url,data=json.dumps({'ref':'main'}).encode(),method='POST',headers=headers)
-              with urllib.request.urlopen(req,timeout=25) as response:
-                  if response.status!=204:raise RuntimeError(f"dispatch {target} HTTP {response.status}")
-          receipt={'schema':'btc-arbiter-v1-operational-dispatch',
-                   'trigger_run_id':os.environ['RUN_ID'],
-                   'dispatched_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                   'dispatch_http_status':204,'target_workflows':list(targets)}
-          path=f"arbiter_v1_dispatch_receipts/{os.environ['RUN_ID']}.json"
-          body={'message':f"Record arbiter v1 dispatch from run {os.environ['RUN_ID']}",
-                'branch':'main','content':base64.b64encode((json.dumps(receipt,sort_keys=True)+'\n').encode()).decode()}
-          req=urllib.request.Request(f"https://api.github.com/repos/{repo}/contents/{path}",
-                                     data=json.dumps(body).encode(),method='PUT',headers=headers)
-          with urllib.request.urlopen(req,timeout=25) as response:
-              if response.status!=201:raise RuntimeError(f"receipt HTTP {response.status}")
-          PY
+      - run: echo 'Arbitration v1 retired; btc-arbitration-v3 is the sole active arbiter.'

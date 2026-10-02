@@ -1,0 +1,1 @@
+{"dispatch_http_status": 204, "dispatched_at_utc": "2026-10-02T21:22:23.618691+00:00", "schema": "btc-arbiter-v3-operational-dispatch", "target_workflows": ["btc-directional-v1.yml", "btc-regime-v4-hardened.yml", "btc-arbitration-v3.yml"], "trigger_run_id": "37066416440"}

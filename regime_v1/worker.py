@@ -87,6 +87,13 @@ def main():
         if t>=START: raise ValueError("schedule registration missed")
         publish({"type":"SCHEDULE_REGISTERED","idempotency_key":"btc-regime-v1-20261002","start_utc":START.isoformat(),
                  "protocol_sha256":sha((ROOT/"regime_v1/protocol.json").read_bytes()),"trading_authority":False}); return
+    if not any(x.get("type")=="CONFIG_FROZEN_PRESTART" for x in ev):
+        if t>=START: raise ValueError("challenger config was not frozen before start")
+        names=("regime_challenger.py","horizon_model.py","macro_signal.py","worker.py","protocol.json")
+        publish({"type":"CONFIG_FROZEN_PRESTART","idempotency_key":"btc-regime-v1-config-freeze",
+                 "start_utc":START.isoformat(),"files_sha256":{n:sha((ROOT/"regime_v1"/n).read_bytes()) for n in names},
+                 "trading_authority":False})
+        return
     anchor=t.replace(minute=0,second=0,microsecond=0)
     if anchor<START or t-anchor>timedelta(minutes=20): return
     slot=anchor.strftime("%Y%m%dT%H%M%SZ"); key="regime:"+slot

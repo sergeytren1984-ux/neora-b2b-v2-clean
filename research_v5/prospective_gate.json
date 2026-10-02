@@ -1,0 +1,28 @@
+{
+  "schema": "btc-regime-research-prospective-gate-v1",
+  "registered_at_context": "before v4 first eligible anchor 2026-10-02T11:00:00Z",
+  "candidate": "btc-regime-v4-hardened shadow scores, not calibrated probabilities",
+  "start_utc": "2026-10-02T11:00:00Z",
+  "horizons": ["1h", "4h", "24h"],
+  "reference_controls": ["v2.9.30 paired anchor", "training-only class frequencies", "constant range baseline"],
+  "minimum_closed_outcomes": {"1h": 500, "4h": 250, "24h": 120},
+  "minimum_distinct_up_and_down_transition_episodes_each": 30,
+  "time_purge_hours_at_split": 24,
+  "overlap_handling": "7-day calendar block bootstrap; episode resampling for transition tests",
+  "engineering_gate": {
+    "forecast_coverage_each_horizon": 0.98,
+    "missing_horizons_allowed": 0,
+    "late_or_backfilled_forecasts_allowed": 0,
+    "unsigned_or_unverifiable_events_allowed": 0,
+    "silent_data_substitution_allowed": 0
+  },
+  "predictive_gate": {
+    "Brier_and_log_loss": "paired improvement over both controls for every horizon with lower 95% block-bootstrap bound above zero",
+    "transition": "recall improves on both up and down episodes at matched false alarm rate no more than 0.20; median detection delay does not worsen",
+    "calibration": "separate train-only calibration, evaluated on future untouched outcomes; ECE and reliability plot disclosed",
+    "barrier": "no numerical probability until independent first-passage calibration beats training-only class frequencies",
+    "macro_and_external": "numeric inclusion only after signed source receipts, release-time semantics, and separate ablation improvement"
+  },
+  "decision_if_insufficient_sample": "PENDING, never ACCEPT",
+  "trading_authority": false
+}

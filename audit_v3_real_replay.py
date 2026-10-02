@@ -10,7 +10,7 @@ from context_trust import context_pair
 
 UTC=timezone.utc
 REPO="sergeytren1984-ux/neora-b2b-v2-clean"
-ROOT=Path(__file__).resolve().parents[1]
+ROOT=Path(__file__).resolve().parent
 PROTOCOL=json.loads((ROOT/"regime_v3/protocol.json").read_text())
 
 def fetch_klines():

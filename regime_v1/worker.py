@@ -54,6 +54,33 @@ def contexts(anchor):
         url=f"https://raw.githubusercontent.com/sergeytren1984-ux/neora-b2b-v2-clean/btc-context/context_live/{n}"
         docs.append(fetch_json(url))
     return docs[-1],docs[-2],list(reversed(chosen))
+def close_at(c, due):
+    for x in c:
+        if datetime.fromisoformat(x["close_time"])==due:
+            return float(x["close"])
+    return None
+
+def resolve_due(anchor,c):
+    ev=events(); resolved={x.get("idempotency_key") for x in ev if x.get("type")=="REGIME_OUTCOME_RECORDED"}
+    for fc in [x for x in ev if x.get("type")=="REGIME_FORECAST_ISSUED"]:
+        ref=float(fc["reference_price"])
+        for h,hours in (("1h",1),("4h",4),("24h",24)):
+            key="outcome:"+fc["slot"]+":"+h
+            if key in resolved: continue
+            due=datetime.fromisoformat(fc["anchor_utc"])+timedelta(hours=hours)
+            if due>anchor: continue
+            close=close_at(c,due)
+            if close is None: continue
+            threshold=float(fc["output"]["horizons"][h]["threshold_pct"])
+            ret=100.0*(close/ref-1.0)
+            actual="upside" if ret>threshold else "downside" if ret<-threshold else "range"
+            probs=fc["output"]["horizons"][h]["probabilities"]
+            brier=sum((float(probs[k])-(1.0 if k==actual else 0.0))**2 for k in ("upside","range","downside"))
+            publish({"type":"REGIME_OUTCOME_RECORDED","idempotency_key":key,"forecast_sequence":fc["sequence"],
+                     "slot":fc["slot"],"horizon":h,"due_utc":due.isoformat(),"reference_price":ref,
+                     "close":close,"return_pct":ret,"threshold_pct":threshold,"class":actual,"brier":brier})
+            resolved.add(key)
+
 def main():
     t=now(); ev=events()
     if not ev:
@@ -64,7 +91,10 @@ def main():
     if anchor<START or t-anchor>timedelta(minutes=20): return
     slot=anchor.strftime("%Y%m%dT%H%M%SZ"); key="regime:"+slot
     if any(x.get("idempotency_key")==key for x in ev): return
-    c=candles(anchor); ctx,prev,names=contexts(anchor); out=forecast(c,anchor,ctx,prev)
+    c=candles(anchor)
+    resolve_due(anchor,c)
+    ev=events()
+    ctx,prev,names=contexts(anchor); out=forecast(c,anchor,ctx,prev)
     publish({"type":"REGIME_FORECAST_ISSUED","idempotency_key":key,"slot":slot,"anchor_utc":anchor.isoformat(),
              "reference_price":c[-1]["close"],"context_snapshots":names,"output":out,
              "publication_authorized":False,"trading_authority":False})

@@ -1,0 +1,1 @@
+{"idempotency_key":"btc-regime-v1-20261002","previous_hash":null,"protocol_sha256":"7ebe49daf3bfb5413e2ea2407e2f86cd5f81562c15daeb4931c9eadd9d1f076e","schema":"btc-regime-prospective-event-v1","sequence":1,"start_utc":"2026-10-02T08:00:00+00:00","trading_authority":false,"type":"SCHEDULE_REGISTERED","workflow_commit":"f9089e73d16062253cb8d87701a8c8f6a0e253bf"}

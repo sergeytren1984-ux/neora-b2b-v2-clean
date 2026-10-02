@@ -1,1 +1,1 @@
-2026-10-02T05:46:45Z manual recovery trigger after missed 08:00 MSK slot
+2026-10-02T06:07:12Z primary guard v3 anchor=20261002T060000Z

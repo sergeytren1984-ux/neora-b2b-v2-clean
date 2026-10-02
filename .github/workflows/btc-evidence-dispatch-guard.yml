@@ -76,6 +76,7 @@ jobs:
                           try:
                               dispatch("btc-1h-evidence-v2.yml")
                               dispatch("btc-1h-evidence-v3.yml")
+                              dispatch("btc-regime-v2-audit.yml")
                               sent.add(key)
                           except Exception as e:
                               print(now.isoformat(), "ERROR", key, repr(e), flush=True)

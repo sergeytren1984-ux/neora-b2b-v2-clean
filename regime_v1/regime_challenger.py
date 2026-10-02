@@ -2,6 +2,7 @@ from __future__ import annotations
 import math
 from datetime import datetime, timezone
 from macro_signal import macro_score
+from horizon_model import horizon_outputs
 
 def clip(x,a=-1.0,b=1.0): return max(a,min(b,float(x)))
 def pct(a,b): return 100.0*(float(a)/float(b)-1.0) if float(b) else 0.0
@@ -65,4 +66,6 @@ def forecast(candles,issued_at,ctx_now=None,ctx_prev=None):
     score=clip(.42*p["technical"]+.21*p["structure"]+.13*p["flow"]+.16*e["score"]+.08*macro+.10*math.copysign(transition,p["ret6"] or 1)+.08*breakout+.05*p["persistence"])
     probs=sm(2.7*score,1.80-2.00*abs(score),-2.7*score)
     wait=int(round(100*clip(.5+.42*score+.18*breakout+.12*max(0,p["persistence"]),0,1)))
-    return {"schema":"btc-regime-challenger-v1","issued_at_utc":issued_at.isoformat(),"regime_score":score,"regime_probabilities":probs,"regime_label":max(probs,key=probs.get),"transition_strength":transition,"breakout_strength":breakout,"risk_waiting_for_lower_price_pct":wait,"components":{"technical":p["technical"],"structure":p["structure"],"market_microstructure":p["flow"],"external_market":e["score"],"macro_surprise":macro},"price_features":p,"external_features":e,"macro_events_used":macro_used,"calibration_status":"UNVALIDATED_PROSPECTIVE_CHALLENGER","trading_authority":False}
+    out={"schema":"btc-regime-challenger-v1","issued_at_utc":issued_at.isoformat(),"regime_score":score,"regime_probabilities":probs,"regime_label":max(probs,key=probs.get),"transition_strength":transition,"breakout_strength":breakout,"risk_waiting_for_lower_price_pct":wait,"components":{"technical":p["technical"],"structure":p["structure"],"market_microstructure":p["flow"],"external_market":e["score"],"macro_surprise":macro},"price_features":p,"external_features":e,"macro_events_used":macro_used,"calibration_status":"UNVALIDATED_PROSPECTIVE_CHALLENGER","trading_authority":False}
+    out["horizons"]=horizon_outputs(out)
+    return out

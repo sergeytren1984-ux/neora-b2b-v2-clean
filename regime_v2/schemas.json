@@ -1,0 +1,19 @@
+{
+  "schema": "btc-regime-v2-schemas-v1",
+  "event_types": [
+    "SCHEDULE_REGISTERED",
+    "CONFIG_FROZEN_PRESTART",
+    "REGIME_FORECAST_ISSUED",
+    "REGIME_OUTCOME_RECORDED",
+    "BARRIER_OUTCOME_RECORDED",
+    "SLOT_MISSED",
+    "ABSTAIN_CONFIG_DRIFT",
+    "ABSTAIN_DATA_INVALID"
+  ],
+  "forecast_required": [
+    "regime_score","regime_probabilities","regime_label","components","external","macro","horizons","features",
+    "calibration_status","trading_authority"
+  ],
+  "horizon_required": ["score","probabilities","threshold_pct"],
+  "barrier_required": ["id","lower_price","upper_price","deadline_utc","probabilities","probability_status"]
+}

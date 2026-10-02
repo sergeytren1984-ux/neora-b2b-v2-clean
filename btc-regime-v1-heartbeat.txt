@@ -1,1 +1,1 @@
-2026-10-02T06:10:00Z bootstrap regime challenger v1
+2026-10-02T06:36:00Z rerun after syntax fix

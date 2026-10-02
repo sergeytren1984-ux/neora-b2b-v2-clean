@@ -91,7 +91,7 @@ def select(raw,anchor):
     return out[-169:]
 
 raw=fetch_klines(); token=os.environ.get("GITHUB_TOKEN")
-start=datetime(2026,10,1,14,tzinfo=UTC); end=datetime(2026,10,2,8,tzinfo=UTC)
+start=datetime(2026,10,2,12,tzinfo=UTC); end=datetime(2026,10,2,14,tzinfo=UTC)
 rows=[]; anchor=start
 while anchor<=end:
     c=select(raw,anchor)

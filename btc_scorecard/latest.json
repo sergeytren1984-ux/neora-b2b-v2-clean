@@ -1,7 +1,7 @@
 {
-  "downside_not_admitted_to_arbiter": true,
+  "downside_admitted_to_arbiter_from_utc": "2026-10-03T09:00:00Z",
   "event_definitions_differ": true,
-  "generated_at_utc": "2026-10-03T07:45:07.173237+00:00",
+  "generated_at_utc": "2026-10-03T07:59:32.294337+00:00",
   "regime_calibration_gate": {
     "also_requires": "30 separate up and down episodes each; paired Brier and Log Loss gain with positive 95% weekly block bootstrap bound; future calibration/reliability test",
     "closed_outcomes": {
@@ -21,7 +21,10 @@
     {
       "arbiter": {
         "action_status": "NO_DIRECTIONAL_ACTION",
+        "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
+        "slot_missed": false,
+        "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
         "trading_authority": false
       },
@@ -63,7 +66,10 @@
     {
       "arbiter": {
         "action_status": "NO_DIRECTIONAL_ACTION",
+        "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
+        "slot_missed": false,
+        "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
         "trading_authority": false
       },
@@ -105,7 +111,10 @@
     {
       "arbiter": {
         "action_status": "NO_DIRECTIONAL_ACTION",
+        "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
+        "slot_missed": false,
+        "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
         "trading_authority": false
       },
@@ -160,7 +169,10 @@
     {
       "arbiter": {
         "action_status": "NO_DIRECTIONAL_ACTION",
+        "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
+        "slot_missed": false,
+        "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
         "trading_authority": false
       },
@@ -202,7 +214,10 @@
     {
       "arbiter": {
         "action_status": "NO_DIRECTIONAL_ACTION",
+        "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
+        "slot_missed": false,
+        "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
         "trading_authority": false
       },
@@ -244,7 +259,10 @@
     {
       "arbiter": {
         "action_status": "NO_DIRECTIONAL_ACTION",
+        "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
+        "slot_missed": false,
+        "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
         "trading_authority": false
       },
@@ -286,7 +304,10 @@
     {
       "arbiter": {
         "action_status": "NO_DIRECTIONAL_ACTION",
+        "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": null,
+        "slot_missed": false,
+        "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
         "trading_authority": false
       },
@@ -335,7 +356,10 @@
     {
       "arbiter": {
         "action_status": "NO_DIRECTIONAL_ACTION",
+        "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": null,
+        "slot_missed": false,
+        "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
         "trading_authority": false
       },
@@ -374,7 +398,10 @@
     {
       "arbiter": {
         "action_status": "NO_DIRECTIONAL_ACTION",
+        "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": null,
+        "slot_missed": false,
+        "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
         "trading_authority": false
       },
@@ -413,7 +440,10 @@
     {
       "arbiter": {
         "action_status": "NO_DIRECTIONAL_ACTION",
+        "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": null,
+        "slot_missed": false,
+        "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
         "trading_authority": false
       },
@@ -455,6 +485,10 @@
     "arbiter": {
       "ARBITRATION_DECISION_ISSUED": 10,
       "ARBITRATION_OUTCOME_RECORDED": 6,
+      "CONFIG_FROZEN_PRESTART": 1,
+      "SCHEDULE_REGISTERED": 1
+    },
+    "arbiter_v4": {
       "CONFIG_FROZEN_PRESTART": 1,
       "SCHEDULE_REGISTERED": 1
     },

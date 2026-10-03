@@ -7,6 +7,7 @@ slot is dispatched and no event is manufactured by this transport.
 from __future__ import annotations
 
 import datetime as dt
+import base64
 import json
 import os
 import subprocess
@@ -39,6 +40,30 @@ def dispatch(workflow: str) -> None:
         if result.status != 204:
             raise RuntimeError(f"{workflow}: HTTP {result.status}")
     print("DISPATCHED", workflow, dt.datetime.now(UTC).isoformat(), flush=True)
+
+
+def receipt(slot: str, ready: list[bool], mode: str) -> None:
+    repo = os.environ["REPO_NAME"]
+    run_id = os.environ["RUN_ID"]
+    path = f"arbiter_v3_sequencer_receipts/{run_id}.json"
+    data = {"schema": "btc-arbiter-v3-source-sequencer-receipt",
+            "run_id": run_id, "slot": slot, "source_candidates_present":
+            {"directional": ready[0], "regime": ready[1]},
+            "dispatch_mode": mode, "arbiter_dispatch_status": 204,
+            "dispatched_at_utc": dt.datetime.now(UTC).isoformat()}
+    body = {"message": "Record ordered BTC arbitration dispatch " + slot,
+            "branch": "main", "content": base64.b64encode(
+                (json.dumps(data, sort_keys=True) + "\n").encode()).decode()}
+    req = urllib.request.Request(
+        f"https://api.github.com/repos/{repo}/contents/{path}",
+        data=json.dumps(body).encode(),
+        headers={"Authorization": "Bearer " + os.environ["GH_TOKEN"],
+                 "Accept": "application/vnd.github+json",
+                 "User-Agent": "btc-arbitration-v3-source-sequencer"},
+        method="PUT")
+    with urllib.request.urlopen(req, timeout=25) as result:
+        if result.status != 201:
+            raise RuntimeError(f"sequencer receipt HTTP {result.status}")
 
 
 def event_present(branch: str, directory: str, kind: str, prefix: str, slot: str) -> bool:
@@ -75,10 +100,12 @@ def main() -> None:
         current = dt.datetime.now(UTC)
         if all(ready):
             dispatch("btc-arbitration-v3.yml")
+            receipt(slot, ready, "BOTH_SOURCE_EVENTS_OBSERVED")
             print("BOTH_SOURCE_EVENTS_OBSERVED", slot, flush=True)
             return
         if ready[0] and current >= anchor + dt.timedelta(minutes=15):
             dispatch("btc-arbitration-v3.yml")
+            receipt(slot, ready, "DIRECTIONAL_ONLY_FALLBACK_AFTER_15M")
             print("DIRECTIONAL_PRESENT_REGIME_FALLBACK_ELIGIBLE", slot, flush=True)
             return
         time.sleep(20)

@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: btc-arbitration-v3-continuous-wakeup
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   wake:

@@ -24,7 +24,7 @@
     "start_utc": "2026-09-30T20:00:00+00:00"
   },
   "event_definitions_differ": true,
-  "generated_at_utc": "2026-10-03T08:07:10.338967+00:00",
+  "generated_at_utc": "2026-10-03T08:09:28.091221+00:00",
   "regime_calibration_gate": {
     "also_requires": "30 separate up and down episodes each; paired Brier and Log Loss gain with positive 95% weekly block bootstrap bound; future calibration/reliability test",
     "closed_outcomes": {
@@ -551,9 +551,13 @@
       },
       "v2_9_30": {
         "actual_native_class": null,
-        "probabilities_diagnostic": null,
+        "probabilities_diagnostic": {
+          "downside": 0.179,
+          "range": 0.584,
+          "upside": 0.236
+        },
         "score": null,
-        "status": "PENDING"
+        "status": "PRE_EXPERT_CANDIDATE_DIAGNOSTIC"
       }
     }
   ],
@@ -592,7 +596,7 @@
     },
     "v5": {
       "FACTORS_VALIDATED": 13,
-      "FORECAST_ISSUED": 15,
+      "FORECAST_ISSUED": 16,
       "OUTCOME_AND_LEARNING_APPLIED": 14,
       "RAW_ATTESTED": 13,
       "SCHEDULE_REGISTERED": 1,

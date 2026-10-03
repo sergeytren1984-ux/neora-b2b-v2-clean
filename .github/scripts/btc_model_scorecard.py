@@ -24,6 +24,7 @@ SOURCES = {
     "up": ("btc-directional-v1", "directional_v1_events", "btc-directional-v1.yml"),
     "down": ("btc-directional-down-v1", "directional_down_v1_events", "btc-directional-down-v1.yml"),
     "arbiter": ("btc-arbitration-v3", "arbiter_v3_events", "btc-arbitration-v3.yml"),
+    "arbiter_v4": ("btc-arbitration-v4", "arbiter_v4_events", "btc-arbitration-v4.yml"),
 }
 
 
@@ -184,11 +185,16 @@ def build() -> tuple[dict, str]:
                          "actual": actual,
                          "score_diagnostic": binary_score(e["output"]["candidate_estimate"], actual)
                          if e and o else None}
-        a = by_type["arbiter"].get("decision:" + slot + ":4h")
-        ao = by_type["arbiter"].get("outcome:" + slot + ":4h")
+        arbiter_stream = "arbiter_v4" if point >= stamp("2026-10-03T09:00:00Z") else "arbiter"
+        a = by_type[arbiter_stream].get("decision:" + slot + ":4h")
+        ao = by_type[arbiter_stream].get("outcome:" + slot + ":4h")
+        am = by_type[arbiter_stream].get("missed:" + slot)
         row["arbiter"] = {"status": a.get("status") if a else "PENDING_OR_MISSED",
                           "action_status": a.get("action_status") if a else None,
                           "actual_rise_gt_1pct": ao.get("actual_rise_gt_1pct") if ao else None,
+                          "actual_fall_lt_minus_1pct": ao.get("actual_fall_lt_minus_1pct") if ao else None,
+                          "source_epoch": arbiter_stream,
+                          "slot_missed": am is not None,
                           "trading_authority": False}
         rows.append(row)
         point += dt.timedelta(hours=1)
@@ -206,7 +212,7 @@ def build() -> tuple[dict, str]:
            "generated_at_utc": now.isoformat(), "source_event_counts": counts,
            "event_definitions_differ": True,
            "regime_scores_are_not_calibrated_probabilities": True,
-           "downside_not_admitted_to_arbiter": True,
+           "downside_admitted_to_arbiter_from_utc": "2026-10-03T09:00:00Z",
            "regime_calibration_gate": calibration_gate,
            "transition_delay_up": episodes(rows, "up"),
            "transition_delay_down": episodes(rows, "down"),
@@ -221,6 +227,12 @@ def build() -> tuple[dict, str]:
              "UPSIDE_TAIL_RISK_CONCORDANT": "повышен риск роста; согласие",
              "UPSIDE_TAIL_RISK_WITH_REGIME_DISAGREEMENT": "повышен риск роста; расхождение",
              "UPSIDE_TAIL_RISK_REGIME_UNAVAILABLE": "риск роста; режим недоступен",
+             "BIDIRECTIONAL_TAIL_RISK_CONFLICT": "конфликт хвостовых сигналов",
+             "DOWNSIDE_TAIL_RISK_CONCORDANT": "повышен риск падения; согласие",
+             "DOWNSIDE_TAIL_RISK_WITH_REGIME_DISAGREEMENT": "повышен риск падения; расхождение",
+             "DOWNSIDE_TAIL_RISK_REGIME_UNAVAILABLE": "риск падения; режим недоступен",
+             "UPSIDE_TAIL_RISK_DOWN_HEAD_UNAVAILABLE": "риск роста; голова падения недоступна",
+             "DOWN_HEAD_UNAVAILABLE_NO_DIRECTIONAL_CONCLUSION": "голова падения недоступна",
              "PENDING": "ожидание", "PENDING_OR_MISSED": "ожидание или пропуск",
              "SLOT_MISSED": "пропуск", "upside": "рост", "downside": "снижение", "range": "диапазон"}
     lines = ["# BTC: подписанная сравнительная таблица (теневой режим)", "",
@@ -262,7 +274,8 @@ def build() -> tuple[dict, str]:
             if s:
                 metric.append(label + " " + f"{s['brier']:.3f}/{s['log_loss']:.3f}")
         lines.append("| " + " | ".join((t, vtxt, reg, signal("up"), signal("down"),
-                                          names.get(r["arbiter"]["status"], "без статуса"),
+                                          ("ПРОПУСК" if r["arbiter"]["slot_missed"] else
+                                           names.get(r["arbiter"]["status"], "без статуса")),
                                           ", ".join(actuals) or "ожидание",
                                           "; ".join(metric) or "ожидание")) + " |")
     lines += ["", "Численные Brier и Log Loss по каждому завершённому исходу, пропуски и задержки",

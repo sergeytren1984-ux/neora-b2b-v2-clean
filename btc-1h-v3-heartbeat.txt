@@ -1,1 +1,1 @@
-2026-10-03T01:12:21Z primary guard v3 anchor=20261003T010000Z
+2026-10-03T02:15:31Z backup guard v3 anchor=20261003T020000Z

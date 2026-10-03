@@ -288,6 +288,9 @@ def build() -> tuple[dict, str]:
         arb_status = (a.get("status") if a else "SOURCE_INVALID" if invalid else
                       "SLOT_MISSED" if am else "UNRECORDED_MISS" if
                       point + dt.timedelta(minutes=45) <= now else "PENDING")
+        row["regime_v4"]["used_by_arbiter_at_decision"] = (
+            bool(a.get("sources", {}).get("regime")) if a and arbiter_stream == "arbiter_v4"
+            else None)
         row["arbiter"] = {"status": arb_status,
                           "reason": a.get("reason") if a else invalid.get("reason") if invalid else
                           am.get("reason") if am else None,
@@ -335,7 +338,7 @@ def build() -> tuple[dict, str]:
                                         "status": r["arbiter"]["status"],
                                         "reason": r["regime_v4"]["missing_reason"] or
                                                   r["arbiter"]["reason"]}
-                                       for r in due_v4 if r["regime_v4"]["source_status"] != "ISSUED"],
+                                       for r in due_v4 if r["regime_v4"]["used_by_arbiter_at_decision"] is False],
                   "unrecorded_misses": [r["slot_msk"] for r in due_v4 if
                                         r["arbiter"]["status"] == "UNRECORDED_MISS"],
                   "signed_slot_misses": [r["slot_msk"] for r in due_v4 if
@@ -393,6 +396,8 @@ def build() -> tuple[dict, str]:
         vtxt = ("/".join(f"{vp[k]:.3f}" for k in ("upside", "range", "downside"))
                 if vp else names.get(v.get("status"), "—"))
         reg = names.get(r["regime_v4"]["state"], "—")
+        if r["regime_v4"]["used_by_arbiter_at_decision"] is False and r["regime_v4"]["state"] is not None:
+            reg += " (после решения арбитра)"
         if r["regime_v4"]["state"] is None and r["regime_v4"]["missing_reason"]:
             reason = r["regime_v4"]["missing_reason"]
             reg = ("нет OI предыдущего снимка" if "open_interest:previous" in reason

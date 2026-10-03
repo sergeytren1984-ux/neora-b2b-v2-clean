@@ -129,6 +129,24 @@ def binary_score(p: float, truth: bool) -> dict:
             "log_loss": round(-math.log(p if truth else 1 - p), 6)}
 
 
+def constant_baseline_comparison(rows: list[dict], head: str, prior: float) -> dict:
+    closed = [r[head] for r in rows if r[head]["actual"] is not None
+              and r[head]["score_diagnostic"] is not None]
+    if not closed:
+        return {"n": 0, "positive_events": 0, "constant": prior,
+                "model_brier": None, "baseline_brier": None,
+                "model_log_loss": None, "baseline_log_loss": None}
+    return {"n": len(closed), "positive_events": sum(bool(r["actual"]) for r in closed),
+            "constant": prior,
+            "model_brier": round(sum(r["score_diagnostic"]["brier"] for r in closed)/len(closed), 6),
+            "baseline_brier": round(sum(binary_score(prior, r["actual"])["brier"]
+                                         for r in closed)/len(closed), 6),
+            "model_log_loss": round(sum(r["score_diagnostic"]["log_loss"]
+                                        for r in closed)/len(closed), 6),
+            "baseline_log_loss": round(sum(binary_score(prior, r["actual"])["log_loss"]
+                                           for r in closed)/len(closed), 6)}
+
+
 def episodes(rows: list[dict], head: str) -> dict:
     finished = [r for r in rows if r.get(head, {}).get("actual") is not None]
     blocks = []
@@ -343,7 +361,14 @@ def build() -> tuple[dict, str]:
                                         r["arbiter"]["status"] == "UNRECORDED_MISS"],
                   "signed_slot_misses": [r["slot_msk"] for r in due_v4 if
                                         r["arbiter"]["status"] == "SLOT_MISSED"]}
+    baseline = json.loads(Path("btc_research/constant_tail_baseline_v1.json").read_bytes())
+    comparison = {"status": "POST_START_DESCRIPTIVE_ONLY_NO_UNTOUCHED_PROOF",
+                  "source_uncompressed_sha256": baseline["source_uncompressed_sha256"],
+                  "training_anchors": baseline["training_anchors"],
+                  "up": constant_baseline_comparison(rows, "up", baseline["up_constant"]),
+                  "down": constant_baseline_comparison(rows, "down", baseline["down_constant"])}
     out = {"schema": "btc-signed-diagnostic-scorecard-v1",
+           "constant_baseline_comparison": comparison,
            "generated_at_utc": now.isoformat(), "source_event_counts": counts,
            "arbiter_v4_continuity": continuity,
            "epoch_5_e2e_audit": audit_v5(streams["v5"], now),
@@ -387,6 +412,10 @@ def build() -> tuple[dict, str]:
              "события v5 и v4 используют собственные определения классов, их оценки нельзя",
              "считать прямым сравнением качества без общей метки. Исходы появляются после due.", "",
              "В v2.9.30 порядок чисел: рост / диапазон / снижение. В метриках: Brier / Log Loss.", "",
+             ("Постоянная база из 2024–2025 введена после старта наблюдений: сравнительные "
+              "метрики описательные, не зачётная проверка преимущества. "
+              f"Закрытых пар рост/падение: {comparison['up']['n']}/{comparison['down']['n']}; "
+              f"положительных: {comparison['up']['positive_events']}/{comparison['down']['positive_events']}."), "",
              "| Якорь МСК | v2.9.30 4ч | v4 режим | Рост >1% | Падение <−1% | Арбитр | Исходы | Метрики после срока |",
              "|---|---|---|---|---|---|---|---|"]
     for r in rows[-72:]:

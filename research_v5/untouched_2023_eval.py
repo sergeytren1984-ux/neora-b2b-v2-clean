@@ -7,12 +7,14 @@ import io
 import json
 import math
 import os
+import sys
 import urllib.error
 import urllib.request
 import zipfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import numpy as np
 from directional_v1.alert import candidate as up_candidate
 from directional_down_v1.alert import candidate as down_candidate

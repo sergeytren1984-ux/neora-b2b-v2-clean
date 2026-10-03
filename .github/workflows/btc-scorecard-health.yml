@@ -1,6 +1,9 @@
 name: BTC scorecard health snapshot
 
 on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/btc-scorecard-health.yml]
   workflow_dispatch: {}
 
 permissions:

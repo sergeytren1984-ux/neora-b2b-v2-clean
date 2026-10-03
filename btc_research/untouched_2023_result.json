@@ -1,0 +1,133 @@
+{
+  "archive_receipts": [
+    {
+      "partial_hours_excluded": [],
+      "rows": 744,
+      "sha256": "ea8caf7fd56c7f7143723f56f8d12a2fc0b643badbcdae5c660db2d11454a11d",
+      "url": "https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2023-01.zip"
+    },
+    {
+      "partial_hours_excluded": [],
+      "rows": 672,
+      "sha256": "53525b700548a19488fcb8754778acdf7941c9ba0b6e7eb548a51a376ef8d86b",
+      "url": "https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2023-02.zip"
+    },
+    {
+      "partial_hours_excluded": [
+        {
+          "close_ms": 1679661581646,
+          "open_ms": 1679659200000
+        }
+      ],
+      "rows": 743,
+      "sha256": "7f2afb8e0179a57ac31eab5205660298ba5eb77039ac2e21aef9b715ff3d06ce",
+      "url": "https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2023-03.zip"
+    },
+    {
+      "partial_hours_excluded": [],
+      "rows": 720,
+      "sha256": "1787dc83836deafaa77d4276cbe3b3ca1fe0083b3017079e3560605ff4f7a4ba",
+      "url": "https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2023-04.zip"
+    },
+    {
+      "partial_hours_excluded": [],
+      "rows": 744,
+      "sha256": "16b33557a4a4040fc56c711f4b1a750ebafb5a7f8dd46c060d9fc8c66cdc1982",
+      "url": "https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2023-05.zip"
+    },
+    {
+      "partial_hours_excluded": [],
+      "rows": 720,
+      "sha256": "05f87fb5f004ee0aff019adb7015afab8df0baaaf2b77154d75ae53e18d59b11",
+      "url": "https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2023-06.zip"
+    },
+    {
+      "partial_hours_excluded": [],
+      "rows": 744,
+      "sha256": "f49a738a793055a583784e78a54840a43861fd110118cbe1add14ef1afb63032",
+      "url": "https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2023-07.zip"
+    },
+    {
+      "partial_hours_excluded": [],
+      "rows": 744,
+      "sha256": "e983243d44536a06ff4707cf35df29f636fe788e6fb69c3b3feed2ef43d343d4",
+      "url": "https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2023-08.zip"
+    },
+    {
+      "partial_hours_excluded": [],
+      "rows": 720,
+      "sha256": "28e12ccaf15745bfe11f570b9079793750047fde3d340fe0231858b26bc0f9d9",
+      "url": "https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2023-09.zip"
+    },
+    {
+      "partial_hours_excluded": [],
+      "rows": 744,
+      "sha256": "165ec50601f914d6c41b776414096bc73974bf45fcd41aaddfedd1cf66cb6c6e",
+      "url": "https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2023-10.zip"
+    },
+    {
+      "partial_hours_excluded": [],
+      "rows": 720,
+      "sha256": "4f550d182d529839dd9cfc28ef0ecca8cd8003e991067e92a2af5b9e92762f49",
+      "url": "https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2023-11.zip"
+    },
+    {
+      "partial_hours_excluded": [],
+      "rows": 744,
+      "sha256": "6117d93e3eb6574df6b0087a45cf12e171afe91789b523b0bfcce00d8f1b6e37",
+      "url": "https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2023-12.zip"
+    }
+  ],
+  "artifacts_sha256": {
+    "down": "621b7d969734a688fd6d6d55ab831f4042210b8cc0c634f15c1096eb664496ae",
+    "up": "bac51ab5a48b7de0f3d6ad44533e652c6553af0fd27e993ddacfc2ee40d8b2f4"
+  },
+  "candidate_frozen_before_archive_opened": "2026-10-03T07:27:14Z",
+  "contiguous_segment_hours": [
+    1980,
+    6778
+  ],
+  "first_720_scores_per_contiguous_segment_warmup_only": true,
+  "interpretation": "one historical stress block; prospective still required",
+  "partial_or_missing_hours_never_imputed": true,
+  "period": "2023-01-01 through 2023-12-31 UTC",
+  "results": {
+    "down": {
+      "alerts": 1485,
+      "brier": 0.05976460930885923,
+      "events": 447,
+      "false_alarm_rate": 0.20223686226444001,
+      "log_loss": 0.23397332449915145,
+      "n": 6974,
+      "precision": 0.1111111111111111,
+      "prevalence": 0.06409521078290795,
+      "recall": 0.3691275167785235,
+      "retrospective_frequency_brier": 0.059987014737602554,
+      "weekly_bootstrap_precision_lift_95ci": [
+        0.02801420545299575,
+        0.06437320245672633
+      ]
+    },
+    "up": {
+      "alerts": 1508,
+      "brier": 0.07113777122953384,
+      "events": 561,
+      "false_alarm_rate": 0.1956962420084204,
+      "log_loss": 0.26205539237007586,
+      "n": 6974,
+      "precision": 0.16777188328912468,
+      "prevalence": 0.0804416403785489,
+      "recall": 0.45098039215686275,
+      "retrospective_frequency_brier": 0.07397078287175711,
+      "weekly_bootstrap_precision_lift_95ci": [
+        0.061814583114966404,
+        0.11151507542158912
+      ]
+    }
+  },
+  "schema": "btc-untouched-2023-one-shot-v1",
+  "target": "BTCUSDT spot \u00b11% 4h close",
+  "trading_authority": false,
+  "training_2024_2025_only": true,
+  "warning_cutoff_rank": 0.8
+}

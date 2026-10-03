@@ -352,6 +352,7 @@ def build() -> tuple[dict, str]:
              "DOWNSIDE_TAIL_RISK_CONCORDANT": "повышен риск падения; согласие",
              "DOWNSIDE_TAIL_RISK_WITH_REGIME_DISAGREEMENT": "повышен риск падения; расхождение",
              "DOWNSIDE_TAIL_RISK_REGIME_UNAVAILABLE": "риск падения; режим недоступен",
+             "NO_UPSIDE_TAIL_WARNING_REGIME_UNAVAILABLE": "нет сигнала роста; режим недоступен",
              "UPSIDE_TAIL_RISK_DOWN_HEAD_UNAVAILABLE": "риск роста; голова падения недоступна",
              "DOWN_HEAD_UNAVAILABLE_NO_DIRECTIONAL_CONCLUSION": "голова падения недоступна",
              "PENDING": "ожидание", "PENDING_OR_MISSED": "ожидание или пропуск",
@@ -373,6 +374,10 @@ def build() -> tuple[dict, str]:
         vtxt = ("/".join(f"{vp[k]:.3f}" for k in ("upside", "range", "downside"))
                 if vp else names.get(v.get("status"), "—"))
         reg = names.get(r["regime_v4"]["state"], "—")
+        if r["regime_v4"]["state"] is None and r["regime_v4"]["missing_reason"]:
+            reason = r["regime_v4"]["missing_reason"]
+            reg = ("нет OI предыдущего снимка" if "open_interest:previous" in reason
+                   else "нет режима: " + names.get(r["regime_v4"]["source_status"], "данные недействительны"))
         def signal(name):
             x = r[name]
             return (f"ранг 30д {x['rank_30d']:.3f} / " +

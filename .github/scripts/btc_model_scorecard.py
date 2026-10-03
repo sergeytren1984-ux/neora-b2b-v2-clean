@@ -26,6 +26,7 @@ SOURCES = {
     "down": ("btc-directional-down-v1", "directional_down_v1_events", "btc-directional-down-v1.yml"),
     "arbiter": ("btc-arbitration-v3", "arbiter_v3_events", "btc-arbitration-v3.yml"),
     "arbiter_v4": ("btc-arbitration-v4", "arbiter_v4_events", "btc-arbitration-v4.yml"),
+    "barrier": ("btc-first-passage-v1", "first_passage_v1_events", "btc-first-passage-v1.yml"),
 }
 
 
@@ -88,14 +89,18 @@ def signed_events(source: str) -> list[dict]:
         if event.get("type") in ("FORECAST_ISSUED", "REGIME_FORECAST_ISSUED",
                                   "DIRECTIONAL_4H_ALERT_ISSUED",
                                   "DIRECTIONAL_4H_DOWNSIDE_ALERT_ISSUED",
-                                  "ARBITRATION_DECISION_ISSUED"):
+                                  "ARBITRATION_DECISION_ISSUED", "BARRIER_QUESTION_ISSUED"):
             anchor = stamp(event["anchor_utc"])
             if not anchor <= integrated < anchor + dt.timedelta(minutes=45):
                 raise ValueError(f"{source}: nonprospective forecast {path}")
         if event.get("type") in ("OUTCOME_AND_LEARNING_APPLIED", "REGIME_OUTCOME_RECORDED",
-                                  "OUTCOME_RECORDED", "ARBITRATION_OUTCOME_RECORDED"):
+                                  "OUTCOME_RECORDED", "ARBITRATION_OUTCOME_RECORDED",
+                                  "BARRIER_OUTCOME_RECORDED"):
             if integrated < stamp(event["due_utc"]):
                 raise ValueError(f"{source}: early outcome {path}")
+        if source == "barrier" and event.get("raw_path"):
+            if digest(get(ref,event["raw_path"])) != event["raw_sha256"]:
+                raise ValueError(f"{source}: raw mismatch {path}")
         event["_source_path"] = f"https://github.com/{REPO}/blob/{branch}/{path}"
         event["_rekor_integrated_utc"] = integrated.isoformat()
         out.append(event)
@@ -285,6 +290,23 @@ def build() -> tuple[dict, str]:
                           "source_epoch": arbiter_stream,
                           "slot_missed": am is not None or arb_status == "UNRECORDED_MISS",
                           "trading_authority": False}
+        if point.hour == 14 and point >= stamp("2026-10-03T14:00:00Z"):
+            row["first_passage"] = {}
+            for scenario in ("entry_72h", "entry_7d"):
+                question = by_type["barrier"].get(f"barrier:{slot}:{scenario}")
+                outcome = by_type["barrier"].get(f"barrier-outcome:{slot}:{scenario}")
+                missing = by_type["barrier"].get(f"barrier-missed:{slot}:{scenario}")
+                ineligible = by_type["barrier"].get(f"barrier-ineligible:{slot}:{scenario}")
+                row["first_passage"][scenario] = {
+                    "status": "ISSUED" if question else "INELIGIBLE" if ineligible else
+                              "SLOT_MISSED" if missing else "UNRECORDED_MISS" if
+                              point + dt.timedelta(minutes=45) <= now else "PENDING",
+                    "reference_price": question.get("reference_price") if question else None,
+                    "lower_usdt": question.get("lower_usdt") if question else None,
+                    "upper_usdt": question.get("upper_usdt") if question else None,
+                    "due_utc": question.get("due_utc") if question else None,
+                    "outcome": outcome.get("outcome") if outcome else None,
+                    "probability": None}
         rows.append(row)
         point += dt.timedelta(hours=1)
     counts = {name: {kind: sum(e["type"] == kind for e in events)
@@ -372,6 +394,16 @@ def build() -> tuple[dict, str]:
                                            names.get(r["arbiter"]["status"], "без статуса")),
                                           ", ".join(actuals) or "ожидание",
                                           "; ".join(metric) or "ожидание")) + " |")
+    lines += ["", "## Окно возврата ядра: фиксированные барьеры", "",
+              "С 17:00 МСК 03.10.2026 подписываются два ежедневных вопроса: 82 500 раньше 87 000 за 72 ч;",
+              "81 500 раньше 88 000 за 7 суток. Классы: нижний первым, верхний первым, ни один,",
+              "оба в одном часовом баре. Вероятности для торговли не опубликованы.", ""]
+    for r in rows[-72:]:
+        for key, title in (("entry_72h", "72 ч"), ("entry_7d", "7 суток")):
+            b = r.get("first_passage", {}).get(key)
+            if b:
+                lines.append(f"- {stamp(r['slot_msk']).strftime('%d.%m %H:%M')} МСК, {title}: "
+                             f"{b['status']}; исход: {b['outcome'] or 'после срока'}.")
     lines += ["", "Численные Brier и Log Loss по каждому завершённому исходу, пропуски и задержки",
               "доступны в `latest.json`. Вероятности класса v4 не опубликованы."]
     return out, "\n".join(lines) + "\n"

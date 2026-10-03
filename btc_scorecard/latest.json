@@ -1,4 +1,17 @@
 {
+  "arbiter_v4_continuity": {
+    "assessed_slots": 4,
+    "decisions": 4,
+    "signed_slot_misses": [],
+    "source_fallbacks": [
+      {
+        "reason": "ValueError: required context invalid: open_interest:previous",
+        "slot_msk": "2026-10-03T12:00:00+03:00",
+        "status": "NO_UPSIDE_TAIL_WARNING_REGIME_UNAVAILABLE"
+      }
+    ],
+    "unrecorded_misses": []
+  },
   "downside_admitted_to_arbiter_from_utc": "2026-10-03T09:00:00Z",
   "epoch_5_e2e_audit": {
     "deadline_minutes": 45,
@@ -24,7 +37,7 @@
     "start_utc": "2026-09-30T20:00:00+00:00"
   },
   "event_definitions_differ": true,
-  "generated_at_utc": "2026-10-03T13:10:41.614613+00:00",
+  "generated_at_utc": "2026-10-03T13:33:29.602274+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 0,

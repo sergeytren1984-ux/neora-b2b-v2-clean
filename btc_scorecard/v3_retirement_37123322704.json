@@ -1,0 +1,1 @@
+{"disabled_workflows": ["btc-arbitration-v3.yml", "btc-arbitration-v3-independent-guard.yml", "btc-arbitration-v3-sequencer.yml"], "retired_at_utc": "2026-10-03T12:34:52.878117+00:00", "schema": "btc-v3-retirement-after-v4-v1", "v4_decision": "arbiter_v4_events/00000003.json", "v4_slot": "20261003T090000Z"}

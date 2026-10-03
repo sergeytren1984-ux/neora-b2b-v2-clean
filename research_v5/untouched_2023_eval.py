@@ -47,14 +47,15 @@ def archive() -> tuple[list[dict], list[dict]]:
             if names != [name[:-4] + ".csv"]:
                 raise ValueError("unexpected archive contents")
             rows = list(csv.reader(io.TextIOWrapper(z.open(names[0]), encoding="utf-8")))
-        receipts.append({"url": BASE + name, "sha256": sha, "rows": len(rows)})
+        irregular = []
         for row in rows:
             if len(row) != 12:
                 raise ValueError("unexpected kline columns")
             open_ms = int(row[0])
             t = datetime.fromtimestamp(open_ms / 1000, UTC)
             if int(row[6]) != open_ms + 3600000 - 1:
-                raise ValueError(f"invalid close time month={month} open_ms={open_ms} close_ms={row[6]}")
+                irregular.append({"open_ms": open_ms, "close_ms": int(row[6])})
+                continue  # partial exchange-halt candle; never turn it into a full hour
             o, h, l, c, volume, buy = map(float, (row[1], row[2], row[3], row[4], row[5], row[9]))
             trades = int(row[8])
             if (not all(map(math.isfinite, (o, h, l, c, volume, buy))) or
@@ -65,10 +66,14 @@ def archive() -> tuple[list[dict], list[dict]]:
                             "close_time": (t + timedelta(hours=1)).isoformat(),
                             "open": o, "high": h, "low": l, "close": c,
                             "volume": volume, "trades": trades, "taker_buy_base": buy})
-    if len(candles) != 8760 or any(
-            datetime.fromisoformat(b["open_time"]) - datetime.fromisoformat(a["open_time"])
-            != timedelta(hours=1) for a, b in zip(candles, candles[1:])):
-        raise ValueError("2023 archive has a gap, duplicate or incomplete year")
+        receipts.append({"url": BASE + name, "sha256": sha, "rows": len(rows),
+                         "partial_hours_excluded": irregular})
+    if (not candles or candles[0]["open_time"] != "2023-01-01T00:00:00+00:00" or
+            candles[-1]["open_time"] != "2023-12-31T23:00:00+00:00"):
+        raise ValueError("2023 archive missing year endpoints")
+    if any(datetime.fromisoformat(b["open_time"]) <= datetime.fromisoformat(a["open_time"])
+           for a, b in zip(candles, candles[1:])):
+        raise ValueError("2023 archive has duplicates or unsorted rows")
     return candles, receipts
 
 
@@ -110,26 +115,48 @@ def once() -> None:
     root = Path(__file__).resolve().parents[1]
     artifacts = {name: json.loads((root / path).read_bytes()) for name, path in (
         ("up", "directional_v1/artifact.json"), ("down", "directional_down_v1/artifact.json"))}
-    estimates = {name: [] for name in artifacts}
-    for i in range(168, len(cs)):
-        bars = cs[i-168:i+1]
-        estimates["up"].append(up_candidate(bars, artifacts["up"])[0])
-        estimates["down"].append(down_candidate(bars, artifacts["down"])[0])
+    segments = []
+    segment = [cs[0]]
+    for c in cs[1:]:
+        if datetime.fromisoformat(c["open_time"]) - datetime.fromisoformat(
+                segment[-1]["open_time"]) != timedelta(hours=1):
+            segments.append(segment)
+            segment = []
+        segment.append(c)
+    segments.append(segment)
+    collected = {name: {"dates": [], "scores": [], "alerts": [], "truth": []}
+                 for name in artifacts}
+    for segment in segments:
+        if len(segment) < 893:  # 169 features + 720 earlier scores + 4h future
+            continue
+        estimates = {name: [] for name in artifacts}
+        for i in range(168, len(segment)):
+            bars = segment[i-168:i+1]
+            estimates["up"].append(up_candidate(bars, artifacts["up"])[0])
+            estimates["down"].append(down_candidate(bars, artifacts["down"])[0])
+        for i in range(888, len(segment)-4):
+            for name, sign in (("up", 1), ("down", -1)):
+                p = estimates[name][i-168]
+                rank = sum(x <= p for x in estimates[name][i-168-720:i-168]) / 720
+                hit = 100 * sign * (segment[i+4]["close"] / segment[i]["close"] - 1) > 1
+                collected[name]["dates"].append(segment[i]["close_time"])
+                collected[name]["scores"].append(p)
+                collected[name]["alerts"].append(rank >= .8)
+                collected[name]["truth"].append(hit)
     results = {}
-    start = 168 + 720
-    dates = [cs[i]["close_time"] for i in range(start, len(cs)-4)]
     for name, sign in (("up", 1), ("down", -1)):
-        scores = np.array(estimates[name])
-        idx = np.arange(start, len(cs)-4)
-        rank = np.array([np.mean(scores[i-168-720:i-168] <= scores[i-168]) for i in idx])
-        alert = rank >= .8
-        truth = np.array([100 * sign * (cs[i+4]["close"] / cs[i]["close"] - 1) > 1 for i in idx])
-        results[name] = metric(truth, scores[idx-168], alert, dates)
+        data = collected[name]
+        truth = np.array(data["truth"], dtype=bool)
+        results[name] = metric(truth, np.array(data["scores"]),
+                               np.array(data["alerts"], dtype=bool), data["dates"])
     result = {"schema": "btc-untouched-2023-one-shot-v1", "target": "BTCUSDT spot ±1% 4h close",
               "period": "2023-01-01 through 2023-12-31 UTC",
               "candidate_frozen_before_archive_opened": "2026-10-03T07:27:14Z",
               "training_2024_2025_only": True, "warning_cutoff_rank": .8,
-              "first_720_scores_warmup_only": True, "archive_receipts": receipts,
+              "first_720_scores_per_contiguous_segment_warmup_only": True,
+              "contiguous_segment_hours": [len(x) for x in segments],
+              "partial_or_missing_hours_never_imputed": True,
+              "archive_receipts": receipts,
               "artifacts_sha256": {name: hashlib.sha256((root / path).read_bytes()).hexdigest()
                                    for name, path in (("up", "directional_v1/artifact.json"),
                                                       ("down", "directional_down_v1/artifact.json"))},

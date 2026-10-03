@@ -7,7 +7,7 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  actions: read
+  actions: write
   contents: write
 
 jobs:
@@ -43,4 +43,18 @@ jobs:
                                      data=json.dumps(body).encode(),headers=headers,method='PUT')
           with urllib.request.urlopen(req,timeout=25) as r:
               if r.status!=201:raise RuntimeError('health receipt not published')
+          PY
+      - name: Wake current scorecard after health snapshot
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import json,os,urllib.request
+          u=f"https://api.github.com/repos/{os.environ['REPO_NAME']}/actions/workflows/btc-model-scorecard.yml/dispatches"
+          req=urllib.request.Request(u,data=json.dumps({"ref":"main"}).encode(),method="POST",
+               headers={"Authorization":"Bearer "+os.environ["GH_TOKEN"],
+                        "Accept":"application/vnd.github+json","User-Agent":"btc-scorecard-health-wakeup"})
+          with urllib.request.urlopen(req,timeout=25) as r:
+              if r.status!=204:raise RuntimeError("scorecard dispatch failed")
           PY

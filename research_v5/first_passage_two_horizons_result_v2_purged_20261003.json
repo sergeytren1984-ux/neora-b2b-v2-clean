@@ -1,0 +1,137 @@
+{
+  "candidate_is_probability": false,
+  "history_gzip_sha256": "34044e360794c59e8b28a149b30a1f5ad56dc95958511d9c20b97ad14dca6070",
+  "protocol_sha256": "dd70996d137eb2c4daaf7b3400c159e70060015c4882ecec5cb5365c0df283f2",
+  "scenarios": {
+    "entry_72h": {
+      "coefficient_features": [
+        "return_4h",
+        "return_24h",
+        "return_72h",
+        "mean_abs_return_24h",
+        "mean_abs_return_72h",
+        "log_volume_24h_vs_168h"
+      ],
+      "evaluation": {
+        "inspected_Jul_Sep_2026": {
+          "baseline": {
+            "brier": 0.6955989751107892,
+            "log_loss": 1.1573435967907757
+          },
+          "brier_gain_baseline_minus_logistic": 0.04220679170773233,
+          "counts": {
+            "ambiguous": 0,
+            "lower_first": 590,
+            "neither": 572,
+            "upper_first": 711
+          },
+          "n": 1873,
+          "simple_logistic": {
+            "brier": 0.6533921834030569,
+            "log_loss": 1.0788221286895419
+          },
+          "weekly_block_bootstrap_brier_gain_95ci": [
+            -0.004316767039425046,
+            0.10173916879150734
+          ]
+        },
+        "validation_H1_2026": {
+          "baseline": {
+            "brier": 0.6128875015288336,
+            "log_loss": 1.00848165367067
+          },
+          "brier_gain_baseline_minus_logistic": -0.0037614515304073217,
+          "counts": {
+            "ambiguous": 0,
+            "lower_first": 2146,
+            "neither": 638,
+            "upper_first": 1536
+          },
+          "n": 4320,
+          "simple_logistic": {
+            "brier": 0.6166489530592411,
+            "log_loss": 1.0083386373620298
+          },
+          "weekly_block_bootstrap_brier_gain_95ci": [
+            -0.01813797880086795,
+            0.010035538060443154
+          ]
+        }
+      },
+      "purged_training_anchors": 48,
+      "train_n": 17327,
+      "training_frequency": {
+        "ambiguous": 0.0008079875339066197,
+        "lower_first": 0.4262134241357419,
+        "neither": 0.16708027933283315,
+        "upper_first": 0.40589830899751833
+      }
+    },
+    "entry_7d": {
+      "coefficient_features": [
+        "return_4h",
+        "return_24h",
+        "return_72h",
+        "mean_abs_return_24h",
+        "mean_abs_return_72h",
+        "log_volume_24h_vs_168h"
+      ],
+      "evaluation": {
+        "inspected_Jul_Sep_2026": {
+          "baseline": {
+            "brier": 0.7655283106175375,
+            "log_loss": 1.312333382982334
+          },
+          "brier_gain_baseline_minus_logistic": 0.036843576642000324,
+          "counts": {
+            "ambiguous": 0,
+            "lower_first": 383,
+            "neither": 720,
+            "upper_first": 770
+          },
+          "n": 1873,
+          "simple_logistic": {
+            "brier": 0.7286847339755371,
+            "log_loss": 1.2195071105702335
+          },
+          "weekly_block_bootstrap_brier_gain_95ci": [
+            -0.00859110094090421,
+            0.08036296399056891
+          ]
+        },
+        "validation_H1_2026": {
+          "baseline": {
+            "brier": 0.5748860806564284,
+            "log_loss": 0.9300379365953962
+          },
+          "brier_gain_baseline_minus_logistic": 0.006950606675230844,
+          "counts": {
+            "ambiguous": 0,
+            "lower_first": 2250,
+            "neither": 360,
+            "upper_first": 1710
+          },
+          "n": 4320,
+          "simple_logistic": {
+            "brier": 0.5679354739811976,
+            "log_loss": 0.9067227798817039
+          },
+          "weekly_block_bootstrap_brier_gain_95ci": [
+            -0.0013089083185441202,
+            0.015203370691141877
+          ]
+        }
+      },
+      "purged_training_anchors": 144,
+      "train_n": 17231,
+      "training_frequency": {
+        "ambiguous": 0.0,
+        "lower_first": 0.44007892751436367,
+        "neither": 0.12367245081539087,
+        "upper_first": 0.4362486216702455
+      }
+    }
+  },
+  "schema": "btc-first-passage-two-horizons-result-v2-purged",
+  "trading_authority": false
+}

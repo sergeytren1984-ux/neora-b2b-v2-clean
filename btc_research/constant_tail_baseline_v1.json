@@ -1,0 +1,17 @@
+{
+  "schema": "btc-constant-tail-benchmark-v1",
+  "created_at_utc": "2026-10-03T18:20:00Z",
+  "status": "POST_START_DESCRIPTIVE_BENCHMARK_NOT_UNTOUCHED_PROOF",
+  "source": "Binance BTCUSDT closed 1h OHLCV research archive",
+  "source_path": "research_v5/data/btc_1h_2024_to_sep24_2026.json.gz",
+  "source_uncompressed_sha256": "3e78a339e60fec957dea2c0884c6840d66a92351ac04b4198623f1da10165fc9",
+  "training_period": "2024-01-01T00:00:00Z through 2026-01-01T00:00:00Z exclusive",
+  "label": "close[t+4h]/close[t] >1.01 or <0.99",
+  "purge": "outcome close must be <=2026-01-01T00:00:00Z; 168h warmup; contiguous 1h candles",
+  "training_anchors": 17371,
+  "up_positive": 1859,
+  "down_positive": 1764,
+  "up_constant": 0.10701744286454436,
+  "down_constant": 0.10154855794139658,
+  "interpretation": "Fixed base-rate control only; thresholds and model weights unchanged; historical and existing prospective comparisons are descriptive because this benchmark was added after their issuance."
+}

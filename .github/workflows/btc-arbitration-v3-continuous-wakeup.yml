@@ -40,7 +40,7 @@ jobs:
               with urllib.request.urlopen(req,timeout=25) as response:
                   if response.status!=204:raise RuntimeError(f"{target}: HTTP {response.status}")
 
-          target='btc-arbitration-v3-sequencer.yml'
+          targets=('btc-arbitration-v3-sequencer.yml','btc-directional-down-v1.yml')
           stages=(2,12,22,32,39)
           sent=set()
           stop=time.monotonic()+330*60
@@ -48,14 +48,15 @@ jobs:
               now=dt.datetime.now(dt.timezone.utc)
               eligible=[stage for stage in stages if stage<=now.minute]
               if now.minute<43 and eligible:
-                  key=(now.strftime('%Y%m%dT%H'),max(eligible))
-                  if key not in sent:
-                      try:
-                          dispatch(target)
-                          sent.add(key)
-                          print(now.isoformat(),'DISPATCH',target,key,flush=True)
-                      except Exception as error:
-                          print(now.isoformat(),'ERROR',target,key,repr(error),flush=True)
+                  for target in targets:
+                      key=(now.strftime('%Y%m%dT%H'),max(eligible),target)
+                      if key not in sent:
+                          try:
+                              dispatch(target)
+                              sent.add(key)
+                              print(now.isoformat(),'DISPATCH',target,key,flush=True)
+                          except Exception as error:
+                              print(now.isoformat(),'ERROR',target,key,repr(error),flush=True)
               if len(sent)>150:
                   day=now.strftime('%Y%m%d')
                   sent={key for key in sent if key[0].startswith(day)}

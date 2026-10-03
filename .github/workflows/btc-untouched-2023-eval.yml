@@ -1,0 +1,31 @@
+name: BTC one-shot untouched 2023 tail evaluation
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/btc-untouched-2023-eval.yml]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: btc-untouched-2023-one-shot
+  cancel-in-progress: false
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: btc-directional-down-v1
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install fixed evaluator dependency
+        run: python3 -m pip install --user numpy==2.2.6
+      - name: Seal first evaluation result without tuning
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 research_v5/untouched_2023_eval.py

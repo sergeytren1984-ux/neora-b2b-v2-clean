@@ -51,9 +51,10 @@ def archive() -> tuple[list[dict], list[dict]]:
         for row in rows:
             if len(row) != 12:
                 raise ValueError("unexpected kline columns")
-            t = datetime.fromtimestamp(int(row[0]) / 1000, UTC)
-            if int(row[6]) != int((t + timedelta(hours=1)).timestamp() * 1000) - 1:
-                raise ValueError("invalid close time")
+            open_ms = int(row[0])
+            t = datetime.fromtimestamp(open_ms / 1000, UTC)
+            if int(row[6]) != open_ms + 3600000 - 1:
+                raise ValueError(f"invalid close time month={month} open_ms={open_ms} close_ms={row[6]}")
             o, h, l, c, volume, buy = map(float, (row[1], row[2], row[3], row[4], row[5], row[9]))
             trades = int(row[8])
             if (not all(map(math.isfinite, (o, h, l, c, volume, buy))) or

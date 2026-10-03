@@ -1,0 +1,33 @@
+name: BTC signed diagnostic scorecard
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/btc-model-scorecard.yml]
+  schedule:
+    - cron: '16 * * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: btc-signed-diagnostic-scorecard
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: Verify signed events and publish comparison
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/btc_model_scorecard.py

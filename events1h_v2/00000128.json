@@ -1,0 +1,1 @@
+{"anchor_utc":"2026-10-03T06:00:00+00:00","idempotency_key":"abstain:20261003T060000Z:1h","previous_hash":"72794ad263fb524f7d37d698494e5971e92664772573e98218163496b32b5ad2","reason":"ABSTAIN_MODEL_DRIFT","schema":"btc-1h-rekor-event-v2","sequence":128,"slot":"20261003T060000Z","type":"ABSTAIN","workflow_commit":"1fc36cce13c2764d086fad64b75407f3dccb1886"}

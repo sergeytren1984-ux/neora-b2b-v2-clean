@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
     paths: [.github/workflows/btc-scorecard-health.yml]
+  workflow_run:
+    workflows: ['BTC signed diagnostic scorecard']
+    types: [completed]
   workflow_dispatch: {}
 
 permissions:

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import base64
 import datetime as dt
+import gzip
 import hashlib
 import json
 import math
@@ -138,6 +139,56 @@ def episodes(rows: list[dict], head: str) -> dict:
             "missed_episodes": sum(x is None for x in delays)}
 
 
+def audit_v5(events: list[dict], now: dt.datetime) -> dict:
+    """Check the frozen epoch-5 cadence and concrete raw/factor linkage."""
+    by_key = {e["idempotency_key"]: e for e in events}
+    ref = "refs/remotes/origin/btc-evidence-v5"
+    defects = []
+    issued = 0
+    checked_raw = set()
+    start = stamp("2026-09-30T20:00:00Z")
+    anchor = start
+    while anchor + dt.timedelta(minutes=45) <= now:
+        slot = anchor.strftime("%Y%m%dT%H%M%SZ")
+        if anchor.hour % 4 == 0:
+            horizons = ("4h", "24h") if anchor.hour == 0 else ("4h",)
+            raw = by_key.get("raw:" + slot)
+            factors = by_key.get("factors:" + slot)
+            for horizon in horizons:
+                key = f"forecast:{slot}:{horizon}"
+                forecast = by_key.get(key)
+                missed = by_key.get(f"missed:{slot}:{horizon}")
+                if forecast is None:
+                    defects.append({"slot": slot, "horizon": horizon,
+                                    "defect": "NO_FORECAST" if missed is None else "SLOT_MISSED"})
+                    continue
+                issued += 1
+                if forecast["type"] != "FORECAST_ISSUED" or forecast.get("base") is None:
+                    defects.append({"slot": slot, "horizon": horizon, "defect": "NO_PROBABILITIES"})
+                if forecast.get("model_status") == "DEGRADED_CLIPPED_DRIFT":
+                    continuity = forecast.get("continuity") or {}
+                    if (continuity.get("primary_status") != "ABSTAIN_MODEL_DRIFT" or
+                            not continuity.get("clipped_features")):
+                        defects.append({"slot": slot, "horizon": horizon,
+                                        "defect": "DRIFT_CONTINUITY_INVALID"})
+                if raw is None or factors is None or any(
+                        x.get("raw_sha256") != forecast.get("raw_sha256") for x in (raw, factors)):
+                    defects.append({"slot": slot, "horizon": horizon,
+                                    "defect": "RAW_FACTORS_LINK_INVALID"})
+            if raw is not None and slot not in checked_raw:
+                checked_raw.add(slot)
+                try:
+                    plain = gzip.decompress(get(ref, "raw/" + slot + ".json.gz"))
+                    if digest(plain) != raw["raw_sha256"]:
+                        raise ValueError("raw digest mismatch")
+                except (subprocess.CalledProcessError, OSError, ValueError, KeyError):
+                    defects.append({"slot": slot, "defect": "RAW_BUNDLE_INVALID"})
+        anchor += dt.timedelta(hours=1)
+    return {"start_utc": start.isoformat(), "deadline_minutes": 45,
+            "forecasts_issued": issued, "raw_bundles_checked": len(checked_raw),
+            "defects": defects}
+
+
 def build() -> tuple[dict, str]:
     streams = {name: signed_events(name) for name in SOURCES}
     by_type = {name: {e["idempotency_key"]: e for e in events}
@@ -210,6 +261,7 @@ def build() -> tuple[dict, str]:
                         "also_requires": "30 separate up and down episodes each; paired Brier and Log Loss gain with positive 95% weekly block bootstrap bound; future calibration/reliability test"}
     out = {"schema": "btc-signed-diagnostic-scorecard-v1",
            "generated_at_utc": now.isoformat(), "source_event_counts": counts,
+           "epoch_5_e2e_audit": audit_v5(streams["v5"], now),
            "event_definitions_differ": True,
            "regime_scores_are_not_calibrated_probabilities": True,
            "downside_admitted_to_arbiter_from_utc": "2026-10-03T09:00:00Z",

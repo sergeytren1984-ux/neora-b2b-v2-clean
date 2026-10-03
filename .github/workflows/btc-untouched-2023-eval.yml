@@ -1,9 +1,6 @@
 name: BTC one-shot untouched 2023 tail evaluation
 
 on:
-  push:
-    branches: [main]
-    paths: [.github/workflows/btc-untouched-2023-eval.yml]
   workflow_dispatch: {}
 
 permissions:
@@ -20,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          ref: btc-directional-down-v1
+          ref: c793cd8d6feb207b5abceeea31e6dd849414e1f9
           fetch-depth: 0
           persist-credentials: false
       - name: Install fixed evaluator dependency

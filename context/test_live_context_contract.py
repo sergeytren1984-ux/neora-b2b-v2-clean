@@ -6,6 +6,14 @@ from context import live_context_collector as collector
 
 
 class OpenInterestContract(unittest.TestCase):
+    def test_canonical_oi_does_not_switch_exchanges(self):
+        okx = {"value_btc": 28450.0, "source_timestamp_utc": "2026-10-03T18:30:00+00:00"}
+        with patch.object(collector, "okx_oi", return_value=okx), \
+             patch.object(collector, "binance_oi", side_effect=AssertionError("cross-exchange OI")):
+            result = collector.canonical_oi()
+        self.assertEqual(result["source"], "OKX_SWAP")
+        self.assertEqual(result["value_btc"], 28450.0)
+
     def test_binance_btc_units_are_named_for_regime(self):
         data = {"openInterest": "12345.50", "time": 1791043200000}
         response = {"raw": json.dumps(data), "requested_url": "https://fapi.binance.com/fapi/v1/openInterest",

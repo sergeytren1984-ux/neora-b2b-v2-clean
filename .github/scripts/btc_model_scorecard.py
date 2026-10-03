@@ -240,12 +240,16 @@ def build() -> tuple[dict, str]:
         a = by_type[arbiter_stream].get("decision:" + slot + ":4h")
         ao = by_type[arbiter_stream].get("outcome:" + slot + ":4h")
         am = by_type[arbiter_stream].get("missed:" + slot)
-        row["arbiter"] = {"status": a.get("status") if a else "PENDING_OR_MISSED",
+        invalid = by_type[arbiter_stream].get("invalid:" + slot)
+        arb_status = (a.get("status") if a else "SOURCE_INVALID" if invalid else
+                      "SLOT_MISSED" if am else "UNRECORDED_MISS" if
+                      point + dt.timedelta(minutes=45) <= now else "PENDING")
+        row["arbiter"] = {"status": arb_status,
                           "action_status": a.get("action_status") if a else None,
                           "actual_rise_gt_1pct": ao.get("actual_rise_gt_1pct") if ao else None,
                           "actual_fall_lt_minus_1pct": ao.get("actual_fall_lt_minus_1pct") if ao else None,
                           "source_epoch": arbiter_stream,
-                          "slot_missed": am is not None,
+                          "slot_missed": am is not None or arb_status == "UNRECORDED_MISS",
                           "trading_authority": False}
         rows.append(row)
         point += dt.timedelta(hours=1)
@@ -286,7 +290,9 @@ def build() -> tuple[dict, str]:
              "UPSIDE_TAIL_RISK_DOWN_HEAD_UNAVAILABLE": "риск роста; голова падения недоступна",
              "DOWN_HEAD_UNAVAILABLE_NO_DIRECTIONAL_CONCLUSION": "голова падения недоступна",
              "PENDING": "ожидание", "PENDING_OR_MISSED": "ожидание или пропуск",
-             "SLOT_MISSED": "пропуск", "upside": "рост", "downside": "снижение", "range": "диапазон"}
+             "SLOT_MISSED": "пропуск", "UNRECORDED_MISS": "пропуск без события",
+             "SOURCE_INVALID": "источник недействителен",
+             "upside": "рост", "downside": "снижение", "range": "диапазон"}
     lines = ["# BTC: подписанная сравнительная таблица (теневой режим)", "",
              "Обновлено: " + now.astimezone(MSK).strftime("%d.%m.%Y %H:%M МСК") + ".",
              "В колонке v4 указаны некалиброванные баллы. Brier v4 — только диагностика;",

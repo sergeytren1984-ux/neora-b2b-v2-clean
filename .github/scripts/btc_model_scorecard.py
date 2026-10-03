@@ -438,8 +438,15 @@ def build() -> tuple[dict, str]:
         for key, title in (("entry_72h", "72 ч"), ("entry_7d", "7 суток")):
             b = r.get("first_passage", {}).get(key)
             if b:
+                barrier_names = {"ISSUED": "вопрос подписан", "INELIGIBLE": "вне фиксированных границ",
+                                 "SLOT_MISSED": "слот пропущен", "UNRECORDED_MISS": "нет события к дедлайну",
+                                 "PENDING": "ожидание"}
+                outcome_names = {"lower_first": "нижняя граница первой",
+                                 "upper_first": "верхняя граница первой",
+                                 "neither": "ни одна граница", "ambiguous": "обе в одном часовом баре"}
                 lines.append(f"- {stamp(r['slot_msk']).strftime('%d.%m %H:%M')} МСК, {title}: "
-                             f"{b['status']}; исход: {b['outcome'] or 'после срока'}.")
+                             f"{barrier_names.get(b['status'], b['status'])}; "
+                             f"исход: {outcome_names.get(b['outcome'], 'после срока')}.")
     lines += ["", "Численные Brier и Log Loss по каждому завершённому исходу, пропуски и задержки",
               "доступны в `latest.json`. Вероятности класса v4 не опубликованы."]
     return out, "\n".join(lines) + "\n"

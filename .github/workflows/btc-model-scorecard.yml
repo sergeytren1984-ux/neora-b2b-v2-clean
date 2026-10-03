@@ -3,7 +3,7 @@ name: BTC signed diagnostic scorecard
 on:
   push:
     branches: [main]
-    paths: [.github/workflows/btc-model-scorecard.yml]
+    paths: [.github/workflows/btc-model-scorecard.yml, .github/scripts/btc_model_scorecard.py]
   schedule:
     - cron: '16 * * * *'
   workflow_dispatch: {}

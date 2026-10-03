@@ -71,7 +71,12 @@
     "start_utc": "2026-09-30T20:00:00+00:00"
   },
   "event_definitions_differ": true,
-  "generated_at_utc": "2026-10-03T18:36:07.744516+00:00",
+  "external_oi_source_audit": {
+    "checked_recent_forecasts": 27,
+    "numeric_cross_exchange_defects": [],
+    "window_hours": 72
+  },
+  "generated_at_utc": "2026-10-03T18:38:39.671269+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 0,

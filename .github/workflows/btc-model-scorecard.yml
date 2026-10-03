@@ -6,6 +6,9 @@ on:
     paths: [.github/workflows/btc-model-scorecard.yml, .github/scripts/btc_model_scorecard.py]
   schedule:
     - cron: '16 * * * *'
+  workflow_run:
+    workflows: ['BTC prospective evidence v5', 'BTC arbitration v4 signed decisions']
+    types: [completed]
   workflow_dispatch: {}
 
 permissions:

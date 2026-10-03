@@ -1,0 +1,1 @@
+{"idempotency_key":"barrier-schedule","previous_hash":null,"protocol_sha256":"22344e964fafc927c1821fc2ff898a4dfd9cde1d9b3b9d80b0b187f8515197d9","published_at_utc":"2026-10-03T12:41:28.370066+00:00","schema":"btc-first-passage-event-v1","sequence":1,"start_utc":"2026-10-03T14:00:00+00:00","type":"SCHEDULE_REGISTERED","workflow_commit":"89a928fa8072e9b36b5732a6208e5e379c6b6a52"}

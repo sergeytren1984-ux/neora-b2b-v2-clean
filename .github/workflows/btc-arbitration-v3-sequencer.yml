@@ -7,7 +7,7 @@ on:
 
 permissions:
   actions: write
-  contents: read
+  contents: write
 
 concurrency:
   group: btc-arbitration-v3-source-sequencer
@@ -27,4 +27,5 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_NAME: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
         run: python3 .github/scripts/btc_arbitration_v3_sequencer.py

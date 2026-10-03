@@ -32,7 +32,7 @@ jobs:
           persist-credentials: true
       - name: Install pinned Cosign
         uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
-      - name: Validate Binance OI contract
+      - name: Validate OI units and single-exchange numeric series
         run: python3 -m unittest context.test_live_context_contract
       - name: Capture context
         id: capture

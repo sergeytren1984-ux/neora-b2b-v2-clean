@@ -1,6 +1,9 @@
 name: BTC arbitration v3 source sequencer
 
 on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/btc-arbitration-v3-sequencer.yml]
   workflow_dispatch: {}
   schedule:
     - cron: '3,18 * * * *'

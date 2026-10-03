@@ -1,0 +1,32 @@
+name: BTC arbiter v4 downside completion wakeup
+
+on:
+  workflow_run:
+    workflows: ['BTC downside 4h shadow v1']
+    types: [completed]
+
+permissions:
+  actions: write
+
+jobs:
+  wake-ordered-guard:
+    if: github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Dispatch frozen ordered three-source guard
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import json,os,urllib.request
+          url=f"https://api.github.com/repos/{os.environ['REPO_NAME']}/actions/workflows/btc-arbitration-v4-independent-guard.yml/dispatches"
+          req=urllib.request.Request(url,data=json.dumps({'ref':'main'}).encode(),method='POST',headers={
+              'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+              'Accept':'application/vnd.github+json',
+              'User-Agent':'btc-arbiter-v4-down-completion'})
+          with urllib.request.urlopen(req,timeout=25) as response:
+              if response.status!=204:raise RuntimeError(f'guard dispatch HTTP {response.status}')
+          print('ORDERED_GUARD_DISPATCHED')
+          PY

@@ -94,12 +94,17 @@ def signed_events(source: str) -> list[dict]:
             if not anchor <= integrated < anchor + dt.timedelta(minutes=45):
                 raise ValueError(f"{source}: nonprospective forecast {path}")
         if event.get("type") in ("OUTCOME_AND_LEARNING_APPLIED", "REGIME_OUTCOME_RECORDED",
-                                  "OUTCOME_RECORDED", "ARBITRATION_OUTCOME_RECORDED",
-                                  "BARRIER_OUTCOME_RECORDED"):
+                                  "OUTCOME_RECORDED", "ARBITRATION_OUTCOME_RECORDED") or (
+                                      source == "barrier" and event.get("type") == "BARRIER_OUTCOME_RECORDED"):
             if not event.get("due_utc"):
                 raise ValueError(f"{source}: outcome due_utc missing in {path}")
             if integrated < stamp(event["due_utc"]):
                 raise ValueError(f"{source}: early outcome {path}")
+        if source == "regime" and event.get("type") == "BARRIER_OUTCOME_RECORDED":
+            touch = event.get("outcome", {}).get("first_touch_time_utc")
+            earliest = touch or event["spec"]["deadline_utc"]
+            if integrated < stamp(earliest):
+                raise ValueError(f"{source}: barrier outcome before observable touch/deadline {path}")
         if source == "barrier" and event.get("raw_path"):
             if digest(get(ref,event["raw_path"])) != event["raw_sha256"]:
                 raise ValueError(f"{source}: raw mismatch {path}")

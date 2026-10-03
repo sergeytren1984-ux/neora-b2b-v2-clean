@@ -1,0 +1,30 @@
+name: BTC arbitration v3 source sequencer
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '3,18 * * * *'
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: btc-arbitration-v3-source-sequencer
+  cancel-in-progress: true
+
+jobs:
+  wait-for-sources:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Wake frozen sources, observe matching events, then wake arbiter
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: ${{ github.repository }}
+        run: python3 .github/scripts/btc_arbitration_v3_sequencer.py

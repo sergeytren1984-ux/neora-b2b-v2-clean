@@ -1,1 +1,1 @@
-2026-10-03T23:07:13Z primary guard v3 anchor=20261003T230000Z
+2026-10-03T23:13:02Z backup guard v3 anchor=20261003T230000Z retry-after-cancel

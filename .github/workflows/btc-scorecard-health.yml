@@ -1,0 +1,46 @@
+name: BTC scorecard health snapshot
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/btc-scorecard-health.yml]
+  workflow_dispatch: {}
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Record scorecard run states and failed steps
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          python3 - <<'PY'
+          import base64,datetime,json,os,urllib.request
+          repo=os.environ['REPO_NAME'];headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+             'Accept':'application/vnd.github+json','User-Agent':'btc-scorecard-health'}
+          def get(path):
+              with urllib.request.urlopen(urllib.request.Request(f'https://api.github.com/repos/{repo}/{path}',headers=headers),timeout=25) as r:
+                  return json.load(r)
+          runs=get('actions/workflows/btc-model-scorecard.yml/runs?per_page=8')['workflow_runs']
+          report={'checked_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'runs':[]}
+          for run in runs:
+              jobs=get(f"actions/runs/{run['id']}/jobs?per_page=20")['jobs']
+              report['runs'].append({'id':run['id'],'event':run['event'],'status':run['status'],
+                 'conclusion':run['conclusion'],'created_at':run['created_at'],'updated_at':run['updated_at'],
+                 'jobs':[{'id':j['id'],'status':j['status'],'conclusion':j['conclusion'],
+                    'failed_steps':[s['name'] for s in j['steps'] if s['conclusion']=='failure']} for j in jobs]})
+          path=f"btc_scorecard/health_{os.environ['RUN_ID']}.json"
+          body={'message':'Record signed scorecard Actions health snapshot','branch':'main',
+             'content':base64.b64encode((json.dumps(report,sort_keys=True)+'\n').encode()).decode()}
+          req=urllib.request.Request(f'https://api.github.com/repos/{repo}/contents/{path}',
+                                     data=json.dumps(body).encode(),headers=headers,method='PUT')
+          with urllib.request.urlopen(req,timeout=25) as r:
+              if r.status!=201:raise RuntimeError('health receipt not published')
+          PY

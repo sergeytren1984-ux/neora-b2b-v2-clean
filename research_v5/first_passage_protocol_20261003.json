@@ -1,0 +1,21 @@
+{
+  "schema": "btc-first-passage-two-horizons-precommitted-v1",
+  "registered_before_evaluation": true,
+  "purpose": "Compare lower-first, upper-first, neither and same-hour ambiguous for a cash-holder's entry-window question; no trade authority",
+  "reference_snapshot": {"anchor_utc": "2026-10-03T12:00:00Z", "price_usdt": 84672.01, "source": "signed btc-arbitration-v4 event 00000006"},
+  "scenarios": [
+    {"id": "entry_72h", "lower_usdt": 82500.0, "upper_usdt": 87000.0, "horizon_hours": 72},
+    {"id": "entry_7d", "lower_usdt": 81500.0, "upper_usdt": 88000.0, "horizon_hours": 168}
+  ],
+  "historical_mapping": "Scale both fixed barrier distances by past anchor close / reference_snapshot.price_usdt; use subsequent closed hourly high and low; both touched in same first hour is ambiguous; no intrahour ordering invented.",
+  "classes": ["lower_first", "upper_first", "neither", "ambiguous"],
+  "training": "2024-01-01 through 2025-12-31 UTC",
+  "validation": "2026-01-02 through 2026-06-30 UTC",
+  "inspected_diagnostic": "2026-07-02 through 2026-09-24 UTC",
+  "baseline": "training class frequency, fixed for each future block",
+  "challenger": "simple L2 logistic regression C=0.03 using only trailing closed-candle returns 4h/24h/72h, realized absolute return 24h/72h and log-volume ratio 24h/168h; scaler fit on training only",
+  "metrics": ["multiclass_brier", "log_loss", "per_class_support", "paired_weekly_block_bootstrap_brier_difference"],
+  "admission": "No candidate probability publication unless a future untouched block and prospective reliability support calibration and improvements over baseline. Every prospective slot retains fixed absolute targets and logs due outcome without tuning.",
+  "missing_or_partial_hour": "exclude anchor/label windows with gaps, duplicates or partial candles; no interpolation",
+  "trading_authority": false
+}

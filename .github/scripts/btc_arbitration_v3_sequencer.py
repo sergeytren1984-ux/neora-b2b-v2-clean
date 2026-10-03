@@ -81,6 +81,23 @@ def event_present(branch: str, directory: str, kind: str, prefix: str, slot: str
     return False
 
 
+def arbiter_already_decided(slot: str) -> bool:
+    branch = "btc-arbitration-v3"
+    run("git", "fetch", "--quiet", "origin",
+        "+refs/heads/" + branch + ":refs/remotes/origin/" + branch)
+    ref = "refs/remotes/origin/" + branch
+    paths = run("git", "ls-tree", "-r", "--name-only", ref, "arbiter_v3_events").splitlines()
+    for path in paths:
+        name = path.rsplit("/", 1)[-1]
+        if len(name) != 13 or not name[:8].isdigit() or not name.endswith(".json"):
+            continue
+        event = json.loads(run("git", "show", ref + ":" + path))
+        if event.get("slot") == slot and event.get("idempotency_key") in (
+                "decision:" + slot + ":4h", "invalid:" + slot):
+            return True
+    return False
+
+
 def main() -> None:
     current = dt.datetime.now(UTC)
     anchor = current.replace(minute=0, second=0, microsecond=0)
@@ -88,11 +105,17 @@ def main() -> None:
     if current.minute >= DEADLINE_MINUTE:
         print("TOO_LATE_FOR_CURRENT_SLOT", slot, flush=True)
         return
+    if arbiter_already_decided(slot):
+        print("DECISION_ALREADY_PUBLISHED", slot, flush=True)
+        return
     # Wake source workflows before looking for any source events.  The calls
     # are idempotent with the frozen workers' per-slot keys.
     for workflow in ("btc-directional-v1.yml", "btc-regime-v4-hardened.yml"):
         dispatch(workflow)
     while dt.datetime.now(UTC) < anchor + dt.timedelta(minutes=DEADLINE_MINUTE):
+        if arbiter_already_decided(slot):
+            print("DECISION_PUBLISHED_BY_OTHER_WATCHER", slot, flush=True)
+            return
         run("git", "fetch", "--quiet", "origin", *(
             "+refs/heads/" + source[0] + ":refs/remotes/origin/" + source[0]
             for source in SOURCES))

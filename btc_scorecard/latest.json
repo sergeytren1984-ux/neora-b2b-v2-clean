@@ -28,9 +28,9 @@
       "baseline_brier": 0.010312,
       "baseline_log_loss": 0.107083,
       "constant": 0.10154855794139658,
-      "model_brier": 0.003762,
-      "model_log_loss": 0.062983,
-      "n": 8,
+      "model_brier": 0.003732,
+      "model_log_loss": 0.062753,
+      "n": 9,
       "positive_events": 0
     },
     "source_uncompressed_sha256": "3e78a339e60fec957dea2c0884c6840d66a92351ac04b4198623f1da10165fc9",
@@ -40,9 +40,9 @@
       "baseline_brier": 0.011453,
       "baseline_log_loss": 0.113188,
       "constant": 0.10701744286454436,
-      "model_brier": 0.00342,
-      "model_log_loss": 0.059759,
-      "n": 18,
+      "model_brier": 0.003461,
+      "model_log_loss": 0.060138,
+      "n": 19,
       "positive_events": 0
     }
   },
@@ -72,35 +72,35 @@
   },
   "event_definitions_differ": true,
   "external_oi_source_audit": {
-    "checked_recent_forecasts": 28,
+    "checked_recent_forecasts": 29,
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
-  "generated_at_utc": "2026-10-03T19:58:51.529635+00:00",
+  "generated_at_utc": "2026-10-03T20:17:16.753637+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 0,
-    "TN": 8,
+    "TN": 9,
     "TP": 0,
-    "closed_pairs": 8,
+    "closed_pairs": 9,
     "precision": null,
     "recall": null
   },
   "prospective_confusion_up": {
     "FN": 0,
     "FP": 0,
-    "TN": 18,
+    "TN": 19,
     "TP": 0,
-    "closed_pairs": 18,
+    "closed_pairs": 19,
     "precision": null,
     "recall": null
   },
   "regime_calibration_gate": {
     "also_requires": "30 separate up and down episodes each; paired Brier and Log Loss gain with positive 95% weekly block bootstrap bound; future calibration/reliability test",
     "closed_outcomes": {
-      "1h": 27,
-      "24h": 5,
-      "4h": 24
+      "1h": 28,
+      "24h": 6,
+      "4h": 25
     },
     "preregistered_minimum": {
       "1h": 500,
@@ -1134,8 +1134,8 @@
     {
       "arbiter": {
         "action_status": "NO_DIRECTIONAL_ACTION",
-        "actual_fall_lt_minus_1pct": null,
-        "actual_rise_gt_1pct": null,
+        "actual_fall_lt_minus_1pct": false,
+        "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
         "signed_sources": {
           "directional": true,
@@ -1148,20 +1148,23 @@
         "trading_authority": false
       },
       "down": {
-        "actual": null,
+        "actual": false,
         "alert": false,
         "candidate_estimate_unproven": 0.059099,
         "rank_30d": 0.197222,
-        "score_diagnostic": null,
+        "score_diagnostic": {
+          "brier": 0.003493,
+          "log_loss": 0.060917
+        },
         "status": "ISSUED"
       },
       "due_4h_utc": "2026-10-03T20:00:00+00:00",
       "regime_v4": {
-        "actual_native_class": null,
+        "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
-        "shadow_brier_diagnostic_only": null,
-        "shadow_log_loss_diagnostic_only": null,
+        "shadow_brier_diagnostic_only": 0.2263068938249881,
+        "shadow_log_loss_diagnostic_only": 0.488457,
         "shadow_scores_uncalibrated": {
           "downside": 0.15917448916179391,
           "range": 0.6135723108676139,
@@ -1174,21 +1177,27 @@
       "slot_msk": "2026-10-03T19:00:00+03:00",
       "slot_utc": "2026-10-03T16:00:00+00:00",
       "up": {
-        "actual": null,
+        "actual": false,
         "alert": false,
         "candidate_estimate_unproven": 0.064771,
         "rank_30d": 0.358333,
-        "score_diagnostic": null,
+        "score_diagnostic": {
+          "brier": 0.004195,
+          "log_loss": 0.066964
+        },
         "status": "ISSUED"
       },
       "v2_9_30": {
-        "actual_native_class": null,
+        "actual_native_class": "range",
         "probabilities_diagnostic": {
           "downside": 0.241,
           "range": 0.563,
           "upside": 0.195
         },
-        "score": null,
+        "score": {
+          "brier": 0.287075,
+          "log_loss": 0.574476
+        },
         "status": "PRE_EXPERT_CANDIDATE_DIAGNOSTIC"
       }
     },
@@ -1344,6 +1353,67 @@
         "score_diagnostic": null,
         "status": "ISSUED"
       }
+    },
+    {
+      "arbiter": {
+        "action_status": "NO_DIRECTIONAL_ACTION",
+        "actual_fall_lt_minus_1pct": null,
+        "actual_rise_gt_1pct": null,
+        "reason": "upside tail not confirmed by the independent head",
+        "signed_sources": {
+          "directional": true,
+          "downside": true,
+          "regime": true
+        },
+        "slot_missed": false,
+        "source_epoch": "arbiter_v4",
+        "status": "NO_DIRECTIONAL_TAIL_WARNING",
+        "trading_authority": false
+      },
+      "down": {
+        "actual": null,
+        "alert": false,
+        "candidate_estimate_unproven": 0.056162,
+        "rank_30d": 0.156944,
+        "score_diagnostic": null,
+        "status": "ISSUED"
+      },
+      "due_4h_utc": "2026-10-04T00:00:00+00:00",
+      "regime_v4": {
+        "actual_native_class": null,
+        "calibrated_brier": null,
+        "missing_reason": null,
+        "shadow_brier_diagnostic_only": null,
+        "shadow_log_loss_diagnostic_only": null,
+        "shadow_scores_uncalibrated": {
+          "downside": 0.16290877165046674,
+          "range": 0.6201880057352276,
+          "upside": 0.21690322261430578
+        },
+        "source_status": "ISSUED",
+        "state": "RANGE",
+        "used_by_arbiter_at_decision": true
+      },
+      "slot_msk": "2026-10-03T23:00:00+03:00",
+      "slot_utc": "2026-10-03T20:00:00+00:00",
+      "up": {
+        "actual": null,
+        "alert": false,
+        "candidate_estimate_unproven": 0.051846,
+        "rank_30d": 0.147222,
+        "score_diagnostic": null,
+        "status": "ISSUED"
+      },
+      "v2_9_30": {
+        "actual_native_class": null,
+        "probabilities_diagnostic": {
+          "downside": 0.203,
+          "range": 0.602,
+          "upside": 0.195
+        },
+        "score": null,
+        "status": "PRE_EXPERT_CANDIDATE_DIAGNOSTIC"
+      }
     }
   ],
   "schema": "btc-signed-diagnostic-scorecard-v1",
@@ -1355,8 +1425,8 @@
       "SCHEDULE_REGISTERED": 1
     },
     "arbiter_v4": {
-      "ARBITRATION_DECISION_ISSUED": 11,
-      "ARBITRATION_OUTCOME_RECORDED": 7,
+      "ARBITRATION_DECISION_ISSUED": 12,
+      "ARBITRATION_OUTCOME_RECORDED": 8,
       "CONFIG_FROZEN_PRESTART": 1,
       "SCHEDULE_REGISTERED": 1
     },
@@ -1367,31 +1437,31 @@
     },
     "down": {
       "CONFIG_FROZEN_PRESTART": 1,
-      "DIRECTIONAL_4H_DOWNSIDE_ALERT_ISSUED": 12,
-      "OUTCOME_RECORDED": 8,
+      "DIRECTIONAL_4H_DOWNSIDE_ALERT_ISSUED": 13,
+      "OUTCOME_RECORDED": 9,
       "SCHEDULE_REGISTERED": 1
     },
     "regime": {
       "ABSTAIN_DATA_INVALID": 3,
-      "BARRIER_OUTCOME_RECORDED": 54,
+      "BARRIER_OUTCOME_RECORDED": 61,
       "CONFIG_FROZEN_PRESTART": 1,
-      "REGIME_FORECAST_ISSUED": 28,
-      "REGIME_OUTCOME_RECORDED": 56,
+      "REGIME_FORECAST_ISSUED": 29,
+      "REGIME_OUTCOME_RECORDED": 59,
       "SCHEDULE_REGISTERED": 1,
       "SLOT_MISSED": 5
     },
     "up": {
       "CONFIG_FROZEN_PRESTART": 1,
-      "DIRECTIONAL_4H_ALERT_ISSUED": 26,
-      "OUTCOME_RECORDED": 22,
+      "DIRECTIONAL_4H_ALERT_ISSUED": 27,
+      "OUTCOME_RECORDED": 23,
       "SCHEDULE_REGISTERED": 1,
       "SLOT_MISSED": 6
     },
     "v5": {
-      "FACTORS_VALIDATED": 15,
-      "FORECAST_ISSUED": 18,
-      "OUTCOME_AND_LEARNING_APPLIED": 16,
-      "RAW_ATTESTED": 15,
+      "FACTORS_VALIDATED": 16,
+      "FORECAST_ISSUED": 19,
+      "OUTCOME_AND_LEARNING_APPLIED": 17,
+      "RAW_ATTESTED": 16,
       "SCHEDULE_REGISTERED": 1,
       "SLOT_MISSED": 3
     }

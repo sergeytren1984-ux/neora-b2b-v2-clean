@@ -78,6 +78,10 @@ def binance_oi():
             "exchange":"Binance USD-M","source_timestamp_utc":iso_ms(j["time"]),
             "receipt":receipt(x)}
 
+# Preserve one exchange in the numeric OI series: a cross-exchange ratio is not a time change.
+def canonical_oi():
+    return first_success("open_interest",[("OKX_SWAP",okx_oi)])
+
 def okx_oi():
     x=fetch("https://www.okx.com/api/v5/public/open-interest?instType=SWAP&instId=BTC-USDT-SWAP")
     j=json.loads(x["raw"])["data"][0]
@@ -193,8 +197,7 @@ def main():
     factors={
       "funding":first_success("funding",[
           ("BINANCE_USDM",binance_funding),("OKX_SWAP",okx_funding)]),
-      "open_interest":first_success("open_interest",[
-          ("BINANCE_USDM",binance_oi),("OKX_SWAP",okx_oi)]),
+      "open_interest":canonical_oi(),
       "dxy":first_success("dxy",[
           ("YAHOO_DX-Y.NYB",lambda:yahoo("DX-Y.NYB"))]),
       "nasdaq_futures":first_success("nasdaq_futures",[

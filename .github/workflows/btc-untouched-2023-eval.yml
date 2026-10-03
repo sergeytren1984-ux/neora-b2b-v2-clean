@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          ref: 26771f89cfcaadb55acbea37b4faff4996ac4075
+          ref: 1d0f5bbfe55d23611e405db68b7ba57efe2a29db
           fetch-depth: 0
           persist-credentials: false
       - name: Install fixed evaluator dependency

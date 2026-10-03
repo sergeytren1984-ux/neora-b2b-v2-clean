@@ -73,7 +73,8 @@ def okx_funding():
 def binance_oi():
     x=fetch("https://fapi.binance.com/fapi/v1/openInterest?symbol=BTCUSDT")
     j=json.loads(x["raw"])
-    return {"value":float(j["openInterest"]),"unit":"BTC_contract_units",
+    return {"value":float(j["openInterest"]),"value_btc":float(j["openInterest"]),
+            "unit":"BTC_contract_units",
             "exchange":"Binance USD-M","source_timestamp_utc":iso_ms(j["time"]),
             "receipt":receipt(x)}
 

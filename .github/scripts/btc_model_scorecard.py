@@ -181,7 +181,18 @@ def audit_v5(events: list[dict], now: dt.datetime) -> dict:
                     plain = gzip.decompress(get(ref, "raw/" + slot + ".json.gz"))
                     if digest(plain) != raw["raw_sha256"]:
                         raise ValueError("raw digest mismatch")
-                except (subprocess.CalledProcessError, OSError, ValueError, KeyError):
+                    bundle = json.loads(plain)
+                    receipts = raw["source_receipts"]
+                    if (bundle["anchor_utc"] != anchor.isoformat() or
+                            len(bundle["captures"]) != len(receipts)):
+                        raise ValueError("raw bundle slot/receipt mismatch")
+                    for capture, receipt in zip(bundle["captures"], receipts):
+                        if (digest(capture["raw"].encode()) != capture["sha256"] or
+                                {k: capture[k] for k in ("url", "retrieved_at_utc", "sha256")} != receipt or
+                                not anchor <= stamp(capture["retrieved_at_utc"]) <
+                                anchor + dt.timedelta(minutes=45)):
+                            raise ValueError("raw capture receipt invalid")
+                except (subprocess.CalledProcessError, OSError, ValueError, KeyError, TypeError):
                     defects.append({"slot": slot, "defect": "RAW_BUNDLE_INVALID"})
         anchor += dt.timedelta(hours=1)
     return {"start_utc": start.isoformat(), "deadline_minutes": 45,

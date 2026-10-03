@@ -19,12 +19,12 @@
         "slot": "20261002T040000Z"
       }
     ],
-    "forecasts_issued": 16,
-    "raw_bundles_checked": 13,
+    "forecasts_issued": 17,
+    "raw_bundles_checked": 14,
     "start_utc": "2026-09-30T20:00:00+00:00"
   },
   "event_definitions_differ": true,
-  "generated_at_utc": "2026-10-03T12:37:13.881513+00:00",
+  "generated_at_utc": "2026-10-03T12:57:38.002469+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 0,
@@ -826,6 +826,10 @@
     },
     "arbiter_v4": {
       "ARBITRATION_DECISION_ISSUED": 4,
+      "CONFIG_FROZEN_PRESTART": 1,
+      "SCHEDULE_REGISTERED": 1
+    },
+    "barrier": {
       "CONFIG_FROZEN_PRESTART": 1,
       "SCHEDULE_REGISTERED": 1
     },

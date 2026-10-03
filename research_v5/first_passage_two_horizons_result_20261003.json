@@ -1,0 +1,135 @@
+{
+  "candidate_is_probability": false,
+  "history_gzip_sha256": "34044e360794c59e8b28a149b30a1f5ad56dc95958511d9c20b97ad14dca6070",
+  "protocol_sha256": "026d80bda63bb1786adf4ce162325317f8a28c8b0c8feb63086e0e6f3616e331",
+  "scenarios": {
+    "entry_72h": {
+      "coefficient_features": [
+        "return_4h",
+        "return_24h",
+        "return_72h",
+        "mean_abs_return_24h",
+        "mean_abs_return_72h",
+        "log_volume_24h_vs_168h"
+      ],
+      "evaluation": {
+        "inspected_Jul_Sep_2026": {
+          "baseline": {
+            "brier": 0.6950609177315732,
+            "log_loss": 1.1561939301748951
+          },
+          "brier_gain_baseline_minus_logistic": 0.04248393822357021,
+          "counts": {
+            "ambiguous": 0,
+            "lower_first": 590,
+            "neither": 572,
+            "upper_first": 711
+          },
+          "n": 1873,
+          "simple_logistic": {
+            "brier": 0.6525769795080029,
+            "log_loss": 1.077529213855603
+          },
+          "weekly_block_bootstrap_brier_gain_95ci": [
+            -0.0046008340991992094,
+            0.10265518865325801
+          ]
+        },
+        "validation_H1_2026": {
+          "baseline": {
+            "brier": 0.6131108311164019,
+            "log_loss": 1.0088171452329928
+          },
+          "brier_gain_baseline_minus_logistic": -0.0037709980501268022,
+          "counts": {
+            "ambiguous": 0,
+            "lower_first": 2146,
+            "neither": 638,
+            "upper_first": 1536
+          },
+          "n": 4320,
+          "simple_logistic": {
+            "brier": 0.6168818291665287,
+            "log_loss": 1.0085807302100611
+          },
+          "weekly_block_bootstrap_brier_gain_95ci": [
+            -0.018310167717043607,
+            0.010028837317298329
+          ]
+        }
+      },
+      "train_n": 17375,
+      "training_frequency": {
+        "ambiguous": 0.0008057553956834532,
+        "lower_first": 0.42503597122302156,
+        "neither": 0.16811510791366907,
+        "upper_first": 0.4060431654676259
+      }
+    },
+    "entry_7d": {
+      "coefficient_features": [
+        "return_4h",
+        "return_24h",
+        "return_72h",
+        "mean_abs_return_24h",
+        "mean_abs_return_72h",
+        "log_volume_24h_vs_168h"
+      ],
+      "evaluation": {
+        "inspected_Jul_Sep_2026": {
+          "baseline": {
+            "brier": 0.7635150264001007,
+            "log_loss": 1.308722242994186
+          },
+          "brier_gain_baseline_minus_logistic": 0.037311953302035836,
+          "counts": {
+            "ambiguous": 0,
+            "lower_first": 383,
+            "neither": 720,
+            "upper_first": 770
+          },
+          "n": 1873,
+          "simple_logistic": {
+            "brier": 0.7262030730980651,
+            "log_loss": 1.2165677907680377
+          },
+          "weekly_block_bootstrap_brier_gain_95ci": [
+            -0.005497616422960071,
+            0.07911079860094229
+          ]
+        },
+        "validation_H1_2026": {
+          "baseline": {
+            "brier": 0.5757915816641651,
+            "log_loss": 0.9312773080356019
+          },
+          "brier_gain_baseline_minus_logistic": 0.006462514729155531,
+          "counts": {
+            "ambiguous": 0,
+            "lower_first": 2250,
+            "neither": 360,
+            "upper_first": 1710
+          },
+          "n": 4320,
+          "simple_logistic": {
+            "brier": 0.5693290669350096,
+            "log_loss": 0.9084979383894748
+          },
+          "weekly_block_bootstrap_brier_gain_95ci": [
+            -0.0012328905156433838,
+            0.014687972833106477
+          ]
+        }
+      },
+      "train_n": 17375,
+      "training_frequency": {
+        "ambiguous": 0.0,
+        "lower_first": 0.436431654676259,
+        "neither": 0.12454676258992806,
+        "upper_first": 0.439021582733813
+      }
+    }
+  },
+  "schema": "btc-first-passage-two-horizons-result-v1",
+  "trading_authority": false
+}

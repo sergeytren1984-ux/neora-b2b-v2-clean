@@ -139,6 +139,22 @@ def episodes(rows: list[dict], head: str) -> dict:
             "missed_episodes": sum(x is None for x in delays)}
 
 
+def confusion(rows: list[dict], head: str) -> dict:
+    counts = {k: 0 for k in ("TP", "FP", "FN", "TN")}
+    for row in rows:
+        x = row[head]
+        if x["alert"] is None or x["actual"] is None:
+            continue
+        counts[("T" if x["alert"] == x["actual"] else "F") +
+               ("P" if x["alert"] else "N")] += 1
+    counts["closed_pairs"] = sum(counts.values())
+    counts["precision"] = (counts["TP"] / (counts["TP"] + counts["FP"])
+                           if counts["TP"] + counts["FP"] else None)
+    counts["recall"] = (counts["TP"] / (counts["TP"] + counts["FN"])
+                        if counts["TP"] + counts["FN"] else None)
+    return counts
+
+
 def audit_v5(events: list[dict], now: dt.datetime) -> dict:
     """Check the frozen epoch-5 cadence and concrete raw/factor linkage."""
     by_key = {e["idempotency_key"]: e for e in events}
@@ -225,9 +241,14 @@ def build() -> tuple[dict, str]:
                                        "log_loss": round(loss(f["base"], fo["class"]), 6)}
                              if f and fo else None}
         rf = by_type["regime"].get("regime:" + slot)
+        ra = by_type["regime"].get("abstain-data:" + slot)
+        rm = by_type["regime"].get("missed:" + slot)
         ro = by_type["regime"].get("outcome:" + slot + ":4h")
         r4 = rf.get("output", {}).get("horizons", {}).get("4h") if rf else None
         row["regime_v4"] = {"state": r4.get("regime_state") if r4 else None,
+                            "source_status": "ISSUED" if rf else "ABSTAIN_DATA_INVALID" if ra else
+                            "SLOT_MISSED" if rm else "PENDING",
+                            "missing_reason": ra.get("reason") if ra else rm.get("reason") if rm else None,
                             "shadow_scores_uncalibrated": r4.get("shadow_class_scores") if r4 else None,
                             "actual_native_class": ro.get("class") if ro else None,
                             "shadow_brier_diagnostic_only": ro.get("shadow_brier_diagnostic_only") if ro else None,
@@ -256,6 +277,8 @@ def build() -> tuple[dict, str]:
                       "SLOT_MISSED" if am else "UNRECORDED_MISS" if
                       point + dt.timedelta(minutes=45) <= now else "PENDING")
         row["arbiter"] = {"status": arb_status,
+                          "reason": a.get("reason") if a else invalid.get("reason") if invalid else
+                          am.get("reason") if am else None,
                           "action_status": a.get("action_status") if a else None,
                           "actual_rise_gt_1pct": ao.get("actual_rise_gt_1pct") if ao else None,
                           "actual_fall_lt_minus_1pct": ao.get("actual_fall_lt_minus_1pct") if ao else None,
@@ -283,6 +306,8 @@ def build() -> tuple[dict, str]:
            "regime_calibration_gate": calibration_gate,
            "transition_delay_up": episodes(rows, "up"),
            "transition_delay_down": episodes(rows, "down"),
+           "prospective_confusion_up": confusion(rows, "up"),
+           "prospective_confusion_down": confusion(rows, "down"),
            "rows": rows}
     names = {"UP_TRANSITION": "переход к росту", "UP_CONTINUATION": "рост",
              "UP_EXHAUSTION": "ослабление роста", "FALSE_BREAKOUT_UP": "ложный пробой вверх",

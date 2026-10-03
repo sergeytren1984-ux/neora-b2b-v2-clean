@@ -1,4 +1,4 @@
-name: BTC arbitration v3 continuous wakeup
+name: BTC arbitration v4 source continuity wakeup
 
 on:
   push:

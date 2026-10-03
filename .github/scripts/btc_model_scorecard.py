@@ -195,11 +195,19 @@ def build() -> tuple[dict, str]:
     counts = {name: {kind: sum(e["type"] == kind for e in events)
                      for kind in sorted({e["type"] for e in events})}
               for name, events in streams.items()}
+    regime_closed = {h: sum(e.get("type") == "REGIME_OUTCOME_RECORDED" and
+                            e.get("horizon") == h for e in streams["regime"])
+                     for h in ("1h", "4h", "24h")}
+    calibration_gate = {"status": "PENDING_NOT_CALIBRATED",
+                        "closed_outcomes": regime_closed,
+                        "preregistered_minimum": {"1h": 500, "4h": 250, "24h": 120},
+                        "also_requires": "30 separate up and down episodes each; paired Brier and Log Loss gain with positive 95% weekly block bootstrap bound; future calibration/reliability test"}
     out = {"schema": "btc-signed-diagnostic-scorecard-v1",
            "generated_at_utc": now.isoformat(), "source_event_counts": counts,
            "event_definitions_differ": True,
            "regime_scores_are_not_calibrated_probabilities": True,
            "downside_not_admitted_to_arbiter": True,
+           "regime_calibration_gate": calibration_gate,
            "transition_delay_up": episodes(rows, "up"),
            "transition_delay_down": episodes(rows, "down"),
            "rows": rows}

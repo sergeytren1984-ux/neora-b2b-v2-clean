@@ -19,18 +19,18 @@
         "slot": "20261002T040000Z"
       }
     ],
-    "forecasts_issued": 15,
-    "raw_bundles_checked": 12,
+    "forecasts_issued": 16,
+    "raw_bundles_checked": 13,
     "start_utc": "2026-09-30T20:00:00+00:00"
   },
   "event_definitions_differ": true,
-  "generated_at_utc": "2026-10-03T08:37:21.945964+00:00",
+  "generated_at_utc": "2026-10-03T10:25:16.870344+00:00",
   "regime_calibration_gate": {
     "also_requires": "30 separate up and down episodes each; paired Brier and Log Loss gain with positive 95% weekly block bootstrap bound; future calibration/reliability test",
     "closed_outcomes": {
-      "1h": 17,
+      "1h": 18,
       "24h": 0,
-      "4h": 14
+      "4h": 16
     },
     "preregistered_minimum": {
       "1h": 500,
@@ -386,7 +386,7 @@
       "arbiter": {
         "action_status": "NO_DIRECTIONAL_ACTION",
         "actual_fall_lt_minus_1pct": null,
-        "actual_rise_gt_1pct": null,
+        "actual_rise_gt_1pct": false,
         "slot_missed": false,
         "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -402,10 +402,10 @@
       },
       "due_4h_utc": "2026-10-03T09:00:00+00:00",
       "regime_v4": {
-        "actual_native_class": null,
+        "actual_native_class": "range",
         "calibrated_brier": null,
-        "shadow_brier_diagnostic_only": null,
-        "shadow_log_loss_diagnostic_only": null,
+        "shadow_brier_diagnostic_only": 0.22641962736992677,
+        "shadow_log_loss_diagnostic_only": 0.488598,
         "shadow_scores_uncalibrated": {
           "downside": 0.22738749346606899,
           "range": 0.6134857819925811,
@@ -416,11 +416,14 @@
       "slot_msk": "2026-10-03T08:00:00+03:00",
       "slot_utc": "2026-10-03T05:00:00+00:00",
       "up": {
-        "actual": null,
+        "actual": false,
         "alert": false,
         "candidate_estimate_unproven": 0.056551,
         "rank_30d": 0.227778,
-        "score_diagnostic": null,
+        "score_diagnostic": {
+          "brier": 0.003198,
+          "log_loss": 0.058213
+        },
         "status": "ISSUED"
       }
     },
@@ -428,7 +431,7 @@
       "arbiter": {
         "action_status": "NO_DIRECTIONAL_ACTION",
         "actual_fall_lt_minus_1pct": null,
-        "actual_rise_gt_1pct": null,
+        "actual_rise_gt_1pct": false,
         "slot_missed": false,
         "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -444,10 +447,10 @@
       },
       "due_4h_utc": "2026-10-03T10:00:00+00:00",
       "regime_v4": {
-        "actual_native_class": null,
+        "actual_native_class": "range",
         "calibrated_brier": null,
-        "shadow_brier_diagnostic_only": null,
-        "shadow_log_loss_diagnostic_only": null,
+        "shadow_brier_diagnostic_only": 0.193453332591081,
+        "shadow_log_loss_diagnostic_only": 0.444878,
         "shadow_scores_uncalibrated": {
           "downside": 0.17589683426199265,
           "range": 0.6409023728978195,
@@ -458,11 +461,14 @@
       "slot_msk": "2026-10-03T09:00:00+03:00",
       "slot_utc": "2026-10-03T06:00:00+00:00",
       "up": {
-        "actual": null,
+        "actual": false,
         "alert": false,
         "candidate_estimate_unproven": 0.040385,
         "rank_30d": 0.031944,
-        "score_diagnostic": null,
+        "score_diagnostic": {
+          "brier": 0.001631,
+          "log_loss": 0.041223
+        },
         "status": "ISSUED"
       }
     },
@@ -559,38 +565,119 @@
         "score": null,
         "status": "PRE_EXPERT_CANDIDATE_DIAGNOSTIC"
       }
+    },
+    {
+      "arbiter": {
+        "action_status": "NO_DIRECTIONAL_ACTION",
+        "actual_fall_lt_minus_1pct": null,
+        "actual_rise_gt_1pct": null,
+        "slot_missed": false,
+        "source_epoch": "arbiter_v4",
+        "status": "NO_UPSIDE_TAIL_WARNING_REGIME_UNAVAILABLE",
+        "trading_authority": false
+      },
+      "down": {
+        "actual": null,
+        "alert": false,
+        "candidate_estimate_unproven": 0.066175,
+        "rank_30d": 0.3,
+        "score_diagnostic": null,
+        "status": "ISSUED"
+      },
+      "due_4h_utc": "2026-10-03T13:00:00+00:00",
+      "regime_v4": {
+        "actual_native_class": null,
+        "calibrated_brier": null,
+        "shadow_brier_diagnostic_only": null,
+        "shadow_log_loss_diagnostic_only": null,
+        "shadow_scores_uncalibrated": null,
+        "state": null
+      },
+      "slot_msk": "2026-10-03T12:00:00+03:00",
+      "slot_utc": "2026-10-03T09:00:00+00:00",
+      "up": {
+        "actual": null,
+        "alert": false,
+        "candidate_estimate_unproven": 0.057169,
+        "rank_30d": 0.241667,
+        "score_diagnostic": null,
+        "status": "ISSUED"
+      }
+    },
+    {
+      "arbiter": {
+        "action_status": "NO_DIRECTIONAL_ACTION",
+        "actual_fall_lt_minus_1pct": null,
+        "actual_rise_gt_1pct": null,
+        "slot_missed": false,
+        "source_epoch": "arbiter_v4",
+        "status": "NO_DIRECTIONAL_TAIL_WARNING",
+        "trading_authority": false
+      },
+      "down": {
+        "actual": null,
+        "alert": false,
+        "candidate_estimate_unproven": 0.055038,
+        "rank_30d": 0.134722,
+        "score_diagnostic": null,
+        "status": "ISSUED"
+      },
+      "due_4h_utc": "2026-10-03T14:00:00+00:00",
+      "regime_v4": {
+        "actual_native_class": null,
+        "calibrated_brier": null,
+        "shadow_brier_diagnostic_only": null,
+        "shadow_log_loss_diagnostic_only": null,
+        "shadow_scores_uncalibrated": {
+          "downside": 0.21702940487368777,
+          "range": 0.6201079994526605,
+          "upside": 0.16286259567365177
+        },
+        "state": "FALSE_BREAKOUT_DOWN"
+      },
+      "slot_msk": "2026-10-03T13:00:00+03:00",
+      "slot_utc": "2026-10-03T10:00:00+00:00",
+      "up": {
+        "actual": null,
+        "alert": false,
+        "candidate_estimate_unproven": 0.049749,
+        "rank_30d": 0.123611,
+        "score_diagnostic": null,
+        "status": "ISSUED"
+      }
     }
   ],
   "schema": "btc-signed-diagnostic-scorecard-v1",
   "source_event_counts": {
     "arbiter": {
-      "ARBITRATION_DECISION_ISSUED": 11,
-      "ARBITRATION_OUTCOME_RECORDED": 7,
+      "ARBITRATION_DECISION_ISSUED": 13,
+      "ARBITRATION_OUTCOME_RECORDED": 9,
       "CONFIG_FROZEN_PRESTART": 1,
       "SCHEDULE_REGISTERED": 1
     },
     "arbiter_v4": {
+      "ARBITRATION_DECISION_ISSUED": 2,
       "CONFIG_FROZEN_PRESTART": 1,
       "SCHEDULE_REGISTERED": 1
     },
     "down": {
       "CONFIG_FROZEN_PRESTART": 1,
-      "DIRECTIONAL_4H_DOWNSIDE_ALERT_ISSUED": 1,
+      "DIRECTIONAL_4H_DOWNSIDE_ALERT_ISSUED": 3,
       "SCHEDULE_REGISTERED": 1
     },
     "regime": {
-      "ABSTAIN_DATA_INVALID": 1,
+      "ABSTAIN_DATA_INVALID": 2,
       "BARRIER_OUTCOME_RECORDED": 30,
       "CONFIG_FROZEN_PRESTART": 1,
-      "REGIME_FORECAST_ISSUED": 18,
-      "REGIME_OUTCOME_RECORDED": 31,
+      "REGIME_FORECAST_ISSUED": 19,
+      "REGIME_OUTCOME_RECORDED": 34,
       "SCHEDULE_REGISTERED": 1,
-      "SLOT_MISSED": 4
+      "SLOT_MISSED": 5
     },
     "up": {
       "CONFIG_FROZEN_PRESTART": 1,
-      "DIRECTIONAL_4H_ALERT_ISSUED": 15,
-      "OUTCOME_RECORDED": 11,
+      "DIRECTIONAL_4H_ALERT_ISSUED": 17,
+      "OUTCOME_RECORDED": 13,
       "SCHEDULE_REGISTERED": 1,
       "SLOT_MISSED": 6
     },

@@ -115,6 +115,33 @@ def signed_events(source: str) -> list[dict]:
     return out
 
 
+def audit_oi_source_consistency(regime_events: list[dict], now: dt.datetime) -> dict:
+    ref = "refs/remotes/origin/btc-context"
+    command("git", "fetch", "--quiet", "origin", "+refs/heads/btc-context:" + ref)
+    checked = 0
+    mismatches = []
+    for event in regime_events:
+        if event["type"] != "REGIME_FORECAST_ISSUED":
+            continue
+        if stamp(event["anchor_utc"]) < now - dt.timedelta(hours=72):
+            continue
+        names = event["context_snapshots"]
+        proofs = event["context_proofs"]
+        factors = []
+        for name, role in zip(names, ("current", "previous")):
+            blob = get(ref, "context_live/" + name)
+            if digest(blob) != proofs[role]["snapshot_sha256"]:
+                raise ValueError("signed regime context snapshot changed: " + name)
+            factors.append(json.loads(blob)["factors"]["open_interest"])
+        checked += 1
+        sources = [f.get("source") for f in factors]
+        if sources[0] != sources[1] and "open_interest" in event["output"]["external"]["used_factors"]:
+            mismatches.append({"slot": event["slot"], "sources": sources,
+                               "defect": "CROSS_EXCHANGE_OI_NUMERIC_CHANGE"})
+    return {"checked_recent_forecasts": checked, "window_hours": 72,
+            "numeric_cross_exchange_defects": mismatches}
+
+
 def brier(prob: dict, truth: str) -> float:
     return sum((float(prob[k]) - (k == truth)) ** 2 for k in ("upside", "range", "downside"))
 
@@ -368,6 +395,7 @@ def build() -> tuple[dict, str]:
                                         r["arbiter"]["status"] == "UNRECORDED_MISS"],
                   "signed_slot_misses": [r["slot_msk"] for r in due_v4 if
                                         r["arbiter"]["status"] == "SLOT_MISSED"]}
+    oi_audit = audit_oi_source_consistency(streams["regime"], now)
     baseline = json.loads(Path("btc_research/constant_tail_baseline_v1.json").read_bytes())
     comparison = {"status": "POST_START_DESCRIPTIVE_ONLY_NO_UNTOUCHED_PROOF",
                   "source_uncompressed_sha256": baseline["source_uncompressed_sha256"],
@@ -376,6 +404,7 @@ def build() -> tuple[dict, str]:
                   "down": constant_baseline_comparison(rows, "down", baseline["down_constant"])}
     out = {"schema": "btc-signed-diagnostic-scorecard-v1",
            "constant_baseline_comparison": comparison,
+           "external_oi_source_audit": oi_audit,
            "generated_at_utc": now.isoformat(), "source_event_counts": counts,
            "arbiter_v4_continuity": continuity,
            "epoch_5_e2e_audit": audit_v5(streams["v5"], now),

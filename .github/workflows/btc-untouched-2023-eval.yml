@@ -1,6 +1,9 @@
 name: BTC one-shot untouched 2023 tail evaluation
 
 on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/btc-untouched-2023-eval.yml]
   workflow_dispatch: {}
 
 permissions:
@@ -25,4 +28,24 @@ jobs:
       - name: Seal first evaluation result without tuning
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 research_v5/untouched_2023_eval.py
+        run: |
+          set +e
+          python3 research_v5/untouched_2023_eval.py > evaluation.log 2>&1
+          status=$?
+          cat evaluation.log
+          if [ "$status" -ne 0 ]; then
+            python3 - <<'PY'
+          import base64,json,os,urllib.request
+          log=open('evaluation.log').read()[-1200:]
+          url=f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/contents/btc_research/untouched_2023_diagnostic_{os.environ['GITHUB_RUN_ID']}.json"
+          content=json.dumps({'run_id':os.environ['GITHUB_RUN_ID'],'error_tail':log},sort_keys=True)+'\n'
+          body={'message':'Record untouched block evaluation failure', 'branch':'main',
+                'content':base64.b64encode(content.encode()).decode()}
+          req=urllib.request.Request(url,data=json.dumps(body).encode(),method='PUT',headers={
+              'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+              'Accept':'application/vnd.github+json','User-Agent':'btc-untouched-eval-diagnostic'})
+          with urllib.request.urlopen(req,timeout=25) as r:
+              assert r.status==201
+          PY
+          fi
+          exit "$status"

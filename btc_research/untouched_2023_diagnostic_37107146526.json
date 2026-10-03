@@ -1,0 +1,1 @@
+{"error_tail": "Traceback (most recent call last):\n  File \"/home/runner/work/neora-b2b-v2-clean/neora-b2b-v2-clean/research_v5/untouched_2023_eval.py\", line 17, in <module>\n    from directional_v1.alert import candidate as up_candidate\nModuleNotFoundError: No module named 'directional_v1'\n", "run_id": "37107146526"}

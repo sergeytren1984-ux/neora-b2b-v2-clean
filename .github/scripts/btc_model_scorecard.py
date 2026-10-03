@@ -368,7 +368,7 @@ def build() -> tuple[dict, str]:
         reg = names.get(r["regime_v4"]["state"], "—")
         def signal(name):
             x = r[name]
-            return (f"{x['candidate_estimate_unproven']:.3f} / " +
+            return (f"ранг 30д {x['rank_30d']:.3f} / " +
                     ("тревога" if x["alert"] else "нет") if x["alert"] is not None
                     else names.get(x["status"], x["status"]))
         actuals = []

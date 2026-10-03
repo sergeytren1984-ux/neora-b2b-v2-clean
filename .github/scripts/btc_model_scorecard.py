@@ -96,6 +96,8 @@ def signed_events(source: str) -> list[dict]:
         if event.get("type") in ("OUTCOME_AND_LEARNING_APPLIED", "REGIME_OUTCOME_RECORDED",
                                   "OUTCOME_RECORDED", "ARBITRATION_OUTCOME_RECORDED",
                                   "BARRIER_OUTCOME_RECORDED"):
+            if not event.get("due_utc"):
+                raise ValueError(f"{source}: outcome due_utc missing in {path}")
             if integrated < stamp(event["due_utc"]):
                 raise ValueError(f"{source}: early outcome {path}")
         if source == "barrier" and event.get("raw_path"):

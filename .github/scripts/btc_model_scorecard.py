@@ -451,7 +451,9 @@ def build() -> tuple[dict, str]:
              ("Постоянная база из 2024–2025 введена после старта наблюдений: сравнительные "
               "метрики описательные, не зачётная проверка преимущества. "
               f"Закрытых пар рост/падение: {comparison['up']['n']}/{comparison['down']['n']}; "
-              f"положительных: {comparison['up']['positive_events']}/{comparison['down']['positive_events']}."), "",
+              f"положительных: {comparison['up']['positive_events']}/{comparison['down']['positive_events']}."),
+             (f"OI: сверено {oi_audit['checked_recent_forecasts']} подписанных прогнозов за 72 ч; "
+              f"межбиржевых численных сравнений {len(oi_audit['numeric_cross_exchange_defects'])}."), "",
              "| Якорь МСК | v2.9.30 4ч | v4 режим | Рост >1% | Падение <−1% | Арбитр | Исходы | Метрики после срока |",
              "|---|---|---|---|---|---|---|---|"]
     for r in rows[-72:]:

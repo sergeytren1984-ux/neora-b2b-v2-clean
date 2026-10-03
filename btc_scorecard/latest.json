@@ -1,7 +1,7 @@
 {
   "arbiter_v4_continuity": {
-    "assessed_slots": 13,
-    "decisions": 13,
+    "assessed_slots": 14,
+    "decisions": 14,
     "signed_slot_misses": [],
     "source_fallbacks": [
       {
@@ -18,6 +18,14 @@
         ],
         "reason": "CalledProcessError: Command '('cosign', 'verify-blob', '/home/runner/work/neora-b2b-v2-clean/neora-b2b-v2-clean/regime_v4_events/00000088.json', '--bundle', '/home/runner/work/neora-b2b-v2-clean/neora-b2b-v2-clean/regime_v4_events/00000088.sigstore.json', '--certificate-identity', 'https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-regime-v4-hardened.yml@refs/heads/main', '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com')' returned non-zero exit status 1.",
         "slot_msk": "2026-10-03T17:00:00+03:00",
+        "status": "NO_UPSIDE_TAIL_WARNING_REGIME_UNAVAILABLE"
+      },
+      {
+        "missing_sources": [
+          "regime"
+        ],
+        "reason": "no timely signed regime forecast; directional head independently verified",
+        "slot_msk": "2026-10-04T01:00:00+03:00",
         "status": "NO_UPSIDE_TAIL_WARNING_REGIME_UNAVAILABLE"
       }
     ],
@@ -76,7 +84,7 @@
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
-  "generated_at_utc": "2026-10-03T22:23:50.961741+00:00",
+  "generated_at_utc": "2026-10-03T22:46:40.814289+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 0,
@@ -98,9 +106,9 @@
   "regime_calibration_gate": {
     "also_requires": "30 separate up and down episodes each; paired Brier and Log Loss gain with positive 95% weekly block bootstrap bound; future calibration/reliability test",
     "closed_outcomes": {
-      "1h": 29,
+      "1h": 30,
       "24h": 8,
-      "4h": 26
+      "4h": 27
     },
     "preregistered_minimum": {
       "1h": 500,
@@ -1287,11 +1295,11 @@
       },
       "due_4h_utc": "2026-10-03T22:00:00+00:00",
       "regime_v4": {
-        "actual_native_class": null,
+        "actual_native_class": "downside",
         "calibrated_brier": null,
         "missing_reason": null,
-        "shadow_brier_diagnostic_only": null,
-        "shadow_log_loss_diagnostic_only": null,
+        "shadow_brier_diagnostic_only": 1.162481039124173,
+        "shadow_log_loss_diagnostic_only": 2.03938,
         "shadow_scores_uncalibrated": {
           "downside": 0.13010936095486647,
           "range": 0.5520274558129655,
@@ -1553,10 +1561,10 @@
     },
     "regime": {
       "ABSTAIN_DATA_INVALID": 3,
-      "BARRIER_OUTCOME_RECORDED": 70,
+      "BARRIER_OUTCOME_RECORDED": 89,
       "CONFIG_FROZEN_PRESTART": 1,
       "REGIME_FORECAST_ISSUED": 30,
-      "REGIME_OUTCOME_RECORDED": 63,
+      "REGIME_OUTCOME_RECORDED": 65,
       "SCHEDULE_REGISTERED": 1,
       "SLOT_MISSED": 5
     },

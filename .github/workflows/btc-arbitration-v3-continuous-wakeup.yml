@@ -57,6 +57,20 @@ jobs:
                               print(now.isoformat(),'DISPATCH',target,key,flush=True)
                           except Exception as error:
                               print(now.isoformat(),'ERROR',target,key,repr(error),flush=True)
+              # GitHub cron and workflow_run can queue late; keep the read-only
+              # comparison awake independently of the signed source schedules.
+              scorecard_stage=(16 if 16<=now.minute<19 else
+                               46 if 46<=now.minute<49 else None)
+              if scorecard_stage is not None:
+                  target='btc-model-scorecard.yml'
+                  key=(now.strftime('%Y%m%dT%H'),scorecard_stage,target)
+                  if key not in sent:
+                      try:
+                          dispatch(target)
+                          sent.add(key)
+                          print(now.isoformat(),'DISPATCH',target,key,flush=True)
+                      except Exception as error:
+                          print(now.isoformat(),'ERROR',target,key,repr(error),flush=True)
               if len(sent)>150:
                   day=now.strftime('%Y%m%d')
                   sent={key for key in sent if key[0].startswith(day)}

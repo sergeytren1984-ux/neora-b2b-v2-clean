@@ -1,7 +1,21 @@
 {
   "downside_not_admitted_to_arbiter": true,
   "event_definitions_differ": true,
-  "generated_at_utc": "2026-10-03T07:36:20.101921+00:00",
+  "generated_at_utc": "2026-10-03T07:45:07.173237+00:00",
+  "regime_calibration_gate": {
+    "also_requires": "30 separate up and down episodes each; paired Brier and Log Loss gain with positive 95% weekly block bootstrap bound; future calibration/reliability test",
+    "closed_outcomes": {
+      "1h": 16,
+      "24h": 0,
+      "4h": 13
+    },
+    "preregistered_minimum": {
+      "1h": 500,
+      "24h": 120,
+      "4h": 250
+    },
+    "status": "PENDING_NOT_CALIBRATED"
+  },
   "regime_scores_are_not_calibrated_probabilities": true,
   "rows": [
     {

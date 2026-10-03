@@ -310,6 +310,9 @@ def build() -> tuple[dict, str]:
             bool(a.get("sources", {}).get("regime")) if a and arbiter_stream == "arbiter_v4"
             else None)
         row["arbiter"] = {"status": arb_status,
+                          "signed_sources": {name: bool(a.get("sources", {}).get(name))
+                                             for name in ("directional", "downside", "regime")}
+                          if a and arbiter_stream == "arbiter_v4" else None,
                           "reason": a.get("reason") if a else invalid.get("reason") if invalid else
                           am.get("reason") if am else None,
                           "action_status": a.get("action_status") if a else None,
@@ -355,8 +358,12 @@ def build() -> tuple[dict, str]:
                   "source_fallbacks": [{"slot_msk": r["slot_msk"],
                                         "status": r["arbiter"]["status"],
                                         "reason": r["regime_v4"]["missing_reason"] or
-                                                  r["arbiter"]["reason"]}
-                                       for r in due_v4 if r["regime_v4"]["used_by_arbiter_at_decision"] is False],
+                                                  r["arbiter"]["reason"],
+                                        "missing_sources": [name for name, used in
+                                                            (r["arbiter"]["signed_sources"] or {}).items()
+                                                            if not used]}
+                                       for r in due_v4 if r["arbiter"]["signed_sources"] and
+                                       not all(r["arbiter"]["signed_sources"].values())],
                   "unrecorded_misses": [r["slot_msk"] for r in due_v4 if
                                         r["arbiter"]["status"] == "UNRECORDED_MISS"],
                   "signed_slot_misses": [r["slot_msk"] for r in due_v4 if

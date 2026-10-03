@@ -84,7 +84,7 @@
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
-  "generated_at_utc": "2026-10-03T23:15:41.029836+00:00",
+  "generated_at_utc": "2026-10-03T23:18:43.059097+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 0,

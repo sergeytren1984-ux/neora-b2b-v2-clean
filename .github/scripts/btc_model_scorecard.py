@@ -168,6 +168,8 @@ def build() -> tuple[dict, str]:
                             "shadow_scores_uncalibrated": r4.get("shadow_class_scores") if r4 else None,
                             "actual_native_class": ro.get("class") if ro else None,
                             "shadow_brier_diagnostic_only": ro.get("shadow_brier_diagnostic_only") if ro else None,
+                            "shadow_log_loss_diagnostic_only": round(loss(
+                                r4["shadow_class_scores"], ro["class"]), 6) if r4 and ro else None,
                             "calibrated_brier": None}
         for name, prefix in (("up", "alert:"), ("down", "down-alert:")):
             e = by_type[name].get(prefix + slot)
@@ -201,34 +203,60 @@ def build() -> tuple[dict, str]:
            "transition_delay_up": episodes(rows, "up"),
            "transition_delay_down": episodes(rows, "down"),
            "rows": rows}
+    names = {"UP_TRANSITION": "переход к росту", "UP_CONTINUATION": "рост",
+             "UP_EXHAUSTION": "ослабление роста", "FALSE_BREAKOUT_UP": "ложный пробой вверх",
+             "DOWN_TRANSITION": "переход к снижению", "DOWN_CONTINUATION": "снижение",
+             "DOWN_EXHAUSTION": "ослабление снижения", "FALSE_BREAKOUT_DOWN": "ложный пробой вниз",
+             "RANGE": "диапазон", "NO_DIRECTIONAL_TAIL_WARNING": "нет сигнала роста",
+             "UP_REGIME_UNCONFIRMED": "рост режима без подтверждения",
+             "DOWNSIDE_REGIME_UNVALIDATED": "снижение режима без независимой проверки",
+             "UPSIDE_TAIL_RISK_CONCORDANT": "повышен риск роста; согласие",
+             "UPSIDE_TAIL_RISK_WITH_REGIME_DISAGREEMENT": "повышен риск роста; расхождение",
+             "UPSIDE_TAIL_RISK_REGIME_UNAVAILABLE": "риск роста; режим недоступен",
+             "PENDING": "ожидание", "PENDING_OR_MISSED": "ожидание или пропуск",
+             "SLOT_MISSED": "пропуск", "upside": "рост", "downside": "снижение", "range": "диапазон"}
     lines = ["# BTC: подписанная сравнительная таблица (теневой режим)", "",
              "Обновлено: " + now.astimezone(MSK).strftime("%d.%m.%Y %H:%M МСК") + ".",
              "В колонке v4 указаны некалиброванные баллы. Brier v4 — только диагностика;",
              "события v5 и v4 используют собственные определения классов, их оценки нельзя",
              "считать прямым сравнением качества без общей метки. Исходы появляются после due.", "",
-             "| Якорь МСК | v2.9.30 4ч | v4 режим | Рост >1% | Падение <−1% | Арбитр | Исходы |",
-             "|---|---|---|---|---|---|---|"]
+             "В v2.9.30 порядок чисел: рост / диапазон / снижение. В метриках: Brier / Log Loss.", "",
+             "| Якорь МСК | v2.9.30 4ч | v4 режим | Рост >1% | Падение <−1% | Арбитр | Исходы | Метрики после срока |",
+             "|---|---|---|---|---|---|---|---|"]
     for r in rows[-72:]:
         t = stamp(r["slot_msk"]).strftime("%d.%m %H:%M")
         v = r.get("v2_9_30", {})
         vp = v.get("probabilities_diagnostic")
         vtxt = ("/".join(f"{vp[k]:.3f}" for k in ("upside", "range", "downside"))
-                if vp else v.get("status", "—"))
-        reg = r["regime_v4"]["state"] or "—"
+                if vp else names.get(v.get("status"), "—"))
+        reg = names.get(r["regime_v4"]["state"], "—")
         def signal(name):
             x = r[name]
             return (f"{x['candidate_estimate_unproven']:.3f} / " +
                     ("тревога" if x["alert"] else "нет") if x["alert"] is not None
-                    else x["status"])
+                    else names.get(x["status"], x["status"]))
         actuals = []
         for name in ("up", "down"):
             actual = r[name]["actual"]
             if actual is not None:
                 actuals.append(("↑" if name == "up" else "↓") + ("да" if actual else "нет"))
         if v.get("actual_native_class"):
-            actuals.append("v5:" + v["actual_native_class"])
+            actuals.append("v5:" + names[v["actual_native_class"]])
+        metric = []
+        if v.get("score"):
+            metric.append("v5 " + f"{v['score']['brier']:.3f}/{v['score']['log_loss']:.3f}")
+        shadow = r["regime_v4"]
+        if shadow["shadow_brier_diagnostic_only"] is not None:
+            metric.append("v4 тень " + f"{shadow['shadow_brier_diagnostic_only']:.3f}/" +
+                          f"{shadow['shadow_log_loss_diagnostic_only']:.3f}")
+        for name, label in (("up", "↑"), ("down", "↓")):
+            s = r[name]["score_diagnostic"]
+            if s:
+                metric.append(label + " " + f"{s['brier']:.3f}/{s['log_loss']:.3f}")
         lines.append("| " + " | ".join((t, vtxt, reg, signal("up"), signal("down"),
-                                          r["arbiter"]["status"], ", ".join(actuals) or "ожидание")) + " |")
+                                          names.get(r["arbiter"]["status"], "без статуса"),
+                                          ", ".join(actuals) or "ожидание",
+                                          "; ".join(metric) or "ожидание")) + " |")
     lines += ["", "Численные Brier и Log Loss по каждому завершённому исходу, пропуски и задержки",
               "доступны в `latest.json`. Вероятности класса v4 не опубликованы."]
     return out, "\n".join(lines) + "\n"

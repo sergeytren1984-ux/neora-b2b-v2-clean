@@ -1,0 +1,24 @@
+name: BTC fixed barrier health wakeup
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/btc-first-passage-health.yml]
+  workflow_dispatch: {}
+permissions:
+  actions: write
+jobs:
+  wake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Dispatch frozen barrier worker
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import json,os,urllib.request
+          u=f"https://api.github.com/repos/{os.environ['REPO_NAME']}/actions/workflows/btc-first-passage-v1.yml/dispatches"
+          q=urllib.request.Request(u,data=json.dumps({"ref":"main"}).encode(),method="POST",headers={"Authorization":"Bearer "+os.environ["GH_TOKEN"],"Accept":"application/vnd.github+json","User-Agent":"btc-first-passage-health"})
+          with urllib.request.urlopen(q,timeout=25) as r: assert r.status==204
+          PY

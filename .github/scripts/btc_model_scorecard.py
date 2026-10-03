@@ -326,8 +326,23 @@ def build() -> tuple[dict, str]:
                         "closed_outcomes": regime_closed,
                         "preregistered_minimum": {"1h": 500, "4h": 250, "24h": 120},
                         "also_requires": "30 separate up and down episodes each; paired Brier and Log Loss gain with positive 95% weekly block bootstrap bound; future calibration/reliability test"}
+    due_v4 = [r for r in rows if r["arbiter"]["source_epoch"] == "arbiter_v4" and
+              stamp(r["slot_utc"]) + dt.timedelta(minutes=45) <= now]
+    continuity = {"assessed_slots": len(due_v4),
+                  "decisions": sum(r["arbiter"]["status"] not in
+                                   ("SLOT_MISSED", "UNRECORDED_MISS", "SOURCE_INVALID") for r in due_v4),
+                  "source_fallbacks": [{"slot_msk": r["slot_msk"],
+                                        "status": r["arbiter"]["status"],
+                                        "reason": r["regime_v4"]["missing_reason"] or
+                                                  r["arbiter"]["reason"]}
+                                       for r in due_v4 if r["regime_v4"]["source_status"] != "ISSUED"],
+                  "unrecorded_misses": [r["slot_msk"] for r in due_v4 if
+                                        r["arbiter"]["status"] == "UNRECORDED_MISS"],
+                  "signed_slot_misses": [r["slot_msk"] for r in due_v4 if
+                                        r["arbiter"]["status"] == "SLOT_MISSED"]}
     out = {"schema": "btc-signed-diagnostic-scorecard-v1",
            "generated_at_utc": now.isoformat(), "source_event_counts": counts,
+           "arbiter_v4_continuity": continuity,
            "epoch_5_e2e_audit": audit_v5(streams["v5"], now),
            "event_definitions_differ": True,
            "regime_scores_are_not_calibrated_probabilities": True,
@@ -361,6 +376,10 @@ def build() -> tuple[dict, str]:
              "upside": "рост", "downside": "снижение", "range": "диапазон"}
     lines = ["# BTC: подписанная сравнительная таблица (теневой режим)", "",
              "Обновлено: " + now.astimezone(MSK).strftime("%d.%m.%Y %H:%M МСК") + ".",
+             (f"Арбитр v4: {continuity['decisions']}/{continuity['assessed_slots']} решений к дедлайну; "
+              f"необъяснённых пропусков {len(continuity['unrecorded_misses'])}; "
+              f"пропусков с событием {len(continuity['signed_slot_misses'])}; "
+              f"неполных источников {len(continuity['source_fallbacks'])}."),
              "В колонке v4 указаны некалиброванные баллы. Brier v4 — только диагностика;",
              "события v5 и v4 используют собственные определения классов, их оценки нельзя",
              "считать прямым сравнением качества без общей метки. Исходы появляются после due.", "",

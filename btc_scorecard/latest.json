@@ -5,17 +5,11 @@
     "signed_slot_misses": [],
     "source_fallbacks": [
       {
-        "missing_sources": [
-          "regime"
-        ],
         "reason": "ValueError: required context invalid: open_interest:previous",
         "slot_msk": "2026-10-03T12:00:00+03:00",
         "status": "NO_UPSIDE_TAIL_WARNING_REGIME_UNAVAILABLE"
       },
       {
-        "missing_sources": [
-          "regime"
-        ],
         "reason": "CalledProcessError: Command '('cosign', 'verify-blob', '/home/runner/work/neora-b2b-v2-clean/neora-b2b-v2-clean/regime_v4_events/00000088.json', '--bundle', '/home/runner/work/neora-b2b-v2-clean/neora-b2b-v2-clean/regime_v4_events/00000088.sigstore.json', '--certificate-identity', 'https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-regime-v4-hardened.yml@refs/heads/main', '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com')' returned non-zero exit status 1.",
         "slot_msk": "2026-10-03T17:00:00+03:00",
         "status": "NO_UPSIDE_TAIL_WARNING_REGIME_UNAVAILABLE"
@@ -71,7 +65,7 @@
     "start_utc": "2026-09-30T20:00:00+00:00"
   },
   "event_definitions_differ": true,
-  "generated_at_utc": "2026-10-03T18:26:12.527430+00:00",
+  "generated_at_utc": "2026-10-03T18:34:05.364136+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 0,
@@ -112,7 +106,6 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -162,7 +155,6 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -212,7 +204,6 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -275,7 +266,6 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -325,7 +315,6 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -375,7 +364,6 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -425,7 +413,6 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -488,7 +475,6 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -538,7 +524,6 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -588,7 +573,6 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -638,7 +622,6 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -704,11 +687,6 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "no timely signed regime forecast; directional head independently verified",
-        "signed_sources": {
-          "directional": true,
-          "downside": true,
-          "regime": false
-        },
         "slot_missed": false,
         "source_epoch": "arbiter_v4",
         "status": "NO_UPSIDE_TAIL_WARNING_REGIME_UNAVAILABLE",
@@ -757,11 +735,6 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": {
-          "directional": true,
-          "downside": true,
-          "regime": true
-        },
         "slot_missed": false,
         "source_epoch": "arbiter_v4",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -814,11 +787,6 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": {
-          "directional": true,
-          "downside": true,
-          "regime": true
-        },
         "slot_missed": false,
         "source_epoch": "arbiter_v4",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -871,11 +839,6 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": {
-          "directional": true,
-          "downside": true,
-          "regime": true
-        },
         "slot_missed": false,
         "source_epoch": "arbiter_v4",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -941,11 +904,6 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": {
-          "directional": true,
-          "downside": true,
-          "regime": true
-        },
         "slot_missed": false,
         "source_epoch": "arbiter_v4",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -998,11 +956,6 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "no timely signed regime forecast; directional head independently verified",
-        "signed_sources": {
-          "directional": true,
-          "downside": true,
-          "regime": false
-        },
         "slot_missed": false,
         "source_epoch": "arbiter_v4",
         "status": "NO_UPSIDE_TAIL_WARNING_REGIME_UNAVAILABLE",
@@ -1075,11 +1028,6 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": null,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": {
-          "directional": true,
-          "downside": true,
-          "regime": true
-        },
         "slot_missed": false,
         "source_epoch": "arbiter_v4",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -1126,11 +1074,6 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": null,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": {
-          "directional": true,
-          "downside": true,
-          "regime": true
-        },
         "slot_missed": false,
         "source_epoch": "arbiter_v4",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -1187,11 +1130,6 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": null,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": {
-          "directional": true,
-          "downside": true,
-          "regime": true
-        },
         "slot_missed": false,
         "source_epoch": "arbiter_v4",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",
@@ -1238,11 +1176,6 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": null,
         "reason": "upside tail not confirmed by the independent head",
-        "signed_sources": {
-          "directional": true,
-          "downside": true,
-          "regime": true
-        },
         "slot_missed": false,
         "source_epoch": "arbiter_v4",
         "status": "NO_DIRECTIONAL_TAIL_WARNING",

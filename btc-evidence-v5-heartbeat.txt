@@ -1,1 +1,1 @@
-2026-10-02T20:04:00Z wake frozen epoch5 worker for 20 UTC eligible 4h anchor
+2026-10-03T04:18:51Z backup guard epoch5 anchor=20261003T040000Z

@@ -1,0 +1,48 @@
+{
+  "artifacts": {
+    "early15m": {
+      "path": "predictive_vnext2/early15m_pm1_4h_competing_risks.joblib",
+      "selfcheck": {
+        "cal_n": 8720,
+        "probe": [
+          0.18735313438094933,
+          0.16696501748295575,
+          0.6454807075434739,
+          0.00020114059262090535
+        ],
+        "probe_probability_sum": 0.9999999999999999,
+        "train_n": 78415
+      },
+      "sha256": "c210b1f451ecddb6e948418758ab199acc01043fca3548bc960f15e65a54cbe9",
+      "source_sha256": "71aa24ec53afaa0b7bbdd5eacee1815cd03fac81da30af2843531437da670abe"
+    },
+    "hourly": {
+      "path": "predictive_vnext2/hourly_rv72_competing_risks.joblib",
+      "selfcheck": {
+        "cal_n": 2112,
+        "probe": [
+          0.4272518473369726,
+          0.5060089997433598,
+          0.06673915291966764,
+          0.0
+        ],
+        "probe_probability_sum": 1.0,
+        "train_n": 19462
+      },
+      "sha256": "f8425371091bb5630413215cbc1908af333bc2371400b8b7167f8f0b9d8de395",
+      "source_sha256": "3e78a339e60fec957dea2c0884c6840d66a92351ac04b4198623f1da10165fc9"
+    }
+  },
+  "no_trade_authority": true,
+  "predictive_accept": false,
+  "purpose": "prospective shadow collection only",
+  "research_outputs": {
+    "early15m_sha256": "0fe22b2398b9c67e1bd8b5d4cc82b938a98779f114e63d6ce6d994972cb3fe93",
+    "hourly_sha256": "eb0cced3d5d516dc22be19fcc4720b86cccf9ded7b3bb950cf9f21ee601d4c3d"
+  },
+  "schema": "btc-predictive-vnext2-freeze-metadata-v1",
+  "selection_basis": {
+    "early15m": "±1%/4h competing risks: best robust score across three inspected folds",
+    "hourly": "rv24_sqrth_72h: competing risks selected as normalized first-passage challenger; inspected history only"
+  }
+}

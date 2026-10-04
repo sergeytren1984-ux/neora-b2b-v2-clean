@@ -1,0 +1,37 @@
+{
+  "artifacts": {
+    "early15m": {
+      "path": "predictive_vnext3/early15m_contenders.joblib",
+      "seed_raw_sha256": "9f26fb67fbb63ac02c3d78bc6a4be178c3480207ece7d423b6d9adb59438f047",
+      "seed_records": 9583,
+      "sha256": "fe88399f78751d0b238b1873f54fac63c474853f050a2a311f09949ca1b75621"
+    },
+    "hourly": {
+      "path": "predictive_vnext3/hourly_contenders.joblib",
+      "seed_raw_sha256": "4723cf35db5d9aaf82d4329b164d433e88485bf4dde6ad2604e8e7c158e07c2b",
+      "seed_records": 2232,
+      "sha256": "6f1b82dabc3f47b063c4641419d7c3c1b203e78dd31009ca2fc02571dabce3c1"
+    }
+  },
+  "contenders": [
+    "logistic",
+    "gbdt",
+    "competing_risks"
+  ],
+  "fixed_fpr_alerts": {
+    "target_fpr": 0.2,
+    "threshold_source": "calibration period only"
+  },
+  "freeze_utc": "2026-10-04T11:06:39.635421+00:00",
+  "historical_selection_status": "INSPECTED_HISTORY_DIAGNOSTIC_ONLY",
+  "note": "No contender is declared champion before the future prospective evaluation.",
+  "predictive_accept": false,
+  "primary_baseline": "vol90d_same_frozen_volatility_bin",
+  "primary_metric": [
+    "multiclass_brier",
+    "multiclass_log_loss"
+  ],
+  "schema": "btc-predictive-vnext3-freeze-metadata-v1",
+  "secondary_baseline": "frozen_training_frequency",
+  "trading_authority": false
+}

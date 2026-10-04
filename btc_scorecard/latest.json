@@ -84,7 +84,7 @@
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
-  "generated_at_utc": "2026-10-03T23:48:20.808815+00:00",
+  "generated_at_utc": "2026-10-04T00:01:12.014145+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 0,
@@ -1588,6 +1588,55 @@
         "rank_30d": 0.052778,
         "score_diagnostic": null,
         "status": "ISSUED"
+      }
+    },
+    {
+      "arbiter": {
+        "action_status": null,
+        "actual_fall_lt_minus_1pct": null,
+        "actual_rise_gt_1pct": null,
+        "reason": null,
+        "signed_sources": null,
+        "slot_missed": false,
+        "source_epoch": "arbiter_v4",
+        "status": "PENDING",
+        "trading_authority": false
+      },
+      "down": {
+        "actual": null,
+        "alert": null,
+        "candidate_estimate_unproven": null,
+        "rank_30d": null,
+        "score_diagnostic": null,
+        "status": "PENDING"
+      },
+      "due_4h_utc": "2026-10-04T04:00:00+00:00",
+      "regime_v4": {
+        "actual_native_class": null,
+        "calibrated_brier": null,
+        "missing_reason": null,
+        "shadow_brier_diagnostic_only": null,
+        "shadow_log_loss_diagnostic_only": null,
+        "shadow_scores_uncalibrated": null,
+        "source_status": "PENDING",
+        "state": null,
+        "used_by_arbiter_at_decision": null
+      },
+      "slot_msk": "2026-10-04T03:00:00+03:00",
+      "slot_utc": "2026-10-04T00:00:00+00:00",
+      "up": {
+        "actual": null,
+        "alert": null,
+        "candidate_estimate_unproven": null,
+        "rank_30d": null,
+        "score_diagnostic": null,
+        "status": "PENDING"
+      },
+      "v2_9_30": {
+        "actual_native_class": null,
+        "probabilities_diagnostic": null,
+        "score": null,
+        "status": "PENDING"
       }
     }
   ],

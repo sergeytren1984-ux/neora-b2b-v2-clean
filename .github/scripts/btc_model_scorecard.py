@@ -27,6 +27,8 @@ SOURCES = {
     "arbiter": ("btc-arbitration-v3", "arbiter_v3_events", "btc-arbitration-v3.yml"),
     "arbiter_v4": ("btc-arbitration-v4", "arbiter_v4_events", "btc-arbitration-v4.yml"),
     "barrier": ("btc-first-passage-v1", "first_passage_v1_events", "btc-first-passage-v1.yml"),
+    "arbiter_v5": ("btc-arbitration-v5", "arbiter_v5_events", "btc-arbitration-v5.yml"),
+    "barrier_v2": ("btc-first-passage-v2", "first_passage_v2_events", "btc-first-passage-v2.yml"),
 }
 
 
@@ -85,7 +87,8 @@ def signed_events(source: str) -> list[dict]:
         if key in seen:
             raise ValueError(f"{source}: duplicate key {key}")
         seen.add(key)
-        integrated = verify(blob, get(ref, path[:-5] + ".sigstore.json"), identity)
+        event_identity = identity.replace(".yml", "-outcome.yml") if (source in ("arbiter_v5", "barrier_v2") and event.get("type") in ("ARBITRATION_OUTCOME_RECORDED", "BARRIER_OUTCOME_RECORDED")) else identity
+        integrated = verify(blob, get(ref, path[:-5] + ".sigstore.json"), event_identity)
         if event.get("type") in ("FORECAST_ISSUED", "REGIME_FORECAST_ISSUED",
                                   "DIRECTIONAL_4H_ALERT_ISSUED",
                                   "DIRECTIONAL_4H_DOWNSIDE_ALERT_ISSUED",
@@ -95,7 +98,7 @@ def signed_events(source: str) -> list[dict]:
                 raise ValueError(f"{source}: nonprospective forecast {path}")
         if event.get("type") in ("OUTCOME_AND_LEARNING_APPLIED", "REGIME_OUTCOME_RECORDED",
                                   "OUTCOME_RECORDED", "ARBITRATION_OUTCOME_RECORDED") or (
-                                      source == "barrier" and event.get("type") == "BARRIER_OUTCOME_RECORDED"):
+                                      source in ("barrier", "barrier_v2") and event.get("type") == "BARRIER_OUTCOME_RECORDED"):
             if not event.get("due_utc"):
                 raise ValueError(f"{source}: outcome due_utc missing in {path}")
             if integrated < stamp(event["due_utc"]):
@@ -105,7 +108,7 @@ def signed_events(source: str) -> list[dict]:
             earliest = touch or event["spec"]["deadline_utc"]
             if integrated < stamp(earliest):
                 raise ValueError(f"{source}: barrier outcome before observable touch/deadline {path}")
-        if source == "barrier" and event.get("raw_path"):
+        if source in ("barrier", "barrier_v2") and event.get("raw_path"):
             if digest(get(ref,event["raw_path"])) != event["raw_sha256"]:
                 raise ValueError(f"{source}: raw mismatch {path}")
         event["_source_path"] = f"https://github.com/{REPO}/blob/{branch}/{path}"
@@ -325,7 +328,8 @@ def build() -> tuple[dict, str]:
                          "actual": actual,
                          "score_diagnostic": binary_score(e["output"]["candidate_estimate"], actual)
                          if e and o else None}
-        arbiter_stream = "arbiter_v4" if point >= stamp("2026-10-03T09:00:00Z") else "arbiter"
+        arbiter_stream = ("arbiter_v5" if point >= stamp("2026-10-05T00:00:00Z") else
+                          "arbiter_v4" if point >= stamp("2026-10-03T09:00:00Z") else "arbiter")
         a = by_type[arbiter_stream].get("decision:" + slot + ":4h")
         ao = by_type[arbiter_stream].get("outcome:" + slot + ":4h")
         am = by_type[arbiter_stream].get("missed:" + slot)
@@ -334,12 +338,12 @@ def build() -> tuple[dict, str]:
                       "SLOT_MISSED" if am else "UNRECORDED_MISS" if
                       point + dt.timedelta(minutes=45) <= now else "PENDING")
         row["regime_v4"]["used_by_arbiter_at_decision"] = (
-            bool(a.get("sources", {}).get("regime")) if a and arbiter_stream == "arbiter_v4"
+            bool(a.get("sources", {}).get("regime")) if a and arbiter_stream in ("arbiter_v4", "arbiter_v5")
             else None)
         row["arbiter"] = {"status": arb_status,
                           "signed_sources": {name: bool(a.get("sources", {}).get(name))
                                              for name in ("directional", "downside", "regime")}
-                          if a and arbiter_stream == "arbiter_v4" else None,
+                          if a and arbiter_stream in ("arbiter_v4", "arbiter_v5") else None,
                           "reason": a.get("reason") if a else invalid.get("reason") if invalid else
                           am.get("reason") if am else None,
                           "action_status": a.get("action_status") if a else None,
@@ -349,12 +353,13 @@ def build() -> tuple[dict, str]:
                           "slot_missed": am is not None or arb_status == "UNRECORDED_MISS",
                           "trading_authority": False}
         if point.hour == 14 and point >= stamp("2026-10-03T14:00:00Z"):
+            barrier_stream = "barrier_v2" if point >= stamp("2026-10-05T14:00:00Z") else "barrier"
             row["first_passage"] = {}
             for scenario in ("entry_72h", "entry_7d"):
-                question = by_type["barrier"].get(f"barrier:{slot}:{scenario}")
-                outcome = by_type["barrier"].get(f"barrier-outcome:{slot}:{scenario}")
-                missing = by_type["barrier"].get(f"barrier-missed:{slot}:{scenario}")
-                ineligible = by_type["barrier"].get(f"barrier-ineligible:{slot}:{scenario}")
+                question = by_type[barrier_stream].get(f"barrier:{slot}:{scenario}")
+                outcome = by_type[barrier_stream].get(f"barrier-outcome:{slot}:{scenario}")
+                missing = by_type[barrier_stream].get(f"barrier-missed:{slot}:{scenario}")
+                ineligible = by_type[barrier_stream].get(f"barrier-ineligible:{slot}:{scenario}")
                 row["first_passage"][scenario] = {
                     "status": "ISSUED" if question else "INELIGIBLE" if ineligible else
                               "SLOT_MISSED" if missing else "UNRECORDED_MISS" if
@@ -395,6 +400,12 @@ def build() -> tuple[dict, str]:
                                         r["arbiter"]["status"] == "UNRECORDED_MISS"],
                   "signed_slot_misses": [r["slot_msk"] for r in due_v4 if
                                         r["arbiter"]["status"] == "SLOT_MISSED"]}
+    due_v5 = [r for r in rows if r["arbiter"]["source_epoch"] == "arbiter_v5" and
+              stamp(r["slot_utc"]) + dt.timedelta(minutes=45) <= now]
+    continuity_v5 = {"assessed_slots": len(due_v5),
+                     "decisions": sum(r["arbiter"]["status"] not in ("SLOT_MISSED", "UNRECORDED_MISS", "SOURCE_INVALID") for r in due_v5),
+                     "unrecorded_misses": [r["slot_msk"] for r in due_v5 if r["arbiter"]["status"] == "UNRECORDED_MISS"],
+                     "source_fallbacks": [r["slot_msk"] for r in due_v5 if r["arbiter"]["signed_sources"] and not all(r["arbiter"]["signed_sources"].values())]}
     oi_audit = audit_oi_source_consistency(streams["regime"], now)
     baseline = json.loads(Path("btc_research/constant_tail_baseline_v1.json").read_bytes())
     comparison = {"status": "POST_START_DESCRIPTIVE_ONLY_NO_UNTOUCHED_PROOF",
@@ -407,6 +418,7 @@ def build() -> tuple[dict, str]:
            "external_oi_source_audit": oi_audit,
            "generated_at_utc": now.isoformat(), "source_event_counts": counts,
            "arbiter_v4_continuity": continuity,
+           "arbiter_v5_continuity": continuity_v5,
            "epoch_5_e2e_audit": audit_v5(streams["v5"], now),
            "event_definitions_differ": True,
            "regime_scores_are_not_calibrated_probabilities": True,
@@ -444,6 +456,9 @@ def build() -> tuple[dict, str]:
               f"необъяснённых пропусков {len(continuity['unrecorded_misses'])}; "
               f"пропусков с событием {len(continuity['signed_slot_misses'])}; "
               f"неполных источников {len(continuity['source_fallbacks'])}."),
+             (f"Арбитр v5 с 05.10 03:00 МСК: {continuity_v5['decisions']}/{continuity_v5['assessed_slots']} решений к дедлайну; "
+              f"необъяснённых пропусков {len(continuity_v5['unrecorded_misses'])}; "
+              f"неполных источников {len(continuity_v5['source_fallbacks'])}."),
              "В колонке v4 указаны некалиброванные баллы. Brier v4 — только диагностика;",
              "события v5 и v4 используют собственные определения классов, их оценки нельзя",
              "считать прямым сравнением качества без общей метки. Исходы появляются после наступления срока.", "",
@@ -498,7 +513,8 @@ def build() -> tuple[dict, str]:
                                           ", ".join(actuals) or "ожидание",
                                           "; ".join(metric) or "ожидание")) + " |")
     lines += ["", "## Окно возврата ядра: фиксированные барьеры", "",
-              "С 17:00 МСК 03.10.2026 подписываются два ежедневных вопроса: 82 500 раньше 87 000 за 72 ч;",
+              "С 17:00 МСК 03.10.2026 подписываются два ежедневных вопроса; с 05.10 17:00 МСК новый раздельный контур:",
+              "82 500 раньше 87 000 за 72 ч;",
               "81 500 раньше 88 000 за 7 суток. Классы: нижний первым, верхний первым, ни один,",
               "оба в одном часовом баре. Вероятности для торговли не опубликованы.", ""]
     for r in rows[-72:]:

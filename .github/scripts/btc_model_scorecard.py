@@ -309,6 +309,7 @@ def build() -> tuple[dict, str]:
                             "source_status": "ISSUED" if rf else "ABSTAIN_DATA_INVALID" if ra else
                             "SLOT_MISSED" if rm else "PENDING",
                             "missing_reason": ra.get("reason") if ra else rm.get("reason") if rm else None,
+                            "rekor_integrated_utc": rf.get("_rekor_integrated_utc") if rf else None,
                             "shadow_scores_uncalibrated": r4.get("shadow_class_scores") if r4 else None,
                             "actual_native_class": ro.get("class") if ro else None,
                             "shadow_brier_diagnostic_only": ro.get("shadow_brier_diagnostic_only") if ro else None,
@@ -350,6 +351,7 @@ def build() -> tuple[dict, str]:
                           "actual_rise_gt_1pct": ao.get("actual_rise_gt_1pct") if ao else None,
                           "actual_fall_lt_minus_1pct": ao.get("actual_fall_lt_minus_1pct") if ao else None,
                           "source_epoch": arbiter_stream,
+                          "rekor_integrated_utc": a.get("_rekor_integrated_utc") if a else None,
                           "slot_missed": am is not None or arb_status == "UNRECORDED_MISS",
                           "trading_authority": False}
         if point.hour == 14 and point >= stamp("2026-10-03T14:00:00Z"):
@@ -405,7 +407,11 @@ def build() -> tuple[dict, str]:
     continuity_v5 = {"assessed_slots": len(due_v5),
                      "decisions": sum(r["arbiter"]["status"] not in ("SLOT_MISSED", "UNRECORDED_MISS", "SOURCE_INVALID") for r in due_v5),
                      "unrecorded_misses": [r["slot_msk"] for r in due_v5 if r["arbiter"]["status"] == "UNRECORDED_MISS"],
-                     "source_fallbacks": [r["slot_msk"] for r in due_v5 if r["arbiter"]["signed_sources"] and not all(r["arbiter"]["signed_sources"].values())]}
+                     "source_fallbacks": [r["slot_msk"] for r in due_v5 if r["arbiter"]["signed_sources"] and not all(r["arbiter"]["signed_sources"].values())],
+                     "regime_race_defects": [r["slot_msk"] for r in due_v5 if
+                         r["arbiter"]["signed_sources"] and not r["arbiter"]["signed_sources"]["regime"] and
+                         r["regime_v4"]["rekor_integrated_utc"] and r["arbiter"]["rekor_integrated_utc"] and
+                         stamp(r["regime_v4"]["rekor_integrated_utc"]) <= stamp(r["arbiter"]["rekor_integrated_utc"])]}
     oi_audit = audit_oi_source_consistency(streams["regime"], now)
     baseline = json.loads(Path("btc_research/constant_tail_baseline_v1.json").read_bytes())
     comparison = {"status": "POST_START_DESCRIPTIVE_ONLY_NO_UNTOUCHED_PROOF",
@@ -458,7 +464,8 @@ def build() -> tuple[dict, str]:
               f"неполных источников {len(continuity['source_fallbacks'])}."),
              (f"Арбитр v5 с 05.10 03:00 МСК: {continuity_v5['decisions']}/{continuity_v5['assessed_slots']} решений к дедлайну; "
               f"необъяснённых пропусков {len(continuity_v5['unrecorded_misses'])}; "
-              f"неполных источников {len(continuity_v5['source_fallbacks'])}."),
+              f"неполных источников {len(continuity_v5['source_fallbacks'])}; "
+              f"гонок после подписи источника {len(continuity_v5['regime_race_defects'])}."),
              "В колонке v4 указаны некалиброванные баллы. Brier v4 — только диагностика;",
              "события v5 и v4 используют собственные определения классов, их оценки нельзя",
              "считать прямым сравнением качества без общей метки. Исходы появляются после наступления срока.", "",

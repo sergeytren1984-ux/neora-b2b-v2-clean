@@ -1,0 +1,71 @@
+{
+  "schema": "btc-predictive-vnext3-protocol-v1",
+  "head": "early15m_pm1pct_4h",
+  "status": "PROSPECTIVE_SHADOW_ONLY",
+  "start_utc": "2026-10-05T00:00:00Z",
+  "cadence_minutes": 15,
+  "issuance_deadline_minutes": 14,
+  "source": "Binance BTCUSDT closed 15m spot candles",
+  "artifact_sha256": "fe88399f78751d0b238b1873f54fac63c474853f050a2a311f09949ca1b75621",
+  "contenders": [
+    "logistic",
+    "gbdt",
+    "competing_risks"
+  ],
+  "primary_baseline": "vol90d_same_frozen_volatility_bin",
+  "secondary_baseline": "frozen_training_frequency",
+  "primary_metrics": [
+    "multiclass_brier",
+    "multiclass_log_loss"
+  ],
+  "target": {
+    "type": "symmetric percent first passage",
+    "lower_ratio": 0.99,
+    "upper_ratio": 1.01,
+    "horizon_minutes": 240,
+    "classes": [
+      "LOWER_FIRST",
+      "UPPER_FIRST",
+      "NEITHER",
+      "AMBIGUOUS_SAME_BAR"
+    ],
+    "same_bar_rule": "AMBIGUOUS_SAME_BAR"
+  },
+  "fixed_alert_evaluation": {
+    "threshold_source": "historical calibration block only",
+    "target_fpr": 0.2,
+    "report_by": "frozen volatility bin"
+  },
+  "uncertainty": {
+    "block_lengths_days": [
+      14,
+      28
+    ],
+    "familywise_alpha": 0.05,
+    "contenders": 3,
+    "correction": "Bonferroni one-sided lower bound"
+  },
+  "admission": {
+    "predictive_accept": false,
+    "minimum_calendar_days": 42,
+    "minimum_fixed_phase_nonoverlap_windows": 150,
+    "nonoverlap_window_hours": 4,
+    "minimum_volatility_episodes": 12,
+    "require_all_three_volatility_bins": true,
+    "require_brier_better_than_primary": true,
+    "require_logloss_better_than_primary": true,
+    "require_positive_familywise_block_lower_bounds_both_metrics_both_block_lengths": true,
+    "calibration_max_ece10_degradation_vs_primary": 0.02,
+    "winner_selection": "only among contenders passing every prospective gate; lowest future Brier then future Log Loss",
+    "raw_forecast_count_is_not_an_admission_criterion": true
+  },
+  "freeze_authority": "signed CONFIG_FROZEN_PRESTART manifest only",
+  "immutable_source_commit_required": true,
+  "outcome_only_after_due": true,
+  "no_backfill": true,
+  "raw_required": true,
+  "sigstore_rekor_required": true,
+  "split_forecast_outcome_workers": true,
+  "trading_authority": false,
+  "supersedes": "vNext2 registration is non-admissible after independent REWORK audit"
+}

@@ -91,3 +91,33 @@ jobs:
           RC=$?
           set -e
           test "$RC" -eq 0
+          git checkout 9ee30cb618a505976ddd143876718f969b307c67 -- predictive_vnext3/predict.py
+          if [ "$HEAD" = "hourly" ]; then
+            MF='predictive_vnext3/frozen_manifest_hourly.json'
+          else
+            MF='predictive_vnext3/frozen_manifest_early15m.json'
+          fi
+          cp "$MF" /tmp/signed-manifest-copy.json
+          python - "$MF" <<'PY'
+import json,sys
+p=sys.argv[1]
+x=json.load(open(p))
+x["intentional_audit_tamper"]=True
+open(p,"w").write(json.dumps(x,sort_keys=True,separators=(",",":"))+"\n")
+PY
+          set +e
+          HEAD_FOR_TEST="$HEAD" BTC_VNEXT3_WORKFLOW_PATH="$FW" python - <<'PY'
+import os
+from predictive_vnext3.worker import CONFIG, verify_signed_freeze
+head=os.environ["HEAD_FOR_TEST"]
+try:
+    verify_signed_freeze(CONFIG[head],head,"forecast")
+except RuntimeError as ex:
+    print("EXPECTED_SIGNED_MANIFEST_REJECTION:", ex)
+    raise SystemExit(0)
+raise SystemExit(1)
+PY
+          RC=$?
+          set -e
+          mv /tmp/signed-manifest-copy.json "$MF"
+          test "$RC" -eq 0

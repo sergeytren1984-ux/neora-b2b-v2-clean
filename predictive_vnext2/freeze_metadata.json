@@ -5,31 +5,31 @@
       "selfcheck": {
         "cal_n": 8720,
         "probe": [
-          0.18735313438094933,
-          0.16696501748295575,
-          0.6454807075434739,
-          0.00020114059262090535
+          0.1874875954216979,
+          0.1670358124203178,
+          0.6452682264988996,
+          0.0002083656590846338
         ],
         "probe_probability_sum": 0.9999999999999999,
         "train_n": 78415
       },
-      "sha256": "1dc4f1c2217b2dc58244d49ccb34af4c02969d27219ec446af241dfe3c26398d",
-      "source_sha256": "1ed1966d904d25920646a4f1a02faf44938c41142ca618ad48a074786df6b833"
+      "sha256": "54efa393e06059fe18b5904dc49212cb951931d23741d80dfb163c0fd0811793",
+      "source_sha256": "667a178b615a538dbc182e576cc6dd0462c6eb09f138f34e97fcf1a99348249b"
     },
     "hourly": {
       "path": "predictive_vnext2/hourly_rv72_competing_risks.joblib",
       "selfcheck": {
         "cal_n": 2112,
         "probe": [
-          0.4272518473369726,
-          0.5060089997433598,
-          0.06673915291966764,
+          0.4272518473369739,
+          0.5060089997433694,
+          0.0667391529196566,
           0.0
         ],
         "probe_probability_sum": 1.0,
         "train_n": 19462
       },
-      "sha256": "e60e0fd3a5f9a2cac31c9e7e5fd7f741f9e75e6517d309a51f82a4b6e15676f3",
+      "sha256": "63a7d372f9736d78e91cb4f093cd2fc6bcb40db99c739335c716f58dede48b3f",
       "source_sha256": "3e78a339e60fec957dea2c0884c6840d66a92351ac04b4198623f1da10165fc9"
     }
   },
@@ -41,8 +41,8 @@
   "predictive_accept": false,
   "purpose": "prospective shadow collection only",
   "research_outputs": {
-    "early15m_sha256": "0fe22b2398b9c67e1bd8b5d4cc82b938a98779f114e63d6ce6d994972cb3fe93",
-    "hourly_sha256": "eb0cced3d5d516dc22be19fcc4720b86cccf9ded7b3bb950cf9f21ee601d4c3d"
+    "early15m_sha256": "cb5d429be5247c0f42662b2bd3f9e613acbc56a338d3995e2e13b8066ec3739c",
+    "hourly_sha256": "7f3e25dc19317f69e0c50e6cb091b3ff38373786cab02e9d23a19217ec6ca835"
   },
   "schema": "btc-predictive-vnext2-freeze-metadata-v1",
   "selection_basis": {

@@ -1,7 +1,7 @@
 {
   "arbiter_v4_continuity": {
-    "assessed_slots": 25,
-    "decisions": 25,
+    "assessed_slots": 26,
+    "decisions": 26,
     "signed_slot_misses": [],
     "source_fallbacks": [
       {
@@ -58,6 +58,14 @@
         ],
         "reason": "no timely signed regime forecast; directional head independently verified",
         "slot_msk": "2026-10-04T12:00:00+03:00",
+        "status": "NO_UPSIDE_TAIL_WARNING_REGIME_UNAVAILABLE"
+      },
+      {
+        "missing_sources": [
+          "regime"
+        ],
+        "reason": "no timely signed regime forecast; directional head independently verified",
+        "slot_msk": "2026-10-04T13:00:00+03:00",
         "status": "NO_UPSIDE_TAIL_WARNING_REGIME_UNAVAILABLE"
       }
     ],
@@ -126,7 +134,7 @@
   },
   "event_definitions_differ": true,
   "external_oi_source_audit": {
-    "checked_recent_forecasts": 41,
+    "checked_recent_forecasts": 42,
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
@@ -135,7 +143,7 @@
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
-  "generated_at_utc": "2026-10-04T10:17:54.739979+00:00",
+  "generated_at_utc": "2026-10-04T10:48:50.960912+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 1,
@@ -157,9 +165,9 @@
   "regime_calibration_gate": {
     "also_requires": "30 separate up and down episodes each; paired Brier and Log Loss gain with positive 95% weekly block bootstrap bound; future calibration/reliability test",
     "closed_outcomes": {
-      "1h": 40,
+      "1h": 41,
       "24h": 19,
-      "4h": 37
+      "4h": 38
     },
     "preregistered_minimum": {
       "1h": 500,
@@ -2162,12 +2170,12 @@
       },
       "due_4h_utc": "2026-10-04T10:00:00+00:00",
       "regime_v4": {
-        "actual_native_class": null,
+        "actual_native_class": "upside",
         "calibrated_brier": null,
         "missing_reason": null,
         "rekor_integrated_utc": "2026-10-04T06:19:56+00:00",
-        "shadow_brier_diagnostic_only": null,
-        "shadow_log_loss_diagnostic_only": null,
+        "shadow_brier_diagnostic_only": 0.9507121579964035,
+        "shadow_log_loss_diagnostic_only": 1.397846,
         "shadow_scores_uncalibrated": {
           "downside": 0.1522824505542547,
           "range": 0.6005888689540181,
@@ -2394,13 +2402,17 @@
         "actual_native_class": null,
         "calibrated_brier": null,
         "missing_reason": null,
-        "rekor_integrated_utc": null,
+        "rekor_integrated_utc": "2026-10-04T10:36:16+00:00",
         "shadow_brier_diagnostic_only": null,
         "shadow_log_loss_diagnostic_only": null,
-        "shadow_scores_uncalibrated": null,
+        "shadow_scores_uncalibrated": {
+          "downside": 0.09625257589469145,
+          "range": 0.3102227911440532,
+          "upside": 0.5935246329612552
+        },
         "source_epoch": "regime",
-        "source_status": "PENDING",
-        "state": null,
+        "source_status": "ISSUED",
+        "state": "UP_TRANSITION",
         "used_by_arbiter_at_decision": false
       },
       "slot_msk": "2026-10-04T13:00:00+03:00",
@@ -2454,10 +2466,10 @@
     },
     "regime": {
       "ABSTAIN_DATA_INVALID": 3,
-      "BARRIER_OUTCOME_RECORDED": 187,
+      "BARRIER_OUTCOME_RECORDED": 197,
       "CONFIG_FROZEN_PRESTART": 1,
-      "REGIME_FORECAST_ISSUED": 41,
-      "REGIME_OUTCOME_RECORDED": 96,
+      "REGIME_FORECAST_ISSUED": 42,
+      "REGIME_OUTCOME_RECORDED": 98,
       "SCHEDULE_REGISTERED": 1,
       "SLOT_MISSED": 6
     },

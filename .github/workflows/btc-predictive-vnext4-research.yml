@@ -5,7 +5,6 @@ on:
     branches: [btc-predictive-vnext4-research-20261004]
     paths:
       - research_vnext4/run_ablation.py
-      - research_vnext4/run_operational_barrier.py
       - .github/workflows/btc-predictive-vnext4-research.yml
   workflow_dispatch: {}
 
@@ -36,17 +35,12 @@ jobs:
         env:
           PYTHONPATH: .
         run: python research_vnext4/run_ablation.py
-      - name: Run generalized operational first-passage research
-        env:
-          PYTHONPATH: .
-        run: python research_vnext4/run_operational_barrier.py
       - name: Commit research outputs
         run: |
           git config user.name 'btc-predictive-vnext4-research[bot]'
           git config user.email 'btc-predictive-vnext4-research[bot]@users.noreply.github.com'
           git add research_vnext4/ablation_result.json
-          git add research_vnext4/operational_barrier_result.json
-          git commit -m "Record vNext4 ablation and operational barrier research"
+          git commit -m "Record vNext4 ablation research"
           git reset --hard HEAD
           git fetch origin btc-predictive-vnext4-research-20261004
           git rebase origin/btc-predictive-vnext4-research-20261004

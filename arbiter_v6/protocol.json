@@ -1,0 +1,22 @@
+{
+  "cadence_minutes": 60,
+  "decision_policy": "one watch-only status; independently signed ±1% 4h tail alerts take precedence over uncalibrated regime disagreement; both alerts yield conflict",
+  "horizon_hours": 4,
+  "issuance_deadline_minutes": 45,
+  "missing_source_policy": "signed up required; missing down/regime explicit UNAVAILABLE; after 35m issue degraded decision with available verified signed inputs; sequencer is sole forecast dispatcher",
+  "no_backfill": true,
+  "outcomes": "independently signed up and down outcomes only after +4h due; no early learning",
+  "probabilities": "no new calibrated probabilities; directional candidate estimates unproven; regime shadow scores uncalibrated",
+  "schema": "btc-arbiter-v6-protocol",
+  "sigstore_rekor_required": true,
+  "source_wait_minutes": 35,
+  "sources": {
+    "down": "btc-directional-down-v1",
+    "regime": "btc-regime-v5-split",
+    "up": "btc-directional-v1"
+  },
+  "start_utc": "2026-10-05T01:00:00Z",
+  "supersedes": "btc-arbitration-v5 after first signed v6 decision",
+  "trading_authority": false,
+  "split_workers": true
+}

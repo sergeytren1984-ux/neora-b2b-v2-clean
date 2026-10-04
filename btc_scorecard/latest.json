@@ -1,7 +1,7 @@
 {
   "arbiter_v4_continuity": {
-    "assessed_slots": 15,
-    "decisions": 15,
+    "assessed_slots": 16,
+    "decisions": 16,
     "signed_slot_misses": [],
     "source_fallbacks": [
       {
@@ -74,8 +74,8 @@
         "slot": "20261002T040000Z"
       }
     ],
-    "forecasts_issued": 19,
-    "raw_bundles_checked": 16,
+    "forecasts_issued": 21,
+    "raw_bundles_checked": 17,
     "start_utc": "2026-09-30T20:00:00+00:00"
   },
   "event_definitions_differ": true,
@@ -84,7 +84,7 @@
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
-  "generated_at_utc": "2026-10-04T00:43:09.601473+00:00",
+  "generated_at_utc": "2026-10-04T00:47:46.068303+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 0,

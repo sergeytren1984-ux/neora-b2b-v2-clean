@@ -7,7 +7,7 @@ on:
   schedule:
     - cron: '16,46 * * * *'
   workflow_run:
-    workflows: ['BTC prospective evidence v5', 'BTC arbitration v4 signed decisions', 'BTC fixed barrier evidence v1']
+    workflows: ['BTC prospective evidence v5', 'BTC arbitration v4 signed decisions', 'BTC fixed barrier evidence v1', 'BTC arbitration v5 signed decisions', 'BTC arbitration v5 due outcomes', 'BTC fixed barrier forecast v2', 'BTC fixed barrier due outcome v2']
     types: [completed]
   workflow_dispatch: {}
 

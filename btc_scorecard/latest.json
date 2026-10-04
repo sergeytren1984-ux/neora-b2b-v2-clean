@@ -84,7 +84,7 @@
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
-  "generated_at_utc": "2026-10-04T06:17:18.657887+00:00",
+  "generated_at_utc": "2026-10-04T06:19:55.665521+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 1,
@@ -106,9 +106,9 @@
   "regime_calibration_gate": {
     "also_requires": "30 separate up and down episodes each; paired Brier and Log Loss gain with positive 95% weekly block bootstrap bound; future calibration/reliability test",
     "closed_outcomes": {
-      "1h": 36,
+      "1h": 37,
       "24h": 16,
-      "4h": 33
+      "4h": 34
     },
     "preregistered_minimum": {
       "1h": 500,
@@ -1773,11 +1773,11 @@
       },
       "due_4h_utc": "2026-10-04T06:00:00+00:00",
       "regime_v4": {
-        "actual_native_class": null,
+        "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
-        "shadow_brier_diagnostic_only": null,
-        "shadow_log_loss_diagnostic_only": null,
+        "shadow_brier_diagnostic_only": 0.1915875449432288,
+        "shadow_log_loss_diagnostic_only": 0.442204,
         "shadow_scores_uncalibrated": {
           "downside": 0.17708430869722985,
           "range": 0.6426184267010895,
@@ -2042,7 +2042,7 @@
       "BARRIER_OUTCOME_RECORDED": 112,
       "CONFIG_FROZEN_PRESTART": 1,
       "REGIME_FORECAST_ISSUED": 37,
-      "REGIME_OUTCOME_RECORDED": 85,
+      "REGIME_OUTCOME_RECORDED": 87,
       "SCHEDULE_REGISTERED": 1,
       "SLOT_MISSED": 6
     },

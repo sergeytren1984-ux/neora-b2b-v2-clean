@@ -119,7 +119,7 @@
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
-  "generated_at_utc": "2026-10-04T08:18:46.816892+00:00",
+  "generated_at_utc": "2026-10-04T08:21:31.816315+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 1,
@@ -2318,7 +2318,7 @@
     },
     "regime": {
       "ABSTAIN_DATA_INVALID": 3,
-      "BARRIER_OUTCOME_RECORDED": 154,
+      "BARRIER_OUTCOME_RECORDED": 156,
       "CONFIG_FROZEN_PRESTART": 1,
       "REGIME_FORECAST_ISSUED": 39,
       "REGIME_OUTCOME_RECORDED": 91,

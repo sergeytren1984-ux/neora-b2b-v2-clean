@@ -43,7 +43,7 @@ jobs:
                   if epoch=='arbiter_v6_continuity' and now<dt.datetime(2026,10,5,1,55,tzinfo=UTC):
                       continue
                   status=data[epoch]
-                  if status['decisions']!=status['assessed_slots'] or status['unrecorded_misses'] or status['regime_race_defects']:
+                  if status['decisions']!=status['assessed_slots'] or status['unrecorded_misses'] or status['regime_race_defects'] or (epoch=='arbiter_v6_continuity' and status['source_fallbacks']):
                       raise RuntimeError(epoch+' continuity defect: '+json.dumps(status))
                   print(epoch,status)
           if now>=dt.datetime(2026,10,5,14,55,tzinfo=UTC):

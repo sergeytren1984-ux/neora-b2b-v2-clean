@@ -13,8 +13,8 @@
         "probe_probability_sum": 0.9999999999999999,
         "train_n": 78415
       },
-      "sha256": "c210b1f451ecddb6e948418758ab199acc01043fca3548bc960f15e65a54cbe9",
-      "source_sha256": "71aa24ec53afaa0b7bbdd5eacee1815cd03fac81da30af2843531437da670abe"
+      "sha256": "1dc4f1c2217b2dc58244d49ccb34af4c02969d27219ec446af241dfe3c26398d",
+      "source_sha256": "1ed1966d904d25920646a4f1a02faf44938c41142ca618ad48a074786df6b833"
     },
     "hourly": {
       "path": "predictive_vnext2/hourly_rv72_competing_risks.joblib",
@@ -29,9 +29,13 @@
         "probe_probability_sum": 1.0,
         "train_n": 19462
       },
-      "sha256": "f8425371091bb5630413215cbc1908af333bc2371400b8b7167f8f0b9d8de395",
+      "sha256": "e60e0fd3a5f9a2cac31c9e7e5fd7f741f9e75e6517d309a51f82a4b6e15676f3",
       "source_sha256": "3e78a339e60fec957dea2c0884c6840d66a92351ac04b4198623f1da10165fc9"
     }
+  },
+  "controls": {
+    "early15m": "frozen training frequency plus frozen volatility-bin frequency",
+    "hourly": "frozen training frequency plus frozen volatility-bin frequency"
   },
   "no_trade_authority": true,
   "predictive_accept": false,

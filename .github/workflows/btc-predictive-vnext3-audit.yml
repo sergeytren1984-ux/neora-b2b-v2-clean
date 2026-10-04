@@ -40,14 +40,7 @@ jobs:
         run: |
           python predictive_vnext3/scorecard.py --head ${{ matrix.head }} > /tmp/score.json
           cat /tmp/score.json
-          python - <<'PY'
-          import json
-          x=json.load(open('/tmp/score.json'))
-          assert x['governance']['ok'] is True, x['governance']
-          assert x['governance']['cosign_rekor_verified_events'] >= 2
-          assert x['score']['status'] == 'PENDING_NO_CLOSED_OUTCOMES'
-          print('PRESTART_GOVERNANCE_ACCEPT')
-          PY
+          python -c "import json; x=json.load(open('/tmp/score.json')); assert x['governance']['ok'] is True, x['governance']; assert x['governance']['cosign_rekor_verified_events'] >= 2; assert x['score']['status'] == 'PENDING_NO_CLOSED_OUTCOMES'; print('PRESTART_GOVERNANCE_ACCEPT')"
       - name: Exercise runtime freeze gate and tamper rejection
         env:
           PYTHONPATH: .
@@ -57,67 +50,28 @@ jobs:
           if [ "$HEAD" = "hourly" ]; then
             FW='.github/workflows/btc-predictive-vnext3-hourly.yml'
             OW='.github/workflows/btc-predictive-vnext3-hourly-outcome.yml'
+            MF='predictive_vnext3/frozen_manifest_hourly.json'
           else
             FW='.github/workflows/btc-predictive-vnext3-early15m.yml'
             OW='.github/workflows/btc-predictive-vnext3-early15m-outcome.yml'
-          fi
-          HEAD_FOR_TEST="$HEAD" BTC_VNEXT3_WORKFLOW_PATH="$FW" python - <<'PY'
-          import os
-          from predictive_vnext3.worker import CONFIG, verify_signed_freeze
-          head=os.environ['HEAD_FOR_TEST']
-          verify_signed_freeze(CONFIG[head],head,'forecast')
-          print('RUNTIME_FORECAST_FREEZE_GATE_ACCEPT')
-          PY
-          HEAD_FOR_TEST="$HEAD" BTC_VNEXT3_WORKFLOW_PATH="$OW" python - <<'PY'
-          import os
-          from predictive_vnext3.worker import CONFIG, verify_signed_freeze
-          head=os.environ['HEAD_FOR_TEST']
-          verify_signed_freeze(CONFIG[head],head,'outcome')
-          print('RUNTIME_OUTCOME_FREEZE_GATE_ACCEPT')
-          PY
-          printf '\n# intentional audit tamper\n' >> predictive_vnext3/predict.py
-          set +e
-          HEAD_FOR_TEST="$HEAD" BTC_VNEXT3_WORKFLOW_PATH="$FW" python - <<'PY'
-          import os
-          from predictive_vnext3.worker import CONFIG, verify_signed_freeze
-          head=os.environ['HEAD_FOR_TEST']
-          try:
-              verify_signed_freeze(CONFIG[head],head,'forecast')
-          except RuntimeError as ex:
-              print('EXPECTED_TAMPER_REJECTION:', ex)
-              raise SystemExit(0)
-          raise SystemExit(1)
-          PY
-          RC=$?
-          set -e
-          test "$RC" -eq 0
-          git checkout 9ee30cb618a505976ddd143876718f969b307c67 -- predictive_vnext3/predict.py
-          if [ "$HEAD" = "hourly" ]; then
-            MF='predictive_vnext3/frozen_manifest_hourly.json'
-          else
             MF='predictive_vnext3/frozen_manifest_early15m.json'
           fi
-          cp "$MF" /tmp/signed-manifest-copy.json
-          python - "$MF" <<'PY'
-import json,sys
-p=sys.argv[1]
-x=json.load(open(p))
-x["intentional_audit_tamper"]=True
-open(p,"w").write(json.dumps(x,sort_keys=True,separators=(",",":"))+"\n")
-PY
+          HEAD_FOR_TEST="$HEAD" BTC_VNEXT3_WORKFLOW_PATH="$FW" python -c "import os; from predictive_vnext3.worker import CONFIG,verify_signed_freeze; h=os.environ['HEAD_FOR_TEST']; verify_signed_freeze(CONFIG[h],h,'forecast'); print('RUNTIME_FORECAST_FREEZE_GATE_ACCEPT')"
+          HEAD_FOR_TEST="$HEAD" BTC_VNEXT3_WORKFLOW_PATH="$OW" python -c "import os; from predictive_vnext3.worker import CONFIG,verify_signed_freeze; h=os.environ['HEAD_FOR_TEST']; verify_signed_freeze(CONFIG[h],h,'outcome'); print('RUNTIME_OUTCOME_FREEZE_GATE_ACCEPT')"
+          printf '\n# intentional audit tamper\n' >> predictive_vnext3/predict.py
           set +e
-          HEAD_FOR_TEST="$HEAD" BTC_VNEXT3_WORKFLOW_PATH="$FW" python - <<'PY'
-import os
-from predictive_vnext3.worker import CONFIG, verify_signed_freeze
-head=os.environ["HEAD_FOR_TEST"]
-try:
-    verify_signed_freeze(CONFIG[head],head,"forecast")
-except RuntimeError as ex:
-    print("EXPECTED_SIGNED_MANIFEST_REJECTION:", ex)
-    raise SystemExit(0)
-raise SystemExit(1)
-PY
+          HEAD_FOR_TEST="$HEAD" BTC_VNEXT3_WORKFLOW_PATH="$FW" python -c "import os; from predictive_vnext3.worker import CONFIG,verify_signed_freeze; h=os.environ['HEAD_FOR_TEST']; verify_signed_freeze(CONFIG[h],h,'forecast')"
+          RC=$?
+          set -e
+          test "$RC" -ne 0
+          echo EXPECTED_STATIC_PATH_TAMPER_REJECTION
+          git checkout 9ee30cb618a505976ddd143876718f969b307c67 -- predictive_vnext3/predict.py
+          cp "$MF" /tmp/signed-manifest-copy.json
+          python -c "import json,sys; p=sys.argv[1]; x=json.load(open(p)); x['intentional_audit_tamper']=True; open(p,'w').write(json.dumps(x,sort_keys=True,separators=(',',':'))+'\\n')" "$MF"
+          set +e
+          HEAD_FOR_TEST="$HEAD" BTC_VNEXT3_WORKFLOW_PATH="$FW" python -c "import os; from predictive_vnext3.worker import CONFIG,verify_signed_freeze; h=os.environ['HEAD_FOR_TEST']; verify_signed_freeze(CONFIG[h],h,'forecast')"
           RC=$?
           set -e
           mv /tmp/signed-manifest-copy.json "$MF"
-          test "$RC" -eq 0
+          test "$RC" -ne 0
+          echo EXPECTED_SIGNED_MANIFEST_REJECTION

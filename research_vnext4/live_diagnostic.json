@@ -1,0 +1,186 @@
+{
+  "early15m": {
+    "control": {
+      "primary_distribution": {
+        "ambiguous_same_bar": 0.0007379295804343243,
+        "lower_first": 0.08169934640522876,
+        "neither": 0.8316466371494835,
+        "upper_first": 0.08591608686485347
+      },
+      "primary_eligible_records": 4741,
+      "primary_name": "vol90d_same_frozen_volatility_bin",
+      "primary_source": "vol90d_same_bin",
+      "secondary_distribution": {
+        "ambiguous_same_bar": 0.00035068926380759274,
+        "lower_first": 0.21854317303645893,
+        "neither": 0.5723695117130214,
+        "upper_first": 0.20873662598671205
+      },
+      "secondary_name": "frozen_training_frequency",
+      "volatility_bin": 0
+    },
+    "lower": 85167.7497,
+    "predictions": {
+      "competing_risks": {
+        "alerts_at_calibration_fpr20": {
+          "lower_first": false,
+          "lower_threshold": 0.24121850113306395,
+          "upper_first": false,
+          "upper_threshold": 0.20673252714950935
+        },
+        "class_distribution": {
+          "ambiguous_same_bar": 9.808131095741867e-05,
+          "lower_first": 0.09251702710709343,
+          "neither": 0.8013969648300886,
+          "upper_first": 0.10598792675186054
+        }
+      },
+      "gbdt": {
+        "alerts_at_calibration_fpr20": {
+          "lower_first": false,
+          "lower_threshold": 0.23410038055656096,
+          "upper_first": false,
+          "upper_threshold": 0.21469025203496428
+        },
+        "class_distribution": {
+          "ambiguous_same_bar": 0.00014034668547778542,
+          "lower_first": 0.12650677278954228,
+          "neither": 0.7833520081519537,
+          "upper_first": 0.09000087237302602
+        }
+      },
+      "logistic": {
+        "alerts_at_calibration_fpr20": {
+          "lower_first": false,
+          "lower_threshold": 0.24122244770953755,
+          "upper_first": false,
+          "upper_threshold": 0.21755566509239535
+        },
+        "class_distribution": {
+          "ambiguous_same_bar": 0.00010042801339343393,
+          "lower_first": 0.10388324347346539,
+          "neither": 0.8027352965244238,
+          "upper_first": 0.09328103198871736
+        }
+      }
+    },
+    "reference": 86028.03,
+    "rv4h": 0.0010180321157050522,
+    "spot": {
+      "high_24h": 86066.22,
+      "last_close": 86028.03,
+      "low_24h": 85178.49,
+      "range_24h_pct": 1.0421997384550963,
+      "ret_1h_pct": 0.23721681143507034,
+      "ret_24h_pct": 0.7972456167484321,
+      "ret_4h_pct": 0.6936703864756755,
+      "taker_buy_ratio_24h": 0.5345764594650511,
+      "taker_buy_ratio_4h": 0.6481277070314422,
+      "taker_buy_ratio_last": 0.676543072891175,
+      "trades_last_vs_prev24_mean": 2.843458532896395,
+      "volume_last_vs_prev24_mean": 3.851958580809453
+    },
+    "upper": 86888.3103
+  },
+  "futures": {
+    "oi": {
+      "error": "HTTPError:HTTP Error 451: "
+    },
+    "oi_hist": {
+      "error": "HTTPError:HTTP Error 451: "
+    },
+    "premium": {
+      "error": "HTTPError:HTTP Error 451: "
+    },
+    "taker": {
+      "error": "HTTPError:HTTP Error 451: "
+    }
+  },
+  "generated_at_utc": "2026-10-04T21:19:06.000245+00:00",
+  "hourly": {
+    "control": {
+      "primary_distribution": {
+        "ambiguous_same_bar": 0.000390015600624025,
+        "lower_first": 0.39352574102964116,
+        "neither": 0.20865834633385336,
+        "upper_first": 0.39742589703588144
+      },
+      "primary_eligible_records": 1280,
+      "primary_name": "vol90d_same_frozen_volatility_bin",
+      "primary_source": "vol90d_same_bin",
+      "secondary_distribution": {
+        "ambiguous_same_bar": 2.5688450472667488e-05,
+        "lower_first": 0.3354654747225647,
+        "neither": 0.33567098232634607,
+        "upper_first": 0.32883785450061653
+      },
+      "secondary_name": "frozen_training_frequency",
+      "volatility_bin": 0
+    },
+    "lower": 84971.6309377073,
+    "predictions": {
+      "competing_risks": {
+        "alerts_at_calibration_fpr20": {
+          "lower_first": true,
+          "lower_threshold": 0.40401560296146466,
+          "upper_first": true,
+          "upper_threshold": 0.45565451081834146
+        },
+        "class_distribution": {
+          "ambiguous_same_bar": 0.0,
+          "lower_first": 0.4161197548454513,
+          "neither": 0.003510654164482976,
+          "upper_first": 0.5803695909900657
+        }
+      },
+      "gbdt": {
+        "alerts_at_calibration_fpr20": {
+          "lower_first": true,
+          "lower_threshold": 0.4026647240138501,
+          "upper_first": true,
+          "upper_threshold": 0.4445162838106815
+        },
+        "class_distribution": {
+          "ambiguous_same_bar": 0.0,
+          "lower_first": 0.44885059975363417,
+          "neither": 0.018670245155362253,
+          "upper_first": 0.5324791550910035
+        }
+      },
+      "logistic": {
+        "alerts_at_calibration_fpr20": {
+          "lower_first": false,
+          "lower_threshold": 0.39772293920568913,
+          "upper_first": true,
+          "upper_threshold": 0.44853649551712227
+        },
+        "class_distribution": {
+          "ambiguous_same_bar": 0.0,
+          "lower_first": 0.3902175622467215,
+          "neither": 0.01210131988094553,
+          "upper_first": 0.597681117872333
+        }
+      }
+    },
+    "reference": 85824.44,
+    "rv24": 0.0011710476856485602,
+    "spot": {
+      "high_24h": 85876.84,
+      "last_close": 85824.44,
+      "low_24h": 84558.0,
+      "range_24h_pct": 1.5596868421674959,
+      "ret_1h_pct": 0.4640633047712672,
+      "ret_24h_pct": 1.2680745370930335,
+      "ret_4h_pct": 0.5276079368426112,
+      "taker_buy_ratio_24h": 0.477443402676267,
+      "taker_buy_ratio_4h": 0.5393769720726904,
+      "taker_buy_ratio_last": 0.6305899908876897,
+      "trades_last_vs_prev24_mean": 1.8622630049126954,
+      "volume_last_vs_prev24_mean": 1.329152851526557
+    },
+    "upper": 86677.2490622927
+  },
+  "not_for_admission": true,
+  "schema": "btc-vnext4-oneoff-live-diagnostic-v1",
+  "status": "NON_PROSPECTIVE_OPERATOR_DIAGNOSTIC"
+}

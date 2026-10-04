@@ -1,7 +1,7 @@
 {
   "arbiter_v4_continuity": {
-    "assessed_slots": 16,
-    "decisions": 16,
+    "assessed_slots": 17,
+    "decisions": 17,
     "signed_slot_misses": [],
     "source_fallbacks": [
       {
@@ -84,7 +84,7 @@
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
-  "generated_at_utc": "2026-10-04T01:18:03.009936+00:00",
+  "generated_at_utc": "2026-10-04T01:49:01.543821+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 0,

@@ -80,11 +80,11 @@
   },
   "event_definitions_differ": true,
   "external_oi_source_audit": {
-    "checked_recent_forecasts": 31,
+    "checked_recent_forecasts": 32,
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
-  "generated_at_utc": "2026-10-04T00:07:43.863516+00:00",
+  "generated_at_utc": "2026-10-04T00:17:46.348612+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 0,
@@ -106,9 +106,9 @@
   "regime_calibration_gate": {
     "also_requires": "30 separate up and down episodes each; paired Brier and Log Loss gain with positive 95% weekly block bootstrap bound; future calibration/reliability test",
     "closed_outcomes": {
-      "1h": 30,
+      "1h": 31,
       "24h": 10,
-      "4h": 28
+      "4h": 29
     },
     "preregistered_minimum": {
       "1h": 500,
@@ -1383,8 +1383,8 @@
     {
       "arbiter": {
         "action_status": "NO_DIRECTIONAL_ACTION",
-        "actual_fall_lt_minus_1pct": null,
-        "actual_rise_gt_1pct": null,
+        "actual_fall_lt_minus_1pct": false,
+        "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
         "signed_sources": {
           "directional": true,
@@ -1409,11 +1409,11 @@
       },
       "due_4h_utc": "2026-10-04T00:00:00+00:00",
       "regime_v4": {
-        "actual_native_class": null,
+        "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
-        "shadow_brier_diagnostic_only": null,
-        "shadow_log_loss_diagnostic_only": null,
+        "shadow_brier_diagnostic_only": 0.2178434268485185,
+        "shadow_log_loss_diagnostic_only": 0.477733,
         "shadow_scores_uncalibrated": {
           "downside": 0.16290877165046674,
           "range": 0.6201880057352276,
@@ -1437,13 +1437,16 @@
         "status": "ISSUED"
       },
       "v2_9_30": {
-        "actual_native_class": null,
+        "actual_native_class": "range",
         "probabilities_diagnostic": {
           "downside": 0.203,
           "range": 0.602,
           "upside": 0.195
         },
-        "score": null,
+        "score": {
+          "brier": 0.237638,
+          "log_loss": 0.507498
+        },
         "status": "PRE_EXPERT_CANDIDATE_DIAGNOSTIC"
       }
     },
@@ -1598,14 +1601,18 @@
     },
     {
       "arbiter": {
-        "action_status": null,
+        "action_status": "WATCH_ONLY_NO_TRADE_AUTHORITY",
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": null,
-        "reason": null,
-        "signed_sources": null,
+        "reason": "independent downside tail warning, prospective unproven; no trade authority",
+        "signed_sources": {
+          "directional": true,
+          "downside": true,
+          "regime": true
+        },
         "slot_missed": false,
         "source_epoch": "arbiter_v4",
-        "status": "PENDING",
+        "status": "DOWNSIDE_TAIL_RISK_WITH_REGIME_DISAGREEMENT",
         "trading_authority": false
       },
       "down": {
@@ -1623,10 +1630,14 @@
         "missing_reason": null,
         "shadow_brier_diagnostic_only": null,
         "shadow_log_loss_diagnostic_only": null,
-        "shadow_scores_uncalibrated": null,
-        "source_status": "PENDING",
-        "state": null,
-        "used_by_arbiter_at_decision": null
+        "shadow_scores_uncalibrated": {
+          "downside": 0.21803747884059477,
+          "range": 0.619468236380841,
+          "upside": 0.16249428477856417
+        },
+        "source_status": "ISSUED",
+        "state": "RANGE",
+        "used_by_arbiter_at_decision": true
       },
       "slot_msk": "2026-10-04T03:00:00+03:00",
       "slot_utc": "2026-10-04T00:00:00+00:00",
@@ -1640,9 +1651,13 @@
       },
       "v2_9_30": {
         "actual_native_class": null,
-        "probabilities_diagnostic": null,
+        "probabilities_diagnostic": {
+          "downside": 0.209,
+          "range": 0.591,
+          "upside": 0.201
+        },
         "score": null,
-        "status": "PENDING"
+        "status": "PRE_EXPERT_CANDIDATE_DIAGNOSTIC"
       }
     }
   ],
@@ -1655,8 +1670,8 @@
       "SCHEDULE_REGISTERED": 1
     },
     "arbiter_v4": {
-      "ARBITRATION_DECISION_ISSUED": 15,
-      "ARBITRATION_OUTCOME_RECORDED": 11,
+      "ARBITRATION_DECISION_ISSUED": 16,
+      "ARBITRATION_OUTCOME_RECORDED": 12,
       "CONFIG_FROZEN_PRESTART": 1,
       "SCHEDULE_REGISTERED": 1
     },
@@ -1673,10 +1688,10 @@
     },
     "regime": {
       "ABSTAIN_DATA_INVALID": 3,
-      "BARRIER_OUTCOME_RECORDED": 93,
+      "BARRIER_OUTCOME_RECORDED": 95,
       "CONFIG_FROZEN_PRESTART": 1,
-      "REGIME_FORECAST_ISSUED": 31,
-      "REGIME_OUTCOME_RECORDED": 68,
+      "REGIME_FORECAST_ISSUED": 32,
+      "REGIME_OUTCOME_RECORDED": 70,
       "SCHEDULE_REGISTERED": 1,
       "SLOT_MISSED": 6
     },
@@ -1688,10 +1703,10 @@
       "SLOT_MISSED": 6
     },
     "v5": {
-      "FACTORS_VALIDATED": 16,
-      "FORECAST_ISSUED": 19,
-      "OUTCOME_AND_LEARNING_APPLIED": 17,
-      "RAW_ATTESTED": 16,
+      "FACTORS_VALIDATED": 17,
+      "FORECAST_ISSUED": 21,
+      "OUTCOME_AND_LEARNING_APPLIED": 19,
+      "RAW_ATTESTED": 17,
       "SCHEDULE_REGISTERED": 1,
       "SLOT_MISSED": 3
     }

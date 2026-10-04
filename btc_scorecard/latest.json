@@ -42,6 +42,7 @@
   "arbiter_v5_continuity": {
     "assessed_slots": 0,
     "decisions": 0,
+    "regime_race_defects": [],
     "source_fallbacks": [],
     "unrecorded_misses": []
   },
@@ -98,7 +99,7 @@
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
-  "generated_at_utc": "2026-10-04T07:18:36.578460+00:00",
+  "generated_at_utc": "2026-10-04T07:21:42.584820+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 1,
@@ -139,6 +140,7 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-02T22:06:28+00:00",
         "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
@@ -158,6 +160,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-02T22:03:16+00:00",
         "shadow_brier_diagnostic_only": 0.2726623856123613,
         "shadow_log_loss_diagnostic_only": 0.543473,
         "shadow_scores_uncalibrated": {
@@ -189,6 +192,7 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-02T23:11:56+00:00",
         "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
@@ -208,6 +212,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-02T23:03:54+00:00",
         "shadow_brier_diagnostic_only": 0.22659851286744884,
         "shadow_log_loss_diagnostic_only": 0.488822,
         "shadow_scores_uncalibrated": {
@@ -239,6 +244,7 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T00:05:54+00:00",
         "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
@@ -258,6 +264,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T00:03:58+00:00",
         "shadow_brier_diagnostic_only": 0.22850356818651854,
         "shadow_log_loss_diagnostic_only": 0.491197,
         "shadow_scores_uncalibrated": {
@@ -302,6 +309,7 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T01:12:33+00:00",
         "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
@@ -321,6 +329,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T01:04:08+00:00",
         "shadow_brier_diagnostic_only": 0.19174116165341973,
         "shadow_log_loss_diagnostic_only": 0.442425,
         "shadow_scores_uncalibrated": {
@@ -352,6 +361,7 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T02:12:43+00:00",
         "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
@@ -371,6 +381,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T02:04:05+00:00",
         "shadow_brier_diagnostic_only": 0.19893269613347206,
         "shadow_log_loss_diagnostic_only": 0.452574,
         "shadow_scores_uncalibrated": {
@@ -402,6 +413,7 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T03:12:34+00:00",
         "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
@@ -421,6 +433,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T03:04:19+00:00",
         "shadow_brier_diagnostic_only": 0.1996502652272914,
         "shadow_log_loss_diagnostic_only": 0.453566,
         "shadow_scores_uncalibrated": {
@@ -452,6 +465,7 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T04:07:12+00:00",
         "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
@@ -471,6 +485,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T04:03:47+00:00",
         "shadow_brier_diagnostic_only": 0.19176850794633854,
         "shadow_log_loss_diagnostic_only": 0.442465,
         "shadow_scores_uncalibrated": {
@@ -515,6 +530,7 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T05:10:44+00:00",
         "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
@@ -534,6 +550,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T05:05:02+00:00",
         "shadow_brier_diagnostic_only": 0.22641962736992677,
         "shadow_log_loss_diagnostic_only": 0.488598,
         "shadow_scores_uncalibrated": {
@@ -565,6 +582,7 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T06:12:11+00:00",
         "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
@@ -584,6 +602,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T06:04:15+00:00",
         "shadow_brier_diagnostic_only": 0.193453332591081,
         "shadow_log_loss_diagnostic_only": 0.444878,
         "shadow_scores_uncalibrated": {
@@ -615,6 +634,7 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T07:12:43+00:00",
         "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
@@ -634,6 +654,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T07:05:42+00:00",
         "shadow_brier_diagnostic_only": 0.19980426368785292,
         "shadow_log_loss_diagnostic_only": 0.453778,
         "shadow_scores_uncalibrated": {
@@ -665,6 +686,7 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T08:05:07+00:00",
         "signed_sources": null,
         "slot_missed": false,
         "source_epoch": "arbiter",
@@ -687,6 +709,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T08:04:24+00:00",
         "shadow_brier_diagnostic_only": 0.21327961392385514,
         "shadow_log_loss_diagnostic_only": 0.471827,
         "shadow_scores_uncalibrated": {
@@ -731,6 +754,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "no timely signed regime forecast; directional head independently verified",
+        "rekor_integrated_utc": "2026-10-03T09:15:30+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -757,6 +781,7 @@
         "actual_native_class": null,
         "calibrated_brier": null,
         "missing_reason": "ValueError: required context invalid: open_interest:previous",
+        "rekor_integrated_utc": null,
         "shadow_brier_diagnostic_only": null,
         "shadow_log_loss_diagnostic_only": null,
         "shadow_scores_uncalibrated": null,
@@ -784,6 +809,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T10:06:37+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -810,6 +836,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T10:06:09+00:00",
         "shadow_brier_diagnostic_only": 0.21794391972924626,
         "shadow_log_loss_diagnostic_only": 0.477862,
         "shadow_scores_uncalibrated": {
@@ -841,6 +868,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T11:06:57+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -867,6 +895,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T11:06:23+00:00",
         "shadow_brier_diagnostic_only": 0.19916482868199642,
         "shadow_log_loss_diagnostic_only": 0.452895,
         "shadow_scores_uncalibrated": {
@@ -898,6 +927,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T12:05:51+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -924,6 +954,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T12:05:24+00:00",
         "shadow_brier_diagnostic_only": 0.19208928662006297,
         "shadow_log_loss_diagnostic_only": 0.442926,
         "shadow_scores_uncalibrated": {
@@ -968,6 +999,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T13:08:28+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -994,6 +1026,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T13:07:55+00:00",
         "shadow_brier_diagnostic_only": 0.2167957720017266,
         "shadow_log_loss_diagnostic_only": 0.476385,
         "shadow_scores_uncalibrated": {
@@ -1025,6 +1058,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "no timely signed regime forecast; directional head independently verified",
+        "rekor_integrated_utc": "2026-10-03T14:15:29+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -1071,6 +1105,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": "CalledProcessError: Command '('cosign', 'verify-blob', '/home/runner/work/neora-b2b-v2-clean/neora-b2b-v2-clean/regime_v4_events/00000088.json', '--bundle', '/home/runner/work/neora-b2b-v2-clean/neora-b2b-v2-clean/regime_v4_events/00000088.sigstore.json', '--certificate-identity', 'https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-regime-v4-hardened.yml@refs/heads/main', '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com')' returned non-zero exit status 1.",
+        "rekor_integrated_utc": "2026-10-03T14:18:12+00:00",
         "shadow_brier_diagnostic_only": 0.22506919813831922,
         "shadow_log_loss_diagnostic_only": 0.486906,
         "shadow_scores_uncalibrated": {
@@ -1102,6 +1137,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T15:05:43+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -1128,6 +1164,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T15:05:03+00:00",
         "shadow_brier_diagnostic_only": 0.22579727002099287,
         "shadow_log_loss_diagnostic_only": 0.487819,
         "shadow_scores_uncalibrated": {
@@ -1159,6 +1196,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T16:07:11+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -1185,6 +1223,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T16:06:32+00:00",
         "shadow_brier_diagnostic_only": 0.2263068938249881,
         "shadow_log_loss_diagnostic_only": 0.488457,
         "shadow_scores_uncalibrated": {
@@ -1229,6 +1268,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T17:07:15+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -1255,6 +1295,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T17:06:39+00:00",
         "shadow_brier_diagnostic_only": 0.2352802850378208,
         "shadow_log_loss_diagnostic_only": 0.49955,
         "shadow_scores_uncalibrated": {
@@ -1286,6 +1327,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T18:11:32+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -1312,6 +1354,7 @@
         "actual_native_class": "downside",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T18:10:38+00:00",
         "shadow_brier_diagnostic_only": 1.162481039124173,
         "shadow_log_loss_diagnostic_only": 2.03938,
         "shadow_scores_uncalibrated": {
@@ -1343,6 +1386,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T19:08:58+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -1369,6 +1413,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T19:08:23+00:00",
         "shadow_brier_diagnostic_only": 0.26469959462257214,
         "shadow_log_loss_diagnostic_only": 0.53437,
         "shadow_scores_uncalibrated": {
@@ -1400,6 +1445,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T20:10:48+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -1426,6 +1472,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T20:09:30+00:00",
         "shadow_brier_diagnostic_only": 0.2178434268485185,
         "shadow_log_loss_diagnostic_only": 0.477733,
         "shadow_scores_uncalibrated": {
@@ -1470,6 +1517,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T21:08:31+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -1496,6 +1544,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T21:07:43+00:00",
         "shadow_brier_diagnostic_only": 0.2001096557118469,
         "shadow_log_loss_diagnostic_only": 0.454199,
         "shadow_scores_uncalibrated": {
@@ -1527,6 +1576,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "no timely signed regime forecast; directional head independently verified",
+        "rekor_integrated_utc": "2026-10-03T22:15:46+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -1553,6 +1603,7 @@
         "actual_native_class": null,
         "calibrated_brier": null,
         "missing_reason": "NO_SIGNED_FORECAST_OR_ABSTENTION_BEFORE_DEADLINE",
+        "rekor_integrated_utc": null,
         "shadow_brier_diagnostic_only": null,
         "shadow_log_loss_diagnostic_only": null,
         "shadow_scores_uncalibrated": null,
@@ -1580,6 +1631,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-03T23:11:29+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -1606,6 +1658,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-03T23:10:49+00:00",
         "shadow_brier_diagnostic_only": 0.20235933314209165,
         "shadow_log_loss_diagnostic_only": 0.45728,
         "shadow_scores_uncalibrated": {
@@ -1637,6 +1690,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "independent downside tail warning, prospective unproven; no trade authority",
+        "rekor_integrated_utc": "2026-10-04T00:11:44+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -1663,6 +1717,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-04T00:11:09+00:00",
         "shadow_brier_diagnostic_only": 0.2187491578879674,
         "shadow_log_loss_diagnostic_only": 0.478894,
         "shadow_scores_uncalibrated": {
@@ -1707,6 +1762,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-04T01:09:42+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -1733,6 +1789,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-04T01:08:48+00:00",
         "shadow_brier_diagnostic_only": 0.21490935059777214,
         "shadow_log_loss_diagnostic_only": 0.473947,
         "shadow_scores_uncalibrated": {
@@ -1764,6 +1821,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-04T02:08:22+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -1790,6 +1848,7 @@
         "actual_native_class": "range",
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-04T02:07:45+00:00",
         "shadow_brier_diagnostic_only": 0.1915875449432288,
         "shadow_log_loss_diagnostic_only": 0.442204,
         "shadow_scores_uncalibrated": {
@@ -1821,6 +1880,7 @@
         "actual_fall_lt_minus_1pct": false,
         "actual_rise_gt_1pct": false,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-04T03:09:03+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -1847,6 +1907,7 @@
         "actual_native_class": null,
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-04T03:08:24+00:00",
         "shadow_brier_diagnostic_only": null,
         "shadow_log_loss_diagnostic_only": null,
         "shadow_scores_uncalibrated": {
@@ -1878,6 +1939,7 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": null,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-04T04:10:26+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -1901,6 +1963,7 @@
         "actual_native_class": null,
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-04T04:09:42+00:00",
         "shadow_brier_diagnostic_only": null,
         "shadow_log_loss_diagnostic_only": null,
         "shadow_scores_uncalibrated": {
@@ -1939,6 +2002,7 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": null,
         "reason": "upside tail not confirmed by the independent head",
+        "rekor_integrated_utc": "2026-10-04T05:14:21+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -1962,6 +2026,7 @@
         "actual_native_class": null,
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-04T05:12:44+00:00",
         "shadow_brier_diagnostic_only": null,
         "shadow_log_loss_diagnostic_only": null,
         "shadow_scores_uncalibrated": {
@@ -1990,6 +2055,7 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": null,
         "reason": "no timely signed regime forecast; directional head independently verified",
+        "rekor_integrated_utc": "2026-10-04T06:15:48+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -2013,6 +2079,7 @@
         "actual_native_class": null,
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": "2026-10-04T06:19:56+00:00",
         "shadow_brier_diagnostic_only": null,
         "shadow_log_loss_diagnostic_only": null,
         "shadow_scores_uncalibrated": {
@@ -2041,6 +2108,7 @@
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": null,
         "reason": "no timely signed regime forecast; directional head independently verified",
+        "rekor_integrated_utc": "2026-10-04T07:15:43+00:00",
         "signed_sources": {
           "directional": true,
           "downside": true,
@@ -2064,6 +2132,7 @@
         "actual_native_class": null,
         "calibrated_brier": null,
         "missing_reason": null,
+        "rekor_integrated_utc": null,
         "shadow_brier_diagnostic_only": null,
         "shadow_log_loss_diagnostic_only": null,
         "shadow_scores_uncalibrated": null,
@@ -2118,7 +2187,7 @@
     },
     "regime": {
       "ABSTAIN_DATA_INVALID": 3,
-      "BARRIER_OUTCOME_RECORDED": 123,
+      "BARRIER_OUTCOME_RECORDED": 126,
       "CONFIG_FROZEN_PRESTART": 1,
       "REGIME_FORECAST_ISSUED": 38,
       "REGIME_OUTCOME_RECORDED": 88,

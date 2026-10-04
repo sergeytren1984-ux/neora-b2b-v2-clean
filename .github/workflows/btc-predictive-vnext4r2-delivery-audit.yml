@@ -1,0 +1,102 @@
+name: BTC predictive vNext4R2 delivery audit
+
+on:
+  workflow_run:
+    workflows:
+      - BTC predictive vNext4R2 hourly shadow
+      - BTC predictive vNext4R2 15m shadow
+    types: [completed]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  verify-remote-delivery-before-deadline:
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.event != 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+      - name: Verify publish step completed after remote push confirmation but before slot deadline
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_NAME: ${{ github.event.workflow_run.name }}
+          RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+        run: |
+          set -euo pipefail
+          test "$RUN_CONCLUSION" = "success"
+
+          if [ "$RUN_NAME" = "BTC predictive vNext4R2 hourly shadow" ]; then
+            BRANCH='btc-predictive-vnext4r2-hourly'
+            EVENTS='predictive_vnext4r2_hourly_events'
+            DEADLINE_MINUTES=45
+            STEP_NAME='Publish signed hourly shadow forecast'
+          elif [ "$RUN_NAME" = "BTC predictive vNext4R2 15m shadow" ]; then
+            BRANCH='btc-predictive-vnext4r2-early15m'
+            EVENTS='predictive_vnext4r2_early15m_events'
+            DEADLINE_MINUTES=14
+            STEP_NAME='Publish signed 15m shadow forecast'
+          else
+            echo "Unexpected workflow name: $RUN_NAME" >&2
+            exit 1
+          fi
+
+          git fetch origin "$BRANCH"
+          EVENT_PATH="$(
+            git ls-tree -r --name-only "origin/$BRANCH" "$EVENTS"             | grep -E '/[0-9]{8}\.json$'             | sort -r             | while read -r p; do
+                if git show "origin/$BRANCH:$p" | python -c "import json,sys; x=json.load(sys.stdin); raise SystemExit(0 if x.get('type')=='FORECAST_ISSUED' else 1)"; then
+                  echo "$p"; break
+                fi
+              done
+          )"
+          test -n "$EVENT_PATH"
+          git show "origin/$BRANCH:$EVENT_PATH" > /tmp/forecast.json
+
+          curl -fsSL             -H "Authorization: Bearer $GH_TOKEN"             -H "Accept: application/vnd.github+json"             "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/jobs?per_page=100"             > /tmp/jobs.json
+
+          python - "$STEP_NAME" "$DEADLINE_MINUTES" <<'PY'
+          import json,sys
+          from datetime import datetime,timedelta,timezone
+
+          step_name=sys.argv[1]
+          deadline_minutes=int(sys.argv[2])
+          event=json.load(open('/tmp/forecast.json'))
+          jobs=json.load(open('/tmp/jobs.json'))['jobs']
+          steps=[s for j in jobs for s in j.get('steps',[]) if s.get('name')==step_name]
+          if len(steps)!=1:
+              raise SystemExit(f"Expected exactly one publish step, found {len(steps)}")
+          step=steps[0]
+          if step.get('conclusion')!='success' or not step.get('completed_at'):
+              raise SystemExit(f"Publish step not successfully completed: {step}")
+
+          anchor=datetime.fromisoformat(event['anchor_utc'])
+          if anchor.tzinfo is None:
+              anchor=anchor.replace(tzinfo=timezone.utc)
+          completed=datetime.fromisoformat(step['completed_at'].replace('Z','+00:00'))
+          deadline=anchor+timedelta(minutes=deadline_minutes)
+
+          # The publish step returns only after git push AND ls-remote verification.
+          # Therefore completed_at < deadline is a strict sufficient proof that the
+          # remote evidence commit was confirmed before the forecast deadline.
+          if not (anchor <= completed < deadline):
+              raise SystemExit(
+                  f"REMOTE_DELIVERY_NOT_PROVEN_BEFORE_DEADLINE "
+                  f"anchor={anchor.isoformat()} step_completed={completed.isoformat()} "
+                  f"deadline={deadline.isoformat()} event={event['slot']}"
+              )
+
+          print(json.dumps({
+              "verdict":"REMOTE_PUSH_CONFIRMED_BEFORE_DEADLINE",
+              "slot":event["slot"],
+              "anchor_utc":anchor.isoformat(),
+              "publish_step_completed_utc":completed.isoformat(),
+              "deadline_utc":deadline.isoformat(),
+              "strict_margin_seconds":(deadline-completed).total_seconds(),
+              "event_raw_sha256":event.get("raw_sha256"),
+          },indent=2))
+          PY

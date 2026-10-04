@@ -39,10 +39,13 @@ jobs:
               newest_due=(now-dt.timedelta(minutes=45)).replace(minute=0,second=0,microsecond=0)
               if generated<newest_due+dt.timedelta(minutes=45):
                   raise RuntimeError('scorecard stale after arbiter v5 deadline')
-              status=data['arbiter_v5_continuity']
-              if status['decisions']!=status['assessed_slots'] or status['unrecorded_misses'] or status['regime_race_defects']:
-                  raise RuntimeError('arbiter v5 continuity defect: '+json.dumps(status))
-              print('ARBITER_V5',status)
+              for epoch in ('arbiter_v5_continuity','arbiter_v6_continuity'):
+                  if epoch=='arbiter_v6_continuity' and now<dt.datetime(2026,10,5,1,55,tzinfo=UTC):
+                      continue
+                  status=data[epoch]
+                  if status['decisions']!=status['assessed_slots'] or status['unrecorded_misses'] or status['regime_race_defects']:
+                      raise RuntimeError(epoch+' continuity defect: '+json.dumps(status))
+                  print(epoch,status)
           if now>=dt.datetime(2026,10,5,14,55,tzinfo=UTC):
               missing=[(r['slot_utc'],name,b['status'])
                        for r in data['rows'] if stamp(r['slot_utc'])>=dt.datetime(2026,10,5,14,tzinfo=UTC)

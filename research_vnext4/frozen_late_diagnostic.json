@@ -1,0 +1,493 @@
+{
+  "early15m": {
+    "baseline_nonoverlap": {
+      "brier": 0.3784213102693203,
+      "ece10": 0.06679196661897799,
+      "log_loss": 0.6943933866036937,
+      "lower_pr_auc": 0.1751452692406406,
+      "lower_roc_auc": 0.6019396693670553,
+      "upper_pr_auc": 0.13883317706675075,
+      "upper_roc_auc": 0.5727035632028181
+    },
+    "baseline_overlapping": {
+      "brier": 0.4028119859802051,
+      "ece10": 0.042205392089703885,
+      "log_loss": 0.7316203581705366,
+      "lower_pr_auc": 0.1683449749234797,
+      "lower_roc_auc": 0.594484171861035,
+      "upper_pr_auc": 0.1834759354313229,
+      "upper_roc_auc": 0.6116144283382932
+    },
+    "baseline_source_counts": {
+      "vol90d": 8720
+    },
+    "models": {
+      "competing_risks": {
+        "early_warning_nonoverlap": {
+          "lower": {
+            "alerts_per_100_anchors": 11.559633027522937,
+            "false_alert_share": 0.7777777777777778,
+            "fn": 49,
+            "fp": 49,
+            "fpr": 0.1016597510373444,
+            "miss_rate": 0.7777777777777778,
+            "precision": 0.2222222222222222,
+            "recall": 0.2222222222222222,
+            "tn": 433,
+            "tp": 14
+          },
+          "upper": {
+            "alerts_per_100_anchors": 11.559633027522937,
+            "false_alert_share": 0.7777777777777778,
+            "fn": 47,
+            "fp": 49,
+            "fpr": 0.1012396694214876,
+            "miss_rate": 0.7704918032786885,
+            "precision": 0.2222222222222222,
+            "recall": 0.22950819672131148,
+            "tn": 435,
+            "tp": 14
+          }
+        },
+        "early_warning_overlapping": {
+          "lower": {
+            "alerts_per_100_anchors": 12.86697247706422,
+            "false_alert_share": 0.7762923351158645,
+            "fn": 826,
+            "fp": 871,
+            "fpr": 0.1139604867198744,
+            "miss_rate": 0.7669452181987001,
+            "precision": 0.22370766488413546,
+            "recall": 0.2330547818012999,
+            "tn": 6772,
+            "tp": 251
+          },
+          "upper": {
+            "alerts_per_100_anchors": 13.81880733944954,
+            "false_alert_share": 0.7261410788381742,
+            "fn": 814,
+            "fp": 875,
+            "fpr": 0.11549630411826821,
+            "miss_rate": 0.7115384615384616,
+            "precision": 0.27385892116182575,
+            "recall": 0.28846153846153844,
+            "tn": 6701,
+            "tp": 330
+          }
+        },
+        "nonoverlap": {
+          "brier": 0.3595384122779824,
+          "ece10": 0.049763629484978006,
+          "log_loss": 0.6600794281822623,
+          "lower_pr_auc": 0.23604907357882368,
+          "lower_roc_auc": 0.6996311664361456,
+          "upper_pr_auc": 0.18301284581314636,
+          "upper_roc_auc": 0.640699092263921
+        },
+        "overlapping": {
+          "brier": 0.38428255589267707,
+          "ece10": 0.03194915168695777,
+          "log_loss": 0.6980448563111925,
+          "lower_pr_auc": 0.22228550484564044,
+          "lower_roc_auc": 0.6892026263464872,
+          "upper_pr_auc": 0.23853819581199528,
+          "upper_roc_auc": 0.6793895287658487
+        }
+      },
+      "gbdt": {
+        "early_warning_nonoverlap": {
+          "lower": {
+            "alerts_per_100_anchors": 12.110091743119266,
+            "false_alert_share": 0.7272727272727273,
+            "fn": 45,
+            "fp": 48,
+            "fpr": 0.0995850622406639,
+            "miss_rate": 0.7142857142857143,
+            "precision": 0.2727272727272727,
+            "recall": 0.2857142857142857,
+            "tn": 434,
+            "tp": 18
+          },
+          "upper": {
+            "alerts_per_100_anchors": 12.293577981651376,
+            "false_alert_share": 0.7761194029850746,
+            "fn": 46,
+            "fp": 52,
+            "fpr": 0.10743801652892562,
+            "miss_rate": 0.7540983606557377,
+            "precision": 0.22388059701492538,
+            "recall": 0.2459016393442623,
+            "tn": 432,
+            "tp": 15
+          }
+        },
+        "early_warning_overlapping": {
+          "lower": {
+            "alerts_per_100_anchors": 13.944954128440369,
+            "false_alert_share": 0.7516447368421053,
+            "fn": 775,
+            "fp": 914,
+            "fpr": 0.11958654978411619,
+            "miss_rate": 0.7195914577530177,
+            "precision": 0.24835526315789475,
+            "recall": 0.28040854224698236,
+            "tn": 6729,
+            "tp": 302
+          },
+          "upper": {
+            "alerts_per_100_anchors": 14.162844036697248,
+            "false_alert_share": 0.7214574898785425,
+            "fn": 800,
+            "fp": 891,
+            "fpr": 0.11760823653643084,
+            "miss_rate": 0.6993006993006993,
+            "precision": 0.2785425101214575,
+            "recall": 0.3006993006993007,
+            "tn": 6685,
+            "tp": 344
+          }
+        },
+        "nonoverlap": {
+          "brier": 0.35481003851771786,
+          "ece10": 0.05048177115993792,
+          "log_loss": 0.6515579702020963,
+          "lower_pr_auc": 0.23737139059380358,
+          "lower_roc_auc": 0.7048672857801488,
+          "upper_pr_auc": 0.21793189690933648,
+          "upper_roc_auc": 0.6526215959897033
+        },
+        "overlapping": {
+          "brier": 0.3796834101902014,
+          "ece10": 0.0316898104770045,
+          "log_loss": 0.6889090149738109,
+          "lower_pr_auc": 0.2295291222283855,
+          "lower_roc_auc": 0.6936381424989897,
+          "upper_pr_auc": 0.24799741327758304,
+          "upper_roc_auc": 0.6838475014953368
+        }
+      },
+      "logistic": {
+        "early_warning_nonoverlap": {
+          "lower": {
+            "alerts_per_100_anchors": 12.110091743119266,
+            "false_alert_share": 0.803030303030303,
+            "fn": 50,
+            "fp": 53,
+            "fpr": 0.10995850622406639,
+            "miss_rate": 0.7936507936507936,
+            "precision": 0.19696969696969696,
+            "recall": 0.20634920634920634,
+            "tn": 429,
+            "tp": 13
+          },
+          "upper": {
+            "alerts_per_100_anchors": 10.642201834862385,
+            "false_alert_share": 0.7413793103448276,
+            "fn": 46,
+            "fp": 43,
+            "fpr": 0.08884297520661157,
+            "miss_rate": 0.7540983606557377,
+            "precision": 0.25862068965517243,
+            "recall": 0.2459016393442623,
+            "tn": 441,
+            "tp": 15
+          }
+        },
+        "early_warning_overlapping": {
+          "lower": {
+            "alerts_per_100_anchors": 13.302752293577983,
+            "false_alert_share": 0.7810344827586206,
+            "fn": 823,
+            "fp": 906,
+            "fpr": 0.11853984037681539,
+            "miss_rate": 0.7641597028783659,
+            "precision": 0.2189655172413793,
+            "recall": 0.23584029712163418,
+            "tn": 6737,
+            "tp": 254
+          },
+          "upper": {
+            "alerts_per_100_anchors": 13.188073394495412,
+            "false_alert_share": 0.7165217391304348,
+            "fn": 818,
+            "fp": 824,
+            "fpr": 0.10876451953537487,
+            "miss_rate": 0.715034965034965,
+            "precision": 0.28347826086956524,
+            "recall": 0.28496503496503495,
+            "tn": 6752,
+            "tp": 326
+          }
+        },
+        "nonoverlap": {
+          "brier": 0.35847357997005624,
+          "ece10": 0.047832740754641875,
+          "log_loss": 0.6583465691156735,
+          "lower_pr_auc": 0.2124116451342274,
+          "lower_roc_auc": 0.6906079167489956,
+          "upper_pr_auc": 0.22526236781054923,
+          "upper_roc_auc": 0.6550941606828342
+        },
+        "overlapping": {
+          "brier": 0.3828005890977018,
+          "ece10": 0.03137770705948558,
+          "log_loss": 0.6958945413466813,
+          "lower_pr_auc": 0.2158849818123179,
+          "lower_roc_auc": 0.6838198964928797,
+          "upper_pr_auc": 0.2423083424496178,
+          "upper_roc_auc": 0.6853966057701539
+        }
+      }
+    },
+    "n_nonoverlap": 545,
+    "n_overlapping": 8720
+  },
+  "historical_status": "INSPECTED_DIAGNOSTIC_NOT_CONFIRMATORY",
+  "hourly": {
+    "baseline_nonoverlap": {
+      "brier": 0.6675932033552882,
+      "ece10": 0.12597948855534366,
+      "log_loss": 1.1498345334730244,
+      "lower_pr_auc": 0.3528362151169169,
+      "lower_roc_auc": 0.537037037037037,
+      "upper_pr_auc": 0.291753848003848,
+      "upper_roc_auc": 0.42105263157894735
+    },
+    "baseline_overlapping": {
+      "brier": 0.6325653092724337,
+      "ece10": 0.10966405244150251,
+      "log_loss": 1.0670747861072236,
+      "lower_pr_auc": 0.3435569960613669,
+      "lower_roc_auc": 0.6206643792032824,
+      "upper_pr_auc": 0.3647544663599891,
+      "upper_roc_auc": 0.5228226575684203
+    },
+    "baseline_source_counts": {
+      "vol90d": 1873
+    },
+    "models": {
+      "competing_risks": {
+        "early_warning_nonoverlap": {
+          "lower": {
+            "alerts_per_100_anchors": 29.629629629629626,
+            "false_alert_share": 0.5,
+            "fn": 5,
+            "fp": 4,
+            "fpr": 0.2222222222222222,
+            "miss_rate": 0.5555555555555556,
+            "precision": 0.5,
+            "recall": 0.4444444444444444,
+            "tn": 14,
+            "tp": 4
+          },
+          "upper": {
+            "alerts_per_100_anchors": 29.629629629629626,
+            "false_alert_share": 0.625,
+            "fn": 5,
+            "fp": 5,
+            "fpr": 0.2631578947368421,
+            "miss_rate": 0.625,
+            "precision": 0.375,
+            "recall": 0.375,
+            "tn": 14,
+            "tp": 3
+          }
+        },
+        "early_warning_overlapping": {
+          "lower": {
+            "alerts_per_100_anchors": 27.709556860651364,
+            "false_alert_share": 0.5163776493256262,
+            "fn": 301,
+            "fp": 268,
+            "fpr": 0.2028766086298259,
+            "miss_rate": 0.5452898550724637,
+            "precision": 0.4836223506743738,
+            "recall": 0.45471014492753625,
+            "tn": 1053,
+            "tp": 251
+          },
+          "upper": {
+            "alerts_per_100_anchors": 30.646022423918843,
+            "false_alert_share": 0.5418118466898955,
+            "fn": 430,
+            "fp": 311,
+            "fpr": 0.2635593220338983,
+            "miss_rate": 0.6204906204906205,
+            "precision": 0.45818815331010454,
+            "recall": 0.3795093795093795,
+            "tn": 869,
+            "tp": 263
+          }
+        },
+        "nonoverlap": {
+          "brier": 0.5868490993771164,
+          "ece10": 0.16866719826755847,
+          "log_loss": 0.9635453479100596,
+          "lower_pr_auc": 0.6233920400587067,
+          "lower_roc_auc": 0.7160493827160495,
+          "upper_pr_auc": 0.5486127700801614,
+          "upper_roc_auc": 0.6381578947368421
+        },
+        "overlapping": {
+          "brier": 0.5949175952022917,
+          "ece10": 0.07373257870805269,
+          "log_loss": 1.0205677229708807,
+          "lower_pr_auc": 0.44738634168351166,
+          "lower_roc_auc": 0.7148199651120692,
+          "upper_pr_auc": 0.44378653930275375,
+          "upper_roc_auc": 0.5960733240394257
+        }
+      },
+      "gbdt": {
+        "early_warning_nonoverlap": {
+          "lower": {
+            "alerts_per_100_anchors": 37.03703703703704,
+            "false_alert_share": 0.5,
+            "fn": 4,
+            "fp": 5,
+            "fpr": 0.2777777777777778,
+            "miss_rate": 0.4444444444444444,
+            "precision": 0.5,
+            "recall": 0.5555555555555556,
+            "tn": 13,
+            "tp": 5
+          },
+          "upper": {
+            "alerts_per_100_anchors": 37.03703703703704,
+            "false_alert_share": 0.6,
+            "fn": 4,
+            "fp": 6,
+            "fpr": 0.3157894736842105,
+            "miss_rate": 0.5,
+            "precision": 0.4,
+            "recall": 0.5,
+            "tn": 13,
+            "tp": 4
+          }
+        },
+        "early_warning_overlapping": {
+          "lower": {
+            "alerts_per_100_anchors": 26.161238654564865,
+            "false_alert_share": 0.573469387755102,
+            "fn": 343,
+            "fp": 281,
+            "fpr": 0.21271763815291445,
+            "miss_rate": 0.6213768115942029,
+            "precision": 0.42653061224489797,
+            "recall": 0.3786231884057971,
+            "tn": 1040,
+            "tp": 209
+          },
+          "upper": {
+            "alerts_per_100_anchors": 36.465563267485315,
+            "false_alert_share": 0.5710102489019033,
+            "fn": 400,
+            "fp": 390,
+            "fpr": 0.3305084745762712,
+            "miss_rate": 0.5772005772005772,
+            "precision": 0.4289897510980966,
+            "recall": 0.4227994227994228,
+            "tn": 790,
+            "tp": 293
+          }
+        },
+        "nonoverlap": {
+          "brier": 0.6139618947814538,
+          "ece10": 0.1251017005511494,
+          "log_loss": 0.9996342677499577,
+          "lower_pr_auc": 0.49168691693201505,
+          "lower_roc_auc": 0.691358024691358,
+          "upper_pr_auc": 0.5405940855483189,
+          "upper_roc_auc": 0.5986842105263157
+        },
+        "overlapping": {
+          "brier": 0.6131039083688647,
+          "ece10": 0.06646530821478168,
+          "log_loss": 1.003624297154297,
+          "lower_pr_auc": 0.4007038604168502,
+          "lower_roc_auc": 0.6746508464163073,
+          "upper_pr_auc": 0.4156076959830493,
+          "upper_roc_auc": 0.5646122239342579
+        }
+      },
+      "logistic": {
+        "early_warning_nonoverlap": {
+          "lower": {
+            "alerts_per_100_anchors": 22.22222222222222,
+            "false_alert_share": 0.5,
+            "fn": 6,
+            "fp": 3,
+            "fpr": 0.16666666666666666,
+            "miss_rate": 0.6666666666666666,
+            "precision": 0.5,
+            "recall": 0.3333333333333333,
+            "tn": 15,
+            "tp": 3
+          },
+          "upper": {
+            "alerts_per_100_anchors": 29.629629629629626,
+            "false_alert_share": 0.625,
+            "fn": 5,
+            "fp": 5,
+            "fpr": 0.2631578947368421,
+            "miss_rate": 0.625,
+            "precision": 0.375,
+            "recall": 0.375,
+            "tn": 14,
+            "tp": 3
+          }
+        },
+        "early_warning_overlapping": {
+          "lower": {
+            "alerts_per_100_anchors": 23.86545648691938,
+            "false_alert_share": 0.5480984340044742,
+            "fn": 350,
+            "fp": 245,
+            "fpr": 0.1854655563966692,
+            "miss_rate": 0.6340579710144928,
+            "precision": 0.4519015659955257,
+            "recall": 0.36594202898550726,
+            "tn": 1076,
+            "tp": 202
+          },
+          "upper": {
+            "alerts_per_100_anchors": 31.713828083288842,
+            "false_alert_share": 0.5437710437710438,
+            "fn": 422,
+            "fp": 323,
+            "fpr": 0.27372881355932205,
+            "miss_rate": 0.6089466089466089,
+            "precision": 0.4562289562289562,
+            "recall": 0.39105339105339104,
+            "tn": 857,
+            "tp": 271
+          }
+        },
+        "nonoverlap": {
+          "brier": 0.5831433432467102,
+          "ece10": 0.24156663378183527,
+          "log_loss": 0.9560843051549505,
+          "lower_pr_auc": 0.5179012345679013,
+          "lower_roc_auc": 0.7098765432098766,
+          "upper_pr_auc": 0.4424845233269146,
+          "upper_roc_auc": 0.625
+        },
+        "overlapping": {
+          "brier": 0.5935860959891393,
+          "ece10": 0.05770269993316015,
+          "log_loss": 1.0238411244278876,
+          "lower_pr_auc": 0.4537830515147314,
+          "lower_roc_auc": 0.7174447882039298,
+          "upper_pr_auc": 0.43441808066203447,
+          "upper_roc_auc": 0.5953652750262919
+        }
+      }
+    },
+    "n_nonoverlap": 27,
+    "n_overlapping": 1873
+  },
+  "important": "Exact frozen production artifacts are evaluated without refitting. Results cannot be used to call vNext4 prospectively validated.",
+  "research_only": true,
+  "schema": "btc-predictive-vnext4-frozen-late-diagnostic-v1",
+  "trading_authority": false
+}

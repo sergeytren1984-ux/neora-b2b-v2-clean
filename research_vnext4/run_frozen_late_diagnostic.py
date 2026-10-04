@@ -95,6 +95,27 @@ def causal_control(artifact,dates,y,vol,due_delta,test_mask):
     return p,vb[ids],sources
 
 
+
+def paired_block_ci(reference,p,y,dates,block_days,n_boot=1200):
+    one=np.eye(4)[y];eps=1e-12
+    bg=np.sum((reference-one)**2,axis=1)-np.sum((p-one)**2,axis=1)
+    lg=-np.log(np.clip(reference[np.arange(len(y)),y],eps,1))+np.log(np.clip(p[np.arange(len(y)),y],eps,1))
+    ds=np.asarray(dates,dtype="datetime64[s]")
+    origin=ds.min().astype("datetime64[D]")
+    bid=((ds.astype("datetime64[D]")-origin)/np.timedelta64(block_days,"D")).astype(int)
+    groups=[np.flatnonzero(bid==x) for x in np.unique(bid)]
+    if len(groups)<3:
+        return {"brier_gain_ci95":None,"logloss_gain_ci95":None,"block_count":len(groups)}
+    rng=np.random.default_rng(20261004+block_days);bb=[];ll=[]
+    for _ in range(n_boot):
+        ids=np.concatenate([groups[j] for j in rng.integers(len(groups),size=len(groups))])
+        bb.append(float(np.mean(bg[ids])));ll.append(float(np.mean(lg[ids])))
+    return {
+        "brier_gain_ci95":[float(x) for x in np.quantile(bb,[.025,.975])],
+        "logloss_gain_ci95":[float(x) for x in np.quantile(ll,[.025,.975])],
+        "block_count":len(groups)
+    }
+
 def fixed_nonoverlap(dates,horizon_steps):
     ids=np.arange(len(dates))
     return ids%horizon_steps==0
@@ -136,6 +157,10 @@ def evaluate(artifact,X,dates,y,vol,due_delta,test_mask,nonstep):
         out["models"][name]={
           "overlapping":metrics(p,yt),
           "nonoverlap":metrics(p[non],yt[non]),
+          "paired_uncertainty_nonoverlap":{
+              "14d":paired_block_ci(baseline[non],p[non],yt[non],dt[non],14),
+              "28d":paired_block_ci(baseline[non],p[non],yt[non],dt[non],28)
+          },
           "early_warning_overlapping":alert_stats(p,yt,artifact,name),
           "early_warning_nonoverlap":alert_stats(p[non],yt[non],artifact,name),
         }

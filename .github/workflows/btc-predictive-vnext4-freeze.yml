@@ -48,6 +48,7 @@ jobs:
           git add predictive_vnext4/baseline_seed_early15m_source.json.gz
           git add predictive_vnext4/freeze_metadata.json
           git commit -m "Freeze vNext4 contenders and reproducible baseline seed sources"
+          git reset --hard HEAD
           git fetch origin btc-predictive-vnext4-source-20261004
           git rebase origin/btc-predictive-vnext4-source-20261004
           git push origin HEAD:btc-predictive-vnext4-source-20261004

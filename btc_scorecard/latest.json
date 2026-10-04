@@ -1,7 +1,7 @@
 {
   "arbiter_v4_continuity": {
-    "assessed_slots": 21,
-    "decisions": 21,
+    "assessed_slots": 22,
+    "decisions": 22,
     "signed_slot_misses": [],
     "source_fallbacks": [
       {
@@ -26,6 +26,14 @@
         ],
         "reason": "NO_SIGNED_FORECAST_OR_ABSTENTION_BEFORE_DEADLINE",
         "slot_msk": "2026-10-04T01:00:00+03:00",
+        "status": "NO_UPSIDE_TAIL_WARNING_REGIME_UNAVAILABLE"
+      },
+      {
+        "missing_sources": [
+          "regime"
+        ],
+        "reason": "no timely signed regime forecast; directional head independently verified",
+        "slot_msk": "2026-10-04T09:00:00+03:00",
         "status": "NO_UPSIDE_TAIL_WARNING_REGIME_UNAVAILABLE"
       }
     ],
@@ -84,7 +92,7 @@
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
-  "generated_at_utc": "2026-10-04T06:33:20.380584+00:00",
+  "generated_at_utc": "2026-10-04T06:49:15.962654+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 1,

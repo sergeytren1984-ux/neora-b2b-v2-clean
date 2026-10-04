@@ -37,6 +37,23 @@ def calibrated(calibrator,raw):
     return full_proba(calibrator,np.log(np.clip(raw,1e-8,1)))
 
 
+def control_block(y,vol,train):
+    counts=np.bincount(y[train],minlength=4).astype(float)+.5
+    q=np.quantile(vol[train],[1/3,2/3])
+    bins=np.digitize(vol,q,right=True)
+    by_bin={}
+    for b in range(3):
+        ids=train&(bins==b)
+        cnt=np.bincount(y[ids],minlength=4).astype(float)+.5
+        by_bin[str(b)]=(cnt/cnt.sum()).tolist()
+    return {
+        "training_frequency":(counts/counts.sum()).tolist(),
+        "vol_quantiles":[float(q[0]),float(q[1])],
+        "vol_bin_training_frequency":by_bin,
+        "smoothing":"Jeffreys-like +0.5 per class"
+    }
+
+
 def hourly_artifact():
     p=ROOT/"btc_1h_2024_to_sep24_2026.json"
     t,o,hi,lo,c,v,trades,taker,source_sha=read_klines(p,3600000)
@@ -59,6 +76,8 @@ def hourly_artifact():
         "feature_names":names,
         "training":{"labels_due_before":"2026-04-01T00:00:00","calibration":"2026Q2 labels due before 2026-07-01",
                     "historical_source_sha256":source_sha},
+        "control":control_block(y,vol,train),
+        "control_vol_measure":"std(log_return_1h, last 24 closed hours)",
         "hazard_step_hours":6,
         "sklearn_version":sklearn.__version__,
         "numpy_version":np.__version__,
@@ -92,6 +111,8 @@ def early_artifact():
         "feature_names":names,
         "training":{"labels_due_before":"2026-04-01T00:00:00","calibration":"2026Q2 labels due before 2026-07-01",
                     "historical_source_sha256":source_sha},
+        "control":control_block(y,vol,train),
+        "control_vol_measure":"std(log_return_15m, last 4 closed hours)",
         "hazard_step_minutes":15,
         "sklearn_version":sklearn.__version__,
         "numpy_version":np.__version__,
@@ -123,6 +144,10 @@ def main():
                       "source_sha256":ha["training"]["historical_source_sha256"]},
             "early15m":{"path":str(ep.relative_to(ROOT)),"sha256":sha(ep),"selfcheck":es,
                         "source_sha256":ea["training"]["historical_source_sha256"]}
+        },
+        "controls":{
+            "hourly":"frozen training frequency plus frozen volatility-bin frequency",
+            "early15m":"frozen training frequency plus frozen volatility-bin frequency"
         },
         "research_outputs":{
             "hourly_sha256":sha(research_hourly),

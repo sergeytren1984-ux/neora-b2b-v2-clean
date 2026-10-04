@@ -1,0 +1,88 @@
+{
+  "schema": "btc-predictive-vnext4r2-protocol-v1",
+  "head": "hourly_rv_first_passage_72h",
+  "status": "PROSPECTIVE_SHADOW_ONLY",
+  "start_utc": "2026-10-05T00:00:00Z",
+  "cadence_minutes": 60,
+  "issuance_deadline_minutes": 45,
+  "source": "Binance BTCUSDT closed 1h spot candles",
+  "artifact_sha256": "6959d3dcc856d2391544957e72e7a8c5edf874df7e387cc2fe8aaf3c72e661b2",
+  "baseline_seed_source_sha256": "e6dba53ba2a5c4abe36ecb0485d76080faf298ab58d13926450ef05c3ac86c29",
+  "contenders": [
+    "logistic",
+    "gbdt",
+    "competing_risks"
+  ],
+  "primary_baseline": "vol90d_same_frozen_volatility_bin",
+  "secondary_baseline": "frozen_training_frequency",
+  "target": {
+    "type": "realized-volatility-normalized symmetric first passage",
+    "horizon_hours": 72,
+    "distance": "reference_price * std(log_return_1h,last 24 closed hours) * sqrt(72)",
+    "classes": [
+      "LOWER_FIRST",
+      "UPPER_FIRST",
+      "NEITHER",
+      "AMBIGUOUS_SAME_BAR"
+    ],
+    "same_bar_rule": "AMBIGUOUS_SAME_BAR"
+  },
+  "operational_endpoints": [
+    {
+      "question_id": "FP_82500_87000_72H",
+      "lower_price": 82500,
+      "upper_price": 87000,
+      "horizon_hours": 72,
+      "probability_status": "NOT_MODELED_SEPARATE_OPERATIONAL_ENDPOINT"
+    },
+    {
+      "question_id": "FP_81500_88000_168H",
+      "lower_price": 81500,
+      "upper_price": 88000,
+      "horizon_hours": 168,
+      "probability_status": "NOT_MODELED_SEPARATE_OPERATIONAL_ENDPOINT"
+    }
+  ],
+  "early_warning": {
+    "threshold_source": "historical calibration only",
+    "target_fpr": 0.2,
+    "reporting": "not primary for hourly head"
+  },
+  "admission": {
+    "predictive_accept": false,
+    "statistics_scope": "PREDECLARED_DUE_FIXED_PHASE_GRID_ONLY",
+    "minimum_calendar_days": 90,
+    "minimum_fixed_phase_nonoverlap_windows": 30,
+    "nonoverlap_window_hours": 72,
+    "minimum_independent_volatility_episodes": 12,
+    "require_all_three_volatility_bins": true,
+    "require_brier_better_than_primary": true,
+    "require_logloss_better_than_primary": true,
+    "block_lengths_days": [
+      14,
+      28
+    ],
+    "familywise_alpha": 0.05,
+    "simultaneous_contenders": 3,
+    "correction": "Bonferroni one-sided lower bound across contenders",
+    "require_positive_block_lower_bounds_for_brier_and_logloss": true,
+    "calibration_max_ece10_degradation_vs_primary": 0.02,
+    "overlapping_forecasts": "DESCRIPTIVE_ONLY",
+    "winner_selection": "only among contenders passing every future gate; lowest nonoverlap Brier then nonoverlap Log Loss",
+    "required_due_independent_outcome_completeness": 1,
+    "expected_grid_phase_utc": "2026-10-05T00:00:00Z",
+    "missing_forecast_or_outcome": "BLOCK_ADMISSION",
+    "outcome_completeness_scope": "ALL_DUE_FIXED_PHASE_NONOVERLAP_WINDOWS"
+  },
+  "runtime_isolation": "python -I on clean archive from immutable source commit; evidence checkout not executable",
+  "freeze_authority": "signed CONFIG_FROZEN_PRESTART manifest only",
+  "immutable_source_commit_required": true,
+  "outcome_only_after_due": true,
+  "no_backfill": true,
+  "raw_required": true,
+  "sigstore_rekor_required": true,
+  "split_forecast_outcome_workers": true,
+  "trading_authority": false,
+  "supersedes": "vNext4 non-admissible after missing-outcome selection vulnerability",
+  "audit_remediation": "100% due-grid completeness gate; explicit missing forecast/outcome accounting"
+}

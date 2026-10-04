@@ -19,7 +19,7 @@ jobs:
           python3 - <<'PY'
           import json,os,urllib.request
           repo=os.environ['REPO_NAME']
-          for workflow in ('btc-first-passage-v2-outcome.yml','btc-arbitration-v5-outcome.yml','btc-regime-v5-split-outcome.yml'):
+          for workflow in ('btc-first-passage-v2-outcome.yml','btc-arbitration-v5-outcome.yml','btc-regime-v5-split-outcome.yml','btc-arbitration-v6-outcome.yml'):
               url=f'https://api.github.com/repos/{repo}/actions/workflows/{workflow}/dispatches'
               body=json.dumps({'ref':'main'}).encode()
               req=urllib.request.Request(url,data=body,method='POST',headers={

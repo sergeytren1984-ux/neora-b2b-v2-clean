@@ -1,0 +1,45 @@
+{
+  "artifacts": {
+    "early15m": {
+      "path": "predictive_vnext4/early15m_contenders.joblib",
+      "seed_records": 9583,
+      "seed_source": {
+        "compressed_sha256": "ec45205beceaa7d5b6971060e3d76525fc774ac6fb9e52f512e9a911fe2081d4",
+        "logical_sha256": "4024a1c8832a0a6a92579982f874bdfff5cca297581dd69b329999f1cd661d7e",
+        "rows": 9983
+      },
+      "sha256": "29f564935fa443b972e9eaa3bafc2d5c42c298621fab221b145e5e964c7712a8"
+    },
+    "hourly": {
+      "path": "predictive_vnext4/hourly_contenders.joblib",
+      "seed_records": 2232,
+      "seed_source": {
+        "compressed_sha256": "e6dba53ba2a5c4abe36ecb0485d76080faf298ab58d13926450ef05c3ac86c29",
+        "logical_sha256": "9bc1a192bf99f07acc5344b71ecec6cee6fd801033ea0e23bfcc1fbcd4211ad8",
+        "rows": 2687
+      },
+      "sha256": "6959d3dcc856d2391544957e72e7a8c5edf874df7e387cc2fe8aaf3c72e661b2"
+    }
+  },
+  "contenders": [
+    "logistic",
+    "gbdt",
+    "competing_risks"
+  ],
+  "fixed_fpr_alerts": {
+    "target_fpr": 0.2,
+    "threshold_source": "calibration period only"
+  },
+  "freeze_utc": "2026-10-04T12:56:37.442295+00:00",
+  "historical_selection_status": "INSPECTED_HISTORY_DIAGNOSTIC_ONLY",
+  "note": "No contender is champion before future prospective evaluation.",
+  "predictive_accept": false,
+  "primary_baseline": "vol90d_same_frozen_volatility_bin",
+  "primary_metric": [
+    "multiclass_brier",
+    "multiclass_log_loss"
+  ],
+  "schema": "btc-predictive-vnext4-freeze-metadata-v1",
+  "secondary_baseline": "frozen_training_frequency",
+  "trading_authority": false
+}

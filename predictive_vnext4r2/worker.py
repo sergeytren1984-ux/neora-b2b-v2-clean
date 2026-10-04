@@ -36,7 +36,7 @@ CLASS_TO_ID={"LOWER_FIRST":0,"UPPER_FIRST":1,"NEITHER":2,"AMBIGUOUS_SAME_BAR":3}
 
 CONFIG={
     "hourly":{
-        "branch":"btc-predictive-vnext4r2r2-hourly",
+        "branch":"btc-predictive-vnext4r2-hourly",
         "protocol":"predictive_vnext4r2/protocol_hourly.json",
         "artifact":"predictive_vnext4/hourly_contenders.joblib",
         "seed_source":"predictive_vnext4/baseline_seed_hourly_source.json.gz",
@@ -44,11 +44,11 @@ CONFIG={
         "raw":"predictive_vnext4r2_hourly_raw",
         "cadence":timedelta(hours=1),"deadline":timedelta(minutes=45),
         "interval":"1h","duration_ms":3600000,"min_history":170,
-        "forecast_workflow":".github/workflows/btc-predictive-vnext4r2r2-hourly.yml",
-        "outcome_workflow":".github/workflows/btc-predictive-vnext4r2r2-hourly-outcome.yml",
+        "forecast_workflow":".github/workflows/btc-predictive-vnext4r2-hourly.yml",
+        "outcome_workflow":".github/workflows/btc-predictive-vnext4r2-hourly-outcome.yml",
     },
     "early15m":{
-        "branch":"btc-predictive-vnext4r2r2-early15m",
+        "branch":"btc-predictive-vnext4r2-early15m",
         "protocol":"predictive_vnext4r2/protocol_early15m.json",
         "artifact":"predictive_vnext4/early15m_contenders.joblib",
         "seed_source":"predictive_vnext4/baseline_seed_early15m_source.json.gz",
@@ -56,8 +56,8 @@ CONFIG={
         "raw":"predictive_vnext4r2_early15m_raw",
         "cadence":timedelta(minutes=15),"deadline":timedelta(minutes=14),
         "interval":"15m","duration_ms":900000,"min_history":385,
-        "forecast_workflow":".github/workflows/btc-predictive-vnext4r2r2-early15m.yml",
-        "outcome_workflow":".github/workflows/btc-predictive-vnext4r2r2-early15m-outcome.yml",
+        "forecast_workflow":".github/workflows/btc-predictive-vnext4r2-early15m.yml",
+        "outcome_workflow":".github/workflows/btc-predictive-vnext4r2-early15m-outcome.yml",
     }
 }
 
@@ -121,7 +121,7 @@ def publish(cfg,obj,deadline=None,attachments=()):
     remote_clean(cfg);prior=prior_events(cfg);keys={e["idempotency_key"] for e,_ in prior}
     if obj["idempotency_key"] in keys:return
     n=len(prior)+1
-    e={"schema":"btc-predictive-vnext4r2r2-event-v1","sequence":n,
+    e={"schema":"btc-predictive-vnext4r2-event-v1","sequence":n,
        "previous_hash":digest(canonical(prior[-1][0])) if prior else None,
        "workflow_commit":os.environ["GITHUB_SHA"],
        "published_at_utc":utcnow().isoformat(),**obj}
@@ -169,7 +169,7 @@ def manifest(cfg,source_sha):
     for p in (cfg["forecast_workflow"],cfg["outcome_workflow"]):
         paths[p]=workflow_hash(workflow_commit,p)
     return {
-        "schema":"btc-predictive-vnext4r2r2-frozen-manifest-v1",
+        "schema":"btc-predictive-vnext4r2-frozen-manifest-v1",
         "source_commit_sha":source_sha,"paths_sha256":paths,
         "forecast_workflow":cfg["forecast_workflow"],
         "outcome_workflow":cfg["outcome_workflow"],

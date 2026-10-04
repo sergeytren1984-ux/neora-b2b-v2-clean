@@ -1,0 +1,33 @@
+name: BTC split worker activation smoke
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/btc-split-worker-activation.yml]
+  workflow_dispatch: {}
+permissions:
+  actions: write
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Run each due-only worker before first due
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import json,os,urllib.request
+          repo=os.environ['REPO_NAME']
+          for workflow in ('btc-first-passage-v2-outcome.yml','btc-arbitration-v5-outcome.yml'):
+              url=f'https://api.github.com/repos/{repo}/actions/workflows/{workflow}/dispatches'
+              body=json.dumps({'ref':'main'}).encode()
+              req=urllib.request.Request(url,data=body,method='POST',headers={
+                  'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+                  'Accept':'application/vnd.github+json',
+                  'Content-Type':'application/json',
+                  'User-Agent':'btc-split-worker-activation'})
+              with urllib.request.urlopen(req,timeout=25) as result:
+                  if result.status!=204:raise RuntimeError(f'{workflow}: HTTP {result.status}')
+              print('DISPATCHED',workflow,flush=True)
+          PY

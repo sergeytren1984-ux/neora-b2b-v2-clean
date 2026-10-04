@@ -145,7 +145,9 @@ def main():
         baseline=baseline_predictions(y,sid,aug_vol,trm,tem)
         pred=fit_models(AX,y,trm,cam,tem)
         yt=y[tem];dt=d[tem]
-        row={"n":int(np.sum(tem)),"baseline":metrics(baseline,yt),"models":{}}
+        row={"n":int(np.sum(tem)),"baseline":metrics(baseline,yt),
+             "baseline_scenario_metrics":scenario_metrics(baseline,y,sid,np.flatnonzero(tem),data["query_specs"]),
+             "models":{}}
         for name,p in pred.items():
             sc=metrics(p,yt)
             sc["brier_gain_vs_conditional_baseline_ci"]=block_ci(baseline,p,yt,dt,n_boot=500)
@@ -158,7 +160,15 @@ def main():
     focus=["72h_L0.025_U0.030","168h_L0.040_U0.040"]
     summary={}
     for focus_key in focus:
-        summary[focus_key]={}
+        summary[focus_key]={"baseline":{"fold_brier":[],"fold_log_loss":[]}}
+        for fold,row in result["folds"].items():
+            s=row["baseline_scenario_metrics"].get(focus_key)
+            if s:
+                summary[focus_key]["baseline"]["fold_brier"].append(s["brier"])
+                summary[focus_key]["baseline"]["fold_log_loss"].append(s["log_loss"])
+        bb=summary[focus_key]["baseline"]["fold_brier"]; bl=summary[focus_key]["baseline"]["fold_log_loss"]
+        summary[focus_key]["baseline"]["mean_brier"]=None if not bb else float(np.mean(bb))
+        summary[focus_key]["baseline"]["mean_log_loss"]=None if not bl else float(np.mean(bl))
         for model in ("logistic","gbdt"):
             brier=[];logloss=[]
             for fold,row in result["folds"].items():

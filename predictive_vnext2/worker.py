@@ -20,13 +20,16 @@ import joblib
 import numpy as np
 import sklearn
 
+ROOT=Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0,str(ROOT))
+
 from predictive_vnext2.live_features import (
     HOURLY_NAMES, EARLY15M_NAMES, hourly_feature, early15m_feature,
 )
 from predictive_vnext2.predict import load_artifact, predict_competing_risks, control_prediction
 
 UTC=timezone.utc
-ROOT=Path(__file__).resolve().parents[1]
 HERE=ROOT/'predictive_vnext2'
 START=datetime(2026,10,5,0,0,tzinfo=UTC)
 ISSUER='https://token.actions.githubusercontent.com'

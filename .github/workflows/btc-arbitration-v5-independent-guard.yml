@@ -1,0 +1,38 @@
+name: BTC arbitration v5 ordered guard
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/btc-arbitration-v5-independent-guard.yml]
+  schedule:
+    - cron: '7,17,27,37 * * * *'
+  workflow_run:
+    workflows: ['BTC directional 4h early warning v1', 'BTC directional downside 4h early warning v1', 'BTC regime v4 hardened challenger']
+    types: [completed]
+  workflow_dispatch: {}
+
+permissions:
+  actions: write
+  contents: write
+
+concurrency:
+  group: btc-arbitration-v5-ordered-guard
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 37
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: btc-arbitration-v5
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Wake sources, await their exact signed slots, then wake arbiter
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: python3 arbiter_v5/sequencer.py

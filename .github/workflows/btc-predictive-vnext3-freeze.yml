@@ -1,4 +1,5 @@
 name: BTC predictive vNext3 freeze contenders
+# final contender freeze after audit-remediation code landed
 
 on:
   push:

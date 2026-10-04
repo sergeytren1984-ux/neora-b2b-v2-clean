@@ -1,0 +1,77 @@
+{
+  "schema": "btc-predictive-vnext4r2-protocol-v1",
+  "head": "early15m_pm1pct_4h",
+  "status": "PROSPECTIVE_SHADOW_ONLY",
+  "start_utc": "2026-10-05T00:00:00Z",
+  "cadence_minutes": 15,
+  "issuance_deadline_minutes": 14,
+  "source": "Binance BTCUSDT closed 15m spot candles",
+  "artifact_sha256": "29f564935fa443b972e9eaa3bafc2d5c42c298621fab221b145e5e964c7712a8",
+  "baseline_seed_source_sha256": "ec45205beceaa7d5b6971060e3d76525fc774ac6fb9e52f512e9a911fe2081d4",
+  "contenders": [
+    "logistic",
+    "gbdt",
+    "competing_risks"
+  ],
+  "primary_baseline": "vol90d_same_frozen_volatility_bin",
+  "secondary_baseline": "frozen_training_frequency",
+  "target": {
+    "type": "symmetric percent first passage",
+    "lower_ratio": 0.99,
+    "upper_ratio": 1.01,
+    "horizon_minutes": 240,
+    "classes": [
+      "LOWER_FIRST",
+      "UPPER_FIRST",
+      "NEITHER",
+      "AMBIGUOUS_SAME_BAR"
+    ],
+    "same_bar_rule": "AMBIGUOUS_SAME_BAR"
+  },
+  "early_warning": {
+    "threshold_source": "historical calibration only",
+    "target_fpr": 0.2,
+    "report_by": "frozen volatility bin",
+    "inferential_scope": "FIXED_PHASE_NONOVERLAP_ONLY",
+    "descriptive_scope": "ALL_OVERLAPPING",
+    "uncertainty": "95% Wilson intervals for recall, FPR and precision",
+    "timing_metric": "median minutes from true alert anchor to first touch"
+  },
+  "admission": {
+    "predictive_accept": false,
+    "statistics_scope": "PREDECLARED_DUE_FIXED_PHASE_GRID_ONLY",
+    "minimum_calendar_days": 42,
+    "minimum_fixed_phase_nonoverlap_windows": 150,
+    "nonoverlap_window_hours": 4,
+    "minimum_independent_volatility_episodes": 12,
+    "require_all_three_volatility_bins": true,
+    "require_brier_better_than_primary": true,
+    "require_logloss_better_than_primary": true,
+    "block_lengths_days": [
+      14,
+      28
+    ],
+    "familywise_alpha": 0.05,
+    "simultaneous_contenders": 3,
+    "correction": "Bonferroni one-sided lower bound across contenders",
+    "require_positive_block_lower_bounds_for_brier_and_logloss": true,
+    "calibration_max_ece10_degradation_vs_primary": 0.02,
+    "overlapping_forecasts": "DESCRIPTIVE_ONLY",
+    "winner_selection": "only among contenders passing every future gate; lowest nonoverlap Brier then nonoverlap Log Loss",
+    "required_due_independent_outcome_completeness": 1,
+    "expected_grid_phase_utc": "2026-10-05T00:00:00Z",
+    "missing_forecast_or_outcome": "BLOCK_ADMISSION",
+    "outcome_completeness_scope": "ALL_DUE_FIXED_PHASE_NONOVERLAP_WINDOWS"
+  },
+  "runtime_isolation": "python -I on clean archive from immutable source commit; evidence checkout not executable",
+  "freeze_authority": "signed CONFIG_FROZEN_PRESTART manifest only",
+  "immutable_source_commit_required": true,
+  "outcome_only_after_due": true,
+  "no_backfill": true,
+  "raw_required": true,
+  "sigstore_rekor_required": true,
+  "split_forecast_outcome_workers": true,
+  "trading_authority": false,
+  "supersedes": "vNext4 non-admissible after missing-outcome selection vulnerability",
+  "audit_remediation": "100% due-grid completeness gate; explicit missing forecast/outcome accounting"
+}

@@ -1,0 +1,40 @@
+{
+  "schema": "btc-predictive-vnext2-protocol-v1",
+  "head": "early15m_pm1pct_4h",
+  "status": "PROSPECTIVE_SHADOW_ONLY",
+  "start_utc": "2026-10-05T00:00:00Z",
+  "cadence_minutes": 15,
+  "issuance_deadline_minutes": 14,
+  "source": "Binance BTCUSDT closed 15m spot candles",
+  "artifact_sha256": "54efa393e06059fe18b5904dc49212cb951931d23741d80dfb163c0fd0811793",
+  "model_family": "discrete-time competing risks",
+  "target": {
+    "type": "symmetric percent first passage",
+    "lower_ratio": 0.99,
+    "upper_ratio": 1.01,
+    "horizon_minutes": 240,
+    "classes": [
+      "LOWER_FIRST",
+      "UPPER_FIRST",
+      "NEITHER",
+      "AMBIGUOUS_SAME_BAR"
+    ],
+    "same_bar_rule": "AMBIGUOUS_SAME_BAR"
+  },
+  "controls": [
+    "frozen training class frequency",
+    "frozen volatility-bin class frequency"
+  ],
+  "probability_status": "HISTORICALLY_CALIBRATED_PROSPECTIVE_UNVALIDATED",
+  "outcome_only_after_due": true,
+  "no_backfill": true,
+  "raw_required": true,
+  "sigstore_rekor_required": true,
+  "split_forecast_outcome_workers": true,
+  "trading_authority": false,
+  "admission": {
+    "predictive_accept": false,
+    "condition": "candidate must beat frozen controls prospectively on Brier and Log Loss with positive block-bootstrap lower bound; calibration disclosed",
+    "minimum_future_closed_outcomes": 500
+  }
+}

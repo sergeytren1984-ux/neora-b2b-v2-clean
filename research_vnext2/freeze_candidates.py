@@ -21,6 +21,7 @@ from core import (read_klines, build_hourly_features, build_15m_features,
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/"predictive_vnext2"
 OUT.mkdir(exist_ok=True)
+# Compressed source provenance uses decompressed logical bytes; gzip mtimes are ignored.
 
 
 def sha(path):

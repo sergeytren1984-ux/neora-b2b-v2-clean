@@ -24,6 +24,17 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install --disable-pip-version-check numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
+      - name: Reject mutable-branch sitecustomize injection
+        run: |
+          cat > sitecustomize.py <<'PY'
+          from pathlib import Path
+          Path('/tmp/vnext4_sitecustomize_pwned').write_text('executed')
+          raise RuntimeError('mutable evidence branch sitecustomize executed')
+          PY
+          rm -f /tmp/vnext4_sitecustomize_pwned
+          python -I -c "import sys; print('isolated', sys.flags.isolated, sys.flags.safe_path)"
+          test ! -e /tmp/vnext4_sitecustomize_pwned
+          rm sitecustomize.py
       - name: Compile frozen runtime
         run: python -I -m py_compile predictive_vnext4/worker.py predictive_vnext4/live_features.py predictive_vnext4/predict.py predictive_vnext4/core.py predictive_vnext4/scorecard.py
       - name: Run vNext4 selftest

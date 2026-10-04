@@ -1,7 +1,7 @@
 {
   "arbiter_v4_continuity": {
-    "assessed_slots": 26,
-    "decisions": 26,
+    "assessed_slots": 27,
+    "decisions": 27,
     "signed_slot_misses": [],
     "source_fallbacks": [
       {
@@ -66,6 +66,14 @@
         ],
         "reason": "no timely signed regime forecast; directional head independently verified",
         "slot_msk": "2026-10-04T13:00:00+03:00",
+        "status": "NO_UPSIDE_TAIL_WARNING_REGIME_UNAVAILABLE"
+      },
+      {
+        "missing_sources": [
+          "regime"
+        ],
+        "reason": "no timely signed regime forecast; directional head independently verified",
+        "slot_msk": "2026-10-04T14:00:00+03:00",
         "status": "NO_UPSIDE_TAIL_WARNING_REGIME_UNAVAILABLE"
       }
     ],
@@ -143,7 +151,7 @@
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
-  "generated_at_utc": "2026-10-04T11:19:24.010733+00:00",
+  "generated_at_utc": "2026-10-04T11:48:55.927293+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 1,
@@ -165,9 +173,9 @@
   "regime_calibration_gate": {
     "also_requires": "30 separate up and down episodes each; paired Brier and Log Loss gain with positive 95% weekly block bootstrap bound; future calibration/reliability test",
     "closed_outcomes": {
-      "1h": 41,
-      "24h": 19,
-      "4h": 38
+      "1h": 42,
+      "24h": 20,
+      "4h": 39
     },
     "preregistered_minimum": {
       "1h": 500,
@@ -2230,12 +2238,12 @@
       },
       "due_4h_utc": "2026-10-04T11:00:00+00:00",
       "regime_v4": {
-        "actual_native_class": null,
+        "actual_native_class": "upside",
         "calibrated_brier": null,
         "missing_reason": null,
         "rekor_integrated_utc": "2026-10-04T07:43:39+00:00",
-        "shadow_brier_diagnostic_only": null,
-        "shadow_log_loss_diagnostic_only": null,
+        "shadow_brier_diagnostic_only": 0.8538881181309199,
+        "shadow_log_loss_diagnostic_only": 1.243835,
         "shadow_scores_uncalibrated": {
           "downside": 0.13899428311435993,
           "range": 0.5727290654848589,
@@ -2522,10 +2530,10 @@
     },
     "regime": {
       "ABSTAIN_DATA_INVALID": 3,
-      "BARRIER_OUTCOME_RECORDED": 205,
+      "BARRIER_OUTCOME_RECORDED": 223,
       "CONFIG_FROZEN_PRESTART": 1,
       "REGIME_FORECAST_ISSUED": 42,
-      "REGIME_OUTCOME_RECORDED": 98,
+      "REGIME_OUTCOME_RECORDED": 101,
       "SCHEDULE_REGISTERED": 1,
       "SLOT_MISSED": 6
     },

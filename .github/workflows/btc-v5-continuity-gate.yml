@@ -1,0 +1,54 @@
+name: BTC v5 prospective continuity gate
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/btc-v5-continuity-gate.yml]
+  workflow_run:
+    workflows: ['BTC signed diagnostic scorecard']
+    types: [completed]
+  schedule:
+    - cron: '55 * * * *'
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  assert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Fail on missing decision, source race or barrier question
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import datetime as dt,json,os,urllib.request
+          UTC=dt.timezone.utc
+          now=dt.datetime.now(UTC)
+          url=f"https://api.github.com/repos/{os.environ['REPO_NAME']}/contents/btc_scorecard/latest.json"
+          req=urllib.request.Request(url,headers={
+              'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+              'Accept':'application/vnd.github+json',
+              'User-Agent':'btc-v5-continuity-gate'})
+          with urllib.request.urlopen(req,timeout=25) as response:
+              import base64
+              data=json.loads(base64.b64decode(json.load(response)['content']))
+          def stamp(s):return dt.datetime.fromisoformat(s.replace('Z','+00:00'))
+          generated=stamp(data['generated_at_utc'])
+          if now>=dt.datetime(2026,10,5,0,55,tzinfo=UTC):
+              newest_due=(now-dt.timedelta(minutes=45)).replace(minute=0,second=0,microsecond=0)
+              if generated<newest_due+dt.timedelta(minutes=45):
+                  raise RuntimeError('scorecard stale after arbiter v5 deadline')
+              status=data['arbiter_v5_continuity']
+              if status['decisions']!=status['assessed_slots'] or status['unrecorded_misses'] or status['regime_race_defects']:
+                  raise RuntimeError('arbiter v5 continuity defect: '+json.dumps(status))
+              print('ARBITER_V5',status)
+          if now>=dt.datetime(2026,10,5,14,55,tzinfo=UTC):
+              missing=[(r['slot_utc'],name,b['status'])
+                       for r in data['rows'] if stamp(r['slot_utc'])>=dt.datetime(2026,10,5,14,tzinfo=UTC)
+                       for name,b in r.get('first_passage',{}).items()
+                       if stamp(r['slot_utc'])+dt.timedelta(minutes=45)<=now
+                       and b['status'] in ('SLOT_MISSED','UNRECORDED_MISS')]
+              if missing:raise RuntimeError('barrier v2 question missing: '+json.dumps(missing))
+              print('BARRIER_V2_NO_MISSING_QUESTIONS')
+          PY

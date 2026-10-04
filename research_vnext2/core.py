@@ -27,8 +27,10 @@ def read_klines(path: str | Path, duration_ms: int):
     blob = path.read_bytes()
     if path.suffix == ".gz":
         import gzip
-        rows = json.loads(gzip.decompress(blob))
+        source_bytes = gzip.decompress(blob)
+        rows = json.loads(source_bytes)
     else:
+        source_bytes = blob
         rows = json.loads(blob)
     t = np.asarray([int(r[0]) for r in rows], dtype=np.int64)
     o = np.asarray([float(r[1]) for r in rows])
@@ -44,7 +46,8 @@ def read_klines(path: str | Path, duration_ms: int):
         raise ValueError(f"partial candle in {path}")
     if not np.all((lo <= np.minimum(o, c)) & (hi >= np.maximum(o, c)) & (v >= 0)):
         raise ValueError(f"OHLC/volume invariant failed in {path}")
-    return t, o, hi, lo, c, v, trades, taker, hashlib.sha256(blob).hexdigest()
+    # Hash logical source bytes, not the gzip container header whose mtime changes on rebuild.
+    return t, o, hi, lo, c, v, trades, taker, hashlib.sha256(source_bytes).hexdigest()
 
 
 def _efficiency(c, i, window):

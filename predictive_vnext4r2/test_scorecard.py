@@ -2,7 +2,12 @@
 from __future__ import annotations
 
 import unittest
+import sys
+from pathlib import Path
 from datetime import datetime,timedelta,timezone
+
+ROOT=Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path: sys.path.insert(0,str(ROOT))
 
 from predictive_vnext4r2.scorecard import score
 

@@ -1,0 +1,33 @@
+name: BTC regime v5 independent guard
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/btc-regime-v5-split-guard.yml]
+  schedule:
+    - cron: '2,12,22,32,40 * * * *'
+  workflow_run:
+    workflows: ['BTC context evidence']
+    types: [completed]
+  workflow_dispatch: {}
+permissions:
+  actions: write
+jobs:
+  wake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Dispatch forecast transport
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import json,os,urllib.request
+          url=f"https://api.github.com/repos/{os.environ['REPO_NAME']}/actions/workflows/btc-regime-v5-split.yml/dispatches"
+          req=urllib.request.Request(url,data=json.dumps({'ref':'main'}).encode(),method='POST',headers={
+              'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+              'Accept':'application/vnd.github+json','Content-Type':'application/json',
+              'User-Agent':'btc-regime-v5-split-guard'})
+          with urllib.request.urlopen(req,timeout=25) as response:
+              if response.status!=204:raise RuntimeError('split regime forecast dispatch failed')
+          PY

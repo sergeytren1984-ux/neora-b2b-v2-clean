@@ -60,3 +60,23 @@ def predict_competing_risks(artifact,x):
         "neither":float(result[2]),
         "ambiguous_same_bar":float(result[3])
     }
+
+
+def _dist(values):
+    return {
+        "lower_first":float(values[0]),
+        "upper_first":float(values[1]),
+        "neither":float(values[2]),
+        "ambiguous_same_bar":float(values[3])
+    }
+
+
+def control_prediction(artifact, vol_value):
+    ctrl=artifact["control"]
+    q0,q1=ctrl["vol_quantiles"]
+    b=0 if float(vol_value)<=q0 else 1 if float(vol_value)<=q1 else 2
+    return {
+        "training_frequency":_dist(ctrl["training_frequency"]),
+        "volatility_bin":b,
+        "volatility_bin_frequency":_dist(ctrl["vol_bin_training_frequency"][str(b)])
+    }

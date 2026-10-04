@@ -36,9 +36,9 @@
       "baseline_brier": 0.010312,
       "baseline_log_loss": 0.107083,
       "constant": 0.10154855794139658,
-      "model_brier": 0.003386,
-      "model_log_loss": 0.059601,
-      "n": 14,
+      "model_brier": 0.003496,
+      "model_log_loss": 0.060533,
+      "n": 15,
       "positive_events": 0
     },
     "source_uncompressed_sha256": "3e78a339e60fec957dea2c0884c6840d66a92351ac04b4198623f1da10165fc9",
@@ -48,9 +48,9 @@
       "baseline_brier": 0.011453,
       "baseline_log_loss": 0.113188,
       "constant": 0.10701744286454436,
-      "model_brier": 0.003372,
-      "model_log_loss": 0.059337,
-      "n": 24,
+      "model_brier": 0.003331,
+      "model_log_loss": 0.058945,
+      "n": 25,
       "positive_events": 0
     }
   },
@@ -80,34 +80,34 @@
   },
   "event_definitions_differ": true,
   "external_oi_source_audit": {
-    "checked_recent_forecasts": 33,
+    "checked_recent_forecasts": 34,
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
-  "generated_at_utc": "2026-10-04T02:02:32.991563+00:00",
+  "generated_at_utc": "2026-10-04T02:18:58.236006+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 0,
-    "TN": 14,
+    "TN": 15,
     "TP": 0,
-    "closed_pairs": 14,
+    "closed_pairs": 15,
     "precision": null,
     "recall": null
   },
   "prospective_confusion_up": {
     "FN": 0,
     "FP": 0,
-    "TN": 24,
+    "TN": 25,
     "TP": 0,
-    "closed_pairs": 24,
+    "closed_pairs": 25,
     "precision": null,
     "recall": null
   },
   "regime_calibration_gate": {
     "also_requires": "30 separate up and down episodes each; paired Brier and Log Loss gain with positive 95% weekly block bootstrap bound; future calibration/reliability test",
     "closed_outcomes": {
-      "1h": 32,
-      "24h": 11,
+      "1h": 33,
+      "24h": 12,
       "4h": 30
     },
     "preregistered_minimum": {
@@ -1510,8 +1510,8 @@
     {
       "arbiter": {
         "action_status": "NO_DIRECTIONAL_ACTION",
-        "actual_fall_lt_minus_1pct": null,
-        "actual_rise_gt_1pct": null,
+        "actual_fall_lt_minus_1pct": false,
+        "actual_rise_gt_1pct": false,
         "reason": "no timely signed regime forecast; directional head independently verified",
         "signed_sources": {
           "directional": true,
@@ -1524,11 +1524,14 @@
         "trading_authority": false
       },
       "down": {
-        "actual": null,
+        "actual": false,
         "alert": false,
         "candidate_estimate_unproven": 0.070938,
         "rank_30d": 0.397222,
-        "score_diagnostic": null,
+        "score_diagnostic": {
+          "brier": 0.005032,
+          "log_loss": 0.07358
+        },
         "status": "ISSUED"
       },
       "due_4h_utc": "2026-10-04T02:00:00+00:00",
@@ -1546,11 +1549,14 @@
       "slot_msk": "2026-10-04T01:00:00+03:00",
       "slot_utc": "2026-10-03T22:00:00+00:00",
       "up": {
-        "actual": null,
+        "actual": false,
         "alert": false,
         "candidate_estimate_unproven": 0.048347,
         "rank_30d": 0.109722,
-        "score_diagnostic": null,
+        "score_diagnostic": {
+          "brier": 0.002337,
+          "log_loss": 0.049555
+        },
         "status": "ISSUED"
       }
     },
@@ -1719,23 +1725,27 @@
     },
     {
       "arbiter": {
-        "action_status": null,
+        "action_status": "NO_DIRECTIONAL_ACTION",
         "actual_fall_lt_minus_1pct": null,
         "actual_rise_gt_1pct": null,
-        "reason": null,
-        "signed_sources": null,
+        "reason": "upside tail not confirmed by the independent head",
+        "signed_sources": {
+          "directional": true,
+          "downside": true,
+          "regime": true
+        },
         "slot_missed": false,
         "source_epoch": "arbiter_v4",
-        "status": "PENDING",
+        "status": "NO_DIRECTIONAL_TAIL_WARNING",
         "trading_authority": false
       },
       "down": {
         "actual": null,
-        "alert": null,
-        "candidate_estimate_unproven": null,
-        "rank_30d": null,
+        "alert": false,
+        "candidate_estimate_unproven": 0.044281,
+        "rank_30d": 0.048611,
         "score_diagnostic": null,
-        "status": "PENDING"
+        "status": "ISSUED"
       },
       "due_4h_utc": "2026-10-04T06:00:00+00:00",
       "regime_v4": {
@@ -1744,20 +1754,24 @@
         "missing_reason": null,
         "shadow_brier_diagnostic_only": null,
         "shadow_log_loss_diagnostic_only": null,
-        "shadow_scores_uncalibrated": null,
-        "source_status": "PENDING",
-        "state": null,
-        "used_by_arbiter_at_decision": null
+        "shadow_scores_uncalibrated": {
+          "downside": 0.17708430869722985,
+          "range": 0.6426184267010895,
+          "upside": 0.18029726460168063
+        },
+        "source_status": "ISSUED",
+        "state": "RANGE",
+        "used_by_arbiter_at_decision": true
       },
       "slot_msk": "2026-10-04T05:00:00+03:00",
       "slot_utc": "2026-10-04T02:00:00+00:00",
       "up": {
         "actual": null,
-        "alert": null,
-        "candidate_estimate_unproven": null,
-        "rank_30d": null,
+        "alert": false,
+        "candidate_estimate_unproven": 0.032768,
+        "rank_30d": 0.005556,
         "score_diagnostic": null,
-        "status": "PENDING"
+        "status": "ISSUED"
       }
     }
   ],
@@ -1770,8 +1784,8 @@
       "SCHEDULE_REGISTERED": 1
     },
     "arbiter_v4": {
-      "ARBITRATION_DECISION_ISSUED": 17,
-      "ARBITRATION_OUTCOME_RECORDED": 13,
+      "ARBITRATION_DECISION_ISSUED": 18,
+      "ARBITRATION_OUTCOME_RECORDED": 14,
       "CONFIG_FROZEN_PRESTART": 1,
       "SCHEDULE_REGISTERED": 1
     },
@@ -1782,23 +1796,23 @@
     },
     "down": {
       "CONFIG_FROZEN_PRESTART": 1,
-      "DIRECTIONAL_4H_DOWNSIDE_ALERT_ISSUED": 18,
-      "OUTCOME_RECORDED": 14,
+      "DIRECTIONAL_4H_DOWNSIDE_ALERT_ISSUED": 19,
+      "OUTCOME_RECORDED": 15,
       "SCHEDULE_REGISTERED": 1
     },
     "regime": {
       "ABSTAIN_DATA_INVALID": 3,
-      "BARRIER_OUTCOME_RECORDED": 97,
+      "BARRIER_OUTCOME_RECORDED": 99,
       "CONFIG_FROZEN_PRESTART": 1,
-      "REGIME_FORECAST_ISSUED": 33,
-      "REGIME_OUTCOME_RECORDED": 73,
+      "REGIME_FORECAST_ISSUED": 34,
+      "REGIME_OUTCOME_RECORDED": 75,
       "SCHEDULE_REGISTERED": 1,
       "SLOT_MISSED": 6
     },
     "up": {
       "CONFIG_FROZEN_PRESTART": 1,
-      "DIRECTIONAL_4H_ALERT_ISSUED": 32,
-      "OUTCOME_RECORDED": 28,
+      "DIRECTIONAL_4H_ALERT_ISSUED": 33,
+      "OUTCOME_RECORDED": 29,
       "SCHEDULE_REGISTERED": 1,
       "SLOT_MISSED": 6
     },

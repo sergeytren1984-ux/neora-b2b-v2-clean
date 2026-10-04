@@ -1,6 +1,10 @@
 name: BTC predictive vNext4R2 completeness watch
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/btc-predictive-vnext4r2-completeness-watch.yml
   schedule:
     - cron: '40 */4 * * *'
   workflow_dispatch: {}

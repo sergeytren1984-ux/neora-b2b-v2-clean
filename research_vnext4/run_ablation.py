@@ -17,7 +17,7 @@ from sklearn.preprocessing import StandardScaler
 from predictive_vnext4.core import (
     read_klines, build_hourly_features, build_15m_features,
     target_distance, target_percent, masks, adaptive_baselines,
-    calibrate, full_proba, metrics,
+    calibrate, full_proba, metrics, block_ci,
 )
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -85,31 +85,45 @@ def run_head(head,dates,X,names,regime,vol,y,due_delta,folds):
         row={"strongest_adaptive_baseline":strongest,"baseline":bscore[strongest],"models":{}}
         for model in ("logistic","gbdt"):
             row["models"][model]={}
+            preds={}
             for variant,cols in masks_by_variant.items():
-                p=fit_predict(model,X[:,cols],y,tr,ca,te)
-                row["models"][model][variant]=metrics(p,y[te])
+                preds[variant]=fit_predict(model,X[:,cols],y,tr,ca,te)
+            full_p=preds["full"]
+            for variant,p in preds.items():
+                stat=metrics(p,y[te])
+                if variant!="full":
+                    stat["brier_gain_from_removal_ci"]=block_ci(full_p,p,y[te],dates[te],n_boot=500)
+                row["models"][model][variant]=stat
         out["folds"][fold]=row
     # Summarize removal effect relative to same-model full feature set.
     summary={}
     for model in ("logistic","gbdt"):
         summary[model]={}
         for family in fam:
-            db=[];dl=[]
+            db=[];dl=[];cis=[]
             for fold in out["folds"].values():
                 full=fold["models"][model]["full"]
                 drop=fold["models"][model]["drop_"+family]
                 db.append(full["brier"]-drop["brier"]) # positive => removal helps
                 dl.append(full["log_loss"]-drop["log_loss"])
+                cis.append(drop["brier_gain_from_removal_ci"])
+            both=int(sum((a>0 and b>0) for a,b in zip(db,dl)))
+            ci_pos=int(sum(ci is not None and ci[0]>0 for ci in cis))
+            diagnostic=bool(
+                np.mean(db)>0 and np.mean(dl)>0 and
+                np.median(db)>0 and np.median(dl)>0 and
+                min(db)>-.01 and both>=2
+            )
             summary[model][family]={
                 "brier_gain_from_removal_by_fold":db,
                 "logloss_gain_from_removal_by_fold":dl,
+                "brier_gain_from_removal_ci_by_fold":cis,
                 "mean_brier_gain_from_removal":float(np.mean(db)),
                 "mean_logloss_gain_from_removal":float(np.mean(dl)),
-                "removal_improves_both_metrics_fold_count":int(sum((a>0 and b>0) for a,b in zip(db,dl))),
-                "diagnostic_remove_signal":bool(
-                    np.median(db)>0 and np.median(dl)>0 and min(db)>-.01 and
-                    sum((a>0 and b>0) for a,b in zip(db,dl))>=2
-                )
+                "removal_improves_both_metrics_fold_count":both,
+                "positive_brier_ci_fold_count":ci_pos,
+                "diagnostic_remove_signal":diagnostic,
+                "statistically_supported_removal_on_inspected_history":bool(diagnostic and ci_pos>=2)
             }
     out["summary"]=summary
     return out

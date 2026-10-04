@@ -1,0 +1,85 @@
+name: BTC predictive vNext4 independent prestart audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/btc-predictive-vnext4-audit.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - head: hourly
+            branch: btc-predictive-vnext4-hourly
+            forecast_workflow: .github/workflows/btc-predictive-vnext4-hourly.yml
+            outcome_workflow: .github/workflows/btc-predictive-vnext4-hourly-outcome.yml
+          - head: early15m
+            branch: btc-predictive-vnext4-early15m
+            forecast_workflow: .github/workflows/btc-predictive-vnext4-early15m.yml
+            outcome_workflow: .github/workflows/btc-predictive-vnext4-early15m-outcome.yml
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ matrix.branch }}
+          fetch-depth: 0
+      - name: Build clean immutable runtime
+        run: |
+          rm -rf /tmp/vnext4-runtime
+          mkdir -p /tmp/vnext4-runtime
+          git archive 4447bd1a82f68b281a3fafb2b76aae238b0c5335 | tar -x -C /tmp/vnext4-runtime
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - run: python -m pip install --disable-pip-version-check numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
+      - name: Independent scorecard governance verification
+        env:
+          BTC_VNEXT4_EVIDENCE_ROOT: ${{ github.workspace }}
+        run: |
+          python -I /tmp/vnext4-runtime/predictive_vnext4/scorecard.py --head ${{ matrix.head }} --repo-root "$GITHUB_WORKSPACE" > /tmp/vnext4-score.json
+          cat /tmp/vnext4-score.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/vnext4-score.json'))
+          assert x['governance']['ok'] is True, x['governance']
+          assert x['governance']['cosign_rekor_verified_events'] >= 2
+          assert x['score']['status'] == 'PENDING_NO_CLOSED_OUTCOMES'
+          print('VNext4 governance: ACCEPT prestart')
+          PY
+      - name: Prove mutable evidence sitecustomize cannot execute
+        run: |
+          rm -f /tmp/vnext4-sitecustomize-pwned
+          cat > sitecustomize.py <<'PY'
+          from pathlib import Path
+          Path('/tmp/vnext4-sitecustomize-pwned').write_text('executed')
+          raise RuntimeError('evidence branch sitecustomize executed')
+          PY
+          BTC_VNEXT4_HEAD="${{ matrix.head }}" \
+          BTC_VNEXT4_ACTION=forecast \
+          BTC_VNEXT4_SOURCE_SHA=4447bd1a82f68b281a3fafb2b76aae238b0c5335 \
+          BTC_VNEXT4_WORKFLOW_PATH="${{ matrix.forecast_workflow }}" \
+          BTC_VNEXT4_EVIDENCE_ROOT="$GITHUB_WORKSPACE" \
+          python -I -c "import sys; sys.path.insert(0,'/tmp/vnext4-runtime'); from predictive_vnext4.worker import CONFIG,verify_signed_freeze; h='${{ matrix.head }}'; verify_signed_freeze(CONFIG[h],h,'forecast'); print('FORECAST_FREEZE_GATE_ACCEPT')"
+          test ! -e /tmp/vnext4-sitecustomize-pwned
+          BTC_VNEXT4_HEAD="${{ matrix.head }}" \
+          BTC_VNEXT4_ACTION=outcome \
+          BTC_VNEXT4_SOURCE_SHA=4447bd1a82f68b281a3fafb2b76aae238b0c5335 \
+          BTC_VNEXT4_WORKFLOW_PATH="${{ matrix.outcome_workflow }}" \
+          BTC_VNEXT4_EVIDENCE_ROOT="$GITHUB_WORKSPACE" \
+          python -I -c "import sys; sys.path.insert(0,'/tmp/vnext4-runtime'); from predictive_vnext4.worker import CONFIG,verify_signed_freeze; h='${{ matrix.head }}'; verify_signed_freeze(CONFIG[h],h,'outcome'); print('OUTCOME_FREEZE_GATE_ACCEPT')"
+          test ! -e /tmp/vnext4-sitecustomize-pwned
+      - name: Recompute adaptive baseline seed from frozen raw candles
+        run: python -I /tmp/vnext4-runtime/predictive_vnext4/selftest.py
+      - name: Reproduce independent-audit false-admission regression
+        run: python -I /tmp/vnext4-runtime/predictive_vnext4/test_scorecard.py -v

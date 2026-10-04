@@ -1,0 +1,44 @@
+name: BTC predictive vNext4R2 source smoke
+
+on:
+  push:
+    branches: [btc-predictive-vnext4r2-source-20261004]
+    paths:
+      - predictive_vnext4r2/**
+      - predictive_vnext4/**
+      - .github/workflows/btc-predictive-vnext4r2-source-smoke.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: btc-predictive-vnext4r2-source-20261004
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
+      - name: Reject mutable-branch sitecustomize injection
+        run: |
+          cat > sitecustomize.py <<'PY'
+          from pathlib import Path
+          Path('/tmp/vnext4r2_sitecustomize_pwned').write_text('executed')
+          raise RuntimeError('sitecustomize executed')
+          PY
+          rm -f /tmp/vnext4r2_sitecustomize_pwned
+          python -I -c "import sys; print('isolated', sys.flags.isolated, sys.flags.safe_path)"
+          test ! -e /tmp/vnext4r2_sitecustomize_pwned
+          rm sitecustomize.py
+      - name: Compile vNext4R2 governance runtime
+        run: python -I -m py_compile predictive_vnext4r2/worker.py predictive_vnext4r2/scorecard.py predictive_vnext4r2/test_scorecard.py
+      - name: Rebuild frozen predictor baseline seed and parity
+        run: python -I predictive_vnext4/selftest.py
+      - name: Run completeness and prior-audit regression tests
+        run: python -I predictive_vnext4r2/test_scorecard.py -v

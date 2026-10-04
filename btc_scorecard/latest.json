@@ -1,7 +1,7 @@
 {
   "arbiter_v4_continuity": {
-    "assessed_slots": 22,
-    "decisions": 22,
+    "assessed_slots": 23,
+    "decisions": 23,
     "signed_slot_misses": [],
     "source_fallbacks": [
       {
@@ -34,6 +34,14 @@
         ],
         "reason": "no timely signed regime forecast; directional head independently verified",
         "slot_msk": "2026-10-04T09:00:00+03:00",
+        "status": "NO_UPSIDE_TAIL_WARNING_REGIME_UNAVAILABLE"
+      },
+      {
+        "missing_sources": [
+          "regime"
+        ],
+        "reason": "no timely signed regime forecast; directional head independently verified",
+        "slot_msk": "2026-10-04T10:00:00+03:00",
         "status": "NO_UPSIDE_TAIL_WARNING_REGIME_UNAVAILABLE"
       }
     ],
@@ -102,7 +110,7 @@
   },
   "event_definitions_differ": true,
   "external_oi_source_audit": {
-    "checked_recent_forecasts": 38,
+    "checked_recent_forecasts": 39,
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
@@ -111,7 +119,7 @@
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
-  "generated_at_utc": "2026-10-04T07:33:27.063321+00:00",
+  "generated_at_utc": "2026-10-04T07:49:12.620930+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 1,
@@ -133,7 +141,7 @@
   "regime_calibration_gate": {
     "also_requires": "30 separate up and down episodes each; paired Brier and Log Loss gain with positive 95% weekly block bootstrap bound; future calibration/reliability test",
     "closed_outcomes": {
-      "1h": 37,
+      "1h": 38,
       "24h": 17,
       "4h": 35
     },
@@ -2177,13 +2185,17 @@
         "actual_native_class": null,
         "calibrated_brier": null,
         "missing_reason": null,
-        "rekor_integrated_utc": null,
+        "rekor_integrated_utc": "2026-10-04T07:43:39+00:00",
         "shadow_brier_diagnostic_only": null,
         "shadow_log_loss_diagnostic_only": null,
-        "shadow_scores_uncalibrated": null,
+        "shadow_scores_uncalibrated": {
+          "downside": 0.13899428311435993,
+          "range": 0.5727290654848589,
+          "upside": 0.28827665140078107
+        },
         "source_epoch": "regime",
-        "source_status": "PENDING",
-        "state": null,
+        "source_status": "ISSUED",
+        "state": "UP_CONTINUATION",
         "used_by_arbiter_at_decision": false
       },
       "slot_msk": "2026-10-04T10:00:00+03:00",
@@ -2237,10 +2249,10 @@
     },
     "regime": {
       "ABSTAIN_DATA_INVALID": 3,
-      "BARRIER_OUTCOME_RECORDED": 134,
+      "BARRIER_OUTCOME_RECORDED": 148,
       "CONFIG_FROZEN_PRESTART": 1,
-      "REGIME_FORECAST_ISSUED": 38,
-      "REGIME_OUTCOME_RECORDED": 89,
+      "REGIME_FORECAST_ISSUED": 39,
+      "REGIME_OUTCOME_RECORDED": 90,
       "SCHEDULE_REGISTERED": 1,
       "SLOT_MISSED": 6
     },

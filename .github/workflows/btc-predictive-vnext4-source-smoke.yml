@@ -29,4 +29,4 @@ jobs:
       - name: Run vNext4 selftest
         run: python -I predictive_vnext4/selftest.py
       - name: Run independent-audit regression tests
-        run: python -I -m unittest predictive_vnext4.test_scorecard -v
+        run: python -I predictive_vnext4/test_scorecard.py -v

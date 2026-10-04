@@ -142,7 +142,7 @@
   },
   "event_definitions_differ": true,
   "external_oi_source_audit": {
-    "checked_recent_forecasts": 42,
+    "checked_recent_forecasts": 43,
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
@@ -151,7 +151,7 @@
     "numeric_cross_exchange_defects": [],
     "window_hours": 72
   },
-  "generated_at_utc": "2026-10-04T12:18:25.641064+00:00",
+  "generated_at_utc": "2026-10-04T12:28:56.250989+00:00",
   "prospective_confusion_down": {
     "FN": 0,
     "FP": 1,
@@ -2529,13 +2529,17 @@
         "actual_native_class": null,
         "calibrated_brier": null,
         "missing_reason": null,
-        "rekor_integrated_utc": null,
+        "rekor_integrated_utc": "2026-10-04T12:17:13+00:00",
         "shadow_brier_diagnostic_only": null,
         "shadow_log_loss_diagnostic_only": null,
-        "shadow_scores_uncalibrated": null,
+        "shadow_scores_uncalibrated": {
+          "downside": 0.09121042394721371,
+          "range": 0.2516035510645026,
+          "upside": 0.6571860249882837
+        },
         "source_epoch": "regime",
-        "source_status": "PENDING",
-        "state": null,
+        "source_status": "ISSUED",
+        "state": "UP_TRANSITION",
         "used_by_arbiter_at_decision": false
       },
       "slot_msk": "2026-10-04T15:00:00+03:00",
@@ -2601,7 +2605,7 @@
       "ABSTAIN_DATA_INVALID": 3,
       "BARRIER_OUTCOME_RECORDED": 223,
       "CONFIG_FROZEN_PRESTART": 1,
-      "REGIME_FORECAST_ISSUED": 42,
+      "REGIME_FORECAST_ISSUED": 43,
       "REGIME_OUTCOME_RECORDED": 103,
       "SCHEDULE_REGISTERED": 1,
       "SLOT_MISSED": 7

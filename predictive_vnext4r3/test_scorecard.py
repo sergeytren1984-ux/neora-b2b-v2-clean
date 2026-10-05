@@ -9,7 +9,7 @@ from datetime import datetime,timedelta,timezone
 ROOT=Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path: sys.path.insert(0,str(ROOT))
 
-from predictive_vnext4r3.scorecard import score
+from predictive_vnext4r3.scorecard import score,signature_claim_args
 
 UTC=timezone.utc
 START=datetime(2026,10,5,12,0,tzinfo=UTC)
@@ -44,6 +44,25 @@ def add_pair(events,a,hours,actual,pred,base,vol_bin,include_outcome=True):
             "due_utc":due.isoformat(),"published_at_utc":(due+timedelta(minutes=5)).isoformat(),
             "outcome_class":cls,"first_touch_time_utc":None
         })
+
+
+class SignatureBindingRegressionTests(unittest.TestCase):
+    def test_scorecard_signature_claims_bind_exact_workflow_sha(self):
+        sha="89abcdef0123456789abcdef0123456789abcdef"
+        args=signature_claim_args({"workflow_commit":sha})
+        self.assertEqual(args[args.index("--certificate-github-workflow-sha")+1],sha)
+        self.assertEqual(
+            args[args.index("--certificate-github-workflow-repository")+1],
+            "sergeytren1984-ux/neora-b2b-v2-clean",
+        )
+        self.assertEqual(args[args.index("--certificate-github-workflow-ref")+1],"refs/heads/main")
+        self.assertEqual(args[args.index("--certificate-github-workflow-trigger")+1],"workflow_dispatch")
+
+    def test_scorecard_signature_claims_reject_malformed_sha(self):
+        for bad in ("", "1234", "z"*40, "0"*41):
+            with self.subTest(bad=bad):
+                with self.assertRaises(ValueError):
+                    signature_claim_args({"workflow_commit":bad})
 
 
 class AdmissionRegressionTests(unittest.TestCase):

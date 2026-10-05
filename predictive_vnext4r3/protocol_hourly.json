@@ -2,7 +2,7 @@
   "schema": "btc-predictive-vnext4r3-protocol-v1",
   "head": "hourly_rv_first_passage_72h",
   "status": "PROSPECTIVE_SHADOW_ONLY",
-  "start_utc": "2026-10-05T10:00:00Z",
+  "start_utc": "2026-10-05T12:00:00Z",
   "cadence_minutes": 60,
   "issuance_deadline_minutes": 45,
   "source": "Binance BTCUSDT closed 1h spot candles",
@@ -70,7 +70,7 @@
     "overlapping_forecasts": "DESCRIPTIVE_ONLY",
     "winner_selection": "only among contenders passing every future gate; lowest nonoverlap Brier then nonoverlap Log Loss",
     "required_due_independent_outcome_completeness": 1,
-    "expected_grid_phase_utc": "2026-10-05T00:00:00Z",
+    "expected_grid_phase_utc": "2026-10-05T12:00:00Z",
     "missing_forecast_or_outcome": "BLOCK_ADMISSION",
     "outcome_completeness_scope": "ALL_DUE_FIXED_PHASE_NONOVERLAP_WINDOWS"
   },

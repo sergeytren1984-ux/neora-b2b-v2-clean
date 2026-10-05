@@ -1,0 +1,82 @@
+name: BTC predictive vNext4R4 15m unified chain
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  id-token: write
+  actions: write
+
+concurrency:
+  group: btc-predictive-vnext4r4-early15m-unified-chain
+  cancel-in-progress: false
+
+jobs:
+  unified-session:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: btc-predictive-vnext4r4-early15m
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Build clean immutable runtime
+        run: |
+          rm -rf /tmp/vnext4r4-runtime
+          mkdir -p /tmp/vnext4r4-runtime
+          git archive 8252b66b64fa524e56193777525e2b744308b4c7 | tar -x -C /tmp/vnext4r4-runtime
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - run: python -m pip install --disable-pip-version-check numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
+      - name: Configure evidence author
+        run: |
+          git config user.name 'btc-predictive-vnext4r4-early15m[bot]'
+          git config user.email 'btc-predictive-vnext4r4-early15m[bot]@users.noreply.github.com'
+      - name: Immutable numerical selftest
+        run: python -I /tmp/vnext4r4-runtime/predictive_vnext4/selftest.py
+      - name: Scheduler preflight
+        env:
+          BTC_VNEXT4R4_HEAD: early15m
+          BTC_VNEXT4R4_PREFLIGHT: '1'
+        run: python -I /tmp/vnext4r4-runtime/predictive_vnext4r4/scheduler.py
+      - name: Pre-start signed registration and freeze
+        env:
+          BTC_VNEXT4R4_HEAD: early15m
+          BTC_VNEXT4R4_ACTION: forecast
+          BTC_VNEXT4R4_SOURCE_SHA: 8252b66b64fa524e56193777525e2b744308b4c7
+          BTC_VNEXT4R4_WORKFLOW_PATH: .github/workflows/btc-predictive-vnext4r4-early15m.yml
+          BTC_VNEXT4R4_EVIDENCE_ROOT: ${{ github.workspace }}
+        run: |
+          python -I - <<'PY'
+          import sys
+          sys.path.insert(0,"/tmp/vnext4r4-runtime")
+          from predictive_vnext4r4.worker import START,utcnow,main
+          if utcnow() < START:
+              main()
+              print("PRESTART_REGISTRATION_VERIFIED")
+          else:
+              print("POSTSTART_SKIP_REGISTRATION_STEP")
+          PY
+      - name: Ensure successor before long session
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -I /tmp/vnext4r4-runtime/predictive_vnext4r4/chain_liveness.py \
+            --repo "$GITHUB_REPOSITORY" \
+            --workflow "btc-predictive-vnext4r4-early15m.yml" \
+            --ref main \
+            --current-run-id "$GITHUB_RUN_ID"
+      - name: Run unified forecast and due-outcome session
+        env:
+          BTC_VNEXT4R4_HEAD: early15m
+          BTC_VNEXT4R4_SOURCE_SHA: 8252b66b64fa524e56193777525e2b744308b4c7
+          BTC_VNEXT4R4_WORKFLOW_PATH: .github/workflows/btc-predictive-vnext4r4-early15m.yml
+          BTC_VNEXT4R4_EVIDENCE_ROOT: ${{ github.workspace }}
+        run: python -I /tmp/vnext4r4-runtime/predictive_vnext4r4/scheduler.py

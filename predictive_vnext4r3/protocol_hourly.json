@@ -94,5 +94,12 @@
     "concurrency": "single workflow concurrency group per head",
     "no_backfill": true,
     "delayed_start_policy": "issue only if still before preregistered slot deadline; otherwise SLOT_MISSED"
+  },
+  "delivery_proof": {
+    "required": true,
+    "mechanism": "signed DELIVERY_CONFIRMED event created only after git push + ls-remote remote branch confirmation",
+    "receipt_rekor_before_forecast_deadline": true,
+    "remote_commit_must_contain_exact_forecast_event": true,
+    "missing_receipt": "BLOCK_GOVERNANCE_AND_ADMISSION"
   }
 }

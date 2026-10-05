@@ -385,13 +385,13 @@ def main():
     if args.head=="hourly":
         events_dir="predictive_vnext4r3_hourly_events"
         fw=".github/workflows/btc-predictive-vnext4r3-hourly.yml"
-        ow=".github/workflows/btc-predictive-vnext4r3-hourly-outcome.yml"
+        ow=".github/workflows/btc-predictive-vnext4r3-hourly.yml"
         protocol_path="predictive_vnext4r3/protocol_hourly.json"
         params=(72,90,30,12)
     else:
         events_dir="predictive_vnext4r3_early15m_events"
         fw=".github/workflows/btc-predictive-vnext4r3-early15m.yml"
-        ow=".github/workflows/btc-predictive-vnext4r3-early15m-outcome.yml"
+        ow=".github/workflows/btc-predictive-vnext4r3-early15m.yml"
         protocol_path="predictive_vnext4r3/protocol_early15m.json"
         params=(4,42,150,12)
     events,rekor=load_chain(repo_root,events_dir,fw,ow)

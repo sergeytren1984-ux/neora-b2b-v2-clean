@@ -25,10 +25,12 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install --disable-pip-version-check numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
       - name: Compile R3 governance and scheduler
-        run: python -I -m py_compile predictive_vnext4r3/worker.py predictive_vnext4r3/scorecard.py predictive_vnext4r3/scheduler.py predictive_vnext4r3/test_scorecard.py predictive_vnext4r3/test_scheduler.py
+        run: python -I -m py_compile predictive_vnext4r3/worker.py predictive_vnext4r3/scorecard.py predictive_vnext4r3/scheduler.py predictive_vnext4r3/test_scorecard.py predictive_vnext4r3/test_scheduler.py predictive_vnext4r3/test_scheduler_stress.py
       - name: Rebuild frozen numerical baseline seed
         run: python -I predictive_vnext4/selftest.py
       - name: Admission regression suite
         run: python -I predictive_vnext4r3/test_scorecard.py -v
       - name: Scheduler regression suite
         run: python -I predictive_vnext4r3/test_scheduler.py -v
+      - name: Scheduler 500-slot stress suite
+        run: python -I predictive_vnext4r3/test_scheduler_stress.py -v

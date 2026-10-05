@@ -20,7 +20,7 @@ def simulate_slots(cadence,deadline,delays):
 
 class StressTests(unittest.TestCase):
     def test_500_15m_slots_with_successor_start_lag(self):
-        delays=[0.8,1.2,2,3,5,8,11,13]*63
+        delays=[0.8,1.2,2,3,5,8,10,11]*63
         delays=delays[:500]
         issued,missed=simulate_slots(CONFIG["early15m"]["cadence"],CONFIG["early15m"]["deadline"],delays)
         self.assertEqual(len(issued),500)
@@ -34,11 +34,25 @@ class StressTests(unittest.TestCase):
         self.assertNotIn(73,issued)
         self.assertIn(74,issued)
 
-    def test_hourly_44m_recovery_still_admissible(self):
-        delays=[1,5,15,25,35,44]*50
+    def test_hourly_42m_recovery_still_admissible(self):
+        delays=[1,5,15,25,35,42]*50
         issued,missed=simulate_slots(CONFIG["hourly"]["cadence"],CONFIG["hourly"]["deadline"],delays)
         self.assertFalse(missed)
         self.assertEqual(len(issued),300)
+
+    def test_15m_13m_restart_delay_is_visible_miss_due_to_delivery_reserve(self):
+        delays=[2]*40
+        delays[11]=13
+        issued,missed=simulate_slots(CONFIG["early15m"]["cadence"],CONFIG["early15m"]["deadline"],delays)
+        self.assertEqual(missed,[11])
+        self.assertNotIn(11,issued)
+
+    def test_hourly_44m_restart_delay_is_visible_miss_due_to_delivery_reserve(self):
+        delays=[2]*40
+        delays[11]=44
+        issued,missed=simulate_slots(CONFIG["hourly"]["cadence"],CONFIG["hourly"]["deadline"],delays)
+        self.assertEqual(missed,[11])
+        self.assertNotIn(11,issued)
 
     def test_hourly_50m_restart_delay_is_visible_miss(self):
         delays=[2,4,50,3]*20

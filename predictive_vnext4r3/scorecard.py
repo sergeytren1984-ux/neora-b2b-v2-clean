@@ -50,12 +50,24 @@ def bundle_time(bundle):
 def expected_workflow(event_type,fw,ow):
     return ow if event_type in ("OUTCOME_RECORDED","OPERATIONAL_OUTCOME_RECORDED") else fw
 
+def signature_claim_args(event):
+    sha=str(event.get("workflow_commit",""))
+    if len(sha)!=40 or any(ch not in "0123456789abcdef" for ch in sha.lower()):
+        raise ValueError("invalid event workflow_commit")
+    return [
+        "--certificate-github-workflow-sha",sha,
+        "--certificate-github-workflow-repository","sergeytren1984-ux/neora-b2b-v2-clean",
+        "--certificate-github-workflow-ref","refs/heads/main",
+        "--certificate-github-workflow-trigger","workflow_dispatch",
+    ]
+
 def verify_signature(path,event,fw,ow):
     wf=expected_workflow(event.get("type"),fw,ow)
     bundle=path.with_suffix(".sigstore.json")
     subprocess.run([
         "cosign","verify-blob",str(path),"--bundle",str(bundle),
-        "--certificate-identity",identity(wf),"--certificate-oidc-issuer",ISSUER
+        "--certificate-identity",identity(wf),"--certificate-oidc-issuer",ISSUER,
+        *signature_claim_args(event),
     ],check=True,capture_output=True,text=True,timeout=180)
     return bundle_time(bundle)
 

@@ -1,6 +1,11 @@
 name: BTC predictive vNext4R4 successor watchdog
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/btc-predictive-vnext4r4-watchdog.yml
   schedule:
     - cron: '*/5 * * * *'
   workflow_run:

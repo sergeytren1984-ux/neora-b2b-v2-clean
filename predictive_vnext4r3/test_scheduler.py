@@ -1,6 +1,6 @@
 """Regression tests for the R3 unified long-lived scheduler."""
 from __future__ import annotations
-import sys,unittest
+import json,sys,unittest
 from unittest.mock import call,patch
 from pathlib import Path
 from datetime import timedelta
@@ -35,6 +35,26 @@ class SchedulerTests(unittest.TestCase):
         now=START+timedelta(minutes=7)
         self.assertEqual(next_anchor_after(now,CONFIG["early15m"]["cadence"]),START)
 
+
+    def test_frozen_protocol_declares_executable_retry_and_signature_policy(self):
+        for head,cfg in CONFIG.items():
+            proto=json.loads((ROOT/cfg["protocol"]).read_text())
+            retry=proto["scheduler"]["transient_forecast_retry"]
+            self.assertTrue(retry["enabled"])
+            self.assertEqual(retry["delivery_safety_seconds"],120)
+            self.assertTrue(retry["stop_before_deadline_minus_safety"])
+            self.assertEqual(
+                retry["retry_interval_seconds"],
+                int(RETRY_INTERVAL[head].total_seconds()),
+            )
+            recovery=proto["delivery_proof"]["receipt_recovery"]
+            self.assertTrue(recovery["enabled"])
+            self.assertEqual(recovery["cutoff_seconds_before_deadline"],120)
+            self.assertEqual(recovery["late_recovery"],"FORBIDDEN")
+            binding=proto["event_signature_binding"]
+            self.assertTrue(binding["github_workflow_sha_must_equal_event_workflow_commit"])
+            self.assertEqual(binding["github_workflow_ref"],"refs/heads/main")
+            self.assertEqual(binding["github_workflow_trigger"],"workflow_dispatch")
 
     def test_retry_grid_has_multiple_attempts_strictly_before_deadline(self):
         self.assertEqual(DEADLINE_SAFETY,timedelta(minutes=2))

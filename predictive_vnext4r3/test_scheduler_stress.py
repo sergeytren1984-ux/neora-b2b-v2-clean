@@ -6,15 +6,16 @@ from datetime import timedelta
 ROOT=Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path: sys.path.insert(0,str(ROOT))
 
-from predictive_vnext4r3.scheduler import START,ACTIVE_SESSION_RUNTIME,PRESTART_SESSION_RUNTIME
+from predictive_vnext4r3.scheduler import START,ACTIVE_SESSION_RUNTIME,PRESTART_SESSION_RUNTIME,DEADLINE_SAFETY
 from predictive_vnext4r3.worker import CONFIG
 
 def simulate_slots(cadence,deadline,delays):
     issued=[];missed=[]
+    effective_cutoff=deadline-DEADLINE_SAFETY
     for i,d in enumerate(delays):
         anchor=START+i*cadence
         arrival=anchor+timedelta(minutes=d)
-        (issued if arrival<anchor+deadline else missed).append(i)
+        (issued if arrival<anchor+effective_cutoff else missed).append(i)
     return issued,missed
 
 class StressTests(unittest.TestCase):

@@ -138,8 +138,53 @@ def publish(cfg,obj,deadline=None,attachments=()):
         cmd("git","add",rel)
     cmd("git","commit","-m",f"BTC predictive vNext4R3 {cfg['interval']} evidence #{n}: {e['type']}")
     cmd("git","push","origin","HEAD:"+cfg["branch"])
-    if cmd("git","ls-remote","origin","refs/heads/"+cfg["branch"]).split()[0]!=cmd("git","rev-parse","HEAD"):
+    remote_sha=cmd("git","ls-remote","origin","refs/heads/"+cfg["branch"]).split()[0]
+    local_sha=cmd("git","rev-parse","HEAD")
+    if remote_sha!=local_sha:
         raise RuntimeError("remote publication unconfirmed")
+
+    # For forecasts, create a second signed receipt only after the first commit
+    # is already visible on the remote branch. Rekor integration of this receipt
+    # before the slot deadline is cryptographic evidence that remote delivery
+    # occurred before the deadline; local timestamps alone are not trusted.
+    if deadline and e.get("type")=="FORECAST_ISSUED":
+        confirmed_at=utcnow()
+        if confirmed_at>=deadline:
+            raise TimeoutError("remote forecast confirmation occurred after deadline")
+        prior2=prior_events(cfg)
+        if not prior2 or prior2[-1][0].get("sequence")!=n:
+            raise RuntimeError("forecast not at ledger tip before delivery receipt")
+        dn=n+1
+        de={
+            "schema":"btc-predictive-vnext4r3-event-v1",
+            "sequence":dn,
+            "previous_hash":digest(canonical(e)),
+            "workflow_commit":os.environ["GITHUB_SHA"],
+            "published_at_utc":confirmed_at.isoformat(),
+            "type":"DELIVERY_CONFIRMED",
+            "idempotency_key":"delivery:"+obj["idempotency_key"],
+            "slot":obj.get("slot"),
+            "target_sequence":n,
+            "target_event_hash":digest(canonical(e)),
+            "remote_commit_sha":local_sha,
+            "remote_confirmed_at_utc":confirmed_at.isoformat(),
+            "deadline_utc":deadline.isoformat(),
+            "trading_authority":False,
+        }
+        dp=(EVIDENCE_ROOT/cfg["events"])/f"{dn:08d}.json"
+        db=dp.with_suffix(".sigstore.json")
+        dp.write_bytes(canonical(de))
+        subprocess.run(["cosign","sign-blob","--yes","--bundle",str(db),str(dp)],
+                       check=True,capture_output=True,text=True,timeout=180,cwd=EVIDENCE_ROOT)
+        if bundle_time(db)>=deadline or utcnow()>=deadline:
+            dp.unlink(missing_ok=True);db.unlink(missing_ok=True)
+            raise TimeoutError("delivery receipt not integrated before forecast deadline")
+        verify_signature(dp,db,cfg,de["type"])
+        cmd("git","add",str(dp.relative_to(EVIDENCE_ROOT)),str(db.relative_to(EVIDENCE_ROOT)))
+        cmd("git","commit","-m",f"BTC predictive vNext4R3 {cfg['interval']} delivery receipt #{dn}")
+        cmd("git","push","origin","HEAD:"+cfg["branch"])
+        if cmd("git","ls-remote","origin","refs/heads/"+cfg["branch"]).split()[0]!=cmd("git","rev-parse","HEAD"):
+            raise RuntimeError("delivery receipt remote publication unconfirmed")
 
 def static_paths(cfg):
     return [

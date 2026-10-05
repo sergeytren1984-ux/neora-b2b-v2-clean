@@ -144,7 +144,7 @@ def publish(cfg,obj,deadline=None,attachments=()):
 def static_paths(cfg):
     return [
         "predictive_vnext4r3/worker.py","predictive_vnext4r3/scorecard.py",
-        "predictive_vnext4r3/test_scorecard.py","predictive_vnext4r3/scheduler.py","predictive_vnext4r3/test_scheduler.py",cfg["protocol"],
+        "predictive_vnext4r3/test_scorecard.py","predictive_vnext4r3/scheduler.py","predictive_vnext4r3/test_scheduler.py","predictive_vnext4r3/test_scheduler_stress.py",cfg["protocol"],
         "predictive_vnext4/live_features.py","predictive_vnext4/predict.py",
         "predictive_vnext4/core.py","predictive_vnext4/selftest.py",
         "predictive_vnext4/freeze_metadata.json",cfg["artifact"],cfg["seed_source"],

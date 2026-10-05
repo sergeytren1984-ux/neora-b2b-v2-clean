@@ -1,0 +1,41 @@
+name: BTC predictive vNext4R3 bootstrap
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/btc-predictive-vnext4r3-bootstrap.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Dispatch four self-chained workers
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          dispatch() {
+            wf="$1"
+            for n in 1 2 3 4 5; do
+              code=$(curl -sS -o /tmp/dispatch.out -w '%{http_code}' -X POST                 -H "Authorization: Bearer $GH_TOKEN"                 -H "Accept: application/vnd.github+json"                 "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/workflows/$wf/dispatches"                 -d '{"ref":"main"}' || true)
+              if [ "$code" = "204" ]; then
+                echo "BOOTSTRAP_DISPATCH_OK workflow=$wf attempt=$n"
+                return 0
+              fi
+              cat /tmp/dispatch.out || true
+              sleep $((n*2))
+            done
+            return 1
+          }
+          dispatch btc-predictive-vnext4r3-hourly.yml
+          dispatch btc-predictive-vnext4r3-early15m.yml
+          sleep 20
+          dispatch btc-predictive-vnext4r3-hourly-outcome.yml
+          dispatch btc-predictive-vnext4r3-early15m-outcome.yml

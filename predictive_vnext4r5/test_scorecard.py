@@ -3,13 +3,14 @@ from __future__ import annotations
 
 import unittest
 import sys
+from unittest.mock import patch
 from pathlib import Path
 from datetime import datetime,timedelta,timezone
 
 ROOT=Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path: sys.path.insert(0,str(ROOT))
 
-from predictive_vnext4r5.scorecard import score,signature_claim_args
+from predictive_vnext4r5.scorecard import (score,signature_claim_args,canonical,digest,duplicate_slot_rejections,schedule_registration_rejections)
 
 UTC=timezone.utc
 START=datetime(2026,10,5,15,0,tzinfo=UTC)
@@ -139,6 +140,76 @@ class AdmissionRegressionTests(unittest.TestCase):
         result=score(events,"early15m",4,42,150,12,as_of_utc=as_of)
         self.assertEqual(result["outcome_completeness"]["missing_forecast_count"],1)
         self.assertFalse(result["admission_ready"])
+
+
+    def test_historical_cutoff_can_never_claim_current_admission(self):
+        # Reproduce the independent expert's attack: 420 forecasts exist,
+        # outcomes exist only through the first 360 due fixed-phase windows.
+        # The old 360-window cutoff is statistically admissible, but it must be
+        # diagnostic-only once supplied manually.
+        events=[]
+        total=420
+        closed=360
+        for i in range(total):
+            a=START+timedelta(hours=4*i)
+            include=i<closed
+            add_pair(events,a,4,2,[.01,.01,.97,.01],[.25,.25,.25,.25],i%3,include)
+        old_cutoff=START+timedelta(hours=4*closed)
+        historical=score(events,"early15m",4,42,150,12,as_of_utc=old_cutoff)
+        self.assertEqual(historical["evaluation_mode"],"HISTORICAL_DIAGNOSTIC")
+        self.assertTrue(historical["historical_candidate_ready"])
+        self.assertFalse(historical["admission_ready"])
+        self.assertIsNone(historical["prospective_winner"])
+        self.assertIn(historical["historical_counterfactual_winner"],MODELS)
+
+        current_cutoff=START+timedelta(hours=4*total)
+        with patch("predictive_vnext4r5.scorecard.utcnow",return_value=current_cutoff):
+            current=score(events,"early15m",4,42,150,12)
+        self.assertEqual(current["evaluation_mode"],"CURRENT_TRUSTED_CLOCK")
+        self.assertEqual(current["outcome_completeness"]["missing_outcome_count"],total-closed)
+        self.assertFalse(current["admission_ready"])
+
+    def test_duplicate_forecast_same_slot_is_never_silently_overwritten(self):
+        events=[]
+        a=START
+        add_pair(events,a,4,2,[.01,.01,.97,.01],[.25,.25,.25,.25],0,True)
+        duplicate=dict(events[0])
+        duplicate["idempotency_key"]="different-key"
+        events.append(duplicate)
+        result=score(events,"early15m",4,42,150,12,as_of_utc=START+timedelta(hours=4))
+        self.assertEqual(result["status"],"INVALID_DUPLICATE_SLOT_EVENTS")
+        self.assertEqual(result["duplicate_forecast_slots"],[START.strftime("%Y%m%dT%H%M%SZ")])
+        self.assertFalse(result["admission_ready"])
+        rejected=duplicate_slot_rejections(events)
+        self.assertTrue(any(x["reason"]=="duplicate_event_type_slot" for x in rejected))
+
+    def test_schedule_registration_semantics_are_strict(self):
+        protocol={
+            "head":"early15m_pm1pct_4h",
+            "start_utc":START.isoformat(),
+            "issuance_deadline_minutes":14,
+            "admission":{"expected_grid_phase_utc":START.isoformat()},
+        }
+        protocol_bytes=b"frozen protocol bytes\n"
+        source="1"*40
+        schedule={
+            "type":"SCHEDULE_REGISTERED","sequence":1,
+            "idempotency_key":"early15m:schedule",
+            "source_commit_sha":source,
+            "start_utc":START.isoformat(),
+            "deadline_minutes":14,
+            "protocol_sha256":digest(protocol_bytes),
+            "trading_authority":False,
+        }
+        freeze={"type":"CONFIG_FROZEN_PRESTART","sequence":2}
+        rekor={1:START-timedelta(minutes=10)}
+        self.assertEqual(
+            schedule_registration_rejections([schedule,freeze],rekor,source,protocol,protocol_bytes,freeze),
+            []
+        )
+        bad=dict(schedule);bad["source_commit_sha"]="2"*40
+        rejected=schedule_registration_rejections([bad,freeze],rekor,source,protocol,protocol_bytes,freeze)
+        self.assertTrue(any(x["reason"]=="schedule_source_commit_mismatch" for x in rejected))
 
     def test_no_due_grid_cannot_admit(self):
         result=score([],"early15m",4,42,150,12,

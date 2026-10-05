@@ -70,16 +70,17 @@
   "no_backfill": true,
   "raw_required": true,
   "sigstore_rekor_required": true,
-  "split_forecast_outcome_workers": true,
+  "split_forecast_outcome_workers": false,
   "trading_authority": false,
   "supersedes": "vNext4R2 non-admissible after primary GitHub cron missed required slots and first due outcome was not recorded",
   "audit_remediation": "vNext4R3 replaces GitHub cron as primary clock with explicit self-chaining workflow_dispatch scheduler; immutable numerical artifacts unchanged",
   "scheduler": {
-    "primary_clock": "self_chained_workflow_dispatch",
-    "github_cron_role": "watchdog_only_not_primary",
-    "run_model": "one admissible slot per chain cycle after immutable scheduler wait",
-    "dispatch_authority": "GITHUB_TOKEN workflow_dispatch",
-    "dispatch_retries": 5,
+    "primary_clock": "long_lived_self_chained_workflow_dispatch",
+    "github_cron_role": "not_used",
+    "writer_model": "one unified writer workflow per head handles forecast and due outcomes",
+    "successor_policy": "successor queued after preflight and before current 4h session",
+    "session_hours": 4,
+    "concurrency": "single workflow concurrency group per head",
     "no_backfill": true,
     "delayed_start_policy": "issue only if still before preregistered slot deadline; otherwise SLOT_MISSED"
   }

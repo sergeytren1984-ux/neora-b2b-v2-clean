@@ -1,0 +1,42 @@
+name: BTC predictive vNext4R5 source regression
+
+on:
+  push:
+    branches:
+      - btc-predictive-vnext4r5-source-20261005
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+      - name: Install pinned numerical dependencies
+        run: python -m pip install --disable-pip-version-check numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
+      - name: Compile R5 runtime
+        run: python -I -m py_compile predictive_vnext4r5/worker.py predictive_vnext4r5/scheduler.py predictive_vnext4r5/scorecard.py predictive_vnext4r5/chain_liveness.py
+      - name: Immutable numerical selftest
+        run: python -I predictive_vnext4/selftest.py
+      - name: Verify numerical artifacts unchanged from R4
+        run: |
+          test "$(sha256sum predictive_vnext4/early15m_contenders.joblib | awk '{print $1}')" = "29f564935fa443b972e9eaa3bafc2d5c42c298621fab221b145e5e964c7712a8"
+          test "$(sha256sum predictive_vnext4/hourly_contenders.joblib | awk '{print $1}')" = "6959d3dcc856d2391544957e72e7a8c5edf874df7e387cc2fe8aaf3c72e661b2"
+          test "$(sha256sum predictive_vnext4/baseline_seed_early15m_source.json.gz | awk '{print $1}')" = "ec45205beceaa7d5b6971060e3d76525fc774ac6fb9e52f512e9a911fe2081d4"
+          test "$(sha256sum predictive_vnext4/baseline_seed_hourly_source.json.gz | awk '{print $1}')" = "e6dba53ba2a5c4abe36ecb0485d76080faf298ab58d13926450ef05c3ac86c29"
+      - name: Scorecard expert-finding regressions
+        run: python -I predictive_vnext4r5/test_scorecard.py -v
+      - name: Scheduler receipt and signature regression
+        run: python -I predictive_vnext4r5/test_scheduler.py -v
+      - name: Scheduler stress regression
+        run: python -I predictive_vnext4r5/test_scheduler_stress.py -v
+      - name: Successor liveness regression
+        run: python -I predictive_vnext4r5/test_chain_liveness.py -v

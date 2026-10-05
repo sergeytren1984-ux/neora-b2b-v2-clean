@@ -37,6 +37,7 @@ class SchedulerTests(unittest.TestCase):
 
 
     def test_retry_grid_has_multiple_attempts_strictly_before_deadline(self):
+        self.assertEqual(DEADLINE_SAFETY,timedelta(minutes=2))
         for head,cfg in CONFIG.items():
             targets=forecast_attempt_targets(head,START)
             self.assertGreaterEqual(len(targets),2)

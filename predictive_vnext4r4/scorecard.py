@@ -16,7 +16,7 @@ import numpy as np
 
 UTC=timezone.utc
 ROOT=Path(__file__).resolve().parents[1]
-START=datetime(2026,10,5,12,0,tzinfo=UTC)
+START=datetime(2026,10,5,13,0,tzinfo=UTC)
 ISSUER="https://token.actions.githubusercontent.com"
 CLASSES=("LOWER_FIRST","UPPER_FIRST","NEITHER","AMBIGUOUS_SAME_BAR")
 CLASS_TO_ID={x:i for i,x in enumerate(CLASSES)}

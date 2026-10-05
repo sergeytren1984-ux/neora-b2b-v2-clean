@@ -79,7 +79,7 @@ class SchedulerTests(unittest.TestCase):
     def test_delivery_receipt_cannot_be_recovered_inside_safety_margin(self,_mock_prior,mock_now):
         cfg=CONFIG["early15m"]
         deadline=START+cfg["deadline"]
-        mock_now.return_value=deadline-timedelta(minutes=1)
+        mock_now.return_value=deadline-timedelta(seconds=30)
         slot=slot_text(START)
         event={"type":"FORECAST_ISSUED","sequence":3,"slot":slot,
                "idempotency_key":"forecast:"+slot}

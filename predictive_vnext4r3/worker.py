@@ -30,7 +30,7 @@ EVIDENCE_ROOT=Path(os.environ.get("BTC_VNEXT4R3_EVIDENCE_ROOT",str(CODE_ROOT))).
 if str(CODE_ROOT) not in sys.path:
     sys.path.insert(0,str(CODE_ROOT))
 
-START=datetime(2026,10,5,10,0,tzinfo=UTC)
+START=datetime(2026,10,5,12,0,tzinfo=UTC)
 ISSUER="https://token.actions.githubusercontent.com"
 CLASS_TO_ID={"LOWER_FIRST":0,"UPPER_FIRST":1,"NEITHER":2,"AMBIGUOUS_SAME_BAR":3}
 

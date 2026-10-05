@@ -31,7 +31,7 @@ if str(CODE_ROOT) not in sys.path:
     sys.path.insert(0,str(CODE_ROOT))
 
 START=datetime(2026,10,5,12,0,tzinfo=UTC)
-DELIVERY_SAFETY=timedelta(seconds=45)
+DELIVERY_SAFETY=timedelta(minutes=2)
 ISSUER="https://token.actions.githubusercontent.com"
 CLASS_TO_ID={"LOWER_FIRST":0,"UPPER_FIRST":1,"NEITHER":2,"AMBIGUOUS_SAME_BAR":3}
 

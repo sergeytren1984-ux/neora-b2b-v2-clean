@@ -23,7 +23,8 @@ from predictive_vnext4r3.worker import CONFIG,START,slot_floor,slot_text,utcnow,
 
 UTC=timezone.utc
 FORECAST_DATA_DELAY={"early15m":timedelta(seconds=75),"hourly":timedelta(seconds=90)}
-SESSION_SLOTS={"early15m":16,"hourly":4}
+ACTIVE_SESSION_RUNTIME=timedelta(hours=4)
+PRESTART_SESSION_RUNTIME=timedelta(hours=5)
 MAX_SLEEP_CHUNK=30.0
 
 
@@ -67,6 +68,10 @@ def session(head):
         raise ValueError("invalid head")
     cfg=CONFIG[head]
 
+    started=utcnow()
+    runtime=PRESTART_SESSION_RUNTIME if started<START else ACTIVE_SESSION_RUNTIME
+    session_deadline=started+runtime
+
     # Pre-start registration/freeze, or immediate recovery attempt if restarted
     # during an already-open slot.
     invoke(head,"forecast")
@@ -85,11 +90,17 @@ def session(head):
         invoke(head,"outcome")
         anchor=anchor+cfg["cadence"]
 
-    for _ in range(SESSION_SLOTS[head]):
+    completed=0
+    while True:
+        target=anchor+FORECAST_DATA_DELAY[head]
+        if target>=session_deadline:
+            sleep_until(session_deadline)
+            break
         run_slot(head,anchor)
+        completed+=1
         anchor=anchor+cfg["cadence"]
 
-    print(f"R3_SESSION_COMPLETE head={head} next_anchor={anchor.isoformat()} at={utcnow().isoformat()}",flush=True)
+    print(f"R3_SESSION_COMPLETE head={head} slots={completed} next_anchor={anchor.isoformat()} at={utcnow().isoformat()}",flush=True)
 
 
 def preflight():
@@ -98,8 +109,9 @@ def preflight():
         raise ValueError("invalid head")
     cfg=CONFIG[head]
     assert cfg["forecast_workflow"]==cfg["outcome_workflow"],"unified writer invariant"
-    assert SESSION_SLOTS[head]>=4
-    print(f"R3_PREFLIGHT_OK head={head} start={START.isoformat()} slots={SESSION_SLOTS[head]}",flush=True)
+    assert ACTIVE_SESSION_RUNTIME==timedelta(hours=4)
+    assert PRESTART_SESSION_RUNTIME<timedelta(hours=5,minutes=30)
+    print(f"R3_PREFLIGHT_OK head={head} start={START.isoformat()} active_runtime={ACTIVE_SESSION_RUNTIME}",flush=True)
 
 
 def main():

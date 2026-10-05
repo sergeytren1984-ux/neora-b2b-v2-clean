@@ -132,6 +132,49 @@ def verify_governance(repo_root,events,rekor,fw,ow,protocol_path):
                     rejected.append({"sequence":seq,"reason":"raw_file_missing","path":raw_path})
                 elif digest(rp.read_bytes())!=raw_sha:
                     rejected.append({"sequence":seq,"reason":"raw_hash_mismatch","path":raw_path})
+    # Every forecast must have exactly one signed DELIVERY_CONFIRMED receipt.
+    # The receipt is created only after git push + ls-remote saw the forecast
+    # commit on the remote evidence branch. Its Rekor integration must itself
+    # occur before the frozen issuance deadline.
+    receipts={}
+    for e in events:
+        if e.get("type")=="DELIVERY_CONFIRMED":
+            receipts.setdefault(int(e.get("target_sequence",-1)),[]).append(e)
+    forecast_count=0
+    receipt_count=0
+    for f in events:
+        if f.get("type")!="FORECAST_ISSUED":
+            continue
+        forecast_count+=1
+        seq=int(f["sequence"])
+        rs=receipts.get(seq,[])
+        if len(rs)!=1:
+            rejected.append({"sequence":seq,"reason":"forecast_delivery_receipt_count","count":len(rs)})
+            continue
+        r=rs[0];receipt_count+=1
+        rseq=int(r["sequence"])
+        deadline=parse(f["anchor_utc"])+timedelta(minutes=deadline_minutes)
+        if r.get("slot")!=f.get("slot") or r.get("target_event_hash")!=digest(canonical(f)):
+            rejected.append({"sequence":rseq,"reason":"delivery_receipt_target_mismatch"})
+        rit=rekor.get(rseq)
+        if rit is None or rit>=deadline:
+            rejected.append({"sequence":rseq,"reason":"delivery_receipt_rekor_not_before_deadline",
+                             "deadline":deadline.isoformat(),
+                             "integrated":None if rit is None else rit.isoformat()})
+        try:
+            remote_commit=r["remote_commit_sha"]
+            # The referenced remote commit must contain the exact forecast event
+            # at the ledger sequence path. Search the commit tree because the
+            # event directory differs between heads.
+            paths=subprocess.run(
+                ["git","-C",str(repo_root),"ls-tree","-r","--name-only",remote_commit],
+                check=True,capture_output=True,text=True,timeout=180
+            ).stdout.splitlines()
+            candidates=[p for p in paths if p.endswith(f"/{seq:08d}.json") and "predictive_vnext4r3_" in p and "_events/" in p]
+            if len(candidates)!=1 or git_blob(repo_root,remote_commit,candidates[0])!=canonical(f):
+                rejected.append({"sequence":rseq,"reason":"delivery_remote_commit_does_not_contain_forecast"})
+        except Exception:
+            rejected.append({"sequence":rseq,"reason":"delivery_remote_commit_unverifiable"})
     return {
         "ok":not rejected,"rejected":rejected,
         "manifest_sha256":freeze.get("manifest_sha256"),
@@ -139,6 +182,8 @@ def verify_governance(repo_root,events,rekor,fw,ow,protocol_path):
         "freeze_rekor_integrated_utc":integrated.isoformat(),
         "cosign_rekor_verified_events":len(events),
         "raw_integrity_and_due_time_checked":True,
+        "forecast_delivery_receipts_checked":forecast_count,
+        "valid_delivery_receipt_count":receipt_count,
     }
 
 def dist(x):

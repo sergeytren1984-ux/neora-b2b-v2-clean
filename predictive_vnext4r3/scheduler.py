@@ -26,6 +26,8 @@ FORECAST_DATA_DELAY={"early15m":timedelta(seconds=75),"hourly":timedelta(seconds
 ACTIVE_SESSION_RUNTIME=timedelta(hours=4)
 PRESTART_SESSION_RUNTIME=timedelta(hours=5)
 MAX_SLEEP_CHUNK=30.0
+DEADLINE_SAFETY=timedelta(minutes=2)
+RETRY_INTERVAL={"early15m":timedelta(seconds=45),"hourly":timedelta(minutes=2)}
 
 
 def sleep_until(target):
@@ -49,18 +51,53 @@ def next_anchor_after(now,cadence):
 def invoke(head,action):
     os.environ["BTC_VNEXT4R3_HEAD"]=head
     os.environ["BTC_VNEXT4R3_ACTION"]=action
-    worker_main()
+    return worker_main()
 
 
-def run_slot(head,anchor):
+def forecast_attempt_targets(head,anchor):
+    """Deterministic retry grid strictly inside the frozen issuance deadline."""
     cfg=CONFIG[head]
-    target=anchor+FORECAST_DATA_DELAY[head]
-    sleep_until(target)
-    print(f"R3_SLOT_WAKE head={head} anchor={anchor.isoformat()} at={utcnow().isoformat()}",flush=True)
-    invoke(head,"forecast")
-    # Outcomes are resolved immediately after each forecast attempt. The worker
-    # independently enforces due-only semantics.
-    invoke(head,"outcome")
+    first=anchor+FORECAST_DATA_DELAY[head]
+    cutoff=anchor+cfg["deadline"]-DEADLINE_SAFETY
+    step=RETRY_INTERVAL[head]
+    out=[];target=first
+    while target<cutoff:
+        out.append(target)
+        target+=step
+    return out
+
+
+def run_slot(head,anchor,session_deadline=None):
+    cfg=CONFIG[head]
+    cutoff=anchor+cfg["deadline"]-DEADLINE_SAFETY
+    for attempt,target in enumerate(forecast_attempt_targets(head,anchor),1):
+        if session_deadline is not None and target>=session_deadline:
+            break
+        sleep_until(target)
+        if utcnow()>=cutoff:
+            break
+        print(
+            f"R3_SLOT_WAKE head={head} anchor={anchor.isoformat()} "
+            f"attempt={attempt} at={utcnow().isoformat()}",
+            flush=True,
+        )
+        issued=bool(invoke(head,"forecast"))
+        # Outcomes remain due-only and idempotent; calling them after an
+        # unsuccessful forecast attempt cannot create a future outcome.
+        invoke(head,"outcome")
+        if issued:
+            print(
+                f"R3_SLOT_FORECAST_CONFIRMED head={head} anchor={anchor.isoformat()} "
+                f"attempt={attempt} at={utcnow().isoformat()}",
+                flush=True,
+            )
+            return True
+    print(
+        f"R3_SLOT_NO_CONFIRMED_FORECAST head={head} anchor={anchor.isoformat()} "
+        f"at={utcnow().isoformat()}",
+        flush=True,
+    )
+    return False
 
 
 def session(head):
@@ -86,8 +123,7 @@ def session(head):
     # missed when appropriate.
     if now>=anchor+FORECAST_DATA_DELAY[head]:
         print(f"R3_RECOVERY_ATTEMPT head={head} anchor={anchor.isoformat()} at={now.isoformat()}",flush=True)
-        invoke(head,"forecast")
-        invoke(head,"outcome")
+        run_slot(head,anchor,session_deadline=session_deadline)
         anchor=anchor+cfg["cadence"]
 
     completed=0
@@ -96,7 +132,7 @@ def session(head):
         if target>=session_deadline:
             sleep_until(session_deadline)
             break
-        run_slot(head,anchor)
+        run_slot(head,anchor,session_deadline=session_deadline)
         completed+=1
         anchor=anchor+cfg["cadence"]
 

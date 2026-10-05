@@ -45,7 +45,7 @@ CONFIG={
         "cadence":timedelta(hours=1),"deadline":timedelta(minutes=45),
         "interval":"1h","duration_ms":3600000,"min_history":170,
         "forecast_workflow":".github/workflows/btc-predictive-vnext4r3-hourly.yml",
-        "outcome_workflow":".github/workflows/btc-predictive-vnext4r3-hourly-outcome.yml",
+        "outcome_workflow":".github/workflows/btc-predictive-vnext4r3-hourly.yml",
     },
     "early15m":{
         "branch":"btc-predictive-vnext4r3-early15m",
@@ -57,7 +57,7 @@ CONFIG={
         "cadence":timedelta(minutes=15),"deadline":timedelta(minutes=14),
         "interval":"15m","duration_ms":900000,"min_history":385,
         "forecast_workflow":".github/workflows/btc-predictive-vnext4r3-early15m.yml",
-        "outcome_workflow":".github/workflows/btc-predictive-vnext4r3-early15m-outcome.yml",
+        "outcome_workflow":".github/workflows/btc-predictive-vnext4r3-early15m.yml",
     }
 }
 

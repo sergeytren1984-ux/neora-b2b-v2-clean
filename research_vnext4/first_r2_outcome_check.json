@@ -1,0 +1,15 @@
+{
+  "status": "FACTUAL_RECONSTRUCTION_ONLY_NOT_PROSPECTIVE_REPAIR",
+  "anchor_utc": "2026-10-05T00:45:00+00:00",
+  "due_utc": "2026-10-05T04:45:00+00:00",
+  "lower": 85755.78989999999,
+  "upper": 87488.2301,
+  "candle_count": 16,
+  "first_open": 1791161100000,
+  "last_close_ms": 1791175499999,
+  "period_high": 86999.11,
+  "period_low": 85485.0,
+  "period_last_close": 85619.68,
+  "outcome": "LOWER_FIRST",
+  "first_touch_time_utc": "2026-10-05T04:30:00+00:00"
+}

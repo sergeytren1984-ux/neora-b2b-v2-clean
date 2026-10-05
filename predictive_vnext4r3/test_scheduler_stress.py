@@ -6,7 +6,7 @@ from datetime import timedelta
 ROOT=Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path: sys.path.insert(0,str(ROOT))
 
-from predictive_vnext4r3.scheduler import START,SESSION_SLOTS
+from predictive_vnext4r3.scheduler import START,ACTIVE_SESSION_RUNTIME,PRESTART_SESSION_RUNTIME
 from predictive_vnext4r3.worker import CONFIG
 
 def simulate_slots(cadence,deadline,delays):
@@ -46,8 +46,8 @@ class StressTests(unittest.TestCase):
         self.assertTrue(all(i%4==2 for i in missed))
 
     def test_session_length_below_hosted_runner_limit(self):
-        self.assertEqual(SESSION_SLOTS["early15m"]*CONFIG["early15m"]["cadence"],timedelta(hours=4))
-        self.assertEqual(SESSION_SLOTS["hourly"]*CONFIG["hourly"]["cadence"],timedelta(hours=4))
+        self.assertEqual(ACTIVE_SESSION_RUNTIME,timedelta(hours=4))
+        self.assertLess(PRESTART_SESSION_RUNTIME,timedelta(hours=5,minutes=30))
 
 if __name__=="__main__":
     unittest.main()

@@ -1,0 +1,108 @@
+name: BTC vNext4R5 diagnostic now
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/btc-predictive-vnext4r5-diagnostic-now.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+      - name: Build immutable R5 runtime
+        run: |
+          rm -rf /tmp/r5diag
+          mkdir -p /tmp/r5diag
+          git archive 16c4fd69e6c4e6f58310ecbd597daa80af270f83 | tar -x -C /tmp/r5diag
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
+      - name: Run frozen R5 diagnostic outside prospective ledger
+        run: |
+          cd /tmp/r5diag
+          python -I - <<'PY'
+          import json,math,urllib.parse,urllib.request,sys
+          from datetime import datetime,timezone,timedelta
+          from pathlib import Path
+          sys.path.insert(0,'.')
+          from predictive_vnext4.live_features import hourly_feature,early15m_feature,HOURLY_NAMES,EARLY15M_NAMES
+          from predictive_vnext4.predict import load_artifact,predict_contenders,control_prediction
+
+          UTC=timezone.utc
+          root=Path('.')
+          cfgs={
+            'hourly':{
+              'interval':'1h','duration_ms':3600000,'min_history':170,
+              'artifact':'predictive_vnext4/hourly_contenders.joblib',
+              'protocol':'predictive_vnext4r5/protocol_hourly.json',
+              'cadence':timedelta(hours=1),
+            },
+            'early15m':{
+              'interval':'15m','duration_ms':900000,'min_history':385,
+              'artifact':'predictive_vnext4/early15m_contenders.joblib',
+              'protocol':'predictive_vnext4r5/protocol_early15m.json',
+              'cadence':timedelta(minutes=15),
+            },
+          }
+          def floor(now,cadence):
+            if cadence==timedelta(hours=1):
+              return now.replace(minute=0,second=0,microsecond=0)
+            return now.replace(minute=(now.minute//15)*15,second=0,microsecond=0)
+          def fetch(anchor,cfg):
+            q=urllib.parse.urlencode({'symbol':'BTCUSDT','interval':cfg['interval'],'limit':1000})
+            req=urllib.request.Request('https://data-api.binance.vision/api/v3/klines?'+q,headers={'User-Agent':'r5-diagnostic'})
+            raw=json.loads(urllib.request.urlopen(req,timeout=30).read())
+            closed=[]
+            for x in raw:
+              close=datetime.fromtimestamp((int(x[6])+1)/1000,UTC)
+              if close<=anchor: closed.append(x)
+            if len(closed)<cfg['min_history']: raise ValueError('insufficient history')
+            if datetime.fromtimestamp((int(closed[-1][6])+1)/1000,UTC)!=anchor:
+              raise ValueError('latest closed candle != diagnostic anchor')
+            return raw,closed
+          def arrays(closed):
+            import numpy as np
+            return tuple(np.asarray([float(x[j]) for x in closed]) for j in (2,3,4,5,8,9))
+          out={'schema':'btc-vnext4r5-diagnostic-v1','source_sha':'16c4fd69e6c4e6f58310ecbd597daa80af270f83',
+               'computed_at_utc':datetime.now(UTC).isoformat(),
+               'prospective_ledger_write':False,'trading_authority':False,'heads':{}}
+          for head,cfg in cfgs.items():
+            now=datetime.now(UTC);anchor=floor(now,cfg['cadence'])
+            proto=json.loads((root/cfg['protocol']).read_text())
+            raw,closed=fetch(anchor,cfg);hi,lo,c,v,trades,taker=arrays(closed)
+            art=load_artifact(root/cfg['artifact'],proto['artifact_sha256'])
+            if head=='hourly':
+              x,meta=hourly_feature(hi,lo,c,v,trades,taker)
+              assert art['feature_names']==HOURLY_NAMES
+              distance=meta['reference_price']*meta['rv24']*math.sqrt(72.0)
+              lower=meta['reference_price']-distance;upper=meta['reference_price']+distance
+              vol=meta['rv24']
+            else:
+              x,meta=early15m_feature(hi,lo,c,v,trades,taker)
+              assert art['feature_names']==EARLY15M_NAMES
+              lower=meta['reference_price']*.99;upper=meta['reference_price']*1.01
+              vol=meta['rv4h']
+            out['heads'][head]={
+              'anchor_utc':anchor.isoformat(),
+              'reference_price':meta['reference_price'],
+              'lower_price':float(lower),'upper_price':float(upper),
+              'contenders':predict_contenders(art,x),
+              'control':control_prediction(art,vol,anchor.isoformat(),()),
+              'last_closed_candle_open_utc':datetime.fromtimestamp(int(closed[-1][0])/1000,UTC).isoformat(),
+              'last_closed_candle_close_price':float(closed[-1][4]),
+              'last_closed_candle_volume':float(closed[-1][5]),
+              'last_closed_candle_trades':int(closed[-1][8]),
+              'last_closed_candle_taker_buy_base':float(closed[-1][9]),
+            }
+          print('R5_DIAGNOSTIC_JSON='+json.dumps(out,sort_keys=True,separators=(',',':')))
+          PY

@@ -90,11 +90,23 @@ def bundle_time(path):
 def event_identity(cfg,event_type):
     return identity(cfg["outcome_workflow"] if event_type in ("OUTCOME_RECORDED","OPERATIONAL_OUTCOME_RECORDED") else cfg["forecast_workflow"])
 
-def verify_signature(path,bundle,cfg,event_type):
+def signature_claim_args(event):
+    sha=str(event.get("workflow_commit",""))
+    if len(sha)!=40 or any(ch not in "0123456789abcdef" for ch in sha.lower()):
+        raise ValueError("invalid event workflow_commit")
+    return [
+        "--certificate-github-workflow-sha",sha,
+        "--certificate-github-workflow-repository","sergeytren1984-ux/neora-b2b-v2-clean",
+        "--certificate-github-workflow-ref","refs/heads/main",
+        "--certificate-github-workflow-trigger","workflow_dispatch",
+    ]
+
+def verify_signature(path,bundle,cfg,event):
     subprocess.run([
         "cosign","verify-blob",str(path),"--bundle",str(bundle),
-        "--certificate-identity",event_identity(cfg,event_type),
-        "--certificate-oidc-issuer",ISSUER
+        "--certificate-identity",event_identity(cfg,event.get("type")),
+        "--certificate-oidc-issuer",ISSUER,
+        *signature_claim_args(event),
     ],check=True,capture_output=True,text=True,timeout=180,cwd=EVIDENCE_ROOT)
     return bundle_time(bundle)
 
@@ -104,7 +116,7 @@ def prior_events(cfg):
     out=[];prev=None;keys=set()
     for i,p in enumerate(files,1):
         raw=p.read_bytes();e=json.loads(raw)
-        integrated=verify_signature(p,p.with_suffix(".sigstore.json"),cfg,e.get("type"))
+        integrated=verify_signature(p,p.with_suffix(".sigstore.json"),cfg,e)
         if raw!=canonical(e) or e.get("sequence")!=i or e.get("previous_hash")!=prev:
             raise ValueError("event hash chain broken")
         if e.get("idempotency_key") in keys: raise ValueError("duplicate event key")
@@ -133,7 +145,7 @@ def publish(cfg,obj,deadline=None,attachments=()):
     if deadline and (bundle_time(b)>=deadline or utcnow()>=deadline):
         p.unlink(missing_ok=True);b.unlink(missing_ok=True)
         raise TimeoutError("signed forecast missed deadline")
-    verify_signature(p,b,cfg,e["type"])
+    verify_signature(p,b,cfg,e)
     for x in (p,b,*attachments):
         rel=str(Path(x).resolve().relative_to(EVIDENCE_ROOT))
         cmd("git","add",rel)

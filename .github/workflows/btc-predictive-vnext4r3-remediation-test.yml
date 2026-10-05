@@ -21,10 +21,10 @@ jobs:
       - name: Install pinned numerical dependencies
         run: python -m pip install numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
       - name: Compile remediation runtime
-        run: python -m py_compile predictive_vnext4r3/worker.py predictive_vnext4r3/scheduler.py
+        run: python -I -m py_compile predictive_vnext4r3/worker.py predictive_vnext4r3/scheduler.py predictive_vnext4r3/scorecard.py
       - name: Retry and receipt recovery regression tests
-        run: python -m unittest predictive_vnext4r3.test_scheduler -v
+        run: python -I predictive_vnext4r3/test_scheduler.py -v
       - name: Scheduler stress regression tests
-        run: python -m unittest predictive_vnext4r3.test_scheduler_stress -v
+        run: python -I predictive_vnext4r3/test_scheduler_stress.py -v
       - name: Admission scorecard regression tests
-        run: python -m unittest predictive_vnext4r3.test_scorecard -v
+        run: python -I predictive_vnext4r3/test_scorecard.py -v

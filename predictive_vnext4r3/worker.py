@@ -143,48 +143,83 @@ def publish(cfg,obj,deadline=None,attachments=()):
     if remote_sha!=local_sha:
         raise RuntimeError("remote publication unconfirmed")
 
-    # For forecasts, create a second signed receipt only after the first commit
-    # is already visible on the remote branch. Rekor integration of this receipt
-    # before the slot deadline is cryptographic evidence that remote delivery
-    # occurred before the deadline; local timestamps alone are not trusted.
+    # Forecast publication is a two-stage transaction. If the forecast commit
+    # reached the remote branch but the runner dies before the receipt commit,
+    # a successor must be able to complete the receipt while the deadline is
+    # still open. The receipt remains idempotent and cannot be created late.
     if deadline and e.get("type")=="FORECAST_ISSUED":
-        confirmed_at=utcnow()
-        if confirmed_at>=deadline:
-            raise TimeoutError("remote forecast confirmation occurred after deadline")
-        prior2=prior_events(cfg)
-        if not prior2 or prior2[-1][0].get("sequence")!=n:
-            raise RuntimeError("forecast not at ledger tip before delivery receipt")
-        dn=n+1
-        de={
-            "schema":"btc-predictive-vnext4r3-event-v1",
-            "sequence":dn,
-            "previous_hash":digest(canonical(e)),
-            "workflow_commit":os.environ["GITHUB_SHA"],
-            "published_at_utc":confirmed_at.isoformat(),
-            "type":"DELIVERY_CONFIRMED",
-            "idempotency_key":"delivery:"+obj["idempotency_key"],
-            "slot":obj.get("slot"),
-            "target_sequence":n,
-            "target_event_hash":digest(canonical(e)),
-            "remote_commit_sha":local_sha,
-            "remote_confirmed_at_utc":confirmed_at.isoformat(),
-            "deadline_utc":deadline.isoformat(),
-            "trading_authority":False,
-        }
-        dp=(EVIDENCE_ROOT/cfg["events"])/f"{dn:08d}.json"
-        db=dp.with_suffix(".sigstore.json")
-        dp.write_bytes(canonical(de))
-        subprocess.run(["cosign","sign-blob","--yes","--bundle",str(db),str(dp)],
-                       check=True,capture_output=True,text=True,timeout=180,cwd=EVIDENCE_ROOT)
-        if bundle_time(db)>=deadline or utcnow()>=deadline:
-            dp.unlink(missing_ok=True);db.unlink(missing_ok=True)
-            raise TimeoutError("delivery receipt not integrated before forecast deadline")
-        verify_signature(dp,db,cfg,de["type"])
-        cmd("git","add",str(dp.relative_to(EVIDENCE_ROOT)),str(db.relative_to(EVIDENCE_ROOT)))
-        cmd("git","commit","-m",f"BTC predictive vNext4R3 {cfg['interval']} delivery receipt #{dn}")
-        cmd("git","push","origin","HEAD:"+cfg["branch"])
-        if cmd("git","ls-remote","origin","refs/heads/"+cfg["branch"]).split()[0]!=cmd("git","rev-parse","HEAD"):
-            raise RuntimeError("delivery receipt remote publication unconfirmed")
+        if not ensure_delivery_receipt(cfg,e,deadline):
+            raise TimeoutError("delivery receipt could not be recovered before deadline")
+
+
+def _verify_remote_forecast_commit(cfg,forecast_event,commit):
+    seq=int(forecast_event["sequence"])
+    path=f"{cfg['events']}/{seq:08d}.json"
+    if git_bytes(commit,path)!=canonical(forecast_event):
+        raise RuntimeError("remote commit does not contain exact forecast event")
+    cmd("git","fetch","origin",cfg["branch"])
+    remote_tip=cmd("git","rev-parse","origin/"+cfg["branch"])
+    subprocess.run(
+        ["git","-C",str(EVIDENCE_ROOT),"merge-base","--is-ancestor",commit,remote_tip],
+        check=True,capture_output=True,text=True,timeout=180
+    )
+    return path
+
+
+def forecast_commit_for_event(cfg,forecast_event):
+    remote_clean(cfg)
+    seq=int(forecast_event["sequence"])
+    path=f"{cfg['events']}/{seq:08d}.json"
+    commit=cmd("git","log","-1","--format=%H","--",path)
+    if not commit:
+        raise RuntimeError("forecast commit not found")
+    _verify_remote_forecast_commit(cfg,forecast_event,commit)
+    return commit
+
+
+def ensure_delivery_receipt(cfg,forecast_event,deadline):
+    """Idempotently complete/verify remote delivery evidence before deadline."""
+    prior=prior_events(cfg)
+    key="delivery:"+forecast_event["idempotency_key"]
+    matches=[x for x in prior if x[0].get("idempotency_key")==key]
+    if len(matches)>1:
+        raise RuntimeError("duplicate delivery receipt")
+    if len(matches)==1:
+        receipt,integrated=matches[0]
+        if (receipt.get("target_sequence")!=forecast_event.get("sequence") or
+            receipt.get("target_event_hash")!=digest(canonical(forecast_event)) or
+            receipt.get("slot")!=forecast_event.get("slot")):
+            raise RuntimeError("delivery receipt target mismatch")
+        if integrated>=deadline:
+            raise RuntimeError("delivery receipt Rekor time is late")
+        remote_commit=receipt.get("remote_commit_sha")
+        if not remote_commit:
+            raise RuntimeError("delivery receipt remote commit missing")
+        _verify_remote_forecast_commit(cfg,forecast_event,remote_commit)
+        return True
+
+    # No receipt exists. Recovery is allowed only while the same signed
+    # pre-registered deadline is still safely open.
+    if utcnow()>=deadline-timedelta(minutes=2):
+        return False
+
+    remote_commit=forecast_commit_for_event(cfg,forecast_event)
+    confirmed_at=utcnow()
+    if confirmed_at>=deadline-timedelta(minutes=2):
+        return False
+
+    publish(cfg,{
+        "type":"DELIVERY_CONFIRMED",
+        "idempotency_key":key,
+        "slot":forecast_event.get("slot"),
+        "target_sequence":int(forecast_event["sequence"]),
+        "target_event_hash":digest(canonical(forecast_event)),
+        "remote_commit_sha":remote_commit,
+        "remote_confirmed_at_utc":confirmed_at.isoformat(),
+        "deadline_utc":deadline.isoformat(),
+        "trading_authority":False,
+    },deadline=deadline)
+    return True
 
 def static_paths(cfg):
     return [
@@ -342,9 +377,11 @@ def operational_questions(anchor,reference):
 def forecast(cfg,head):
     events=verify_signed_freeze(cfg,head,"forecast")
     now=utcnow();anchor=slot_floor(now,cfg["cadence"]);deadline=anchor+cfg["deadline"]
-    if anchor<START or now>=deadline:return
+    if anchor<START or now>=deadline:return False
     keys={e["idempotency_key"] for e,_ in events};slot=slot_text(anchor)
-    if "forecast:"+slot in keys:return
+    existing=[e for e,_ in events if e.get("idempotency_key")=="forecast:"+slot]
+    if existing:
+        return ensure_delivery_receipt(cfg,existing[0],deadline)
     proto=json.loads((CODE_ROOT/cfg["protocol"]).read_bytes())
     try:
         from predictive_vnext4.live_features import HOURLY_NAMES,EARLY15M_NAMES,hourly_feature,early15m_feature
@@ -370,7 +407,7 @@ def forecast(cfg,head):
             publish(cfg,{"type":"ABSTAIN_DATA_INVALID","idempotency_key":k,"slot":slot,
                          "reason":type(ex).__name__+": "+str(ex)[:300],
                          "retryable_before_deadline":True},deadline=deadline)
-        return
+        return False
     rawdir=EVIDENCE_ROOT/cfg["raw"];rawdir.mkdir(exist_ok=True)
     p=rawdir/(slot+".json");p.write_bytes(canonical({
         "slot":slot,"anchor_utc":anchor.isoformat(),"retrieved_at_utc":utcnow().isoformat(),
@@ -384,6 +421,7 @@ def forecast(cfg,head):
            "raw_sha256":digest(p.read_bytes()),"trading_authority":False}
     if head=="hourly":event["operational_questions"]=operational_questions(anchor,meta["reference_price"])
     publish(cfg,event,deadline=deadline,attachments=(p,))
+    return True
 
 def mark_missed(cfg,head):
     events=verify_signed_freeze(cfg,head,"forecast")
@@ -478,9 +516,10 @@ def main():
     if head not in CONFIG or action not in ("forecast","outcome"):raise ValueError("invalid head/action")
     cfg=CONFIG[head]
     if action=="forecast":
-        if not initialize(cfg,head):return
-        if utcnow()<START:return
-        mark_missed(cfg,head);forecast(cfg,head)
+        if not initialize(cfg,head):return False
+        if utcnow()<START:return False
+        mark_missed(cfg,head)
+        return forecast(cfg,head)
     else:
         if utcnow()<START:return
         outcomes(cfg,head)

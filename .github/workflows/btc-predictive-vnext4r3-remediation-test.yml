@@ -24,6 +24,8 @@ jobs:
         run: python -I -m py_compile predictive_vnext4r3/worker.py predictive_vnext4r3/scheduler.py predictive_vnext4r3/scorecard.py
       - name: Retry and receipt recovery regression tests
         run: python -I predictive_vnext4r3/test_scheduler.py -v
+      - name: Successor liveness regression tests
+        run: python -I predictive_vnext4r3/test_chain_liveness.py -v
       - name: Scheduler stress regression tests
         run: python -I predictive_vnext4r3/test_scheduler_stress.py -v
       - name: Admission scorecard regression tests

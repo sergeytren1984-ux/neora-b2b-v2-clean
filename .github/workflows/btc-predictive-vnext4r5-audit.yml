@@ -1,0 +1,200 @@
+name: BTC predictive vNext4R5 independent prestart audit
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/btc-predictive-vnext4r5-audit.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  audit:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - head: hourly
+            branch: btc-predictive-vnext4r5-hourly
+            workflow: .github/workflows/btc-predictive-vnext4r5-hourly.yml
+            workflow_file: btc-predictive-vnext4r5-hourly.yml
+            events_dir: predictive_vnext4r5_hourly_events
+            protocol: predictive_vnext4r5/protocol_hourly.json
+            horizon_hours: 72
+          - head: early15m
+            branch: btc-predictive-vnext4r5-early15m
+            workflow: .github/workflows/btc-predictive-vnext4r5-early15m.yml
+            workflow_file: btc-predictive-vnext4r5-early15m.yml
+            events_dir: predictive_vnext4r5_early15m_events
+            protocol: predictive_vnext4r5/protocol_early15m.json
+            horizon_hours: 4
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ matrix.branch }}
+          fetch-depth: 0
+      - name: Fetch all branch refs for ancestry checks
+        run: git fetch origin '+refs/heads/*:refs/remotes/origin/*'
+      - name: Build immutable R5 runtime
+        run: |
+          rm -rf /tmp/vnext4r5-runtime
+          mkdir -p /tmp/vnext4r5-runtime
+          git archive 16c4fd69e6c4e6f58310ecbd597daa80af270f83 | tar -x -C /tmp/vnext4r5-runtime
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - run: python -m pip install --disable-pip-version-check numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
+
+      - name: Verify signed prestart governance on trusted current clock
+        env:
+          BTC_VNEXT4R5_EVIDENCE_ROOT: ${{ github.workspace }}
+        run: |
+          python -I /tmp/vnext4r5-runtime/predictive_vnext4r5/scorecard.py \
+            --head ${{ matrix.head }} --repo-root "$GITHUB_WORKSPACE" > /tmp/r5-score.json
+          cat /tmp/r5-score.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/r5-score.json'))
+          assert x['governance']['ok'] is True, x['governance']
+          assert x['governance']['source_commit_sha']=='16c4fd69e6c4e6f58310ecbd597daa80af270f83'
+          assert x['score']['evaluation_mode']=='CURRENT_TRUSTED_CLOCK'
+          assert x['score']['admission_ready'] is False
+          assert x['score']['status']=='PENDING_NO_DUE_INDEPENDENT_WINDOWS'
+          print('R5_CURRENT_ADMISSION_CLOCK_ACCEPT')
+          PY
+
+      - name: Verify exact signed schedule and freeze
+        env:
+          R5_WORKFLOW_PATH: ${{ matrix.workflow }}
+          R5_EVENTS_DIR: ${{ matrix.events_dir }}
+        run: |
+          set -euo pipefail
+          identity="https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/$R5_WORKFLOW_PATH@refs/heads/main"
+          count=0
+          for p in "$R5_EVENTS_DIR"/????????.json; do
+            [ -f "$p" ] || continue
+            count=$((count+1))
+            b="${p%.json}.sigstore.json"
+            sha=$(python -c 'import json,sys; e=json.load(open(sys.argv[1])); print(e["workflow_commit"])' "$p")
+            cosign verify-blob "$p" \
+              --bundle "$b" \
+              --certificate-identity "$identity" \
+              --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+              --certificate-github-workflow-sha "$sha" \
+              --certificate-github-workflow-repository "sergeytren1984-ux/neora-b2b-v2-clean" \
+              --certificate-github-workflow-ref "refs/heads/main" \
+              --certificate-github-workflow-trigger "workflow_dispatch" >/dev/null
+            echo "R5_SIGNER_SHA_BOUND file=$p workflow_commit=$sha"
+          done
+          test "$count" -eq 2
+
+      - name: Re-run all expert finding and prior attack regressions
+        run: |
+          python -I /tmp/vnext4r5-runtime/predictive_vnext4r5/test_scorecard.py -v
+          python -I /tmp/vnext4r5-runtime/predictive_vnext4r5/test_scheduler.py -v
+          python -I /tmp/vnext4r5-runtime/predictive_vnext4r5/test_scheduler_stress.py -v
+          python -I /tmp/vnext4r5-runtime/predictive_vnext4r5/test_chain_liveness.py -v
+
+      - name: Attack remote commit ancestry with exact forecast bytes
+        env:
+          R5_HEAD: ${{ matrix.head }}
+          R5_WORKFLOW_PATH: ${{ matrix.workflow }}
+          R5_EVENTS_DIR: ${{ matrix.events_dir }}
+          R5_PROTOCOL: ${{ matrix.protocol }}
+          R5_HORIZON_HOURS: ${{ matrix.horizon_hours }}
+        run: |
+          python -I - <<'PY'
+          import json,os,subprocess,sys,tempfile
+          from datetime import timedelta
+          from pathlib import Path
+          sys.path.insert(0,'/tmp/vnext4r5-runtime')
+          from predictive_vnext4r5.scorecard import (
+              START,canonical,digest,load_chain,verify_governance
+          )
+          root=Path(os.environ['GITHUB_WORKSPACE'])
+          events_dir=os.environ['R5_EVENTS_DIR']
+          wf=os.environ['R5_WORKFLOW_PATH']
+          protocol_path=os.environ['R5_PROTOCOL']
+          horizon=int(os.environ['R5_HORIZON_HOURS'])
+          events,rekor=load_chain(root,events_dir,wf,wf)
+          assert len(events)==2
+          proto=json.loads((root/protocol_path).read_bytes())
+          deadline=timedelta(minutes=int(proto['issuance_deadline_minutes']))
+          workflow_commit=events[-1]['workflow_commit']
+          slot=START.strftime('%Y%m%dT%H%M%SZ')
+          raw=(root/protocol_path).read_bytes()
+          forecast={
+              'schema':'btc-predictive-vnext4r5-event-v1',
+              'sequence':3,
+              'previous_hash':digest(canonical(events[-1])),
+              'workflow_commit':workflow_commit,
+              'published_at_utc':(START+timedelta(seconds=30)).isoformat(),
+              'type':'FORECAST_ISSUED','idempotency_key':'forecast:'+slot,
+              'slot':slot,'head':os.environ['R5_HEAD'],
+              'anchor_utc':START.isoformat(),'due_utc':(START+timedelta(hours=horizon)).isoformat(),
+              'reference_price':1.0,'lower_price':0.9,'upper_price':1.1,
+              'raw_path':protocol_path,'raw_sha256':digest(raw),'trading_authority':False,
+          }
+          side=Path(tempfile.mkdtemp(prefix='r5-side-'))
+          subprocess.run(['git','-C',str(root),'worktree','add','--detach',str(side),'16c4fd69e6c4e6f58310ecbd597daa80af270f83'],check=True,capture_output=True)
+          try:
+              subprocess.run(['git','-C',str(side),'config','user.name','r5-audit'],check=True)
+              subprocess.run(['git','-C',str(side),'config','user.email','r5-audit@example.invalid'],check=True)
+              p=side/events_dir/'00000003.json';p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(canonical(forecast))
+              subprocess.run(['git','-C',str(side),'add',str(p.relative_to(side))],check=True)
+              subprocess.run(['git','-C',str(side),'commit','-m','synthetic non-ancestor forecast'],check=True,capture_output=True)
+              side_commit=subprocess.run(['git','-C',str(side),'rev-parse','HEAD'],check=True,capture_output=True,text=True).stdout.strip()
+              receipt={
+                  'schema':'btc-predictive-vnext4r5-event-v1',
+                  'sequence':4,'previous_hash':digest(canonical(forecast)),
+                  'workflow_commit':workflow_commit,
+                  'published_at_utc':(START+timedelta(minutes=2)).isoformat(),
+                  'type':'DELIVERY_CONFIRMED','idempotency_key':'delivery:forecast:'+slot,
+                  'slot':slot,'target_sequence':3,'target_event_hash':digest(canonical(forecast)),
+                  'remote_commit_sha':side_commit,
+                  'remote_confirmed_at_utc':(START+timedelta(minutes=2)).isoformat(),
+                  'deadline_utc':(START+deadline).isoformat(),'trading_authority':False,
+              }
+              r=dict(rekor);r[3]=START+timedelta(minutes=1);r[4]=START+timedelta(minutes=2)
+              g=verify_governance(root,events+[forecast,receipt],r,wf,wf,protocol_path,events_dir=events_dir)
+              assert g['ok'] is False,g
+              assert any(x.get('reason')=='delivery_remote_commit_not_ancestor_of_evidence_tip' for x in g['rejected']),g
+              print('R5_NON_ANCESTOR_EXACT_FORECAST_REJECTED',side_commit)
+          finally:
+              subprocess.run(['git','-C',str(root),'worktree','remove','--force',str(side)],check=False)
+          PY
+
+      - name: Verify live successor state
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          R5_WORKFLOW_FILE: ${{ matrix.workflow_file }}
+        run: |
+          python - <<'PY'
+          import json,os,urllib.request
+          url=f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/actions/workflows/{os.environ['R5_WORKFLOW_FILE']}/runs?per_page=20"
+          req=urllib.request.Request(url,headers={
+              'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+              'Accept':'application/vnd.github+json',
+              'X-GitHub-Api-Version':'2022-11-28',
+          })
+          runs=json.load(urllib.request.urlopen(req))['workflow_runs']
+          live=[r for r in runs if r['status'] in ('in_progress','queued','pending','waiting','requested')]
+          assert any(r['status']=='in_progress' for r in live),[(r['id'],r['status']) for r in live]
+          assert any(r['status'] in ('queued','pending','waiting','requested') for r in live),[(r['id'],r['status']) for r in live]
+          print('R5_RUNNING_PLUS_SUCCESSOR_ACCEPT',[(r['id'],r['status']) for r in live])
+          PY
+
+      - name: Verify numerical hashes unchanged
+        run: |
+          test "$(sha256sum /tmp/vnext4r5-runtime/predictive_vnext4/early15m_contenders.joblib | awk '{print $1}')" = "29f564935fa443b972e9eaa3bafc2d5c42c298621fab221b145e5e964c7712a8"
+          test "$(sha256sum /tmp/vnext4r5-runtime/predictive_vnext4/hourly_contenders.joblib | awk '{print $1}')" = "6959d3dcc856d2391544957e72e7a8c5edf874df7e387cc2fe8aaf3c72e661b2"
+          echo "R5_NUMERICAL_ARTIFACTS_UNCHANGED"

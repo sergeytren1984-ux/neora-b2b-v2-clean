@@ -25,6 +25,7 @@ CONTENDERS=("logistic","gbdt","competing_risks")
 
 def canonical(obj): return (json.dumps(obj,sort_keys=True,separators=(",",":"),ensure_ascii=False,allow_nan=False)+"\n").encode()
 def digest(data): return hashlib.sha256(data).hexdigest()
+def utcnow(): return datetime.now(UTC)
 def parse(s):
     x=s[:-1]+"+00:00" if s.endswith("Z") else s
     d=datetime.fromisoformat(x)
@@ -87,7 +88,59 @@ def git_blob(repo_root,commit,path):
     return subprocess.run(["git","-C",str(repo_root),"show",f"{commit}:{path}"],
                           check=True,capture_output=True,timeout=180).stdout
 
-def verify_governance(repo_root,events,rekor,fw,ow,protocol_path):
+def duplicate_slot_rejections(events):
+    """Reject semantic duplicates even when idempotency keys differ."""
+    rejected=[]
+    for etype in ("FORECAST_ISSUED","OUTCOME_RECORDED"):
+        seen={}
+        for e in events:
+            if e.get("type")!=etype:
+                continue
+            slot=e.get("slot")
+            if not slot:
+                rejected.append({"sequence":e.get("sequence"),"reason":"slot_missing","event_type":etype})
+                continue
+            seen.setdefault(slot,[]).append(int(e.get("sequence",0)))
+        for slot,seqs in seen.items():
+            if len(seqs)!=1:
+                rejected.append({"reason":"duplicate_event_type_slot","event_type":etype,
+                                 "slot":slot,"sequences":seqs})
+    return rejected
+
+def schedule_registration_rejections(events,rekor,source,protocol,protocol_bytes,freeze):
+    rejected=[]
+    schedules=[e for e in events if e.get("type")=="SCHEDULE_REGISTERED"]
+    if len(schedules)!=1:
+        return [{"reason":"schedule_registration_count","count":len(schedules)}]
+    s=schedules[0]
+    seq=int(s.get("sequence",0))
+    integrated=rekor.get(seq)
+    expected_key="hourly:schedule" if str(protocol.get("head","")).startswith("hourly") else "early15m:schedule"
+    try:
+        protocol_start=parse(protocol["start_utc"])
+        grid_start=parse(protocol["admission"]["expected_grid_phase_utc"])
+        schedule_start=parse(s["start_utc"])
+    except Exception:
+        return [{"sequence":seq,"reason":"schedule_time_unreadable"}]
+    if integrated is None or integrated>=START:
+        rejected.append({"sequence":seq,"reason":"schedule_rekor_time_not_prestart"})
+    if protocol_start!=START or grid_start!=START or schedule_start!=START:
+        rejected.append({"sequence":seq,"reason":"schedule_start_or_grid_mismatch"})
+    if s.get("source_commit_sha")!=source:
+        rejected.append({"sequence":seq,"reason":"schedule_source_commit_mismatch"})
+    if int(s.get("deadline_minutes",-1))!=int(protocol.get("issuance_deadline_minutes",-2)):
+        rejected.append({"sequence":seq,"reason":"schedule_deadline_mismatch"})
+    if s.get("protocol_sha256")!=digest(protocol_bytes):
+        rejected.append({"sequence":seq,"reason":"schedule_protocol_hash_mismatch"})
+    if s.get("idempotency_key")!=expected_key:
+        rejected.append({"sequence":seq,"reason":"schedule_idempotency_key_mismatch"})
+    if s.get("trading_authority") is not False:
+        rejected.append({"sequence":seq,"reason":"schedule_trading_authority_invalid"})
+    if int(s.get("sequence",0))>=int(freeze.get("sequence",0)):
+        rejected.append({"sequence":seq,"reason":"schedule_not_before_freeze"})
+    return rejected
+
+def verify_governance(repo_root,events,rekor,fw,ow,protocol_path,events_dir=None):
     freezes=[e for e in events if e.get("type")=="CONFIG_FROZEN_PRESTART"]
     if len(freezes)!=1:return {"ok":False,"reason":"freeze_count_not_one"}
     freeze=freezes[0];m=freeze.get("manifest")
@@ -99,10 +152,18 @@ def verify_governance(repo_root,events,rekor,fw,ow,protocol_path):
     source=m.get("source_commit_sha");paths=m.get("paths_sha256",{})
     rejected=[]
     try:
-        protocol=json.loads(git_blob(repo_root,source,protocol_path))
+        protocol_bytes=git_blob(repo_root,source,protocol_path)
+        protocol=json.loads(protocol_bytes)
         deadline_minutes=int(protocol["issuance_deadline_minutes"])
     except Exception:
         return {"ok":False,"reason":"frozen_protocol_unreadable"}
+
+    if freeze.get("start_utc") is None or parse(freeze["start_utc"])!=START:
+        rejected.append({"sequence":freeze.get("sequence"),"reason":"freeze_start_mismatch"})
+    if m.get("source_commit_sha")!=source:
+        rejected.append({"sequence":freeze.get("sequence"),"reason":"freeze_source_commit_mismatch"})
+    rejected.extend(schedule_registration_rejections(events,rekor,source,protocol,protocol_bytes,freeze))
+    rejected.extend(duplicate_slot_rejections(events))
 
     for p,h in paths.items():
         if p.startswith(".github/workflows/"):continue
@@ -175,16 +236,23 @@ def verify_governance(repo_root,events,rekor,fw,ow,protocol_path):
                              "integrated":None if rit is None else rit.isoformat()})
         try:
             remote_commit=r["remote_commit_sha"]
-            # The referenced remote commit must contain the exact forecast event
-            # at the ledger sequence path. Search the commit tree because the
-            # event directory differs between heads.
-            paths=subprocess.run(
-                ["git","-C",str(repo_root),"ls-tree","-r","--name-only",remote_commit],
+            if not events_dir:
+                events_dir=("predictive_vnext4r5_hourly_events"
+                            if "hourly" in protocol_path
+                            else "predictive_vnext4r5_early15m_events")
+            event_path=f"{events_dir}/{seq:08d}.json"
+            if git_blob(repo_root,remote_commit,event_path)!=canonical(f):
+                rejected.append({"sequence":rseq,"reason":"delivery_remote_commit_does_not_contain_exact_forecast"})
+            current_tip=subprocess.run(
+                ["git","-C",str(repo_root),"rev-parse","HEAD"],
                 check=True,capture_output=True,text=True,timeout=180
-            ).stdout.splitlines()
-            candidates=[p for p in paths if p.endswith(f"/{seq:08d}.json") and "predictive_vnext4r5_" in p and "_events/" in p]
-            if len(candidates)!=1 or git_blob(repo_root,remote_commit,candidates[0])!=canonical(f):
-                rejected.append({"sequence":rseq,"reason":"delivery_remote_commit_does_not_contain_forecast"})
+            ).stdout.strip()
+            subprocess.run(
+                ["git","-C",str(repo_root),"merge-base","--is-ancestor",remote_commit,current_tip],
+                check=True,capture_output=True,text=True,timeout=180
+            )
+        except subprocess.CalledProcessError:
+            rejected.append({"sequence":rseq,"reason":"delivery_remote_commit_not_ancestor_of_evidence_tip"})
         except Exception:
             rejected.append({"sequence":rseq,"reason":"delivery_remote_commit_unverifiable"})
     return {
@@ -291,12 +359,37 @@ def expected_due_grid(as_of_utc,horizon_hours):
     return out
 
 def score(events,head,horizon_hours,min_calendar_days,min_nonoverlap,min_episodes,as_of_utc=None):
-    as_of_utc=as_of_utc or datetime.now(UTC)
-    forecasts={e["slot"]:e for e in events if e.get("type")=="FORECAST_ISSUED"}
-    outcomes={e["slot"]:e for e in events if e.get("type")=="OUTCOME_RECORDED"}
+    # A caller-supplied cutoff is always historical/diagnostic. Only the
+    # runner's own UTC clock can produce the current admission_ready field.
+    historical=as_of_utc is not None
+    cutoff=as_of_utc if historical else utcnow()
+
+    forecast_lists={}
+    outcome_lists={}
+    for e in events:
+        if e.get("type")=="FORECAST_ISSUED":
+            forecast_lists.setdefault(e.get("slot"),[]).append(e)
+        elif e.get("type")=="OUTCOME_RECORDED":
+            outcome_lists.setdefault(e.get("slot"),[]).append(e)
+    duplicate_forecast=sorted(s for s,v in forecast_lists.items() if s and len(v)!=1)
+    duplicate_outcome=sorted(s for s,v in outcome_lists.items() if s and len(v)!=1)
+    if duplicate_forecast or duplicate_outcome:
+        return {
+            "status":"INVALID_DUPLICATE_SLOT_EVENTS",
+            "evaluation_mode":"HISTORICAL_DIAGNOSTIC" if historical else "CURRENT_TRUSTED_CLOCK",
+            "evaluation_cutoff_utc":cutoff.isoformat(),
+            "duplicate_forecast_slots":duplicate_forecast,
+            "duplicate_outcome_slots":duplicate_outcome,
+            "historical_candidate_ready":False if historical else None,
+            "admission_ready":False,
+            "prospective_winner":None,
+        }
+
+    forecasts={s:v[0] for s,v in forecast_lists.items() if s}
+    outcomes={s:v[0] for s,v in outcome_lists.items() if s}
     overlap_slots=sorted(set(forecasts)&set(outcomes),key=lambda s:parse(forecasts[s]["anchor_utc"]))
 
-    expected_anchors=expected_due_grid(as_of_utc,horizon_hours)
+    expected_anchors=expected_due_grid(cutoff,horizon_hours)
     expected_slots=[slot_text(a) for a in expected_anchors]
     missing_forecast=[];missing_outcome=[];malformed=[];complete_slots=[]
     step=timedelta(hours=horizon_hours)
@@ -326,7 +419,7 @@ def score(events,head,horizon_hours,min_calendar_days,min_nonoverlap,min_episode
 
     expected_n=len(expected_slots);complete_n=len(complete_slots)
     completeness={
-        "as_of_utc":as_of_utc.isoformat(),
+        "as_of_utc":cutoff.isoformat(),
         "required_fraction":1.0,
         "expected_due_independent_slots":expected_n,
         "complete_due_independent_slots":complete_n,
@@ -342,12 +435,18 @@ def score(events,head,horizon_hours,min_calendar_days,min_nonoverlap,min_episode
     }
     if expected_n==0:
         return {"status":"PENDING_NO_DUE_INDEPENDENT_WINDOWS",
-                "outcome_completeness":completeness,"admission_ready":False}
+                "evaluation_mode":"HISTORICAL_DIAGNOSTIC" if historical else "CURRENT_TRUSTED_CLOCK",
+                "evaluation_cutoff_utc":cutoff.isoformat(),
+                "outcome_completeness":completeness,
+                "historical_candidate_ready":False if historical else None,
+                "admission_ready":False}
 
     result={
         "status":"EVALUATED_PARTIAL" if not completeness["complete"] else "EVALUATED_COMPLETE",
+        "evaluation_mode":"HISTORICAL_DIAGNOSTIC" if historical else "CURRENT_TRUSTED_CLOCK",
+        "evaluation_cutoff_utc":cutoff.isoformat(),
         "outcome_completeness":completeness,
-        "calendar_days":max(0.0,(as_of_utc-START).total_seconds()/86400),
+        "calendar_days":max(0.0,(cutoff-START).total_seconds()/86400),
         "expected_fixed_phase_nonoverlap_count":expected_n,
         "fixed_phase_nonoverlap_count":complete_n,
         "closed_forecasts_overlapping":len(overlap_slots),
@@ -414,11 +513,15 @@ def score(events,head,horizon_hours,min_calendar_days,min_nonoverlap,min_episode
         if head=="early15m":
             result["contenders"][m]["early_warning"]=early_warning(forecasts,outcomes,m,complete_slots)
     passing=[m for m,x in result["contenders"].items() if x["passes_all"]]
-    result["admission_ready"]=bool(passing)
+    candidate_ready=bool(passing)
+    result["historical_candidate_ready"]=candidate_ready if historical else None
+    result["admission_ready"]=candidate_ready and not historical
     if passing:
         passing.sort(key=lambda m:(result["contenders"][m]["nonoverlap"]["brier"],
                                    result["contenders"][m]["nonoverlap"]["log_loss"]))
-        result["prospective_winner"]=passing[0]
+        result["prospective_winner"]=passing[0] if not historical else None
+        if historical:
+            result["historical_counterfactual_winner"]=passing[0]
     else:
         result["prospective_winner"]=None
     return result
@@ -436,7 +539,7 @@ def main():
     ap=argparse.ArgumentParser();ap.add_argument("--head",choices=("hourly","early15m"),required=True)
     ap.add_argument("--repo-root",default=os.environ.get("BTC_VNEXT4R5_EVIDENCE_ROOT",str(ROOT)))
     ap.add_argument("--as-of-utc",default=None,
-                    help="ISO-8601 evaluation cutoff; defaults to current UTC")
+                    help="Historical diagnostic cutoff only. Supplying it permanently forces admission_ready=false.")
     args=ap.parse_args()
     repo_root=Path(args.repo_root)
     if args.head=="hourly":
@@ -452,10 +555,10 @@ def main():
         protocol_path="predictive_vnext4r5/protocol_early15m.json"
         params=(4,42,150,12)
     events,rekor=load_chain(repo_root,events_dir,fw,ow)
-    governance=verify_governance(repo_root,events,rekor,fw,ow,protocol_path)
+    governance=verify_governance(repo_root,events,rekor,fw,ow,protocol_path,events_dir=events_dir)
     result={"schema":"btc-predictive-vnext4r5-scorecard-v1","head":args.head,
             "governance":governance,"score":None,"operational":operational_summary(events)}
-    as_of=parse(args.as_of_utc) if args.as_of_utc else datetime.now(UTC)
+    as_of=parse(args.as_of_utc) if args.as_of_utc else None
     if governance["ok"]:result["score"]=score(events,args.head,*params,as_of_utc=as_of)
     print(json.dumps(result,ensure_ascii=False,indent=2,sort_keys=True))
 

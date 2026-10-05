@@ -82,13 +82,36 @@
     "session_hours": 4,
     "concurrency": "single workflow concurrency group per head",
     "no_backfill": true,
-    "delayed_start_policy": "issue only if still before preregistered slot deadline; otherwise SLOT_MISSED"
+    "delayed_start_policy": "issue only if still before preregistered slot deadline; otherwise SLOT_MISSED",
+    "transient_forecast_retry": {
+      "enabled": true,
+      "retry_interval_seconds": 45,
+      "delivery_safety_seconds": 120,
+      "stop_before_deadline_minus_safety": true,
+      "data_abstention_is_retryable_before_cutoff": true
+    }
   },
   "delivery_proof": {
     "required": true,
     "mechanism": "signed DELIVERY_CONFIRMED event created only after git push + ls-remote remote branch confirmation",
     "receipt_rekor_before_forecast_deadline": true,
     "remote_commit_must_contain_exact_forecast_event": true,
-    "missing_receipt": "BLOCK_GOVERNANCE_AND_ADMISSION"
+    "missing_receipt": "BLOCK_GOVERNANCE_AND_ADMISSION",
+    "receipt_recovery": {
+      "enabled": true,
+      "idempotent": true,
+      "cutoff_seconds_before_deadline": 120,
+      "remote_forecast_commit_must_contain_exact_event": true,
+      "remote_forecast_commit_must_be_ancestor_of_current_evidence_tip": true,
+      "late_recovery": "FORBIDDEN"
+    }
+  },
+  "event_signature_binding": {
+    "certificate_identity": "frozen workflow path @ refs/heads/main",
+    "github_workflow_sha_must_equal_event_workflow_commit": true,
+    "github_workflow_repository": "sergeytren1984-ux/neora-b2b-v2-clean",
+    "github_workflow_ref": "refs/heads/main",
+    "github_workflow_trigger": "workflow_dispatch",
+    "mismatch": "REJECT_EVENT_AND_GOVERNANCE"
   }
 }

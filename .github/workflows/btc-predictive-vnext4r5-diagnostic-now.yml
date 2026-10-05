@@ -106,3 +106,5 @@ jobs:
             }
           print('R5_DIAGNOSTIC_JSON='+json.dumps(out,sort_keys=True,separators=(',',':')))
           PY
+
+# manual rerun 2026-10-05T16:21Z

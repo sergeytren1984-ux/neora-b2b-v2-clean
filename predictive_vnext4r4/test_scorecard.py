@@ -12,7 +12,7 @@ if str(ROOT) not in sys.path: sys.path.insert(0,str(ROOT))
 from predictive_vnext4r4.scorecard import score,signature_claim_args
 
 UTC=timezone.utc
-START=datetime(2026,10,5,12,0,tzinfo=UTC)
+START=datetime(2026,10,5,13,0,tzinfo=UTC)
 MODELS=("logistic","gbdt","competing_risks")
 
 

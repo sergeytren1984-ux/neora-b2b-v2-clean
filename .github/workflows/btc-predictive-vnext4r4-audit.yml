@@ -220,8 +220,8 @@ jobs:
         run: |
           git show "${GITHUB_SHA}:.github/workflows/btc-predictive-vnext4r4-watchdog.yml" > /tmp/watchdog.yml
           git show "${GITHUB_SHA}:${{ matrix.workflow }}" > /tmp/unified.yml
-          grep -q "workflow_run:" /tmp/watchdog.yml
-          grep -q "cron: '*/5 \* \* \* \*'" /tmp/watchdog.yml
-          grep -q "continue-on-error: true" /tmp/unified.yml
-          grep -q "chain_liveness.py" /tmp/unified.yml
+          grep -Fq "workflow_run:" /tmp/watchdog.yml
+          grep -Fq "cron: '*/5 * * * *'" /tmp/watchdog.yml
+          grep -Fq "continue-on-error: true" /tmp/unified.yml
+          grep -Fq "chain_liveness.py" /tmp/unified.yml
           echo "R4_LIVENESS_POLICY_ACCEPT"

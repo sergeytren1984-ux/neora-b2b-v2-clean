@@ -1,4 +1,4 @@
-name: BTC predictive vNext4R3 15m outcome chain RETIRED
+name: BTC predictive vNext4R3 15m outcome RETIRED
 
 on:
   workflow_dispatch: {}
@@ -10,4 +10,4 @@ jobs:
   retired:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "RETIRED_AFTER_SELF_DISPATCH_FAILURE_STORM_BEFORE_PROSPECTIVE_START"
+      - run: echo "RETIRED_UNIFIED_WRITER_HANDLES_FORECAST_AND_OUTCOME"

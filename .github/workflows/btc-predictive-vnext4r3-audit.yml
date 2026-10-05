@@ -74,15 +74,7 @@ jobs:
           for p in "$events_dir"/????????.json; do
             [ -f "$p" ] || continue
             b="${p%.json}.sigstore.json"
-            sha=$(python - "$p" <<'PY'
-import json,sys
-e=json.load(open(sys.argv[1]))
-s=e.get("workflow_commit","")
-if len(s)!=40:
-    raise SystemExit("missing/invalid workflow_commit")
-print(s)
-PY
-)
+            sha=$(python -c 'import json,sys; s=json.load(open(sys.argv[1])).get("workflow_commit",""); assert len(s)==40, "missing/invalid workflow_commit"; print(s)' "$p")
             cosign verify-blob "$p" \
               --bundle "$b" \
               --certificate-identity "$identity" \

@@ -19,14 +19,14 @@ ROOT=Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0,str(ROOT))
 
-from predictive_vnext4r3.worker import CONFIG,START,slot_floor,slot_text,utcnow,main as worker_main
+from predictive_vnext4r3.worker import CONFIG,START,DELIVERY_SAFETY,slot_floor,slot_text,utcnow,main as worker_main
 
 UTC=timezone.utc
 FORECAST_DATA_DELAY={"early15m":timedelta(seconds=75),"hourly":timedelta(seconds=90)}
 ACTIVE_SESSION_RUNTIME=timedelta(hours=4)
 PRESTART_SESSION_RUNTIME=timedelta(hours=5)
 MAX_SLEEP_CHUNK=30.0
-DEADLINE_SAFETY=timedelta(minutes=2)
+DEADLINE_SAFETY=DELIVERY_SAFETY
 RETRY_INTERVAL={"early15m":timedelta(seconds=45),"hourly":timedelta(minutes=2)}
 
 

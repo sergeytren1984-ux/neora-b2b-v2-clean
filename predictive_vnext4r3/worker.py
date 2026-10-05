@@ -31,6 +31,7 @@ if str(CODE_ROOT) not in sys.path:
     sys.path.insert(0,str(CODE_ROOT))
 
 START=datetime(2026,10,5,12,0,tzinfo=UTC)
+DELIVERY_SAFETY=timedelta(seconds=45)
 ISSUER="https://token.actions.githubusercontent.com"
 CLASS_TO_ID={"LOWER_FIRST":0,"UPPER_FIRST":1,"NEITHER":2,"AMBIGUOUS_SAME_BAR":3}
 
@@ -116,7 +117,7 @@ def remote_clean(cfg):
         raise RuntimeError("remote evidence branch advanced")
 
 def publish(cfg,obj,deadline=None,attachments=()):
-    if deadline and utcnow()>=deadline-timedelta(minutes=2):
+    if deadline and utcnow()>=deadline-DELIVERY_SAFETY:
         raise TimeoutError("deadline safety margin reached")
     remote_clean(cfg);prior=prior_events(cfg);keys={e["idempotency_key"] for e,_ in prior}
     if obj["idempotency_key"] in keys:return
@@ -200,12 +201,12 @@ def ensure_delivery_receipt(cfg,forecast_event,deadline):
 
     # No receipt exists. Recovery is allowed only while the same signed
     # pre-registered deadline is still safely open.
-    if utcnow()>=deadline-timedelta(minutes=2):
+    if utcnow()>=deadline-DELIVERY_SAFETY:
         return False
 
     remote_commit=forecast_commit_for_event(cfg,forecast_event)
     confirmed_at=utcnow()
-    if confirmed_at>=deadline-timedelta(minutes=2):
+    if confirmed_at>=deadline-DELIVERY_SAFETY:
         return False
 
     publish(cfg,{

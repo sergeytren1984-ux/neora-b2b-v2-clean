@@ -58,6 +58,57 @@ jobs:
           assert x['score']['admission_ready'] is False
           print('R3_SIGNED_PRESTART_ACCEPT')
           PY
+      - name: Bind every Sigstore signature to the declared workflow commit SHA
+        env:
+          BTC_VNEXT4R3_WORKFLOW_PATH: ${{ matrix.workflow }}
+          BTC_VNEXT4R3_HEAD: ${{ matrix.head }}
+        run: |
+          set -euo pipefail
+          if [ "$BTC_VNEXT4R3_HEAD" = "hourly" ]; then
+            events_dir="predictive_vnext4r3_hourly_events"
+          else
+            events_dir="predictive_vnext4r3_early15m_events"
+          fi
+          identity="https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/$BTC_VNEXT4R3_WORKFLOW_PATH@refs/heads/main"
+          first_event=""
+          for p in "$events_dir"/????????.json; do
+            [ -f "$p" ] || continue
+            b="${p%.json}.sigstore.json"
+            sha=$(python - "$p" <<'PY'
+import json,sys
+e=json.load(open(sys.argv[1]))
+s=e.get("workflow_commit","")
+if len(s)!=40:
+    raise SystemExit("missing/invalid workflow_commit")
+print(s)
+PY
+)
+            cosign verify-blob "$p" \
+              --bundle "$b" \
+              --certificate-identity "$identity" \
+              --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+              --certificate-github-workflow-sha "$sha" \
+              --certificate-github-workflow-repository "sergeytren1984-ux/neora-b2b-v2-clean" \
+              --certificate-github-workflow-ref "refs/heads/main" \
+              --certificate-github-workflow-trigger "workflow_dispatch" >/dev/null
+            echo "R3_SIGNER_SHA_BOUND file=$p workflow_commit=$sha"
+            [ -n "$first_event" ] || first_event="$p"
+          done
+          test -n "$first_event"
+          first_bundle="${first_event%.json}.sigstore.json"
+          set +e
+          cosign verify-blob "$first_event" \
+            --bundle "$first_bundle" \
+            --certificate-identity "$identity" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            --certificate-github-workflow-sha "0000000000000000000000000000000000000000" \
+            --certificate-github-workflow-repository "sergeytren1984-ux/neora-b2b-v2-clean" \
+            --certificate-github-workflow-ref "refs/heads/main" \
+            --certificate-github-workflow-trigger "workflow_dispatch" >/dev/null 2>&1
+          rc=$?
+          set -e
+          test "$rc" -ne 0
+          echo "R3_FORGED_WORKFLOW_SHA_REJECTED"
       - name: Re-run all admission and scheduler attack regressions
         run: |
           python -I /tmp/vnext4r3-runtime/predictive_vnext4r3/test_scorecard.py -v

@@ -1,0 +1,52 @@
+name: BTC predictive vNext4R5 successor watchdog
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/btc-predictive-vnext4r5-watchdog.yml
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_run:
+    workflows:
+      - BTC predictive vNext4R5 hourly unified chain
+      - BTC predictive vNext4R5 15m unified chain
+    types: [completed]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: btc-predictive-vnext4r5-successor-watchdog
+  cancel-in-progress: false
+
+jobs:
+  ensure-successor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        workflow:
+          - btc-predictive-vnext4r5-hourly.yml
+          - btc-predictive-vnext4r5-early15m.yml
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+      - name: Build immutable liveness runtime
+        run: |
+          rm -rf /tmp/vnext4r5-runtime
+          mkdir -p /tmp/vnext4r5-runtime
+          git archive 16c4fd69e6c4e6f58310ecbd597daa80af270f83 | tar -x -C /tmp/vnext4r5-runtime
+      - name: Ensure chain has a live run or successor
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -I /tmp/vnext4r5-runtime/predictive_vnext4r5/chain_liveness.py \
+            --repo "$GITHUB_REPOSITORY" \
+            --workflow "${{ matrix.workflow }}" \
+            --ref main

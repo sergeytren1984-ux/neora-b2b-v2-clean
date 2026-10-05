@@ -62,6 +62,76 @@ jobs:
           assert x['score']['admission_ready'] is False
           print('R4_SIGNED_PRESTART_ACCEPT')
           PY
+      - name: Attack missing and late delivery receipts
+        env:
+          R4_HEAD: ${{ matrix.head }}
+          R4_WORKFLOW_PATH: ${{ matrix.workflow }}
+          R4_EVENTS_DIR: ${{ matrix.events_dir }}
+        run: |
+          python -I - <<'PY'
+          import json,os,sys
+          from datetime import timedelta
+          from pathlib import Path
+          sys.path.insert(0,'/tmp/vnext4r4-runtime')
+          from predictive_vnext4r4.scorecard import START,canonical,digest,load_chain,verify_governance
+          root=Path(os.environ['GITHUB_WORKSPACE'])
+          head=os.environ['R4_HEAD']
+          wf=os.environ['R4_WORKFLOW_PATH']
+          events_dir=os.environ['R4_EVENTS_DIR']
+          protocol_path='predictive_vnext4r4/protocol_hourly.json' if head=='hourly' else 'predictive_vnext4r4/protocol_early15m.json'
+          protocol=json.loads((root/protocol_path).read_bytes())
+          deadline=timedelta(minutes=int(protocol['issuance_deadline_minutes']))
+          events,rekor=load_chain(root,events_dir,wf,wf)
+          assert len(events)==2
+          slot=START.strftime('%Y%m%dT%H%M%SZ')
+          raw_path=protocol_path
+          forecast={
+              'schema':'btc-predictive-vnext4r4-event-v1',
+              'sequence':3,
+              'previous_hash':digest(canonical(events[-1])),
+              'workflow_commit':events[-1]['workflow_commit'],
+              'published_at_utc':(START+timedelta(seconds=30)).isoformat(),
+              'type':'FORECAST_ISSUED',
+              'idempotency_key':'forecast:'+slot,
+              'slot':slot,
+              'head':head,
+              'anchor_utc':START.isoformat(),
+              'due_utc':(START+(timedelta(hours=72) if head=='hourly' else timedelta(hours=4))).isoformat(),
+              'reference_price':1.0,
+              'lower_price':0.9,
+              'upper_price':1.1,
+              'raw_path':raw_path,
+              'raw_sha256':digest((root/raw_path).read_bytes()),
+              'trading_authority':False,
+          }
+          r1=dict(rekor);r1[3]=START+timedelta(minutes=1)
+          g1=verify_governance(root,events+[forecast],r1,wf,wf,protocol_path)
+          assert g1['ok'] is False
+          assert any(x.get('reason')=='forecast_delivery_receipt_count' and x.get('count')==0 for x in g1['rejected']),g1
+          print('R4_MISSING_RECEIPT_REJECTED')
+
+          receipt={
+              'schema':'btc-predictive-vnext4r4-event-v1',
+              'sequence':4,
+              'previous_hash':digest(canonical(forecast)),
+              'workflow_commit':events[-1]['workflow_commit'],
+              'published_at_utc':(START+deadline+timedelta(seconds=1)).isoformat(),
+              'type':'DELIVERY_CONFIRMED',
+              'idempotency_key':'delivery:forecast:'+slot,
+              'slot':slot,
+              'target_sequence':3,
+              'target_event_hash':digest(canonical(forecast)),
+              'remote_commit_sha':events[-1]['workflow_commit'],
+              'remote_confirmed_at_utc':(START+deadline+timedelta(seconds=1)).isoformat(),
+              'deadline_utc':(START+deadline).isoformat(),
+              'trading_authority':False,
+          }
+          r2=dict(r1);r2[4]=START+deadline
+          g2=verify_governance(root,events+[forecast,receipt],r2,wf,wf,protocol_path)
+          assert g2['ok'] is False
+          assert any(x.get('reason')=='delivery_receipt_rekor_not_before_deadline' for x in g2['rejected']),g2
+          print('R4_LATE_RECEIPT_REJECTED')
+          PY
       - name: Bind every Sigstore signature to declared workflow commit SHA
         env:
           R4_WORKFLOW_PATH: ${{ matrix.workflow }}

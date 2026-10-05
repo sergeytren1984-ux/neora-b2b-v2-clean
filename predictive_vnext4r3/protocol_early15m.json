@@ -78,7 +78,7 @@
     "primary_clock": "long_lived_self_chained_workflow_dispatch",
     "github_cron_role": "not_used",
     "writer_model": "one unified writer workflow per head handles forecast and due outcomes",
-    "successor_policy": "successor queued after preflight and before current 4h session",
+    "successor_policy": "best-effort self-dispatch before current 4h session; dispatch failure is non-fatal to the current session",
     "session_hours": 4,
     "concurrency": "single workflow concurrency group per head",
     "no_backfill": true,
@@ -89,6 +89,17 @@
       "delivery_safety_seconds": 120,
       "stop_before_deadline_minus_safety": true,
       "data_abstention_is_retryable_before_cutoff": true
+    },
+    "independent_watchdog": {
+      "trigger_policy": [
+        "workflow_run completion",
+        "5-minute scheduled check",
+        "manual dispatch"
+      ],
+      "repair_rule": "if running session has no queued/pending successor, or no live run exists, dispatch one workflow_dispatch run",
+      "evidence_writer": false,
+      "backfill": false,
+      "failure_policy": "watchdog failure does not mutate evidence; next independent trigger retries"
     }
   },
   "delivery_proof": {

@@ -11,7 +11,7 @@ from predictive_vnext4r3.scheduler import (
     START,ACTIVE_SESSION_RUNTIME,PRESTART_SESSION_RUNTIME,FORECAST_DATA_DELAY,
     DEADLINE_SAFETY,RETRY_INTERVAL,forecast_attempt_targets,next_anchor_after,run_slot
 )
-from predictive_vnext4r3.worker import CONFIG,ensure_delivery_receipt,forecast,slot_text
+from predictive_vnext4r3.worker import CONFIG,ensure_delivery_receipt,forecast,slot_text,signature_claim_args
 
 class SchedulerTests(unittest.TestCase):
     def test_unified_writer_per_head(self):
@@ -73,6 +73,21 @@ class SchedulerTests(unittest.TestCase):
         args=mock_ensure.call_args.args
         self.assertEqual(args[1],event)
         self.assertEqual(args[2],START+CONFIG["early15m"]["deadline"])
+
+    def test_signature_claims_bind_event_to_exact_workflow_sha(self):
+        sha="0123456789abcdef0123456789abcdef01234567"
+        args=signature_claim_args({"workflow_commit":sha})
+        self.assertIn("--certificate-github-workflow-sha",args)
+        self.assertEqual(args[args.index("--certificate-github-workflow-sha")+1],sha)
+        self.assertIn("--certificate-github-workflow-repository",args)
+        self.assertIn("--certificate-github-workflow-ref",args)
+        self.assertIn("--certificate-github-workflow-trigger",args)
+
+    def test_signature_claims_reject_missing_or_malformed_workflow_sha(self):
+        for bad in ("","abc","g"*40,"0"*39):
+            with self.subTest(bad=bad):
+                with self.assertRaises(ValueError):
+                    signature_claim_args({"workflow_commit":bad})
 
     @patch("predictive_vnext4r3.worker.utcnow")
     @patch("predictive_vnext4r3.worker.prior_events",return_value=[])

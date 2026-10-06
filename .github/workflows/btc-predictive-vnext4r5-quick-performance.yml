@@ -1,0 +1,137 @@
+name: BTC vNext4R5 quick performance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/btc-predictive-vnext4r5-quick-performance.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+      - name: Fetch evidence
+        run: |
+          git fetch origin \
+            refs/heads/btc-predictive-vnext4r5-early15m:refs/remotes/origin/btc-predictive-vnext4r5-early15m \
+            refs/heads/btc-predictive-vnext4r5-hourly:refs/remotes/origin/btc-predictive-vnext4r5-hourly
+      - name: Compute metrics
+        run: |
+          python - <<'PY'
+          import subprocess,json,hashlib,math
+          from datetime import datetime,timezone,timedelta
+
+          UTC=timezone.utc
+          START=datetime(2026,10,5,15,0,tzinfo=UTC)
+          CLASS={"LOWER_FIRST":0,"UPPER_FIRST":1,"NEITHER":2,"AMBIGUOUS_SAME_BAR":3}
+          MODELS=("logistic","gbdt","competing_risks")
+
+          def git(*a):
+              return subprocess.run(["git",*a],check=True,capture_output=True,text=True).stdout
+
+          def load(branch,evdir):
+              ref="origin/"+branch
+              names=[x for x in git("ls-tree","-r","--name-only",ref).splitlines()
+                     if x.startswith(evdir+"/") and x.endswith(".json")
+                     and len(x.rsplit("/",1)[1])==13]
+              out=[];prev=None;keys=set()
+              for p in sorted(names):
+                  raw=git("show",f"{ref}:{p}")
+                  e=json.loads(raw)
+                  canon=json.dumps(e,sort_keys=True,separators=(",",":"),ensure_ascii=False,allow_nan=False)+"\n"
+                  if raw!=canon: raise SystemExit("noncanonical "+p)
+                  if e.get("previous_hash")!=prev: raise SystemExit("hash chain break "+p)
+                  if e.get("idempotency_key") in keys: raise SystemExit("duplicate idempotency "+p)
+                  keys.add(e.get("idempotency_key"))
+                  prev=hashlib.sha256(raw.encode()).hexdigest()
+                  out.append(e)
+              return out
+
+          def vec(d):
+              return [float(d["lower_first"]),float(d["upper_first"]),float(d["neither"]),float(d["ambiguous_same_bar"])]
+
+          def met(rows,source):
+              if not rows:return None
+              b=ll=acc=0.0;dn=dc=0
+              for f,o in rows:
+                  y=CLASS[o["outcome_class"]]
+                  p=vec(f["control"][source+"_distribution"]) if source in ("primary","secondary") else vec(f["contenders"][source]["class_distribution"])
+                  b+=sum((p[i]-(1.0 if i==y else 0.0))**2 for i in range(4))
+                  ll-=math.log(max(p[y],1e-12))
+                  acc+=int(max(range(4),key=lambda i:p[i])==y)
+                  if y in (0,1):
+                      dn+=1; dc+=int((0 if p[0]>=p[1] else 1)==y)
+              n=len(rows)
+              return {"n":n,"brier":b/n,"log_loss":ll/n,"argmax_accuracy":acc/n,
+                      "directional_accuracy_on_touch":None if not dn else dc/dn}
+
+          def audit(branch,evdir,cadmin,horizon):
+              ev=load(branch,evdir)
+              F=[e for e in ev if e.get("type")=="FORECAST_ISSUED"]
+              O=[e for e in ev if e.get("type")=="OUTCOME_RECORDED"]
+              R=[e for e in ev if e.get("type")=="DELIVERY_CONFIRMED"]
+              M=[e for e in ev if e.get("type")=="SLOT_MISSED"]
+              A=[e for e in ev if e.get("type")=="ABSTAIN_DATA_INVALID"]
+              fd={e["slot"]:e for e in F};od={e["slot"]:e for e in O};rd={e["slot"]:e for e in R}
+              now=datetime.now(UTC)
+              paired=[(f,od[f["slot"]]) for f in F if f["slot"] in od]
+              due=[f for f in F if datetime.fromisoformat(f["due_utc"])<=now]
+              independent=[];t=START
+              while t+timedelta(hours=horizon)<=now:
+                  s=t.strftime("%Y%m%dT%H%M%SZ")
+                  if s in fd and s in od: independent.append((fd[s],od[s]))
+                  t+=timedelta(hours=horizon)
+              classes={k:0 for k in CLASS}
+              for _,o in paired:classes[o["outcome_class"]]+=1
+              means={}
+              for m in MODELS:
+                  if paired:
+                      z=[0,0,0,0]
+                      for f,_ in paired:
+                          p=vec(f["contenders"][m]["class_distribution"])
+                          z=[z[i]+p[i] for i in range(4)]
+                      means[m]=[v/len(paired) for v in z]
+              # time buckets, MSK labels are UTC+3
+              buckets=[]
+              starts=[
+                ("18-22 MSK",START,START+timedelta(hours=4)),
+                ("22-02 MSK",START+timedelta(hours=4),START+timedelta(hours=8)),
+                ("02-06 MSK",START+timedelta(hours=8),START+timedelta(hours=12)),
+                ("06-10 MSK",START+timedelta(hours=12),START+timedelta(hours=16)),
+              ]
+              for label,a,b in starts:
+                  rr=[(f,o) for f,o in paired if a<=datetime.fromisoformat(f["anchor_utc"])<b]
+                  buckets.append({"bucket":label,"closed":len(rr),
+                                  **{m:met(rr,m) for m in (*MODELS,"primary")}})
+              latest=F[-1] if F else None
+              return {
+                "events":len(ev),"forecasts":len(F),"receipts":len(R),"outcomes":len(O),
+                "slot_missed":len(M),"abstain":len(A),
+                "duplicate_forecast_slots":len(F)-len(fd),"duplicate_outcome_slots":len(O)-len(od),
+                "missing_receipts":sum(1 for f in F if f["slot"] not in rd),
+                "missing_due_outcomes":sum(1 for f in due if f["slot"] not in od),
+                "closed_overlapping":len(paired),"classes":classes,
+                "metrics_all":{m:met(paired,m) for m in (*MODELS,"primary","secondary")},
+                "independent_closed":len(independent),
+                "metrics_independent":{m:met(independent,m) for m in (*MODELS,"primary","secondary")},
+                "mean_probabilities":means,"buckets":buckets,
+                "latest_forecast":None if not latest else {
+                  "slot":latest["slot"],"anchor_utc":latest["anchor_utc"],"reference_price":latest["reference_price"],
+                  "lower_price":latest["lower_price"],"upper_price":latest["upper_price"],
+                  "contenders":latest["contenders"],"control":latest["control"]
+                }
+              }
+
+          out={"computed_at_utc":datetime.now(UTC).isoformat(),
+               "early15m":audit("btc-predictive-vnext4r5-early15m","predictive_vnext4r5_early15m_events",15,4),
+               "hourly":audit("btc-predictive-vnext4r5-hourly","predictive_vnext4r5_hourly_events",60,72)}
+          print("QUICK_R5_AUDIT="+json.dumps(out,sort_keys=True,separators=(",",":")))
+          PY

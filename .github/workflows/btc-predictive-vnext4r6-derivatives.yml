@@ -1,0 +1,47 @@
+name: BTC predictive vNext4R6 derivatives ablation
+
+on:
+  push:
+    branches: [btc-predictive-vnext4r6-research-20261006]
+    paths:
+      - research_vnext4r6/derivatives_ablation.py
+      - .github/workflows/btc-predictive-vnext4r6-derivatives.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: btc-predictive-vnext4r6-derivatives
+  cancel-in-progress: false
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: btc-predictive-vnext4r6-research-20261006
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
+      - run: python research_vnext/fetch_hourly.py
+      - name: Fetch public derivatives history
+        run: python research_vnext/fetch_derivatives.py
+      - run: python -I -m py_compile research_vnext4r6/derivatives_ablation.py
+      - name: Run paired derivatives ablation
+        run: PYTHONPATH=. python research_vnext4r6/derivatives_ablation.py
+      - name: Commit research result
+        run: |
+          git config user.name 'btc-predictive-vnext4r6[bot]'
+          git config user.email 'btc-predictive-vnext4r6[bot]@users.noreply.github.com'
+          git add research_vnext4r6/derivatives_ablation_result.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Record R6 derivatives ablation"
+          git fetch origin btc-predictive-vnext4r6-research-20261006
+          git rebase origin/btc-predictive-vnext4r6-research-20261006
+          git push origin HEAD:btc-predictive-vnext4r6-research-20261006

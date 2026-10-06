@@ -34,6 +34,7 @@ def fit_fold(X,regime,vol,dates,y,when,train,cal,test,due_delta,horizon_steps,ha
     pred=fit_candidates(X,regime,y,when,train,cal,test,horizon_steps,hazard_step)
     base=adaptive_baselines(dates,y,regime,vol,train,test,due_delta)
     pred.update(base)
+    pred["ensemble_equal"]=(pred["logistic"]+pred["gbdt"]+pred["competing_risks"])/3.0
 
     test_idx=np.flatnonzero(test)
     q=np.quantile(vol[train],[1/3,2/3])
@@ -95,7 +96,7 @@ def evaluate_head(name,X,regime,vol,dates,y,when,due_delta,horizon_steps,hazard_
 
 
 def summarize(head):
-    names=["vol90d",*CONTENDERS,*SELECTORS]
+    names=["vol90d",*CONTENDERS,"ensemble_equal",*SELECTORS]
     summary={}
     for name in names:
         rows=[]
@@ -180,6 +181,7 @@ def main():
       "status":"RESEARCH_ONLY",
       "trading_authority":False,
       "production_freeze_authorized":False,
+      "research_iteration_note":"ensemble_equal added after initial structural diagnostic; historical result is tuning evidence only and still requires fresh prospective validation",
       "predeclared_selector_rules":{
         "selector_regime":"GBDT only in BREAKOUT_POST_BREAKOUT or REVERSAL_LIQUIDATION; vol90d otherwise",
         "selector_regime_or_highvol":"GBDT in event regime OR top training volatility tercile; vol90d otherwise",

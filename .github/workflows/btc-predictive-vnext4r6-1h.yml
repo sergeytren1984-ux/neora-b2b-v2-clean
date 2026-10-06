@@ -63,10 +63,10 @@ jobs:
       - name: Immutable numerical selftest
         run: |
           python -I - <<'PY'
-import runpy,sys
-sys.path.insert(0,"/tmp/vnext4r6-runtime")
-runpy.run_path("/tmp/vnext4r6-runtime/predictive_vnext4r6/selftest.py",run_name="__main__")
-PY
+          import runpy,sys
+          sys.path.insert(0,"/tmp/vnext4r6-runtime")
+          runpy.run_path("/tmp/vnext4r6-runtime/predictive_vnext4r6/selftest.py",run_name="__main__")
+          PY
 
       - name: Scheduler preflight
         env:

@@ -51,7 +51,7 @@ def flow_number(text):
 
 
 def farside():
-    url="https://farside.co.uk/btc/"
+    url="https://farside.co.uk/bitcoin-etf-flow-all-data/"
     b,digest=get(url)
     html=b.decode("utf-8","replace")
     rows=[]

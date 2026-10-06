@@ -50,6 +50,7 @@ jobs:
           git add research_vnext4r6/structural_result.json
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "Record R6 structural research result"
+          git reset --hard HEAD
           git fetch origin btc-predictive-vnext4r6-research-20261006
           git rebase origin/btc-predictive-vnext4r6-research-20261006
           git push origin HEAD:btc-predictive-vnext4r6-research-20261006

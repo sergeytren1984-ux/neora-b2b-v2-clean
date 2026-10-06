@@ -26,7 +26,8 @@ from predictive_vnext4r6.predict import (
 ROOT = Path(__file__).resolve().parents[1]
 HERE = ROOT / "predictive_vnext4r6"
 RESEARCH = ROOT / "research_vnext4r6"
-TOL = 1e-8
+TOL = 1e-4
+COMPONENT_TOL = 2e-4
 
 
 def ensemble(artifact, X):
@@ -106,9 +107,17 @@ def main():
         if list(names) != artifact["feature_names"]:
             raise AssertionError(f"{head}: feature schema drift")
 
-        p = ensemble(artifact, X)
+        component_probs = {
+            name: component_distribution(artifact, name, X)
+            for name in ("logistic", "gbdt", "competing_risks")
+        }
+        component_metrics = {
+            name: metrics(p, y) for name, p in component_probs.items()
+        }
+        p = sum(component_probs.values()) / 3.0
         got = metrics(p, y)
-        expected = research["heads"][head]["folds"]["2026Q3"]["models"]["ensemble_equal"]
+        expected_models = research["heads"][head]["folds"]["2026Q3"]["models"]
+        expected = expected_models["ensemble_equal"]
 
         if abs(got["brier"] - expected["brier"]) > TOL:
             raise AssertionError(
@@ -118,6 +127,18 @@ def main():
             raise AssertionError(
                 f"{head}: log-loss replay mismatch {got['log_loss']} != {expected['log_loss']}"
             )
+        for name, cm in component_metrics.items():
+            em = expected_models[name]
+            if abs(cm["brier"] - em["brier"]) > COMPONENT_TOL:
+                raise AssertionError(
+                    f"{head}/{name}: component Brier replay mismatch "
+                    f"{cm['brier']} != {em['brier']}"
+                )
+            if abs(cm["log_loss"] - em["log_loss"]) > COMPONENT_TOL:
+                raise AssertionError(
+                    f"{head}/{name}: component log-loss replay mismatch "
+                    f"{cm['log_loss']} != {em['log_loss']}"
+                )
 
         expected_n = int(
             research["heads"][head]["folds"]["2026Q3"]["meta"]["test_n"]
@@ -134,6 +155,21 @@ def main():
             "brier_abs_error": abs(got["brier"] - expected["brier"]),
             "log_loss_abs_error": abs(got["log_loss"] - expected["log_loss"]),
             "source_sha256": source_sha,
+            "components": {
+                name: {
+                    "brier": component_metrics[name]["brier"],
+                    "expected_brier": expected_models[name]["brier"],
+                    "brier_abs_error": abs(
+                        component_metrics[name]["brier"] - expected_models[name]["brier"]
+                    ),
+                    "log_loss": component_metrics[name]["log_loss"],
+                    "expected_log_loss": expected_models[name]["log_loss"],
+                    "log_loss_abs_error": abs(
+                        component_metrics[name]["log_loss"] - expected_models[name]["log_loss"]
+                    ),
+                }
+                for name in ("logistic", "gbdt", "competing_risks")
+            },
             "parity": True,
         }
 

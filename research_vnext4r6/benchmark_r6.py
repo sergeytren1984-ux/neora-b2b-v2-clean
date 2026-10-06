@@ -127,7 +127,7 @@ def summarize(head):
 
 
 def build_15m_heads():
-    hist=ROOT/"research_vnext/data/BTCUSDT_15m_2024-01_2026-06.json.gz"
+    hist=ROOT/"research_vnext4r6/data/BTCUSDT_15m_2024-01_2026-09.json.gz"
     t,o,hi,lo,c,v,trades,taker,source_sha=read_klines(hist,900000)
     ix,dates,X,names,regime,vol=build_15m_features(t,hi,lo,c,v,trades,taker,16)
     heads={}

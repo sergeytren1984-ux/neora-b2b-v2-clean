@@ -1,0 +1,149 @@
+name: BTC predictive vNext4R6 health guard
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/btc-predictive-vnext4r6-health.yml
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: btc-predictive-vnext4r6-health-guard
+  cancel-in-progress: true
+
+jobs:
+  health:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - head: 1h
+            branch: btc-predictive-vnext4r6-1h
+            workflow_file: btc-predictive-vnext4r6-1h.yml
+            cadence_minutes: 15
+            deadline_minutes: 14
+            horizon_minutes: 60
+          - head: 4h
+            branch: btc-predictive-vnext4r6-4h
+            workflow_file: btc-predictive-vnext4r6-4h.yml
+            cadence_minutes: 15
+            deadline_minutes: 14
+            horizon_minutes: 240
+          - head: 24h
+            branch: btc-predictive-vnext4r6-24h
+            workflow_file: btc-predictive-vnext4r6-24h.yml
+            cadence_minutes: 60
+            deadline_minutes: 45
+            horizon_minutes: 1440
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ matrix.branch }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fetch main and build immutable runtime
+        run: |
+          git fetch origin main
+          rm -rf /tmp/vnext4r6-runtime
+          mkdir -p /tmp/vnext4r6-runtime
+          git archive 98d6ea6e981b3306f397a9105babc2e5d66ac7a0 | tar -x -C /tmp/vnext4r6-runtime
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+
+      - run: python -m pip install --disable-pip-version-check numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
+
+      - name: Verify signed governance and slot lifecycle
+        env:
+          R6_HEAD: ${{ matrix.head }}
+          R6_CADENCE_MINUTES: ${{ matrix.cadence_minutes }}
+          R6_DEADLINE_MINUTES: ${{ matrix.deadline_minutes }}
+          R6_HORIZON_MINUTES: ${{ matrix.horizon_minutes }}
+        run: |
+          python -I - <<'PY'
+          import json,os,sys
+          from datetime import datetime,timedelta,timezone
+          sys.path.insert(0,"/tmp/vnext4r6-runtime")
+          from predictive_vnext4r6.scorecard import run
+          from predictive_vnext4r6.worker import CONFIG,START,slot_text
+
+          head=os.environ["R6_HEAD"]
+          cfg=CONFIG[head]
+          report=run(head,".")
+          print(json.dumps(report,indent=2,sort_keys=True))
+          assert report["governance"]["ok"] is True,report["governance"]
+          assert report["trading_authority"] is False
+
+          now=datetime.now(timezone.utc)
+          events_dir=cfg["events"]
+          import pathlib
+          events=[]
+          for p in sorted(pathlib.Path(events_dir).glob("????????.json")):
+              events.append(json.loads(p.read_text()))
+          by_type={}
+          for e in events:
+              by_type.setdefault(e.get("type"),{})[e.get("slot")]=e
+
+          if now < START:
+              assert len(events)==2,[(e.get("sequence"),e.get("type")) for e in events]
+              assert events[0]["type"]=="SCHEDULE_REGISTERED"
+              assert events[1]["type"]=="CONFIG_FROZEN_PRESTART"
+              print("R6_PRESTART_HEALTH_PASS",head)
+              raise SystemExit(0)
+
+          cadence=timedelta(minutes=int(os.environ["R6_CADENCE_MINUTES"]))
+          deadline=timedelta(minutes=int(os.environ["R6_DEADLINE_MINUTES"]))
+          horizon=timedelta(minutes=int(os.environ["R6_HORIZON_MINUTES"]))
+          forecast=by_type.get("FORECAST_ISSUED",{})
+          delivery=by_type.get("DELIVERY_CONFIRMED",{})
+          missed=by_type.get("SLOT_MISSED",{})
+          outcome=by_type.get("OUTCOME_RECORDED",{})
+
+          anchor=START
+          checked=0
+          while anchor+deadline < now:
+              slot=slot_text(anchor)
+              has_forecast=slot in forecast
+              has_miss=slot in missed
+              assert has_forecast ^ has_miss,(head,slot,"forecast/miss lifecycle invalid")
+              if has_forecast:
+                  assert slot in delivery,(head,slot,"delivery missing")
+                  if anchor+horizon+cadence+timedelta(minutes=5) < now:
+                      assert slot in outcome,(head,slot,"due outcome missing beyond grace")
+              checked+=1
+              anchor+=cadence
+          print("R6_POSTSTART_HEALTH_PASS",head,"closed_deadline_slots",checked)
+          PY
+
+      - name: Verify workflow liveness
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          R6_WORKFLOW_FILE: ${{ matrix.workflow_file }}
+        run: |
+          python - <<'PY'
+          import json,os,urllib.request
+          url=f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/actions/workflows/{os.environ['R6_WORKFLOW_FILE']}/runs?per_page=30"
+          req=urllib.request.Request(url,headers={
+              "Authorization":"Bearer "+os.environ["GH_TOKEN"],
+              "Accept":"application/vnd.github+json",
+              "X-GitHub-Api-Version":"2022-11-28",
+          })
+          runs=json.load(urllib.request.urlopen(req))["workflow_runs"]
+          live=[r for r in runs if r["status"] in ("in_progress","queued","pending","waiting","requested")]
+          assert live,[(r["id"],r["status"]) for r in runs[:10]]
+          print("R6_LIVENESS_PASS",[(r["id"],r["status"]) for r in live])
+          PY

@@ -42,7 +42,7 @@ jobs:
       - name: Run R6 structural benchmark
         env:
           PYTHONPATH: .
-        run: python -I research_vnext4r6/benchmark_r6.py
+        run: PYTHONPATH=. python research_vnext4r6/benchmark_r6.py
       - name: Commit immutable research result
         run: |
           git config user.name 'btc-predictive-vnext4r6[bot]'

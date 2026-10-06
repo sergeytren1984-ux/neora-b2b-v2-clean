@@ -86,7 +86,7 @@ def fold_scores(X,regime,vol,dates,y,when,train,cal,test):
         m["brier_gain_vs_vol90d_mean"]=float(np.mean(
           np.sum((primary-one)**2,axis=1)-np.sum((p-one)**2,axis=1)))
         out[name]=m
-    return out
+    return out,pred,yt,dt
 
 
 def main():
@@ -125,23 +125,49 @@ def main():
             if np.sum(te&ce)>=100:
                 fam["spot_plus_macro_markets_etf"]=np.column_stack((spot,xm,xe))
         fr={"n_market_test":int(np.sum(tem)),"families":{}}
+        raw={}
         for name,X in fam.items():
             vv=common if name!="spot_plus_macro_markets_etf" else (vm&ve)
             trf=tr&vv;caf=ca&vv;tef=te&vv
-            fr["families"][name]=fold_scores(
+            scores,pred,yt,dt=fold_scores(
               X,regime,vol,dates,y,when,trf,caf,tef)
+            fr["families"][name]=scores
             fr["families"][name]["_n_test"]=int(np.sum(tef))
+            raw[name]=(pred,yt,dt)
+        # This is the decisive macro ablation: same GBDT architecture, same anchors,
+        # only the exogenous feature block differs.
+        if "spot" in raw and "spot_plus_macro_markets" in raw:
+            p0,y0,dt0=raw["spot"];p1,y1,dt1=raw["spot_plus_macro_markets"]
+            if len(y0)!=len(y1) or not np.array_equal(y0,y1) or not np.array_equal(dt0,dt1):
+                raise ValueError("paired macro comparison anchors differ")
+            a=p0["gbdt"];bpred=p1["gbdt"];one=np.eye(4)[y0]
+            gain=np.sum((a-one)**2,axis=1)-np.sum((bpred-one)**2,axis=1)
+            fr["paired_macro_gbdt_vs_spot_gbdt"]={
+              "n":len(y0),
+              "brier_gain_mean":float(np.mean(gain)),
+              "brier_gain_ci95":block_ci(a,bpred,y0,dt0),
+              "macro_brier":metrics(bpred,y0)["brier"],
+              "spot_brier":metrics(a,y0)["brier"],
+            }
         report["folds"][label]=fr
 
-    # Structural acceptance summary for the GBDT macro challenger only.
-    gains=[]
+    gains_base=[];gains_pair=[];cis_pair=[]
     for f in report["folds"].values():
         if "spot_plus_macro_markets" in f["families"]:
-            gains.append(f["families"]["spot_plus_macro_markets"]["gbdt"]["brier_gain_vs_vol90d_mean"])
+            gains_base.append(f["families"]["spot_plus_macro_markets"]["gbdt"]["brier_gain_vs_vol90d_mean"])
+        if "paired_macro_gbdt_vs_spot_gbdt" in f:
+            gains_pair.append(f["paired_macro_gbdt_vs_spot_gbdt"]["brier_gain_mean"])
+            cis_pair.append(f["paired_macro_gbdt_vs_spot_gbdt"]["brier_gain_ci95"])
     report["macro_market_gbdt_summary"]={
-      "folds":len(gains),"wins_vs_vol90d":sum(g>0 for g in gains),
-      "mean_brier_gain_vs_vol90d":None if not gains else float(np.mean(gains)),
-      "research_gate_pass":bool(len(gains)>=3 and sum(g>0 for g in gains)>=2 and np.mean(gains)>0),
+      "folds":len(gains_pair),
+      "wins_vs_vol90d":sum(g>0 for g in gains_base),
+      "mean_brier_gain_vs_vol90d":None if not gains_base else float(np.mean(gains_base)),
+      "wins_vs_spot_gbdt":sum(g>0 for g in gains_pair),
+      "mean_brier_gain_vs_spot_gbdt":None if not gains_pair else float(np.mean(gains_pair)),
+      "positive_ci_folds_vs_spot_gbdt":sum(ci[0]>0 for ci in cis_pair if ci and ci[0] is not None),
+      "research_gate_pass":bool(
+          len(gains_pair)>=3 and sum(g>0 for g in gains_pair)>=2 and
+          np.mean(gains_pair)>0),
     }
     p=DATA/"macro_ablation_result.json"
     p.write_text(json.dumps(report,ensure_ascii=False,indent=2,sort_keys=True)+"\n")

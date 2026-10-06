@@ -30,7 +30,7 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install --disable-pip-version-check numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
       - run: python research_vnext/fetch_hourly.py
-      - run: python research_vnext/fetch_micro.py
+      - run: python research_vnext4r6/fetch_15m_r6.py
       - run: python -I -m py_compile research_vnext4r6/breakout_memory_ablation.py
       - name: Run paired memory ablation
         run: PYTHONPATH=. python research_vnext4r6/breakout_memory_ablation.py

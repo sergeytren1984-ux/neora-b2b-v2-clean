@@ -5,7 +5,7 @@
     "yahoo_daily": "raw point + 24h"
   },
   "etf_provenance": {
-    "raw_sha256": "95c1c044c9d68e03c034c814eadce2f814b3af312d60752498dbb46bc119cfa2",
+    "raw_sha256": "512ff8c4a516a81695b7efb1d5f7f29d9fe68ac71338576b59b39f8b634185dd",
     "rows": 123,
     "status": "OK"
   },
@@ -1338,9 +1338,9 @@
     "wins_vs_vol90d": 4
   },
   "market_provenance": {
-    "dxy_raw_sha256": "f81a7d99c2a18c6d20f3261203567465058c441ae15abc7af84973a8d5e466ad",
-    "nasdaq_futures_raw_sha256": "041f78150b8a9d5a6f211e230a4f760b362b4196e1a909ca83c0a17b0a10a9eb",
-    "us10y_raw_sha256": "afd67703bc093ca0622bcd40c7f2374334f9d4cb36e4381178b49cc40ff25e73"
+    "dxy_raw_sha256": "d095c5ff714219b4c03554c0a564859d9e31b46a083b6138db7e573efb8982ca",
+    "nasdaq_futures_raw_sha256": "c8b3e5925bca3f73910b4a9cab0eca1023d935335fcaa0349128e9e6695f1055",
+    "us10y_raw_sha256": "02a87d9c8afd89cddb3aca7856b85bb9e0d3c492b7d8df94a81692b3b44c584b"
   },
   "schema": "btc-predictive-vnext4r6-macro-ablation-v1",
   "status": "RESEARCH_ONLY",

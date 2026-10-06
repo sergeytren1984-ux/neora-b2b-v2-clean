@@ -4,7 +4,7 @@
     "missing_values": "reject/not available; never forward-fill beyond actual latest observation",
     "yahoo_daily": "raw point + 24h"
   },
-  "retrieved_at_utc": "2026-10-06T07:33:09.984906+00:00",
+  "retrieved_at_utc": "2026-10-06T07:39:54.845981+00:00",
   "schema": "btc-predictive-r6-exogenous-history-v1",
   "series": {
     "dxy": {
@@ -2814,12 +2814,12 @@
           "timestamp_utc": "2026-09-30T04:00:00+00:00"
         }
       ],
-      "raw_sha256": "f81a7d99c2a18c6d20f3261203567465058c441ae15abc7af84973a8d5e466ad",
+      "raw_sha256": "d095c5ff714219b4c03554c0a564859d9e31b46a083b6138db7e573efb8982ca",
       "source_url": "https://query1.finance.yahoo.com/v8/finance/chart/DX-Y.NYB?period1=1702598400&period2=1790812800&interval=1d&events=history&includeAdjustedClose=true",
       "symbol": "DX-Y.NYB"
     },
     "etf_flows": {
-      "raw_sha256": "95c1c044c9d68e03c034c814eadce2f814b3af312d60752498dbb46bc119cfa2",
+      "raw_sha256": "512ff8c4a516a81695b7efb1d5f7f29d9fe68ac71338576b59b39f8b634185dd",
       "rows": [
         {
           "date": "2026-04-08",
@@ -6123,7 +6123,7 @@
           "timestamp_utc": "2026-09-30T04:00:00+00:00"
         }
       ],
-      "raw_sha256": "041f78150b8a9d5a6f211e230a4f760b362b4196e1a909ca83c0a17b0a10a9eb",
+      "raw_sha256": "c8b3e5925bca3f73910b4a9cab0eca1023d935335fcaa0349128e9e6695f1055",
       "source_url": "https://query1.finance.yahoo.com/v8/finance/chart/NQ%3DF?period1=1702598400&period2=1790812800&interval=1d&events=history&includeAdjustedClose=true",
       "symbol": "NQ=F"
     },
@@ -8926,7 +8926,7 @@
           "timestamp_utc": "2026-09-30T12:20:00+00:00"
         }
       ],
-      "raw_sha256": "afd67703bc093ca0622bcd40c7f2374334f9d4cb36e4381178b49cc40ff25e73",
+      "raw_sha256": "02a87d9c8afd89cddb3aca7856b85bb9e0d3c492b7d8df94a81692b3b44c584b",
       "source_url": "https://query1.finance.yahoo.com/v8/finance/chart/%5ETNX?period1=1702598400&period2=1790812800&interval=1d&events=history&includeAdjustedClose=true",
       "symbol": "^TNX"
     }

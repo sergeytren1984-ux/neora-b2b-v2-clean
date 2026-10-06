@@ -55,9 +55,12 @@ jobs:
           git config user.name 'btc-predictive-vnext4r6-24h[bot]'
           git config user.email 'btc-predictive-vnext4r6-24h[bot]@users.noreply.github.com'
       - name: Immutable numerical selftest
-        env:
-          PYTHONPATH: /tmp/vnext4r6-runtime
-        run: PYTHONPATH=/tmp/vnext4r6-runtime python -I /tmp/vnext4r6-runtime/predictive_vnext4r6/selftest.py
+        run: |
+          python -I - <<'PY'
+import runpy,sys
+sys.path.insert(0,"/tmp/vnext4r6-runtime")
+runpy.run_path("/tmp/vnext4r6-runtime/predictive_vnext4r6/selftest.py",run_name="__main__")
+PY
       - name: Scheduler preflight
         env:
           BTC_VNEXT4R6_HEAD: 24h

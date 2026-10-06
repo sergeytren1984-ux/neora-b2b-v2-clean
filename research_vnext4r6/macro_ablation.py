@@ -122,7 +122,7 @@ def main():
         }
         if eprov["status"]=="OK":
             ce=vm&ve
-            if np.sum(te&ce)>=100:
+            if min(np.sum(tr&ce),np.sum(ca&ce),np.sum(te&ce))>=100:
                 fam["spot_plus_macro_markets_etf"]=np.column_stack((spot,xm,xe))
         fr={"n_market_test":int(np.sum(tem)),"families":{}}
         raw={}

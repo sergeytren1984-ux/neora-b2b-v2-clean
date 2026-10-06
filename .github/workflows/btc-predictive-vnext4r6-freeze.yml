@@ -1,0 +1,70 @@
+name: BTC predictive vNext4R6 freeze research candidate
+
+on:
+  push:
+    branches: [btc-predictive-vnext4r6-freeze-20261006]
+    paths:
+      - predictive_vnext4r6/freeze_r6.py
+      - predictive_vnext4r6/predict.py
+      - predictive_vnext4r6/selftest.py
+      - predictive_vnext4r6/README.md
+      - .github/workflows/btc-predictive-vnext4r6-freeze.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: btc-predictive-vnext4r6-freeze
+  cancel-in-progress: true
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: btc-predictive-vnext4r6-freeze-20261006
+          fetch-depth: 0
+          persist-credentials: true
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+
+      - run: python -m pip install --disable-pip-version-check numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
+
+      - name: Recreate exact historical hourly source
+        run: python research_vnext/fetch_hourly.py
+
+      - name: Recreate exact R6 15m source through Sep 2026
+        run: python research_vnext4r6/fetch_15m_r6.py
+
+      - name: Compile frozen candidate sources
+        run: |
+          python -I -m py_compile predictive_vnext4r6/freeze_r6.py
+          python -I -m py_compile predictive_vnext4r6/predict.py
+          python -I -m py_compile predictive_vnext4r6/selftest.py
+
+      - name: Build frozen R6 candidate
+        env:
+          PYTHONPATH: .
+        run: PYTHONPATH=. python predictive_vnext4r6/freeze_r6.py
+
+      - name: Selftest frozen R6 candidate
+        env:
+          PYTHONPATH: .
+        run: PYTHONPATH=. python predictive_vnext4r6/selftest.py
+
+      - name: Commit frozen artifacts and metadata
+        run: |
+          git config user.name 'btc-predictive-vnext4r6[bot]'
+          git config user.email 'btc-predictive-vnext4r6[bot]@users.noreply.github.com'
+          git add             predictive_vnext4r6/head_1h.joblib             predictive_vnext4r6/head_4h.joblib             predictive_vnext4r6/head_24h.joblib             predictive_vnext4r6/freeze_metadata.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Freeze R6 research candidate artifacts"
+          git reset --hard HEAD
+          git fetch origin btc-predictive-vnext4r6-freeze-20261006
+          git rebase origin/btc-predictive-vnext4r6-freeze-20261006
+          git push origin HEAD:btc-predictive-vnext4r6-freeze-20261006

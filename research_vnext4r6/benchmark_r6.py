@@ -57,8 +57,11 @@ def fit_fold(X,regime,vol,dates,y,when,train,cal,test,due_delta,horizon_steps,ha
                     np.sum((p-np.eye(4)[yt])**2,axis=1))
         )
         report[name]=m
+    counts=np.bincount(yt,minlength=4)
     return report, {
         "test_n":int(np.sum(test)),
+        "test_class_counts":counts.tolist(),
+        "test_class_frequency":(counts/max(int(counts.sum()),1)).tolist(),
         "test_regime_event_fraction":float(np.mean(event_regime)) if len(event_regime) else None,
         "test_highvol_fraction":float(np.mean(highvol)) if len(highvol) else None,
         "training_vol_quantiles":[float(q[0]),float(q[1])],
@@ -133,8 +136,10 @@ def build_15m_heads():
         due=np.timedelta64(bars*15,"m")
         heads[label]=evaluate_head(
             label,X,regime,vol,dates,y,when,due,bars,1)
+        ratio=distance/c[ix]
         heads[label]["target"]={
             "type":"realized_vol_scaled_first_passage",
+            "distance_ratio_quantiles":[float(x) for x in np.quantile(ratio,[.01,.1,.5,.9,.99])],
             "source_interval":"15m","vol_window":"4h",
             "distance_formula":f"reference * std(15m_log_returns,4h) * sqrt({bars})",
             "horizon_minutes":bars*15,
@@ -153,8 +158,10 @@ def build_24h_head():
     distance=c[ix]*vol*np.sqrt(float(bars))
     y,when=target_distance(ix,c,hi,lo,distance,bars)
     head=evaluate_head("24h",X,regime,vol,dates,y,when,np.timedelta64(24,"h"),24,3)
+    ratio=distance/c[ix]
     head["target"]={
         "type":"realized_vol_scaled_first_passage",
+        "distance_ratio_quantiles":[float(x) for x in np.quantile(ratio,[.01,.1,.5,.9,.99])],
         "source_interval":"1h","vol_window":"24h",
         "distance_formula":"reference * std(1h_log_returns,24h) * sqrt(24)",
         "horizon_hours":24,

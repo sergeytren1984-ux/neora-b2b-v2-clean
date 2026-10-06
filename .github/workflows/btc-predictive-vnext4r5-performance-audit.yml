@@ -1,0 +1,201 @@
+name: BTC predictive vNext4R5 performance audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/btc-predictive-vnext4r5-performance-audit.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+      - name: Fetch evidence refs
+        run: |
+          git fetch origin \
+            refs/heads/btc-predictive-vnext4r5-early15m:refs/remotes/origin/btc-predictive-vnext4r5-early15m \
+            refs/heads/btc-predictive-vnext4r5-hourly:refs/remotes/origin/btc-predictive-vnext4r5-hourly
+      - name: Build immutable R5 runtime
+        run: |
+          rm -rf /tmp/r5audit
+          mkdir -p /tmp/r5audit
+          git archive 16c4fd69e6c4e6f58310ecbd597daa80af270f83 | tar -x -C /tmp/r5audit
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: 'v3.0.6'
+      - run: python -m pip install --disable-pip-version-check numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
+      - name: Current trusted scorecard - early15m
+        run: |
+          git checkout --detach origin/btc-predictive-vnext4r5-early15m
+          cp -a /tmp/r5audit/predictive_vnext4r5 ./predictive_vnext4r5_runtime
+          PYTHONPATH=/tmp/r5audit BTC_VNEXT4R5_EVIDENCE_ROOT=$PWD \
+            python /tmp/r5audit/predictive_vnext4r5/scorecard.py --head early15m --repo-root "$PWD" | tee /tmp/score-early.json
+      - name: Current trusted scorecard - hourly
+        run: |
+          git checkout --detach origin/btc-predictive-vnext4r5-hourly
+          PYTHONPATH=/tmp/r5audit BTC_VNEXT4R5_EVIDENCE_ROOT=$PWD \
+            python /tmp/r5audit/predictive_vnext4r5/scorecard.py --head hourly --repo-root "$PWD" | tee /tmp/score-hourly.json
+      - name: Prospective performance audit
+        shell: bash
+        run: |
+          git checkout --detach ${{ github.sha }}
+          python - <<'PY'
+          import subprocess,json,hashlib,math
+          from datetime import datetime,timezone,timedelta
+          import numpy as np
+
+          UTC=timezone.utc
+          START=datetime(2026,10,5,15,0,tzinfo=UTC)
+          CLASS={"LOWER_FIRST":0,"UPPER_FIRST":1,"NEITHER":2,"AMBIGUOUS_SAME_BAR":3}
+          MODELS=("logistic","gbdt","competing_risks")
+
+          def git(*args):
+              return subprocess.run(["git",*args],check=True,capture_output=True,text=True).stdout
+          def events(branch,evdir):
+              ref="origin/"+branch
+              names=[x for x in git("ls-tree","-r","--name-only",ref).splitlines()
+                     if x.startswith(evdir+"/") and x.endswith(".json") and x.rsplit("/",1)[1][:8].isdigit()
+                     and len(x.rsplit("/",1)[1].split(".")[0])==8]
+              out=[]
+              prev=None
+              idem=set()
+              for p in sorted(names):
+                  raw=git("show",f"{ref}:{p}")
+                  e=json.loads(raw)
+                  canon=json.dumps(e,sort_keys=True,separators=(",",":"),ensure_ascii=False,allow_nan=False)+"\n"
+                  assert raw==canon,("noncanonical",p)
+                  assert e["previous_hash"]==prev,("hash_chain",p)
+                  assert e["idempotency_key"] not in idem,("duplicate_idempotency",p)
+                  idem.add(e["idempotency_key"])
+                  prev=hashlib.sha256(raw.encode()).hexdigest()
+                  out.append(e)
+              return out
+
+          def dist(d):
+              return np.array([float(d["lower_first"]),float(d["upper_first"]),
+                               float(d["neither"]),float(d["ambiguous_same_bar"])])
+          def metrics(rows,which):
+              if not rows:return None
+              y=np.array([CLASS[o["outcome_class"]] for f,o in rows],dtype=int)
+              if which=="primary":
+                  p=np.vstack([dist(f["control"]["primary_distribution"]) for f,o in rows])
+              elif which=="secondary":
+                  p=np.vstack([dist(f["control"]["secondary_distribution"]) for f,o in rows])
+              else:
+                  p=np.vstack([dist(f["contenders"][which]["class_distribution"]) for f,o in rows])
+              one=np.eye(4)[y]
+              brier=float(np.mean(np.sum((p-one)**2,axis=1)))
+              ll=float(-np.mean(np.log(np.clip(p[np.arange(len(y)),y],1e-12,1))))
+              acc=float(np.mean(np.argmax(p,axis=1)==y))
+              # Directional score only on decisive upper/lower outcomes.
+              dm=np.isin(y,[0,1])
+              dacc=None
+              if np.any(dm):
+                  pred=np.where(p[:,0]>=p[:,1],0,1)
+                  dacc=float(np.mean(pred[dm]==y[dm]))
+              return {"n":len(y),"brier":brier,"log_loss":ll,"argmax_accuracy":acc,
+                      "directional_accuracy_lower_upper_only":dacc}
+
+          def audit(branch,evdir,cadence,horizon):
+              ev=events(branch,evdir)
+              fs=[e for e in ev if e.get("type")=="FORECAST_ISSUED"]
+              os=[e for e in ev if e.get("type")=="OUTCOME_RECORDED"]
+              rs=[e for e in ev if e.get("type")=="DELIVERY_CONFIRMED"]
+              ms=[e for e in ev if e.get("type")=="SLOT_MISSED"]
+              ab=[e for e in ev if e.get("type")=="ABSTAIN_DATA_INVALID"]
+              fd={e["slot"]:e for e in fs}; od={e["slot"]:e for e in os}
+              receipts={e["slot"]:e for e in rs}
+              dupf=len(fs)-len(fd); dupo=len(os)-len(od)
+              paired=[(f,od[f["slot"]]) for f in fs if f["slot"] in od]
+              now=datetime.now(UTC)
+              due=[f for f in fs if datetime.fromisoformat(f["due_utc"])<=now]
+              missing_out=[f["slot"] for f in due if f["slot"] not in od]
+              missing_receipt=[f["slot"] for f in fs if f["slot"] not in receipts]
+              # expected forecast slots from START through last completed cadence anchor
+              last=now.replace(second=0,microsecond=0)
+              if cadence==15:
+                  last=last.replace(minute=(last.minute//15)*15)
+              else:
+                  last=last.replace(minute=0)
+              exp=[];t=START
+              while t<=last:
+                  exp.append(t.strftime("%Y%m%dT%H%M%SZ"));t+=timedelta(minutes=cadence)
+              missing_fc=[s for s in exp if s not in fd and not any(x.get("slot")==s for x in ms)]
+              # independent non-overlap fixed phase.
+              ind=[]
+              t=START
+              while t+timedelta(hours=horizon)<=now:
+                  s=t.strftime("%Y%m%dT%H%M%SZ")
+                  if s in fd and s in od: ind.append((fd[s],od[s]))
+                  t+=timedelta(hours=horizon)
+              classes={k:0 for k in CLASS}
+              for f,o in paired: classes[o["outcome_class"]]+=1
+              # empirical mean probabilities and outcome frequency over all closed overlapping windows.
+              mean_probs={}
+              for m in MODELS:
+                  if paired:
+                      pp=np.vstack([dist(f["contenders"][m]["class_distribution"]) for f,o in paired])
+                      mean_probs[m]=pp.mean(axis=0).tolist()
+              freq=np.zeros(4)
+              for f,o in paired: freq[CLASS[o["outcome_class"]]]+=1
+              if len(paired):freq/=len(paired)
+              # First hours after launch vs later closed windows.
+              def slice_metrics(a,b):
+                  rr=[]
+                  for f,o in paired:
+                      x=datetime.fromisoformat(f["anchor_utc"])
+                      if a<=x<b: rr.append((f,o))
+                  return {m:metrics(rr,m) for m in (*MODELS,"primary")}
+              early=slice_metrics(START,START+timedelta(hours=4))
+              later=slice_metrics(START+timedelta(hours=4),now+timedelta(seconds=1))
+              # Check alert behavior by actual class.
+              alert={}
+              for m in MODELS:
+                  z={"lower_alert_total":0,"upper_alert_total":0,"lower_alert_on_lower":0,
+                     "upper_alert_on_upper":0,"closed":len(paired)}
+                  for f,o in paired:
+                      a=f["contenders"][m]["alerts_at_calibration_fpr20"]
+                      if a["lower_first"]:z["lower_alert_total"]+=1
+                      if a["upper_first"]:z["upper_alert_total"]+=1
+                      if o["outcome_class"]=="LOWER_FIRST" and a["lower_first"]:z["lower_alert_on_lower"]+=1
+                      if o["outcome_class"]=="UPPER_FIRST" and a["upper_first"]:z["upper_alert_on_upper"]+=1
+                  alert[m]=z
+              return {
+                "event_count":len(ev),"forecast_count":len(fs),"receipt_count":len(rs),
+                "outcome_count":len(os),"slot_missed_count":len(ms),"abstain_count":len(ab),
+                "duplicate_forecast_slots":dupf,"duplicate_outcome_slots":dupo,
+                "expected_forecast_slots_to_last_anchor":len(exp),
+                "missing_forecast_or_miss_marker_count":len(missing_fc),
+                "missing_due_outcome_count":len(missing_out),
+                "missing_receipt_count":len(missing_receipt),
+                "closed_overlapping_windows":len(paired),"outcome_classes":classes,
+                "empirical_class_frequency":freq.tolist(),"mean_model_probability":mean_probs,
+                "all_closed_metrics":{m:metrics(paired,m) for m in (*MODELS,"primary","secondary")},
+                "independent_fixed_phase_closed":len(ind),
+                "independent_metrics":{m:metrics(ind,m) for m in (*MODELS,"primary","secondary")},
+                "first_4h_metrics":early,"later_metrics":later,"alert_summary":alert,
+                "latest_forecast":fs[-1] if fs else None,
+                "latest_outcome":os[-1] if os else None
+              }
+
+          report={
+            "computed_at_utc":datetime.now(UTC).isoformat(),
+            "source_sha":"16c4fd69e6c4e6f58310ecbd597daa80af270f83",
+            "early15m":audit("btc-predictive-vnext4r5-early15m","predictive_vnext4r5_early15m_events",15,4),
+            "hourly":audit("btc-predictive-vnext4r5-hourly","predictive_vnext4r5_hourly_events",60,72)
+          }
+          print("R5_PERFORMANCE_AUDIT="+json.dumps(report,sort_keys=True,separators=(",",":")))
+          print("R5_SCORECARD_EARLY="+open("/tmp/score-early.json").read().replace("\n"," "))
+          print("R5_SCORECARD_HOURLY="+open("/tmp/score-hourly.json").read().replace("\n"," "))
+          PY

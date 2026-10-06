@@ -1,0 +1,100 @@
+{
+  "anchors_dropped_for_missing_or_stale_derivatives": 2156,
+  "folds": {
+    "2025Q3": {
+      "brier_gain_derivatives_vs_spot_ci95": [
+        -0.0035061886478983026,
+        0.010779520682369936
+      ],
+      "brier_gain_derivatives_vs_spot_mean": 0.0028711920720625307,
+      "derivatives_gbdt": {
+        "brier": 0.6028024715081471,
+        "ece10": 0.05610909546294141,
+        "log_loss": 1.0021133491783538,
+        "lower_pr_auc": 0.3823050617606687,
+        "lower_roc_auc": 0.6396213127947892,
+        "upper_pr_auc": 0.3519877171939576,
+        "upper_roc_auc": 0.5697365154792723
+      },
+      "n": 2036,
+      "spot_gbdt": {
+        "brier": 0.6056736635802096,
+        "ece10": 0.025772993239512317,
+        "log_loss": 1.0069415142270837,
+        "lower_pr_auc": 0.3801073022502734,
+        "lower_roc_auc": 0.6398494235232463,
+        "upper_pr_auc": 0.3768057394252037,
+        "upper_roc_auc": 0.5885425901627718
+      }
+    },
+    "2025Q4": {
+      "brier_gain_derivatives_vs_spot_ci95": [
+        -0.018631820627734285,
+        0.012261834334240138
+      ],
+      "brier_gain_derivatives_vs_spot_mean": -0.004466623957884806,
+      "derivatives_gbdt": {
+        "brier": 0.6040828047861925,
+        "ece10": 0.09529035507139724,
+        "log_loss": 1.0105232608974448,
+        "lower_pr_auc": 0.43587604122768164,
+        "lower_roc_auc": 0.614416645399925,
+        "upper_pr_auc": 0.4813461470698924,
+        "upper_roc_auc": 0.7110940452977351
+      },
+      "n": 2040,
+      "spot_gbdt": {
+        "brier": 0.5996161808283077,
+        "ece10": 0.07910223363934969,
+        "log_loss": 1.0029937947786707,
+        "lower_pr_auc": 0.4387039432687165,
+        "lower_roc_auc": 0.6026437973053725,
+        "upper_pr_auc": 0.4647738743298016,
+        "upper_roc_auc": 0.7177177141142942
+      }
+    },
+    "2026H1": {
+      "brier_gain_derivatives_vs_spot_ci95": [
+        -0.00996098509649316,
+        0.006941808066230336
+      ],
+      "brier_gain_derivatives_vs_spot_mean": -0.0020666874198164427,
+      "derivatives_gbdt": {
+        "brier": 0.6213846399616931,
+        "ece10": 0.03878196429501343,
+        "log_loss": 1.0293191997083577,
+        "lower_pr_auc": 0.4460586482918499,
+        "lower_roc_auc": 0.6284522779132897,
+        "upper_pr_auc": 0.3376282516175989,
+        "upper_roc_auc": 0.5970856484217993
+      },
+      "n": 4176,
+      "spot_gbdt": {
+        "brier": 0.6193179525418768,
+        "ece10": 0.03687495962388577,
+        "log_loss": 1.0260519941856159,
+        "lower_pr_auc": 0.4308200464154762,
+        "lower_roc_auc": 0.6214411234633124,
+        "upper_pr_auc": 0.35308608567134403,
+        "upper_roc_auc": 0.6112956614257005
+      }
+    }
+  },
+  "history_sha256": "3e78a339e60fec957dea2c0884c6840d66a92351ac04b4198623f1da10165fc9",
+  "provenance": {
+    "funding_sha256": "a2d6a63d37e1688e2438eef596728dbaa5e400d2a5a0c1e259d2d016686ef41a",
+    "oi_sha256": "17465a0f9d58ab269e1e20b4b021fedf40b4d3b6b4f429e8152321c70c519129",
+    "publication_time_verified": false,
+    "timestamp_lag_hours": 1
+  },
+  "schema": "btc-predictive-vnext4r6-derivatives-ablation-v1",
+  "status": "RESEARCH_ONLY",
+  "summary": {
+    "folds": 3,
+    "mean_brier_gain_vs_spot_gbdt": -0.0012207064352129059,
+    "positive_ci_folds": 0,
+    "research_gate_pass": false,
+    "wins_vs_spot_gbdt": 1
+  },
+  "trading_authority": false
+}

@@ -4,7 +4,9 @@ on:
   push:
     branches: [btc-predictive-vnext4r6-research-20261006]
     paths:
-      - research_vnext4r6/**
+      - research_vnext4r6/benchmark_r6.py
+      - research_vnext4r6/test_benchmark_r6.py
+      - research_vnext4r6/README.md
       - .github/workflows/btc-predictive-vnext4r6-research.yml
   workflow_dispatch: {}
 

@@ -16,7 +16,7 @@ permissions:
 
 concurrency:
   group: btc-predictive-vnext4r6-structural-research
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   research:

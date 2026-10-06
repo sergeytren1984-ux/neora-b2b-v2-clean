@@ -1,0 +1,50 @@
+{
+  "schema": "btc-predictive-vnext4r6-research-acceptance-policy-v1",
+  "status": "RESEARCH_SELECTION_POLICY",
+  "fixed_before_final_q3_result": true,
+  "trading_authority": false,
+  "production_freeze_authority": false,
+  "core_head_gate": {
+    "required_heads": [
+      "1h",
+      "4h",
+      "24h"
+    ],
+    "eligible_models": [
+      "logistic",
+      "gbdt",
+      "competing_risks",
+      "ensemble_equal"
+    ],
+    "min_folds": 4,
+    "require_wins_vs_vol90d_all_folds": true,
+    "min_positive_block_ci_fraction": 0.75,
+    "min_mean_brier_gain_vs_vol90d": 0.015,
+    "require_mean_log_loss_better_than_vol90d": true,
+    "selection_among_eligible": "lowest_mean_brier"
+  },
+  "target_gate": {
+    "primary_classes": [
+      "LOWER_FIRST",
+      "UPPER_FIRST",
+      "NEITHER"
+    ],
+    "min_test_frequency_each_primary_class": 0.05,
+    "max_test_frequency_any_primary_class": 0.8,
+    "median_distance_ratio_min": 0.001,
+    "median_distance_ratio_max": 0.1
+  },
+  "additional_block_gate": {
+    "comparison": "same_model_same_anchors_paired_ablation",
+    "min_folds": 3,
+    "min_win_fraction": 0.6666666667,
+    "min_positive_block_ci_folds": 2,
+    "require_positive_mean_brier_gain": true
+  },
+  "interpretation": {
+    "macro_daily_levels": "optional; reject does not block core R6",
+    "funding_oi": "optional; reject does not block core R6",
+    "breakout_memory": "optional; reject does not block core R6",
+    "etf": "requires sufficient timestamp-safe history; no backfill"
+  }
+}

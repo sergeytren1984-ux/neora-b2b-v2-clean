@@ -1,0 +1,48 @@
+{
+  "acceptance_policy_sha256": "e53e0e4e5d51bd8a3ac243d15f439753331e8fdb690188b1057679e4061ac56c",
+  "artifacts": {
+    "1h": {
+      "cal_n": 17372,
+      "path": "predictive_vnext4r6/head_1h.joblib",
+      "sha256": "9ccbcc3799a3be27e383b862213629ce268aace919a1c5aecf097a05ae1a04f5",
+      "source_sha256": "ca13cd2ede55d14c0ebd67ba1dcd14f8f793e1283e2f402d9452fc6e6c34d759",
+      "train_n": 69787
+    },
+    "24h": {
+      "cal_n": 4320,
+      "path": "predictive_vnext4r6/head_24h.joblib",
+      "sha256": "852ec232cd798d3939d50301dd0b3d30fb7e11e51ea3b6b1b5b9761abef57e09",
+      "source_sha256": "3e78a339e60fec957dea2c0884c6840d66a92351ac04b4198623f1da10165fc9",
+      "train_n": 17350
+    },
+    "4h": {
+      "cal_n": 17360,
+      "path": "predictive_vnext4r6/head_4h.joblib",
+      "sha256": "c386489ec54eb441fab7666036c5dcb1fca72e3ad7aa89fc32bf8e3575c04726",
+      "source_sha256": "ca13cd2ede55d14c0ebd67ba1dcd14f8f793e1283e2f402d9452fc6e6c34d759",
+      "train_n": 69775
+    }
+  },
+  "historical_validation_reused_for_component_fit": false,
+  "optional_blocks_excluded": {
+    "breakout_memory": "1h GBDT-only ablation passed, but incremental value versus the selected equal-weight ensemble has not been established",
+    "funding_oi": "paired research gate failed",
+    "macro_daily_market": "paired research gate failed",
+    "regime_selector": "diagnostic only; not the selected core architecture under the frozen acceptance gate"
+  },
+  "optional_blocks_in_executable_candidate": [],
+  "parent_r5_source_sha": "16c4fd69e6c4e6f58310ecbd597daa80af270f83",
+  "predictive_accept": false,
+  "prospective_admission": false,
+  "research_gate_sha256": "c2621bf96cac8e5d2b2bfd16219be612ffeeab2159702dfc63da646c2ec79e3c",
+  "research_gate_status": "READY_FOR_FREEZE_RESEARCH_CANDIDATE",
+  "research_iteration_note": "equal-weight ensemble was introduced during historical research; historical metrics remain tuning evidence and require prospective validation",
+  "schema": "btc-predictive-vnext4r6-freeze-metadata-v1",
+  "selected_core": {
+    "1h": "ensemble_equal",
+    "24h": "ensemble_equal",
+    "4h": "ensemble_equal"
+  },
+  "status": "FROZEN_RESEARCH_CANDIDATE",
+  "trading_authority": false
+}

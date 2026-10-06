@@ -1,0 +1,165 @@
+name: BTC predictive vNext4R6 independent prestart audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/btc-predictive-vnext4r6-audit.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  audit:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - head: 1h
+            branch: btc-predictive-vnext4r6-1h
+            workflow: .github/workflows/btc-predictive-vnext4r6-1h.yml
+            workflow_file: btc-predictive-vnext4r6-1h.yml
+            events_dir: predictive_vnext4r6_1h_events
+            protocol: predictive_vnext4r6/protocol_1h.json
+          - head: 4h
+            branch: btc-predictive-vnext4r6-4h
+            workflow: .github/workflows/btc-predictive-vnext4r6-4h.yml
+            workflow_file: btc-predictive-vnext4r6-4h.yml
+            events_dir: predictive_vnext4r6_4h_events
+            protocol: predictive_vnext4r6/protocol_4h.json
+          - head: 24h
+            branch: btc-predictive-vnext4r6-24h
+            workflow: .github/workflows/btc-predictive-vnext4r6-24h.yml
+            workflow_file: btc-predictive-vnext4r6-24h.yml
+            events_dir: predictive_vnext4r6_24h_events
+            protocol: predictive_vnext4r6/protocol_24h.json
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ matrix.branch }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fetch all refs
+        run: git fetch origin '+refs/heads/*:refs/remotes/origin/*'
+
+      - name: Build immutable R6 runtime
+        run: |
+          rm -rf /tmp/vnext4r6-runtime
+          mkdir -p /tmp/vnext4r6-runtime
+          git archive 98d6ea6e981b3306f397a9105babc2e5d66ac7a0 | tar -x -C /tmp/vnext4r6-runtime
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+
+      - run: python -m pip install --disable-pip-version-check numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
+
+      - name: Verify signed chain and trusted-clock governance
+        env:
+          R6_HEAD: ${{ matrix.head }}
+          BTC_VNEXT4R6_EVIDENCE_ROOT: ${{ github.workspace }}
+        run: |
+          python -I - <<'PY'
+          import json,runpy,sys
+          sys.path.insert(0,"/tmp/vnext4r6-runtime")
+          from predictive_vnext4r6.scorecard import run
+          import os
+          x=run(os.environ["R6_HEAD"],".")
+          print(json.dumps(x,indent=2,sort_keys=True))
+          assert x["governance"]["ok"] is True,x["governance"]
+          assert x["governance"]["source_commit_sha"]=="98d6ea6e981b3306f397a9105babc2e5d66ac7a0"
+          assert x["score"]["evaluation_mode"]=="CURRENT_TRUSTED_CLOCK"
+          assert x["score"]["admission_ready"] is False
+          assert x["trading_authority"] is False
+          print("R6_SIGNED_GOVERNANCE_PASS",os.environ["R6_HEAD"])
+          PY
+
+      - name: Verify exact two-event prestart chain and immutable manifest
+        env:
+          R6_EVENTS_DIR: ${{ matrix.events_dir }}
+          R6_WORKFLOW: ${{ matrix.workflow }}
+          R6_PROTOCOL: ${{ matrix.protocol }}
+        run: |
+          python - <<'PY'
+          import hashlib,json,os,pathlib,subprocess
+          root=pathlib.Path(".")
+          events_dir=root/os.environ["R6_EVENTS_DIR"]
+          files=sorted(events_dir.glob("????????.json"))
+          assert len(files)==2,[str(x) for x in files]
+          e1=json.loads(files[0].read_text())
+          e2=json.loads(files[1].read_text())
+          assert e1["type"]=="SCHEDULE_REGISTERED",e1
+          assert e2["type"]=="CONFIG_FROZEN_PRESTART",e2
+          assert e1["source_commit_sha"]=="98d6ea6e981b3306f397a9105babc2e5d66ac7a0"
+          assert e2["manifest"]["source_commit_sha"]==e1["source_commit_sha"]
+          assert e1["start_utc"].startswith("2026-10-07T00:00:00")
+          assert e2["start_utc"].startswith("2026-10-07T00:00:00")
+          manifest=e2["manifest"]
+          for path,want in manifest["paths_sha256"].items():
+              if path==os.environ["R6_WORKFLOW"]:
+                  source_commit=e2["workflow_commit"]
+              else:
+                  source_commit=e1["source_commit_sha"]
+              raw=subprocess.run(
+                  ["git","show",f"{source_commit}:{path}"],
+                  check=True,capture_output=True
+              ).stdout
+              got=hashlib.sha256(raw).hexdigest()
+              assert got==want,(path,got,want,source_commit)
+          current=subprocess.run(
+              ["git","show",f"origin/main:{os.environ['R6_WORKFLOW']}"],
+              check=True,capture_output=True
+          ).stdout
+          current_sha=hashlib.sha256(current).hexdigest()
+          frozen=manifest["paths_sha256"][os.environ["R6_WORKFLOW"]]
+          assert current_sha==frozen,(current_sha,frozen)
+          proto=(root/os.environ["R6_PROTOCOL"]).read_bytes()
+          assert hashlib.sha256(proto).hexdigest()==e1["protocol_sha256"]
+          print("R6_MANIFEST_EXACT_PASS",e1["head"])
+          PY
+
+      - name: Re-run defensive regressions from frozen source
+        run: |
+          python -I - <<'PY'
+          import runpy,sys
+          sys.path.insert(0,"/tmp/vnext4r6-runtime")
+          for p in (
+              "predictive_vnext4r6/selftest.py",
+              "predictive_vnext4r6/negative_tests.py",
+              "predictive_vnext4r6/test_scorecard.py",
+              "predictive_vnext4r6/test_scheduler.py",
+              "predictive_vnext4r6/test_scheduler_stress.py",
+              "predictive_vnext4r6/test_chain_liveness.py",
+          ):
+              print("RUN",p)
+              runpy.run_path("/tmp/vnext4r6-runtime/"+p,run_name="__main__")
+          PY
+
+      - name: Verify live running session plus queued successor
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          R6_WORKFLOW_FILE: ${{ matrix.workflow_file }}
+        run: |
+          python - <<'PY'
+          import json,os,urllib.request
+          url=f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/actions/workflows/{os.environ['R6_WORKFLOW_FILE']}/runs?per_page=30"
+          req=urllib.request.Request(url,headers={
+              "Authorization":"Bearer "+os.environ["GH_TOKEN"],
+              "Accept":"application/vnd.github+json",
+              "X-GitHub-Api-Version":"2022-11-28",
+          })
+          runs=json.load(urllib.request.urlopen(req))["workflow_runs"]
+          live=[r for r in runs if r["status"] in ("in_progress","queued","pending","waiting","requested")]
+          assert any(r["status"]=="in_progress" for r in live),[(r["id"],r["status"]) for r in live]
+          assert any(r["status"] in ("queued","pending","waiting","requested") for r in live),[(r["id"],r["status"]) for r in live]
+          print("R6_RUNNING_PLUS_SUCCESSOR_PASS",[(r["id"],r["status"]) for r in live])
+          PY

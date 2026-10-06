@@ -1,0 +1,47 @@
+name: BTC predictive vNext4R6 research gate
+
+on:
+  push:
+    branches: [btc-predictive-vnext4r6-research-20261006]
+    paths:
+      - research_vnext4r6/structural_result.json
+      - research_vnext4r6/breakout_memory_result.json
+      - research_vnext4r6/macro_ablation_result.json
+      - research_vnext4r6/derivatives_ablation_result.json
+      - research_vnext4r6/acceptance_policy.json
+      - research_vnext4r6/research_gate.py
+      - .github/workflows/btc-predictive-vnext4r6-gate.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: btc-predictive-vnext4r6-research-gate
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: btc-predictive-vnext4r6-research-20261006
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Compile gate
+        run: python -I -m py_compile research_vnext4r6/research_gate.py
+      - name: Evaluate immutable policy
+        run: python research_vnext4r6/research_gate.py
+      - name: Publish gate result
+        run: |
+          git config user.name 'btc-predictive-vnext4r6[bot]'
+          git config user.email 'btc-predictive-vnext4r6[bot]@users.noreply.github.com'
+          git add research_vnext4r6/research_gate_result.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Record R6 research gate result"
+          git reset --hard HEAD
+          git fetch origin btc-predictive-vnext4r6-research-20261006
+          git rebase origin/btc-predictive-vnext4r6-research-20261006
+          git push origin HEAD:btc-predictive-vnext4r6-research-20261006

@@ -95,7 +95,7 @@ def eval_head(name,X0,X1,regime,dates,y,when,due,horizon,step):
 
 def build_15m():
     t,o,hi,lo,c,v,trades,taker,sha=read_klines(
-      ROOT/"research_vnext/data/BTCUSDT_15m_2024-01_2026-06.json.gz",900000)
+      ROOT/"research_vnext4r6/data/BTCUSDT_15m_2024-01_2026-09.json.gz",900000)
     ix,dates,X,names,regime,vol=build_15m_features(t,hi,lo,c,v,trades,taker,16)
     mem=memory_features(o,hi,lo,c,ix,16,16)
     X1=np.column_stack((X,mem))

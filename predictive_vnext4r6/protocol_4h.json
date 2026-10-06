@@ -1,0 +1,119 @@
+{
+  "schema": "btc-predictive-vnext4r6-protocol-v1",
+  "status": "PROSPECTIVE_ADMISSION_CANDIDATE",
+  "start_utc": "2026-10-07T00:00:00Z",
+  "selected_model": "ensemble_equal",
+  "classes": [
+    "LOWER_FIRST",
+    "UPPER_FIRST",
+    "NEITHER",
+    "AMBIGUOUS_SAME_BAR"
+  ],
+  "primary_baseline": "vol90d_same_frozen_volatility_bin",
+  "secondary_baseline": "frozen_training_frequency",
+  "statistics_scope": "PREDECLARED_DUE_FIXED_PHASE_NONOVERLAP_WINDOWS_ONLY",
+  "overlapping_forecasts": "DESCRIPTIVE_ONLY",
+  "runtime_isolation": "python -I on clean archive from immutable source commit; evidence checkout not executable",
+  "freeze_authority": "signed CONFIG_FROZEN_PRESTART manifest only",
+  "immutable_source_commit_required": true,
+  "outcome_only_after_due": true,
+  "no_backfill": true,
+  "raw_required": true,
+  "sigstore_rekor_required": true,
+  "split_forecast_outcome_workers": false,
+  "trading_authority": false,
+  "system_acceptance": "all three R6 heads must independently pass their prospective gate",
+  "multiple_head_correction": {
+    "familywise_alpha": 0.05,
+    "heads": 3,
+    "method": "Bonferroni one-sided lower bound",
+    "per_head_alpha": 0.016666666666666666
+  },
+  "delivery_proof": {
+    "required": true,
+    "mechanism": "signed DELIVERY_CONFIRMED event only after git push + ls-remote remote branch confirmation",
+    "receipt_rekor_before_forecast_deadline": true,
+    "remote_commit_must_contain_exact_forecast_event": true,
+    "remote_commit_must_be_ancestor_of_current_evidence_tip": true,
+    "missing_receipt": "BLOCK_GOVERNANCE_AND_ADMISSION",
+    "receipt_recovery": {
+      "enabled": true,
+      "idempotent": true,
+      "cutoff_seconds_before_deadline": 120,
+      "late_recovery": "FORBIDDEN"
+    }
+  },
+  "event_signature_binding": {
+    "certificate_identity": "frozen workflow path @ refs/heads/main",
+    "github_workflow_sha_must_equal_event_workflow_commit": true,
+    "github_workflow_repository": "sergeytren1984-ux/neora-b2b-v2-clean",
+    "github_workflow_ref": "refs/heads/main",
+    "github_workflow_trigger": "workflow_dispatch",
+    "mismatch": "REJECT_EVENT_AND_GOVERNANCE"
+  },
+  "scheduler": {
+    "primary_clock": "long_lived_self_chained_workflow_dispatch",
+    "github_cron_role": "watchdog_only",
+    "writer_model": "one unified writer workflow per head handles forecast and due outcomes",
+    "successor_policy": "best-effort self-dispatch before current 4h session; independent watchdog repairs missing successor",
+    "session_hours": 4,
+    "no_backfill": true,
+    "delayed_start_policy": "issue only if still before preregistered slot deadline; otherwise SLOT_MISSED",
+    "transient_forecast_retry": {
+      "enabled": true,
+      "retry_interval_seconds": 45,
+      "delivery_safety_seconds": 120,
+      "stop_before_deadline_minus_safety": true,
+      "data_abstention_is_retryable_before_cutoff": true
+    },
+    "independent_watchdog": {
+      "trigger_policy": [
+        "workflow_run completion",
+        "5-minute scheduled check",
+        "manual dispatch"
+      ],
+      "repair_rule": "if running session has no queued/pending successor, or no live run exists, dispatch one workflow_dispatch run",
+      "evidence_writer": false,
+      "backfill": false
+    }
+  },
+  "head": "4h",
+  "source": "Binance BTCUSDT closed 15m spot candles",
+  "cadence_minutes": 15,
+  "issuance_deadline_minutes": 14,
+  "artifact_sha256": "c386489ec54eb441fab7666036c5dcb1fca72e3ad7aa89fc32bf8e3575c04726",
+  "baseline_sha256": "d4449b18d96162755d938d7b8b8b6da5ee126466ad9e4253ccac24d2c4d8c655",
+  "target": {
+    "type": "realized-volatility-scaled symmetric first passage",
+    "source_interval": "15m",
+    "vol_window": "4h",
+    "distance": "reference_price * std(log_return_15m,last 4h) * sqrt(16)",
+    "horizon_minutes": 240,
+    "same_bar_rule": "AMBIGUOUS_SAME_BAR",
+    "classes": [
+      "LOWER_FIRST",
+      "UPPER_FIRST",
+      "NEITHER",
+      "AMBIGUOUS_SAME_BAR"
+    ]
+  },
+  "admission": {
+    "minimum_calendar_days": 42,
+    "minimum_fixed_phase_nonoverlap_windows": 150,
+    "nonoverlap_window_hours": 4,
+    "minimum_independent_volatility_episodes": 12,
+    "require_all_three_volatility_bins": true,
+    "require_brier_better_than_primary": true,
+    "require_logloss_better_than_primary": true,
+    "block_lengths_days": [
+      14,
+      28
+    ],
+    "require_positive_block_lower_bounds_for_brier_and_logloss": true,
+    "calibration_max_ece10_degradation_vs_primary": 0.02,
+    "required_due_independent_outcome_completeness": 1,
+    "expected_grid_phase_utc": "2026-10-07T00:00:00Z",
+    "missing_forecast_or_outcome": "BLOCK_ADMISSION",
+    "current_cutoff_source": "runner UTC clock only"
+  }
+}

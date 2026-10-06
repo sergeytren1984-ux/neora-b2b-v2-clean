@@ -1,5 +1,13 @@
+import sys
 import unittest
+from pathlib import Path
 import numpy as np
+
+ROOT=Path(__file__).resolve().parents[1]
+HERE=Path(__file__).resolve().parent
+sys.path.insert(0,str(ROOT))
+sys.path.insert(0,str(HERE))
+
 from benchmark_r6 import SELECTORS
 
 class R6StructuralContract(unittest.TestCase):

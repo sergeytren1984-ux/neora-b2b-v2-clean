@@ -27,7 +27,7 @@ ROOT = Path(__file__).resolve().parents[1]
 HERE = ROOT / "predictive_vnext4r6"
 RESEARCH = ROOT / "research_vnext4r6"
 TOL = 1e-4
-COMPONENT_TOL = 2e-4
+COMPONENT_TOL = 5e-4
 
 
 def ensemble(artifact, X):

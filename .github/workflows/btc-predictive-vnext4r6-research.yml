@@ -38,7 +38,7 @@ jobs:
       - name: Compile and contract tests
         run: |
           python -I -m py_compile research_vnext4r6/benchmark_r6.py research_vnext4r6/test_benchmark_r6.py
-          PYTHONPATH=. python -I -m unittest research_vnext4r6/test_benchmark_r6.py -v
+          python research_vnext4r6/test_benchmark_r6.py -v
       - name: Run R6 structural benchmark
         env:
           PYTHONPATH: .

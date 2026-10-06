@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from research_vnext4r6.benchmark_r6 import SELECTORS
+from benchmark_r6 import SELECTORS
 
 class R6StructuralContract(unittest.TestCase):
     def test_selector_set_is_predeclared(self):

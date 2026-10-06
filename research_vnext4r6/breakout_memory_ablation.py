@@ -85,7 +85,10 @@ def eval_head(name,X0,X1,regime,dates,y,when,due,horizon,step):
       "folds":len(gains),"wins":sum(g>0 for g in gains),
       "mean_brier_gain":None if not gains else float(np.mean(gains)),
       "positive_ci_folds":sum(ci[0]>0 for ci in cis if ci and ci[0] is not None),
-      "research_gate_pass":bool(len(gains)>=3 and sum(g>0 for g in gains)>=2 and np.mean(gains)>0),
+      "research_gate_pass":bool(
+          len(gains)>=3 and sum(g>0 for g in gains)>=2 and np.mean(gains)>0 and
+          sum(ci[0]>0 for ci in cis if ci and ci[0] is not None)>=2
+      ),
     }
     return out
 
@@ -117,6 +120,7 @@ def build_24h():
 
 def main():
     report={"schema":"btc-predictive-vnext4r6-breakout-memory-ablation-v1",
+            "research_iteration_note":"gate hardened after first diagnostic to require >=2 positive block-CI folds; prior diagnostic is tuning evidence only",
             "status":"RESEARCH_ONLY","trading_authority":False,
             "feature_contract":[
               "failed_up_break_count","failed_down_break_count",

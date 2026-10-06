@@ -5,6 +5,7 @@ on:
     branches: [btc-predictive-vnext4r6-research-20261006]
     paths:
       - research_vnext4r6/benchmark_r6.py
+      - research_vnext4r6/fetch_15m_r6.py
       - research_vnext4r6/test_benchmark_r6.py
       - research_vnext4r6/README.md
       - .github/workflows/btc-predictive-vnext4r6-research.yml
@@ -33,8 +34,8 @@ jobs:
       - run: python -m pip install --disable-pip-version-check numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
       - name: Recreate exact historical hourly source
         run: python research_vnext/fetch_hourly.py
-      - name: Recreate public 15m research source
-        run: python research_vnext/fetch_micro.py
+      - name: Recreate R6 15m source through Sep 2026
+        run: python research_vnext4r6/fetch_15m_r6.py
       - name: Compile and contract tests
         run: |
           python -I -m py_compile research_vnext4r6/benchmark_r6.py research_vnext4r6/test_benchmark_r6.py

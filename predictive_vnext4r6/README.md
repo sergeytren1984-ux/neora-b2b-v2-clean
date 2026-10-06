@@ -55,3 +55,5 @@ selected-ensemble ablation. It is not silently mixed into this freeze.
 A prospective R6 launch requires a separate pre-start protocol, immutable source
 registration, negative tests, independent review, and signed evidence setup. R5 is
 not modified by this branch.
+
+Freeze workflow activation marker: 2026-10-06.

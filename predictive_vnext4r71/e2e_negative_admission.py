@@ -518,7 +518,34 @@ def main():
     )
 
     # Preserve every signed negative artifact for independent read-only replay.
-    subprocess.run(["git","add","r71_negative_e2e","predictive_vnext4r71_1h_raw"],cwd=ROOT,check=True)
+    artifact_rows=[]
+    for base in (BASE,RAW_ROOT):
+        for p in sorted(x for x in base.rglob("*") if x.is_file()):
+            artifact_rows.append({
+                "path":str(p.relative_to(ROOT)),
+                "sha256":digest(p.read_bytes()),
+                "size":p.stat().st_size,
+            })
+    audit={
+        "schema":"btc-predictive-vnext4r72-negative-e2e-audit-v1",
+        "status":"R7_2_NEGATIVE_E2E_PASS",
+        "source_sha":os.environ["GITHUB_SHA"],
+        "evidence_branch":NEG_BRANCH,
+        "attacks":15,
+        "artifact_count":len(artifact_rows),
+        "artifacts":artifact_rows,
+        "real_oidc_rekor":True,
+    }
+    audit_path=ROOT/"r72_negative_e2e_audit_manifest.json"
+    audit_bundle=audit_path.with_suffix(".sigstore.json")
+    audit_path.write_bytes(canonical(audit))
+    sign(audit_path,audit_bundle)
+    subprocess.run(
+        ["git","add","r71_negative_e2e","predictive_vnext4r71_1h_raw",
+         str(audit_path.relative_to(ROOT)),
+         str(audit_bundle.relative_to(ROOT))],
+        cwd=ROOT,check=True,
+    )
     subprocess.run(
         ["git","commit","-m","R7.2 preserve signed negative E2E artifacts"],
         cwd=ROOT,check=True,capture_output=True,text=True,

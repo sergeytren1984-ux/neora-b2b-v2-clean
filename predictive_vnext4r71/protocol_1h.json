@@ -13,7 +13,8 @@
     "checkpoint_failure_policy": "FAIL_CLOSED_NO_SILENT_DOWNGRADE",
     "anchor_required": true,
     "anchor_branch": null,
-    "anchor_semantics": "signed post-publication document binds checkpoint remote commit; anchor itself is Rekor logged"
+    "anchor_semantics": "signed post-publication document binds checkpoint remote commit; anchor itself is Rekor logged",
+    "checkpoint_path": "predictive_vnext4r71_checkpoints/1h.json"
   },
   "workflow_binding": {
     "every_event_workflow_commit_must_match_signed_manifest_content_hash": true

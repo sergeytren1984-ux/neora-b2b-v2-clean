@@ -45,6 +45,7 @@ jobs:
           python -I -m py_compile predictive_vnext4r7/checkpoint.py
           python -I -m py_compile predictive_vnext4r7/checkpoint_writer.py
           python -I -m py_compile predictive_vnext4r7/journal_runtime.py
+          python -I -m py_compile predictive_vnext4r7/full_verify.py
           python -I -m py_compile predictive_vnext4r7/episodes.py
           python -I -m py_compile predictive_vnext4r7/scorecard_core.py
           python -I -m py_compile predictive_vnext4r7/tail_research.py
@@ -55,6 +56,21 @@ jobs:
         env:
           PYTHONPATH: .
         run: PYTHONPATH=. python predictive_vnext4r7/test_remediation.py -v
+
+      - name: Verify remediation protocol templates are non-production
+        run: |
+          python - <<'PY'
+          import json,pathlib
+          for head in ("1h","4h","24h"):
+              p=json.loads(pathlib.Path(f"predictive_vnext4r7/protocol_template_{head}.json").read_text())
+              assert p["prospective_start_utc"] is None
+              assert p["admission_enabled"] is False
+              assert p["trading_authority"] is False
+              assert p["checkpointing"]["full_cryptographic_replay_before_admission"] is True
+              assert p["workflow_binding"]["every_event_workflow_commit_must_match_signed_manifest_content_hash"] is True
+              assert p["event_invariants"]["unique_type_head_slot"] is True
+          print("R7_PROTOCOL_TEMPLATES_SAFE")
+          PY
 
       - name: Audit current R6 evidence with strict workflow binding
         env:

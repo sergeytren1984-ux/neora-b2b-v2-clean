@@ -279,11 +279,11 @@ def research_gate(side):
         q90["pinball"] < q90["baseline_pinball"]
         and abs(q90["coverage"] - 0.90) <= 0.05
     )
+    # Gate is selection-only. Q3 remains visible in diagnostics but is never
+    # consulted by model selection, coherence gating, calibration or admission.
     coherent = (
         side["coherence"]["selection_2026h1"]["projected_quantile_crossing_rows"] == 0
         and side["coherence"]["selection_2026h1"]["projected_threshold_order_violation_rows"] == 0
-        and side["coherence"]["seen_diagnostic_2026q3"]["projected_quantile_crossing_rows"] == 0
-        and side["coherence"]["seen_diagnostic_2026q3"]["projected_threshold_order_violation_rows"] == 0
     )
     return {
         "threshold_brier_wins": int(wins),

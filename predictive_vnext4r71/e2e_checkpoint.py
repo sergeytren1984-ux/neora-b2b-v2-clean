@@ -9,6 +9,7 @@ import json
 import os
 import subprocess
 import time
+import statistics
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -316,26 +317,49 @@ def main():
 
     # Recovery path must now use the checkpoint, not replay 24 old signatures.
     tip=cmd("git","rev-parse","HEAD")
-    loaded=load_incremental_journal(
-        repo_root=ROOT,
-        events_dir=events_dir,
-        checkpoint_path=checkpoint,
-        checkpoint_bundle_path=checkpoint.with_suffix(".sigstore.json"),
-        head="1h",
-        horizon=horizon,
-        issuance_deadline=deadline,
-        start_utc=start,
-        current_branch_tip=tip,
-        forecast_workflow=WORKFLOW,
-        outcome_workflow=WORKFLOW,
-        verify_event_blob=lambda p,b,e: worker.verify_signature(p,b,cfg,e),
-        verify_checkpoint_blob=lambda p,b,e: worker.verify_signature(p,b,cfg,e),
-        verify_workflow_binding=worker.verify_event_workflow_against_manifest,
-    )
+    recovery_seconds=[]
+    loaded=None
+    for _ in range(5):
+        t0=time.perf_counter()
+        loaded=load_incremental_journal(
+            repo_root=ROOT,
+            events_dir=events_dir,
+            checkpoint_path=checkpoint,
+            checkpoint_bundle_path=checkpoint.with_suffix(".sigstore.json"),
+            head="1h",
+            horizon=horizon,
+            issuance_deadline=deadline,
+            start_utc=start,
+            current_branch_tip=tip,
+            forecast_workflow=WORKFLOW,
+            outcome_workflow=WORKFLOW,
+            verify_event_blob=lambda p,b,e: worker.verify_signature(p,b,cfg,e),
+            verify_checkpoint_blob=lambda p,b,e: worker.verify_signature(p,b,cfg,e),
+            verify_workflow_binding=worker.verify_event_workflow_against_manifest,
+        )
+        recovery_seconds.append(time.perf_counter()-t0)
     if not loaded["checkpoint_used"] or loaded["checkpoint_verified_through"]!=24:
         raise RuntimeError("checkpoint recovery path not active")
     if loaded["verified_suffix_event_count"]!=0:
         raise RuntimeError("unexpected suffix after fresh checkpoint")
+
+    # Measure real runner Cosign/Rekor verification latency, separately from the
+    # scaled prefix benchmark.
+    sig_seconds=[]
+    event1=json.loads((events_dir/"00000001.json").read_text())
+    for _ in range(30):
+        t0=time.perf_counter()
+        worker.verify_signature(
+            events_dir/"00000001.json",
+            events_dir/"00000001.sigstore.json",
+            cfg,
+            event1,
+        )
+        sig_seconds.append(time.perf_counter()-t0)
+    sig_sorted=sorted(sig_seconds)
+    sig_p95=sig_sorted[min(len(sig_sorted)-1,int(.95*(len(sig_sorted)-1)))]
+    recovery_sorted=sorted(recovery_seconds)
+    recovery_p95=recovery_sorted[min(len(recovery_sorted)-1,int(.95*(len(recovery_sorted)-1)))]
 
     # Full admission path is mandatory and independent of checkpoint acceleration.
     report=run_admission(
@@ -360,6 +384,8 @@ def main():
         "independent_checkpoint_anchor_verified":report["governance"]["independent_checkpoint_anchor_verified"],
         "admission_status":report["score"]["status"],
         "full_cryptographic_replay":report["governance"]["full_cryptographic_replay"],
+        "real_cosign_verify_seconds":{"p50":statistics.median(sig_seconds),"p95":sig_p95,"n":len(sig_seconds)},
+        "checkpoint_recovery_seconds":{"p50":statistics.median(recovery_seconds),"p95":recovery_p95,"n":len(recovery_seconds)},
     },indent=2,sort_keys=True))
 
 

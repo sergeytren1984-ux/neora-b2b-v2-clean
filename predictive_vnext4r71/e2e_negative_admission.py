@@ -183,10 +183,10 @@ def forecast_event(
     head="1h",
     raw_sha_override=None,
 ):
-    raw=RAW_ROOT/case_dir.name/"raw.json"
+    slot=start.strftime("%Y%m%dT%H%M%SZ")
+    raw=RAW_ROOT/case_dir.name/(slot+".json")
     raw.parent.mkdir(parents=True,exist_ok=True)
     raw.write_bytes(canonical({"source":"negative-e2e","slot":start.isoformat()}))
-    slot=start.strftime("%Y%m%dT%H%M%SZ")
     return make_event(seq,previous,{
         "type":"FORECAST_ISSUED",
         "idempotency_key":"forecast:"+slot,
@@ -232,10 +232,6 @@ def expect_failure(name,case_dir,expected_fragment=None):
             repo_root=str(ROOT),
             protocol_path=str((case_dir/"protocol.json").relative_to(ROOT)),
             events_dir=str((case_dir/"events").relative_to(ROOT)),
-            current_tip=subprocess.run(
-                ["git","rev-parse","HEAD"],
-                cwd=ROOT,check=True,capture_output=True,text=True,
-            ).stdout.strip(),
         )
     except Exception as ex:
         message=f"{type(ex).__name__}: {ex}"
@@ -517,6 +513,69 @@ def main():
         "forecast raw bytes absent from publication commit",
     )
 
+    # 16. raw may not be first-published in an earlier commit and then reused
+    # by a later forecast event, even when the bytes and SHA are identical.
+    d,freeze=prepare("raw_reused_from_prior_commit")
+    fc=forecast_event(3,digest(canonical(freeze)),start,d)
+    raw_path=ROOT/fc["raw_path"]
+    subprocess.run(
+        ["git","add",str(raw_path.relative_to(ROOT))],
+        cwd=ROOT,check=True,
+    )
+    subprocess.run(
+        ["git","commit","-m","R7.3 negative E2E prepublish raw only"],
+        cwd=ROOT,check=True,capture_output=True,text=True,
+    )
+    subprocess.run(
+        ["git","push","origin","HEAD:"+NEG_BRANCH],
+        cwd=ROOT,check=True,capture_output=True,text=True,
+    )
+    write_signed(d/"events",fc)
+    subprocess.run(
+        ["git","add",str(d.relative_to(ROOT))],
+        cwd=ROOT,check=True,
+    )
+    subprocess.run(
+        ["git","commit","-m","R7.3 negative E2E forecast after raw prepublication"],
+        cwd=ROOT,check=True,capture_output=True,text=True,
+    )
+    forecast_commit=subprocess.run(
+        ["git","rev-parse","HEAD"],
+        cwd=ROOT,check=True,capture_output=True,text=True,
+    ).stdout.strip()
+    slot=fc["slot"]
+    receipt=make_event(4,digest(canonical(fc)),{
+        "type":"DELIVERY_CONFIRMED",
+        "idempotency_key":"delivery:forecast:"+slot,
+        "head":"1h",
+        "slot":slot,
+        "target_sequence":3,
+        "target_event_hash":digest(canonical(fc)),
+        "remote_commit_sha":forecast_commit,
+        "remote_confirmed_at_utc":(start+timedelta(seconds=2)).isoformat(),
+        "deadline_utc":(start+timedelta(seconds=600)).isoformat(),
+        "published_at_utc":(start+timedelta(seconds=2)).isoformat(),
+        "trading_authority":False,
+    })
+    write_signed(d/"events",receipt)
+    subprocess.run(
+        ["git","add",str((d/"events"/"00000004.json").relative_to(ROOT)),
+         str((d/"events"/"00000004.sigstore.json").relative_to(ROOT))],
+        cwd=ROOT,check=True,
+    )
+    subprocess.run(
+        ["git","commit","-m","R7.3 negative E2E receipt for reused raw"],
+        cwd=ROOT,check=True,capture_output=True,text=True,
+    )
+    subprocess.run(
+        ["git","push","origin","HEAD:"+NEG_BRANCH],
+        cwd=ROOT,check=True,capture_output=True,text=True,
+    )
+    expect_failure(
+        "raw_reused_from_prior_commit",d,
+        "forecast raw first publication differs from event publication commit",
+    )
+
     # Preserve every signed negative artifact for independent read-only replay.
     artifact_rows=[]
     for base in (BASE,RAW_ROOT):
@@ -527,11 +586,11 @@ def main():
                 "size":p.stat().st_size,
             })
     audit={
-        "schema":"btc-predictive-vnext4r72-negative-e2e-audit-v1",
-        "status":"R7_2_NEGATIVE_E2E_PASS",
+        "schema":"btc-predictive-vnext4r73-negative-e2e-audit-v1",
+        "status":"R7_3_NEGATIVE_E2E_PASS",
         "source_sha":os.environ["GITHUB_SHA"],
         "evidence_branch":NEG_BRANCH,
-        "attacks":15,
+        "attacks":16,
         "artifact_count":len(artifact_rows),
         "artifacts":artifact_rows,
         "real_oidc_rekor":True,
@@ -547,7 +606,7 @@ def main():
         cwd=ROOT,check=True,
     )
     subprocess.run(
-        ["git","commit","-m","R7.2 preserve signed negative E2E artifacts"],
+        ["git","commit","-m","R7.3 preserve signed negative E2E artifacts"],
         cwd=ROOT,check=True,capture_output=True,text=True,
     )
     subprocess.run(
@@ -558,8 +617,8 @@ def main():
         ["git","rev-parse","HEAD"],cwd=ROOT,check=True,capture_output=True,text=True,
     ).stdout.strip()
     print(json.dumps({
-        "status":"R7_2_NEGATIVE_E2E_PASS",
-        "attacks":15,
+        "status":"R7_3_NEGATIVE_E2E_PASS",
+        "attacks":16,
         "real_oidc_rekor":True,
         "preserved_branch":NEG_BRANCH,
         "preserved_tip":tip,

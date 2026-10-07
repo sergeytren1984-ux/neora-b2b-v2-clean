@@ -172,9 +172,23 @@ def publish_checkpoint_anchor(
             parent=_git(work,"rev-parse","HEAD^")
             if remote_before and parent!=remote_before:
                 raise RuntimeError("anchor branch lost single-writer tip")
-            _git(work,"push","origin","HEAD:"+anchor_branch)
-            remote_after=_remote_branch_sha(work,anchor_branch)
             local=_git(work,"rev-parse","HEAD")
+            # Push through the authenticated primary checkout rather than the
+            # linked worktree. actions/checkout credentials are guaranteed on
+            # repo_root; linked worktree credential propagation is not.
+            push=_run(
+                repo_root,
+                "push",
+                "origin",
+                local+":refs/heads/"+anchor_branch,
+                check=False,
+            )
+            if push.returncode!=0:
+                raise RuntimeError(
+                    "anchor push failed: "
+                    + (push.stderr or push.stdout or "unknown git error")
+                )
+            remote_after=_remote_branch_sha(repo_root,anchor_branch)
             if remote_after!=local:
                 raise RuntimeError("anchor remote publication unconfirmed")
             return {

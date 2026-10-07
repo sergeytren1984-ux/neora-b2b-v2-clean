@@ -30,6 +30,10 @@ if str(CODE_ROOT) not in sys.path:
     sys.path.insert(0, str(CODE_ROOT))
 
 from predictive_vnext4r7.integrity import verify_event_workflow_against_manifest
+from predictive_vnext4r71.integrity import (
+    REQUIRED_PROTOCOLS,
+    REQUIRED_PRODUCTION_WORKFLOWS,
+)
 from predictive_vnext4r71.journal_runtime import load_incremental_journal
 from predictive_vnext4r71.checkpoint_writer import (
     should_checkpoint,
@@ -48,18 +52,8 @@ CLASS_TO_ID = {
     "AMBIGUOUS_SAME_BAR": 3,
 }
 
-PROTOCOL_PATHS = (
-    "predictive_vnext4r71/protocol_1h.json",
-    "predictive_vnext4r71/protocol_4h.json",
-    "predictive_vnext4r71/protocol_24h.json",
-)
-PRODUCTION_WORKFLOWS = (
-    ".github/workflows/btc-predictive-vnext4r71-1h.yml",
-    ".github/workflows/btc-predictive-vnext4r71-4h.yml",
-    ".github/workflows/btc-predictive-vnext4r71-24h.yml",
-    ".github/workflows/btc-predictive-vnext4r71-watchdog.yml",
-    ".github/workflows/btc-predictive-vnext4r71-health.yml",
-)
+PROTOCOL_PATHS = REQUIRED_PROTOCOLS
+PRODUCTION_WORKFLOWS = REQUIRED_PRODUCTION_WORKFLOWS
 
 CONFIG = {
     "1h": {

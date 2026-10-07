@@ -226,7 +226,29 @@ def forecast_event(
     })
 
 
-def expect_failure(name,case_dir,expected_fragment=None):
+def _publish_case_snapshot(name,case_dir):
+    paths=[str(case_dir.relative_to(ROOT))]
+    raw_case=RAW_ROOT/name
+    if raw_case.exists():
+        paths.append(str(raw_case.relative_to(ROOT)))
+    subprocess.run(["git","add","--",*paths],cwd=ROOT,check=True)
+    changed=subprocess.run(
+        ["git","diff","--cached","--quiet"],cwd=ROOT
+    ).returncode != 0
+    if changed:
+        subprocess.run(
+            ["git","commit","-m",f"R7.5 negative E2E snapshot {name}"],
+            cwd=ROOT,check=True,capture_output=True,text=True,
+        )
+    subprocess.run(
+        ["git","push","origin","HEAD:"+NEG_BRANCH],
+        cwd=ROOT,check=True,capture_output=True,text=True,
+    )
+
+
+def expect_failure(name,case_dir,expected_fragment=None,*,publish_snapshot=True):
+    if publish_snapshot:
+        _publish_case_snapshot(name,case_dir)
     try:
         result=run_admission(
             repo_root=str(ROOT),
@@ -511,6 +533,7 @@ def main():
     expect_failure(
         "raw_not_in_publication_commit",d,
         "forecast raw bytes absent from publication commit",
+        publish_snapshot=False,
     )
 
     # 16. raw may not be first-published in an earlier commit and then reused
@@ -574,6 +597,7 @@ def main():
     expect_failure(
         "raw_reused_from_prior_commit",d,
         "forecast raw first publication differs from event publication commit",
+        publish_snapshot=False,
     )
 
     # Preserve every signed negative artifact for independent read-only replay.

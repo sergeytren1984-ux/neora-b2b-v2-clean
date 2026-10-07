@@ -1,8 +1,8 @@
-name: BTC predictive vNext4R7.2 remediation
+name: BTC predictive vNext4R7.3 remediation
 
 on:
   push:
-    branches: [btc-predictive-vnext4r72-remediation-20261007]
+    branches: [btc-predictive-vnext4r73-remediation-20261007]
     paths:
       - predictive_vnext4r71/**
       - predictive_vnext4r7/scorecard_core.py
@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: btc-predictive-vnext4r72-remediation-${{ github.ref }}
+  group: btc-predictive-vnext4r73-remediation-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -88,7 +88,7 @@ jobs:
               assert len(req["all_production_workflows_required"])==5
               for wf in req["all_production_workflows_required"]:
                   assert pathlib.Path(wf).exists(),wf
-          print("R7_2_PROTOCOLS_FAIL_CLOSED")
+          print("R7_3_PROTOCOLS_FAIL_CLOSED")
 
   tail-research:
     runs-on: ubuntu-latest
@@ -127,7 +127,7 @@ jobs:
                       assert v["projected_quantile_crossing_rows"]==0,(head,side,split,v)
                       assert v["projected_threshold_order_violation_rows"]==0,(head,side,split,v)
               print(head,row["gate"])
-          print("R7_2_TAIL_COHERENCE_PASS")
+          print("R7_3_TAIL_COHERENCE_PASS")
           PY
 
   signed-checkpoint-e2e:
@@ -157,7 +157,7 @@ jobs:
       - name: Real OIDC/Rekor checkpoint and full-admission replay
         env:
           PYTHONPATH: .
-          R71_E2E_BRANCH: btc-predictive-vnext4r72-e2e-${{ github.run_id }}
+          R71_E2E_BRANCH: btc-predictive-vnext4r73-e2e-${{ github.run_id }}
           R71_EXPECTED_TRIGGER: ${{ github.event_name }}
         run: PYTHONPATH=. python predictive_vnext4r71/e2e_checkpoint.py
 
@@ -189,6 +189,6 @@ jobs:
         env:
           PYTHONPATH: .
           R71_EXPECTED_TRIGGER: ${{ github.event_name }}
-          R72_NEGATIVE_E2E_BRANCH: btc-predictive-vnext4r72-negative-e2e-${{ github.run_id }}
+          R73_NEGATIVE_E2E_BRANCH: btc-predictive-vnext4r73-negative-e2e-${{ github.run_id }}
         run: PYTHONPATH=. python predictive_vnext4r71/e2e_negative_admission.py
 

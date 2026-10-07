@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import subprocess
+import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -92,6 +94,16 @@ def _path_addition_commit(
     return out[0]
 
 
+def _actual_head(root: Path) -> str:
+    return subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    ).stdout.strip()
+
+
 def _verify_exact_checkout_remote_tip(
     root: Path,
     branch: str,
@@ -103,13 +115,7 @@ def _verify_exact_checkout_remote_tip(
     """
     if not isinstance(branch, str) or not branch:
         raise ValueError("evidence branch missing")
-    actual_head = subprocess.run(
-        ["git", "-C", str(root), "rev-parse", "HEAD"],
-        check=True,
-        capture_output=True,
-        text=True,
-        timeout=60,
-    ).stdout.strip()
+    actual_head = _actual_head(root)
     subprocess.run(
         ["git", "-C", str(root), "fetch", "origin", branch],
         check=True,
@@ -195,6 +201,39 @@ def _verify_exact_checkout_snapshot(
     _verify_checkout_path_at_head(
         root, head, str(checkpoint_path.with_suffix(".sigstore.json").resolve().relative_to(root.resolve()))
     )
+
+
+def _create_private_snapshot_worktree(root: Path, head: str) -> Path:
+    """Materialize a private detached worktree from immutable Git objects.
+
+    All policy/evidence/checkpoint/bundle file reads during admission are made
+    from this snapshot, never from the caller-visible working tree. Concurrent
+    writers may change or restore the original checkout without changing the
+    bytes consumed by verification or scoring.
+    """
+    parent = Path(tempfile.mkdtemp(prefix="btc-admission-snapshot-"))
+    snapshot = parent / "worktree"
+    try:
+        subprocess.run(
+            ["git", "-C", str(root), "worktree", "add", "--detach", str(snapshot), head],
+            check=True,
+            capture_output=True,
+            timeout=180,
+        )
+    except Exception:
+        shutil.rmtree(parent, ignore_errors=True)
+        raise
+    return snapshot
+
+
+def _remove_private_snapshot_worktree(root: Path, snapshot: Path) -> None:
+    subprocess.run(
+        ["git", "-C", str(root), "worktree", "remove", "--force", str(snapshot)],
+        check=False,
+        capture_output=True,
+        timeout=180,
+    )
+    shutil.rmtree(snapshot.parent, ignore_errors=True)
 
 
 def _git_bytes(root: Path, commit: str, path: str) -> bytes:
@@ -315,13 +354,13 @@ def _verify_governance(
     rekor: dict,
     relation: dict,
     protocol: dict,
+    protocol_bytes: bytes,
     protocol_path: str,
     events_dir: Path,
     current_tip: str,
     issuance_deadline: timedelta,
 ):
     schedule = relation["schedule"]
-    protocol_bytes = (root / protocol_path).read_bytes()
     if schedule.get("protocol_sha256") != digest(protocol_bytes):
         raise ValueError("schedule protocol hash mismatch")
 
@@ -452,14 +491,16 @@ def _verify_governance(
     }
 
 
-def run_admission(
+def _run_admission_snapshot(
     *,
     repo_root: str,
     protocol_path: str,
     events_dir: str,
+    protocol: dict,
+    protocol_bytes: bytes,
+    current_tip: str,
 ):
     root = Path(repo_root).resolve()
-    protocol = json.loads((root / protocol_path).read_text())
     _reject_nonprospective_protocol(protocol)
 
     # The signed protocol is authoritative. The public API intentionally has no
@@ -524,10 +565,6 @@ def run_admission(
     ):
         raise ValueError("protocol signature binding incomplete")
 
-    current_tip = _verify_exact_checkout_remote_tip(
-        root, evidence_branch
-    )
-
     verify_forecast_blob = make_blob_verifier(
         repository=repository,
         workflow_path=forecast_workflow,
@@ -573,6 +610,7 @@ def run_admission(
         rekor=rekor,
         relation=relation,
         protocol=protocol,
+        protocol_bytes=protocol_bytes,
         protocol_path=protocol_path,
         events_dir=root / events_dir,
         current_tip=current_tip,
@@ -600,6 +638,11 @@ def run_admission(
         raise ValueError("signed manifest evidence branch differs from protocol")
     governance["remote_evidence_tip"] = current_tip
     governance["exact_checkout_head_verified"] = True
+    governance["authenticated_protocol_snapshot"] = True
+    governance["used_protocol_sha256"] = digest(protocol_bytes)
+    governance["signed_protocol_sha256"] = schedule.get("protocol_sha256")
+    if governance["used_protocol_sha256"] != governance["signed_protocol_sha256"]:
+        raise ValueError("used protocol bytes differ from signed protocol bytes")
 
     checkpoint_policy = protocol.get("checkpointing", {})
     if checkpoint_policy.get("anchor_required") is not True:
@@ -702,6 +745,14 @@ def run_admission(
         phase="during scoring",
     )
     governance["remote_tip_revalidated_after_score"] = True
+    governance["decision_binding"] = {
+        "semantics": "SNAPSHOT_AS_OF_EXACT_EVIDENCE_SHA",
+        "evidence_branch": evidence_branch,
+        "evidence_sha": current_tip,
+        "protocol_sha256": digest(protocol_bytes),
+        "absolute_latest_tip_atomicity_claimed": False,
+        "consumer_must_reject_if_evidence_tip_differs": True,
+    }
 
     return {
         "schema": "btc-predictive-vnext4r71-admission-v1",
@@ -711,6 +762,68 @@ def run_admission(
         "admission_ready": passed,
         "trading_authority": False,
     }
+
+
+def run_admission(
+    *,
+    repo_root: str,
+    protocol_path: str,
+    events_dir: str,
+):
+    """Verify and score exactly one immutable evidence snapshot.
+
+    The caller-visible working tree is never authoritative. Protocol bytes are
+    loaded from the current Git object, the matching remote evidence tip is
+    fetched and required to equal that HEAD, and all subsequent file reads occur
+    in a private detached worktree at that exact SHA.
+    """
+    root = Path(repo_root).resolve()
+    initial_head = _actual_head(root)
+    protocol_bytes = _git_bytes(root, initial_head, protocol_path)
+    protocol = json.loads(protocol_bytes)
+    _reject_nonprospective_protocol(protocol)
+
+    if protocol.get("admission_enabled") is not True:
+        return {
+            "schema": "btc-predictive-vnext4r71-admission-v1",
+            "head": protocol.get("head"),
+            "admission_ready": False,
+            "status": "BLOCKED_PROTOCOL_ADMISSION_DISABLED",
+            "trading_authority": False,
+            "governance": {
+                "authenticated_protocol_snapshot": True,
+                "used_protocol_sha256": digest(protocol_bytes),
+                "decision_binding": {
+                    "semantics": "SNAPSHOT_AS_OF_EXACT_EVIDENCE_SHA",
+                    "evidence_sha": initial_head,
+                    "protocol_sha256": digest(protocol_bytes),
+                    "absolute_latest_tip_atomicity_claimed": False,
+                },
+            },
+        }
+
+    evidence_branch = protocol.get("evidence_branch")
+    if not isinstance(evidence_branch, str) or not evidence_branch:
+        raise ValueError("protocol evidence branch missing")
+    current_tip = _verify_exact_checkout_remote_tip(root, evidence_branch)
+    if current_tip != initial_head:
+        raise ValueError("immutable protocol HEAD differs from fetched evidence tip")
+
+    snapshot = _create_private_snapshot_worktree(root, current_tip)
+    try:
+        snapshot_protocol_bytes = _git_bytes(snapshot, current_tip, protocol_path)
+        if snapshot_protocol_bytes != protocol_bytes:
+            raise ValueError("private snapshot protocol bytes differ from authenticated bytes")
+        return _run_admission_snapshot(
+            repo_root=str(snapshot),
+            protocol_path=protocol_path,
+            events_dir=events_dir,
+            protocol=protocol,
+            protocol_bytes=protocol_bytes,
+            current_tip=current_tip,
+        )
+    finally:
+        _remove_private_snapshot_worktree(root, snapshot)
 
 
 def main():

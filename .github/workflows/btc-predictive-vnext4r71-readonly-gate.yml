@@ -110,6 +110,8 @@ jobs:
               assert ae["absolute_latest_tip_atomicity_claimed"] is False
               assert ae["consumer_must_reject_if_evidence_tip_differs"] is True
               assert ae["consumer_compare_and_swap_or_lease_required_for_activation"] is True
+              assert ae["consumer_validation_entrypoint"]=="predictive_vnext4r71.admission.assert_snapshot_decision_current"
+              assert ae["consumer_snapshot_freshness_guard_required"] is True
               rp=p["raw_evidence_provenance"]
               assert rp["raw_first_addition_commit_must_equal_event_publication_commit"] is True
               assert rp["raw_reuse_from_prior_commit_forbidden"] is True

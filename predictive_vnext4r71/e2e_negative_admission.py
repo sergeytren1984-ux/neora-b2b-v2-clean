@@ -455,7 +455,17 @@ def main():
     bundle.write_text(json.dumps(obj,separators=(",",":"),sort_keys=True))
     expect_failure("corrupted_rekor_proof",d)
 
-    # 14. local raw bytes with a matching SHA are insufficient unless the exact
+    # 14. traversal or non-canonical raw paths are rejected before provenance use.
+    d,freeze=prepare("raw_path_traversal")
+    fc=forecast_event(3,digest(canonical(freeze)),start,d)
+    fc["raw_path"]="../escape.json"
+    write_signed(d/"events",fc)
+    expect_failure(
+        "raw_path_traversal",d,
+        "unsafe repository-relative path",
+    )
+
+    # 15. local raw bytes with a matching SHA are insufficient unless the exact
     # bytes were published in the forecast evidence commit and remote ancestry.
     d,freeze=prepare("raw_not_in_publication_commit")
     fc=forecast_event(3,digest(canonical(freeze)),start,d)
@@ -520,7 +530,7 @@ def main():
     ).stdout.strip()
     print(json.dumps({
         "status":"R7_2_NEGATIVE_E2E_PASS",
-        "attacks":14,
+        "attacks":15,
         "real_oidc_rekor":True,
         "preserved_branch":NEG_BRANCH,
         "preserved_tip":tip,

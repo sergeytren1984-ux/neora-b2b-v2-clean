@@ -115,6 +115,8 @@ def authority_events(
     protocol_path:Path,
     *,
     workflow_hash_override=None,
+    deployment_override=None,
+    protocols_override=None,
 ):
     source_sha=os.environ["GITHUB_SHA"]
     required_paths=list(REQUIRED_PROTOCOLS)+list(REQUIRED_PRODUCTION_WORKFLOWS)+[WORKFLOW]
@@ -131,8 +133,16 @@ def authority_events(
         "schema":"btc-predictive-vnext4r72-negative-e2e-manifest-v1",
         "source_commit_sha":source_sha,
         "paths_sha256":hashes,
-        "all_protocols":list(REQUIRED_PROTOCOLS),
-        "deployment_workflows":list(REQUIRED_PRODUCTION_WORKFLOWS),
+        "all_protocols":(
+            list(REQUIRED_PROTOCOLS)
+            if protocols_override is None
+            else list(protocols_override)
+        ),
+        "deployment_workflows":(
+            list(REQUIRED_PRODUCTION_WORKFLOWS)
+            if deployment_override is None
+            else list(deployment_override)
+        ),
         "evidence_branch":NEG_BRANCH,
     }
     schedule=make_event(1,None,{
@@ -301,6 +311,31 @@ def main():
         "workflow content differs from signed frozen manifest",
     )
 
+    # 4. diagnostic cutoff is forbidden even when authority is correctly signed.
+    d=case_dir("diagnostic_cutoff")
+    p=protocol(start)
+    p["diagnostic_cutoff_utc"]="2026-10-07T00:00:00Z"
+    write_protocol(d,p)
+    authority_events(d/"events",start,d/"protocol.json")
+    expect_failure(
+        "diagnostic_cutoff",d,
+        "non-prospective admission control forbidden",
+    )
+
+    # 5. a signed but incomplete deployment bundle is rejected by admission.
+    d=case_dir("incomplete_deployment_bundle")
+    shutil.copy2(common/"protocol.json",d/"protocol.json")
+    authority_events(
+        d/"events",
+        start,
+        d/"protocol.json",
+        deployment_override=list(REQUIRED_PRODUCTION_WORKFLOWS[:-1]),
+    )
+    expect_failure(
+        "incomplete_deployment_bundle",d,
+        "production workflow set is not exact",
+    )
+
     while datetime.now(UTC)<start+timedelta(seconds=1):
         time.sleep(.25)
 
@@ -415,6 +450,56 @@ def main():
     bundle.write_text(json.dumps(obj,separators=(",",":"),sort_keys=True))
     expect_failure("corrupted_rekor_proof",d)
 
+    # 14. local raw bytes with a matching SHA are insufficient unless the exact
+    # bytes were published in the forecast evidence commit and remote ancestry.
+    d,freeze=prepare("raw_not_in_publication_commit")
+    fc=forecast_event(3,digest(canonical(freeze)),start,d)
+    write_signed(d/"events",fc)
+    subprocess.run(
+        ["git","add",str(d.relative_to(ROOT))],
+        cwd=ROOT,check=True,
+    )
+    subprocess.run(
+        ["git","commit","-m","R7.2 negative E2E forecast without raw publication"],
+        cwd=ROOT,check=True,capture_output=True,text=True,
+    )
+    forecast_commit=subprocess.run(
+        ["git","rev-parse","HEAD"],
+        cwd=ROOT,check=True,capture_output=True,text=True,
+    ).stdout.strip()
+    slot=fc["slot"]
+    receipt=make_event(4,digest(canonical(fc)),{
+        "type":"DELIVERY_CONFIRMED",
+        "idempotency_key":"delivery:forecast:"+slot,
+        "head":"1h",
+        "slot":slot,
+        "target_sequence":3,
+        "target_event_hash":digest(canonical(fc)),
+        "remote_commit_sha":forecast_commit,
+        "remote_confirmed_at_utc":(start+timedelta(seconds=2)).isoformat(),
+        "deadline_utc":(start+timedelta(seconds=600)).isoformat(),
+        "published_at_utc":(start+timedelta(seconds=2)).isoformat(),
+        "trading_authority":False,
+    })
+    write_signed(d/"events",receipt)
+    subprocess.run(
+        ["git","add",str((d/"events"/"00000004.json").relative_to(ROOT)),
+         str((d/"events"/"00000004.sigstore.json").relative_to(ROOT))],
+        cwd=ROOT,check=True,
+    )
+    subprocess.run(
+        ["git","commit","-m","R7.2 negative E2E receipt without raw publication"],
+        cwd=ROOT,check=True,capture_output=True,text=True,
+    )
+    subprocess.run(
+        ["git","push","origin","HEAD:"+NEG_BRANCH],
+        cwd=ROOT,check=True,capture_output=True,text=True,
+    )
+    expect_failure(
+        "raw_not_in_publication_commit",d,
+        "forecast raw bytes absent from publication commit",
+    )
+
     # Preserve every signed negative artifact for independent read-only replay.
     subprocess.run(["git","add","r71_negative_e2e","predictive_vnext4r71_1h_raw"],cwd=ROOT,check=True)
     subprocess.run(
@@ -430,7 +515,7 @@ def main():
     ).stdout.strip()
     print(json.dumps({
         "status":"R7_2_NEGATIVE_E2E_PASS",
-        "attacks":11,
+        "attacks":14,
         "real_oidc_rekor":True,
         "preserved_branch":NEG_BRANCH,
         "preserved_tip":tip,

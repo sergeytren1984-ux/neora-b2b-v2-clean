@@ -290,8 +290,16 @@ def _verify_governance(
         raw_local, raw_rel = safe_repo_relative_path(
             root, forecast["raw_path"]
         )
-        if _git_bytes(root, commit, raw_rel) != raw_local.read_bytes():
-            raise ValueError("forecast raw bytes absent from publication commit: " + slot)
+        try:
+            committed_raw = _git_bytes(root, commit, raw_rel)
+        except subprocess.CalledProcessError as ex:
+            raise ValueError(
+                "forecast raw bytes absent from publication commit: " + slot
+            ) from ex
+        if committed_raw != raw_local.read_bytes():
+            raise ValueError(
+                "forecast raw bytes absent from publication commit: " + slot
+            )
         _is_ancestor(root, commit, current_tip)
 
     for slot, outcome in outcomes.items():
@@ -310,8 +318,16 @@ def _verify_governance(
         raw_local, raw_rel = safe_repo_relative_path(
             root, outcome["raw_path"]
         )
-        if _git_bytes(root, publication_commit, raw_rel) != raw_local.read_bytes():
-            raise ValueError("outcome raw bytes absent from publication commit: " + slot)
+        try:
+            committed_raw = _git_bytes(root, publication_commit, raw_rel)
+        except subprocess.CalledProcessError as ex:
+            raise ValueError(
+                "outcome raw bytes absent from publication commit: " + slot
+            ) from ex
+        if committed_raw != raw_local.read_bytes():
+            raise ValueError(
+                "outcome raw bytes absent from publication commit: " + slot
+            )
         _is_ancestor(root, publication_commit, current_tip)
 
     return {

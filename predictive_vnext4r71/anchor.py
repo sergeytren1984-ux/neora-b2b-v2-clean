@@ -84,8 +84,18 @@ def publish_checkpoint_anchor(
                 if len(p.stem)==8 and p.stem.isdigit()
             )
             previous_hash=None
+            prev_cp_seq=int(checkpoint_doc.get("previous_checkpoint_sequence",0))
+            prev_cp_sha=checkpoint_doc.get("previous_checkpoint_sha256")
             if existing:
-                previous_hash=digest(existing[-1].read_bytes())
+                previous_raw=existing[-1].read_bytes()
+                previous_doc=json.loads(previous_raw)
+                previous_hash=digest(previous_raw)
+                if int(previous_doc.get("verified_through_sequence",-1))!=prev_cp_seq:
+                    raise ValueError("checkpoint predecessor does not match latest anchor")
+                if previous_doc.get("checkpoint_sha256")!=prev_cp_sha:
+                    raise ValueError("checkpoint predecessor hash does not match latest anchor")
+            elif prev_cp_seq!=0 or prev_cp_sha is not None:
+                raise ValueError("prior anchor chain missing for non-first checkpoint")
 
             seq=int(checkpoint_doc["verified_through_sequence"])
             path=anchor_dir/f"{seq:08d}.json"
@@ -103,6 +113,8 @@ def publish_checkpoint_anchor(
                     "checkpoint_bundle_path":rel_bundle,
                     "checkpoint_remote_commit":checkpoint_remote_commit,
                     "verified_branch_commit":checkpoint_doc["verified_branch_commit"],
+                    "previous_checkpoint_sequence":prev_cp_seq,
+                    "previous_checkpoint_sha256":prev_cp_sha,
                     "manifest_sha256":checkpoint_doc["manifest_sha256"],
                     "source_commit_sha":checkpoint_doc["source_commit_sha"],
                     "workflow_commit":workflow_commit,
@@ -136,6 +148,8 @@ def publish_checkpoint_anchor(
                 "checkpoint_bundle_path":rel_bundle,
                 "checkpoint_remote_commit":checkpoint_remote_commit,
                 "verified_branch_commit":checkpoint_doc["verified_branch_commit"],
+                "previous_checkpoint_sequence":prev_cp_seq,
+                "previous_checkpoint_sha256":prev_cp_sha,
                 "manifest_sha256":checkpoint_doc["manifest_sha256"],
                 "source_commit_sha":checkpoint_doc["source_commit_sha"],
                 "workflow_commit":workflow_commit,

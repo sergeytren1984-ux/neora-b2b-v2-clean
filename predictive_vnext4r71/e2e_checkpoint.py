@@ -462,8 +462,9 @@ def main():
     if report["admission_ready"] is not False:
         raise RuntimeError("E2E short sample must not become admissible")
 
-    print(json.dumps({
-        "status":"R7_1_E2E_PASS",
+    audit={
+        "schema":"btc-predictive-vnext4r72-e2e-audit-artifact-v1",
+        "status":"R7_2_E2E_PASS",
         "evidence_branch":e2e_branch,
         "source_sha":source_sha,
         "event_count":len(event_files(events_dir)),
@@ -471,13 +472,25 @@ def main():
         "anchor_count":report["governance"]["checkpoint_anchor"]["anchor_count"],
         "checkpoint_remote_tip":tip,
         "anchor_branch":anchor_branch,
+        "anchor_tip":cmd("git","ls-remote","origin","refs/heads/"+anchor_branch).split()[0],
         "independent_checkpoint_anchor_verified":report["governance"]["independent_checkpoint_anchor_verified"],
+        "complete_deployment_bundle_bound":report["governance"]["complete_deployment_bundle_bound"],
         "admission_status":report["score"]["status"],
         "full_cryptographic_replay":report["governance"]["full_cryptographic_replay"],
         "real_cosign_verify_seconds":{"p50":statistics.median(sig_seconds),"p95":sig_p95,"n":len(sig_seconds)},
         "checkpoint_recovery_seconds":{"p50":statistics.median(recovery_seconds),"p95":recovery_p95,"n":len(recovery_seconds)},
         "full_checkpoint_operation_seconds":{"p50":statistics.median(checkpoint_operation_seconds),"p95":checkpoint_p95,"n":len(checkpoint_operation_seconds),"budget_seconds":720},
-    },indent=2,sort_keys=True))
+    }
+    audit_path=ROOT/"r72_e2e_audit_manifest.json"
+    audit_bundle=audit_path.with_suffix(".sigstore.json")
+    audit_path.write_bytes(canonical(audit))
+    sign(audit_path,audit_bundle)
+    preserved_tip=push_paths(
+        "R7.2 preserve signed positive E2E audit artifact",
+        audit_path,audit_bundle,
+    )
+    audit["preserved_tip"]=preserved_tip
+    print(json.dumps(audit,indent=2,sort_keys=True))
 
 
 if __name__=="__main__":

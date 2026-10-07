@@ -166,13 +166,6 @@ class AdmissionBoundaryTests(unittest.TestCase):
                 repo_root=str(root),
                 protocol_path="protocol.json",
                 events_dir="events",
-                forecast_workflow=".github/workflows/f.yml",
-                outcome_workflow=".github/workflows/f.yml",
-                head="1h",
-                start_utc=datetime(2026,10,7,tzinfo=UTC),
-                horizon=timedelta(hours=1),
-                issuance_deadline=timedelta(minutes=14),
-                repository="owner/repo",
             )
             self.assertFalse(out["admission_ready"])
             self.assertEqual(out["status"],"BLOCKED_PROTOCOL_ADMISSION_DISABLED")

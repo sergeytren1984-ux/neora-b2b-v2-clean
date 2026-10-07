@@ -1,6 +1,6 @@
 {
   "schema": "btc-predictive-vnext4r71-protocol-v1",
-  "status": "R7_3_REMEDIATION_PRE_FREEZE_NOT_PRODUCTION",
+  "status": "R7_4_REMEDIATION_PRE_FREEZE_NOT_PRODUCTION",
   "parent_r6_source_sha": "98d6ea6e981b3306f397a9105babc2e5d66ac7a0",
   "selected_model": "ensemble_equal",
   "numerical_core": "unchanged frozen R6 artifacts",
@@ -91,7 +91,10 @@
       "raw",
       "checkpoint",
       "checkpoint_sigstore_bundle"
-    ]
+    ],
+    "remote_tip_revalidated_before_scoring": true,
+    "remote_tip_revalidated_after_scoring": true,
+    "remote_tip_toctou_fail_closed": true
   },
   "workflows": {
     "forecast": ".github/workflows/btc-predictive-vnext4r71-24h.yml",
@@ -145,7 +148,8 @@
     "cosign_rekor_bundles_must_be_preserved": true,
     "commit_ids_and_hashes_must_be_reported": true,
     "targeted_stale_checkout_newer_tip_attack_required": true,
-    "prior_commit_raw_reuse_attack_required": true
+    "prior_commit_raw_reuse_attack_required": true,
+    "mid_admission_remote_tip_advance_attack_required": true
   },
   "evidence_branch": "btc-predictive-vnext4r71-24h",
   "evidence_raw_prefix": "predictive_vnext4r71_24h_raw/"

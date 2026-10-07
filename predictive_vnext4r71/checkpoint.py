@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import subprocess
+import tarfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
@@ -63,103 +65,55 @@ def _git(repo_root: Path, *args, text=True):
     ).stdout
 
 
-def _prefix_paths(events_dir: Path, through_sequence: int) -> list[str]:
-    root = events_dir.parent.resolve()
-    out = []
-    for i in range(1, through_sequence + 1):
-        e = events_dir / f"{i:08d}.json"
-        b = e.with_suffix(".sigstore.json")
-        out.extend(
-            [
-                str(e.resolve().relative_to(root)),
-                str(b.resolve().relative_to(root)),
-            ]
-        )
-    return out
-
-
 def git_prefix_binding(
     repo_root: Path,
     events_dir: Path,
     commit: str,
     through_sequence: int,
 ) -> dict:
-    """Bind exact event+bundle bytes through N to one concrete git commit."""
-    rel_events = str(events_dir.resolve().relative_to(repo_root.resolve()))
-    output = _git(
-        repo_root,
-        "ls-tree",
-        "-r",
-        commit,
-        "--",
-        rel_events,
-    )
-    tree = {}
-    for line in output.splitlines():
-        if not line.strip():
-            continue
-        meta, path = line.split("\t", 1)
-        parts = meta.split()
-        if len(parts) != 3 or parts[1] != "blob":
-            continue
-        tree[path] = parts[2]
+    """Recompute exact prefix bytes from one git archive subprocess.
 
-    rows = []
+    This proves that verified_branch_commit itself contains the exact event and
+    Sigstore bundle bytes claimed by the signed checkpoint, without spawning a
+    git process for every historical file.
+    """
+    rel_events = str(events_dir.resolve().relative_to(repo_root.resolve()))
+    archive = subprocess.run(
+        [
+            "git", "-C", str(repo_root), "archive", "--format=tar",
+            commit, "--", rel_events,
+        ],
+        check=True,
+        capture_output=True,
+        timeout=180,
+    ).stdout
+    members = {}
+    with tarfile.open(fileobj=io.BytesIO(archive), mode="r:") as tf:
+        for member in tf.getmembers():
+            if member.isfile():
+                fh = tf.extractfile(member)
+                if fh is not None:
+                    members[member.name] = fh.read()
+
+    h = hashlib.sha256()
+    count = 0
     for i in range(1, through_sequence + 1):
         for suffix in (".json", ".sigstore.json"):
             rel = f"{rel_events}/{i:08d}{suffix}"
-            oid = tree.get(rel)
-            if oid is None:
+            raw = members.get(rel)
+            if raw is None:
                 raise ValueError(
                     f"verified_branch_commit lacks prefix path: {rel}"
                 )
-            local = repo_root / rel
-            if not local.exists():
-                raise ValueError(f"local prefix path missing: {rel}")
-            local_oid = _git(
-                repo_root, "hash-object", str(local), text=True
-            ).strip()
-            if local_oid != oid:
-                raise ValueError(
-                    f"local prefix bytes differ from verified commit: {rel}"
-                )
-            rows.append({"path": rel, "blob_oid": oid})
-
-    payload = canonical(rows)
+            name = Path(rel).name
+            h.update(name.encode())
+            h.update(len(raw).to_bytes(8, "big"))
+            h.update(raw)
+            count += 1
     return {
-        "path_count": len(rows),
-        "git_prefix_digest_sha256": digest(payload),
-        "rows": rows,
+        "path_count": count,
+        "verified_commit_prefix_files_sha256": h.hexdigest(),
     }
-
-
-def build_state(events: list[dict]) -> ChainState:
-    state = ChainState(
-        sequence=0,
-        last_event_hash=None,
-        prefix_root_sha256=EMPTY_ROOT,
-        seen_idempotency_keys=set(),
-        seen_type_slot=set(),
-    )
-    for event in events:
-        raw = canonical(event)
-        event_hash = digest(raw)
-        state.sequence += 1
-        state.last_event_hash = event_hash
-        state.prefix_root_sha256 = root_step(
-            state.prefix_root_sha256, event_hash
-        )
-        state.seen_idempotency_keys.add(event["idempotency_key"])
-        state.seen_type_slot.add(
-            "|".join(
-                [
-                    str(event["type"]),
-                    str(event["head"]),
-                    str(event.get("slot", "")),
-                ]
-            )
-        )
-    return state
 
 
 def checkpoint_document(
@@ -171,7 +125,7 @@ def checkpoint_document(
     workflow_commit: str,
     verified_branch_commit: str,
     prefix_files_sha256: str,
-    git_prefix_digest_sha256: str,
+    verified_commit_prefix_files_sha256: str,
     git_prefix_path_count: int,
     created_at_utc: str,
 ) -> dict:
@@ -182,7 +136,7 @@ def checkpoint_document(
         "verified_through_event_hash": state.last_event_hash,
         "prefix_root_sha256": state.prefix_root_sha256,
         "prefix_files_sha256": prefix_files_sha256,
-        "git_prefix_digest_sha256": git_prefix_digest_sha256,
+        "verified_commit_prefix_files_sha256": verified_commit_prefix_files_sha256,
         "git_prefix_path_count": int(git_prefix_path_count),
         "seen_idempotency_keys": sorted(state.seen_idempotency_keys),
         "seen_type_slot": sorted(state.seen_type_slot),
@@ -263,10 +217,14 @@ def verify_checkpoint(
     binding = git_prefix_binding(
         repo_root, events_dir, verified_commit, state.sequence
     )
-    if binding["git_prefix_digest_sha256"] != doc.get(
-        "git_prefix_digest_sha256"
+    if binding["verified_commit_prefix_files_sha256"] != doc.get(
+        "verified_commit_prefix_files_sha256"
     ):
-        raise ValueError("checkpoint git-prefix digest mismatch")
+        raise ValueError("checkpoint verified-commit prefix bytes mismatch")
+    if binding["verified_commit_prefix_files_sha256"] != doc.get(
+        "prefix_files_sha256"
+    ):
+        raise ValueError("checkpoint local/verified-commit prefix mismatch")
     if binding["path_count"] != int(doc.get("git_prefix_path_count", -1)):
         raise ValueError("checkpoint git-prefix path count mismatch")
 

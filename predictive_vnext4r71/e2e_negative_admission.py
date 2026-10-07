@@ -12,12 +12,22 @@ from pathlib import Path
 
 from predictive_vnext4r7.integrity import canonical, digest
 from predictive_vnext4r71.admission import run_admission
+from predictive_vnext4r71.integrity import (
+    REQUIRED_PROTOCOLS,
+    REQUIRED_PRODUCTION_WORKFLOWS,
+)
 
 UTC=timezone.utc
 ROOT=Path(__file__).resolve().parents[1]
 REPO="sergeytren1984-ux/neora-b2b-v2-clean"
 WORKFLOW=".github/workflows/btc-predictive-vnext4r71-remediation.yml"
 BASE=ROOT/"r71_negative_e2e"
+RUN_ID=os.environ.get("GITHUB_RUN_ID","local")
+NEG_BRANCH=os.environ.get(
+    "R72_NEGATIVE_E2E_BRANCH",
+    "btc-predictive-vnext4r72-negative-e2e-"+RUN_ID,
+)
+RAW_ROOT=ROOT/"predictive_vnext4r71_1h_raw"/("r72-negative-"+RUN_ID)
 
 
 def sign(path:Path,bundle:Path):
@@ -72,6 +82,10 @@ def protocol(start:datetime,*,enabled=True):
             "anchor_branch":"unused-negative-e2e-anchor",
             "checkpoint_path":"unused-negative-e2e-checkpoint.json",
         },
+        "signed_manifest_requirements":{
+            "all_protocols_required":list(REQUIRED_PROTOCOLS),
+            "all_production_workflows_required":list(REQUIRED_PRODUCTION_WORKFLOWS),
+        },
         "admission":{
             "nonoverlap_window_hours":1,
             "minimum_calendar_days":42,
@@ -103,20 +117,23 @@ def authority_events(
     workflow_hash_override=None,
 ):
     source_sha=os.environ["GITHUB_SHA"]
-    workflow_bytes=subprocess.run(
-        ["git","-C",str(ROOT),"show",f"{source_sha}:{WORKFLOW}"],
-        check=True,capture_output=True,timeout=120,
-    ).stdout
+    required_paths=list(REQUIRED_PROTOCOLS)+list(REQUIRED_PRODUCTION_WORKFLOWS)+[WORKFLOW]
+    hashes={}
+    for required_path in required_paths:
+        payload=subprocess.run(
+            ["git","-C",str(ROOT),"show",f"{source_sha}:{required_path}"],
+            check=True,capture_output=True,timeout=120,
+        ).stdout
+        hashes[required_path]=digest(payload)
+    if workflow_hash_override is not None:
+        hashes[WORKFLOW]=workflow_hash_override
     manifest={
-        "schema":"btc-predictive-vnext4r71-negative-e2e-manifest-v1",
+        "schema":"btc-predictive-vnext4r72-negative-e2e-manifest-v1",
         "source_commit_sha":source_sha,
-        "paths_sha256":{
-            WORKFLOW:(
-                workflow_hash_override
-                if workflow_hash_override is not None
-                else digest(workflow_bytes)
-            )
-        },
+        "paths_sha256":hashes,
+        "all_protocols":list(REQUIRED_PROTOCOLS),
+        "deployment_workflows":list(REQUIRED_PRODUCTION_WORKFLOWS),
+        "evidence_branch":NEG_BRANCH,
     }
     schedule=make_event(1,None,{
         "type":"SCHEDULE_REGISTERED",
@@ -149,7 +166,8 @@ def forecast_event(
     head="1h",
     raw_sha_override=None,
 ):
-    raw=case_dir/"raw.json"
+    raw=RAW_ROOT/case_dir.name/"raw.json"
+    raw.parent.mkdir(parents=True,exist_ok=True)
     raw.write_bytes(canonical({"source":"negative-e2e","slot":start.isoformat()}))
     slot=start.strftime("%Y%m%dT%H%M%SZ")
     return make_event(seq,previous,{
@@ -197,7 +215,10 @@ def expect_failure(name,case_dir,expected_fragment=None):
             repo_root=str(ROOT),
             protocol_path=str((case_dir/"protocol.json").relative_to(ROOT)),
             events_dir=str((case_dir/"events").relative_to(ROOT)),
-            current_tip=os.environ["GITHUB_SHA"],
+            current_tip=subprocess.run(
+                ["git","rev-parse","HEAD"],
+                cwd=ROOT,check=True,capture_output=True,text=True,
+            ).stdout.strip(),
         )
     except Exception as ex:
         message=f"{type(ex).__name__}: {ex}"
@@ -224,7 +245,25 @@ def case_dir(name):
 
 def main():
     shutil.rmtree(BASE,ignore_errors=True)
+    shutil.rmtree(RAW_ROOT,ignore_errors=True)
     BASE.mkdir()
+    RAW_ROOT.mkdir(parents=True,exist_ok=True)
+    subprocess.run(
+        ["git","config","user.name","btc-predictive-r72-negative-e2e[bot]"],
+        cwd=ROOT,check=True,
+    )
+    subprocess.run(
+        ["git","config","user.email","btc-predictive-r72-negative-e2e[bot]@users.noreply.github.com"],
+        cwd=ROOT,check=True,
+    )
+    subprocess.run(
+        ["git","checkout","-B",NEG_BRANCH,os.environ["GITHUB_SHA"]],
+        cwd=ROOT,check=True,capture_output=True,text=True,
+    )
+    subprocess.run(
+        ["git","push","-u","origin","HEAD:"+NEG_BRANCH],
+        cwd=ROOT,check=True,capture_output=True,text=True,
+    )
     now=datetime.now(UTC)
 
     # 1. disabled protocol must block before scoring or verification.
@@ -376,10 +415,25 @@ def main():
     bundle.write_text(json.dumps(obj,separators=(",",":"),sort_keys=True))
     expect_failure("corrupted_rekor_proof",d)
 
+    # Preserve every signed negative artifact for independent read-only replay.
+    subprocess.run(["git","add","r71_negative_e2e","predictive_vnext4r71_1h_raw"],cwd=ROOT,check=True)
+    subprocess.run(
+        ["git","commit","-m","R7.2 preserve signed negative E2E artifacts"],
+        cwd=ROOT,check=True,capture_output=True,text=True,
+    )
+    subprocess.run(
+        ["git","push","origin","HEAD:"+NEG_BRANCH],
+        cwd=ROOT,check=True,capture_output=True,text=True,
+    )
+    tip=subprocess.run(
+        ["git","rev-parse","HEAD"],cwd=ROOT,check=True,capture_output=True,text=True,
+    ).stdout.strip()
     print(json.dumps({
-        "status":"R7_1_NEGATIVE_E2E_PASS",
+        "status":"R7_2_NEGATIVE_E2E_PASS",
         "attacks":11,
         "real_oidc_rekor":True,
+        "preserved_branch":NEG_BRANCH,
+        "preserved_tip":tip,
         "mandatory_admission_entrypoint":"predictive_vnext4r71/admission.py",
     },sort_keys=True))
 

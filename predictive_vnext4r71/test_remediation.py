@@ -20,6 +20,7 @@ from predictive_vnext4r71.admission import (
     _assert_remote_tip_still_exact,
     _verify_checkout_path_at_head,
     _verify_exact_checkout_remote_tip,
+    assert_snapshot_decision_current,
     run_admission,
 )
 from predictive_vnext4r71.checkpoint import git_prefix_binding
@@ -318,6 +319,33 @@ class ExactCheckoutBindingTests(unittest.TestCase):
             self.assertFalse(
                 out["governance"]["decision_binding"]["absolute_latest_tip_atomicity_claimed"]
             )
+
+    def test_snapshot_consumer_rejects_advanced_remote_tip(self):
+        report={
+            "governance":{
+                "decision_binding":{
+                    "semantics":"SNAPSHOT_AS_OF_EXACT_EVIDENCE_SHA",
+                    "evidence_branch":"evidence",
+                    "evidence_sha":"a"*40,
+                }
+            }
+        }
+        with patch(
+            "predictive_vnext4r71.admission._fetch_remote_tip",
+            return_value="a"*40,
+        ):
+            self.assertEqual(
+                assert_snapshot_decision_current(repo_root=".",report=report),
+                "a"*40,
+            )
+        with patch(
+            "predictive_vnext4r71.admission._fetch_remote_tip",
+            return_value="b"*40,
+        ):
+            with self.assertRaisesRegex(
+                ValueError,"admission snapshot decision is stale"
+            ):
+                assert_snapshot_decision_current(repo_root=".",report=report)
 
     def test_working_tree_bytes_must_equal_exact_head(self):
         with tempfile.TemporaryDirectory() as td:

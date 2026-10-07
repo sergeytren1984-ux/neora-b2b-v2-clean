@@ -104,6 +104,24 @@ def _actual_head(root: Path) -> str:
     ).stdout.strip()
 
 
+def _fetch_remote_tip(root: Path, branch: str) -> str:
+    if not isinstance(branch, str) or not branch:
+        raise ValueError("evidence branch missing")
+    subprocess.run(
+        ["git", "-C", str(root), "fetch", "origin", branch],
+        check=True,
+        capture_output=True,
+        timeout=180,
+    )
+    return subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "origin/" + branch],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    ).stdout.strip()
+
+
 def _verify_exact_checkout_remote_tip(
     root: Path,
     branch: str,
@@ -113,22 +131,8 @@ def _verify_exact_checkout_remote_tip(
     There is deliberately no caller-supplied tip override. This check executes
     before replay/scoring and binds every later verification to the real checkout.
     """
-    if not isinstance(branch, str) or not branch:
-        raise ValueError("evidence branch missing")
     actual_head = _actual_head(root)
-    subprocess.run(
-        ["git", "-C", str(root), "fetch", "origin", branch],
-        check=True,
-        capture_output=True,
-        timeout=180,
-    )
-    remote_tip = subprocess.run(
-        ["git", "-C", str(root), "rev-parse", "origin/" + branch],
-        check=True,
-        capture_output=True,
-        text=True,
-        timeout=60,
-    ).stdout.strip()
+    remote_tip = _fetch_remote_tip(root, branch)
     if actual_head != remote_tip:
         raise ValueError(
             "admission checkout HEAD is not exact fetched remote evidence tip"
@@ -708,8 +712,9 @@ def _run_admission_snapshot(
     )
     governance["exact_checkout_bytes_verified"] = True
 
-    # Close the time-of-check/time-of-use gap: the evidence branch must still
-    # point to this exact checkout after replay/checkpoint/anchor verification.
+    # Freshness observation for the bound snapshot. This does not claim a
+    # linearizable "latest remote tip" at function return; the decision remains
+    # bound to current_tip and must be rechecked by any later consumer.
     _assert_remote_tip_still_exact(
         root,
         evidence_branch,
@@ -736,8 +741,9 @@ def _run_admission_snapshot(
         if passed else "PROSPECTIVE_GATE_PENDING_OR_FAIL"
     )
 
-    # Re-fetch once more immediately before the admission decision leaves this
-    # function. If a writer advanced the branch while scoring, fail closed.
+    # Re-fetch after scoring to reject advances observed during this execution.
+    # A later advance after this fetch does not invalidate the historical result;
+    # it makes the snapshot decision stale for a consumer, which must reject it.
     _assert_remote_tip_still_exact(
         root,
         evidence_branch,
@@ -752,6 +758,7 @@ def _run_admission_snapshot(
         "protocol_sha256": digest(protocol_bytes),
         "absolute_latest_tip_atomicity_claimed": False,
         "consumer_must_reject_if_evidence_tip_differs": True,
+        "consumer_validation_entrypoint": "predictive_vnext4r71.admission.assert_snapshot_decision_current",
     }
 
     return {
@@ -762,6 +769,32 @@ def _run_admission_snapshot(
         "admission_ready": passed,
         "trading_authority": False,
     }
+
+
+def assert_snapshot_decision_current(*, repo_root: str, report: dict) -> str:
+    """Reject a snapshot decision if the evidence branch has advanced.
+
+    This is an explicit freshness precondition for a later consumer. It is not a
+    cross-process lease and therefore intentionally makes no absolute latest-tip
+    atomicity claim. Production activation must combine it with CAS/lease if the
+    consume action itself must be linearizable.
+    """
+    try:
+        binding = report["governance"]["decision_binding"]
+    except (KeyError, TypeError) as ex:
+        raise ValueError("admission report lacks decision binding") from ex
+    if binding.get("semantics") != "SNAPSHOT_AS_OF_EXACT_EVIDENCE_SHA":
+        raise ValueError("unsupported admission decision semantics")
+    branch = binding.get("evidence_branch")
+    expected = binding.get("evidence_sha")
+    if not isinstance(branch, str) or not branch:
+        raise ValueError("decision binding evidence branch missing")
+    if not isinstance(expected, str) or len(expected) != 40:
+        raise ValueError("decision binding evidence SHA invalid")
+    observed = _fetch_remote_tip(Path(repo_root).resolve(), branch)
+    if observed != expected:
+        raise ValueError("admission snapshot decision is stale: evidence tip changed")
+    return observed
 
 
 def run_admission(

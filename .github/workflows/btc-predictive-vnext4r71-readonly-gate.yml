@@ -1,8 +1,8 @@
-name: BTC predictive vNext4R7.2 read-only release gate
+name: BTC predictive vNext4R7.3 read-only release gate
 
 on:
   push:
-    branches: [btc-predictive-vnext4r72-remediation-20261007]
+    branches: [btc-predictive-vnext4r73-remediation-20261007]
     paths:
       - predictive_vnext4r71/**
       - predictive_vnext4r7/scorecard_core.py
@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: btc-predictive-vnext4r72-readonly-${{ github.ref }}
+  group: btc-predictive-vnext4r73-readonly-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -32,7 +32,7 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test -z "$(git status --porcelain)"
-          echo "R72_EXACT_SHA=$GITHUB_SHA"
+          echo "R73_EXACT_SHA=$GITHUB_SHA"
 
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
@@ -101,11 +101,11 @@ jobs:
               baseline=pathlib.Path(p["baseline_path"]).read_bytes()
               assert hashlib.sha256(artifact).hexdigest()==p["artifact_sha256"]
               assert hashlib.sha256(baseline).hexdigest()==p["baseline_sha256"]
-          print("R72_READONLY_POLICY_PASS")
+          print("R73_READONLY_POLICY_PASS")
           PY
 
       - name: Ensure tests did not mutate tracked candidate
         run: |
           git diff --exit-code
           git diff --cached --exit-code
-          echo "R72_READONLY_GATE_PASS"
+          echo "R73_READONLY_GATE_PASS"

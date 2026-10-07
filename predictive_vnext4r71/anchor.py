@@ -51,6 +51,7 @@ def publish_checkpoint_anchor(
     workflow_commit:str,
     sign_blob,
     require_bundle_time,
+    verify_blob=None,
 )->dict:
     rel_checkpoint=str(checkpoint_path.resolve().relative_to(repo_root.resolve()))
     rel_bundle=str(checkpoint_bundle_path.resolve().relative_to(repo_root.resolve()))
@@ -89,7 +90,39 @@ def publish_checkpoint_anchor(
             seq=int(checkpoint_doc["verified_through_sequence"])
             path=anchor_dir/f"{seq:08d}.json"
             if path.exists():
-                raise ValueError("anchor sequence already exists")
+                existing=json.loads(path.read_bytes())
+                stable={
+                    "head":head,
+                    "evidence_branch":evidence_branch,
+                    "anchor_branch":anchor_branch,
+                    "verified_through_sequence":seq,
+                    "verified_through_event_hash":checkpoint_doc["verified_through_event_hash"],
+                    "checkpoint_sha256":digest(checkpoint_path.read_bytes()),
+                    "checkpoint_bundle_sha256":digest(checkpoint_bundle_path.read_bytes()),
+                    "checkpoint_path":rel_checkpoint,
+                    "checkpoint_bundle_path":rel_bundle,
+                    "checkpoint_remote_commit":checkpoint_remote_commit,
+                    "verified_branch_commit":checkpoint_doc["verified_branch_commit"],
+                    "manifest_sha256":checkpoint_doc["manifest_sha256"],
+                    "source_commit_sha":checkpoint_doc["source_commit_sha"],
+                    "workflow_commit":workflow_commit,
+                }
+                for key,value in stable.items():
+                    if existing.get(key)!=value:
+                        raise ValueError("existing anchor conflicts: "+key)
+                bundle=path.with_suffix(".sigstore.json")
+                if not bundle.exists():
+                    raise ValueError("existing anchor bundle missing")
+                if verify_blob is not None:
+                    verify_blob(path,bundle,existing)
+                return {
+                    "document":existing,
+                    "anchor_path":str(path.relative_to(work)),
+                    "anchor_bundle_path":str(bundle.relative_to(work)),
+                    "anchor_remote_commit":remote_before,
+                    "rekor_time_utc":require_bundle_time(bundle).isoformat(),
+                    "recovered_existing":True,
+                }
             doc={
                 "schema":"btc-predictive-vnext4r71-checkpoint-anchor-v1",
                 "head":head,

@@ -74,7 +74,7 @@ jobs:
       - name: Verify release policy is fail-closed and complete
         run: |
           python - <<'PY'
-          import json,pathlib
+          import hashlib,json,pathlib
           expected=[
             ".github/workflows/btc-predictive-vnext4r71-1h.yml",
             ".github/workflows/btc-predictive-vnext4r71-4h.yml",
@@ -87,6 +87,7 @@ jobs:
               assert "BTC_VNEXT4R71_ENABLED" in text,wf
           for head in ("1h","4h","24h"):
               p=json.loads(pathlib.Path(f"predictive_vnext4r71/protocol_{head}.json").read_text())
+              assert p["parent_r6_source_sha"]=="98d6ea6e981b3306f397a9105babc2e5d66ac7a0"
               assert p["admission_enabled"] is False
               assert p["trading_authority"] is False
               assert p["start_utc"] is None
@@ -95,6 +96,10 @@ jobs:
               assert req["all_production_workflows_required"]==expected
               assert p["skill_inference"]["block_confidence_intervals_required"] is True
               assert p["skill_inference"]["separate_stress_episode_gate_required"] is True
+              artifact=pathlib.Path(p["artifact_path"]).read_bytes()
+              baseline=pathlib.Path(p["baseline_path"]).read_bytes()
+              assert hashlib.sha256(artifact).hexdigest()==p["artifact_sha256"]
+              assert hashlib.sha256(baseline).hexdigest()==p["baseline_sha256"]
           print("R71_READONLY_POLICY_PASS")
           PY
 

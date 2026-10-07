@@ -13,6 +13,7 @@ from predictive_vnext4r7.checkpoint import (
     checkpoint_document,
     initial_state,
     prefix_file_digest,
+    verify_checkpoint,
 )
 from predictive_vnext4r7.episodes import independent_volatility_episodes
 from predictive_vnext4r7.integrity import (
@@ -135,6 +136,91 @@ class CheckpointTests(unittest.TestCase):
             self.assertEqual(doc["verified_through_sequence"], 2)
             self.assertEqual(doc["prefix_files_sha256"], prefix)
             self.assertEqual(len(doc["seen_idempotency_keys"]), 2)
+
+    def test_checkpoint_detects_prefix_rewrite(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            subprocess.run(["git", "init"], cwd=root, check=True, capture_output=True)
+            subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=root, check=True)
+            subprocess.run(["git", "config", "user.name", "test"], cwd=root, check=True)
+
+            workflow = root / ".github/workflows/test.yml"
+            workflow.parent.mkdir(parents=True)
+            workflow.write_text("name: frozen\non: workflow_dispatch\n")
+            events_dir = root / "events"
+            events_dir.mkdir()
+
+            state = initial_state()
+            prev = None
+            for i, slot in enumerate(
+                ["20261007T000000Z", "20261007T010000Z"], 1
+            ):
+                e = event(i, prev, slot=slot)
+                raw = canonical(e)
+                (events_dir / f"{i:08d}.json").write_bytes(raw)
+                advance_state(
+                    state, e, raw, head="1h", horizon=timedelta(hours=1)
+                )
+                prev = digest(raw)
+
+            subprocess.run(["git", "add", "."], cwd=root, check=True)
+            subprocess.run(["git", "commit", "-m", "verified prefix"], cwd=root, check=True, capture_output=True)
+            verified_commit = subprocess.run(
+                ["git", "rev-parse", "HEAD"], cwd=root, check=True,
+                capture_output=True, text=True
+            ).stdout.strip()
+            manifest = {
+                "source_commit_sha": verified_commit,
+                "paths_sha256": {
+                    ".github/workflows/test.yml": digest(workflow.read_bytes())
+                },
+            }
+            prefix = prefix_file_digest(sorted(events_dir.glob("*.json")), 2)
+            doc = checkpoint_document(
+                head="1h",
+                state=state,
+                source_commit_sha=verified_commit,
+                manifest_sha256=digest(canonical(manifest)),
+                workflow_commit=verified_commit,
+                verified_branch_commit=verified_commit,
+                prefix_files_sha256=prefix,
+                created_at_utc="2026-10-07T02:00:00+00:00",
+            )
+            checkpoint = root / "checkpoint.json"
+            bundle = root / "checkpoint.sigstore.json"
+            checkpoint.write_bytes(canonical(doc))
+            bundle.write_text("{}")
+
+            verified = verify_checkpoint(
+                repo_root=root,
+                events_dir=events_dir,
+                checkpoint_path=checkpoint,
+                checkpoint_bundle_path=bundle,
+                manifest=manifest,
+                manifest_sha256=digest(canonical(manifest)),
+                workflow_path=".github/workflows/test.yml",
+                current_branch_tip=verified_commit,
+                verify_blob=lambda *args: None,
+                expected_head="1h",
+            )
+            self.assertEqual(verified.sequence, 2)
+
+            first = json.loads((events_dir / "00000001.json").read_text())
+            first["published_at_utc"] = "2026-10-07T00:02:00+00:00"
+            (events_dir / "00000001.json").write_bytes(canonical(first))
+            with self.assertRaises(ValueError):
+                verify_checkpoint(
+                    repo_root=root,
+                    events_dir=events_dir,
+                    checkpoint_path=checkpoint,
+                    checkpoint_bundle_path=bundle,
+                    manifest=manifest,
+                    manifest_sha256=digest(canonical(manifest)),
+                    workflow_path=".github/workflows/test.yml",
+                    current_branch_tip=verified_commit,
+                    verify_blob=lambda *args: None,
+                    expected_head="1h",
+                )
 
 
 class EpisodeTests(unittest.TestCase):

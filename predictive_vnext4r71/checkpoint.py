@@ -11,7 +11,10 @@ from pathlib import Path
 from typing import Callable
 
 from predictive_vnext4r7.integrity import canonical, digest
-from predictive_vnext4r71.integrity import validate_event_collection
+from predictive_vnext4r71.integrity import (
+    validate_event_collection,
+    verify_deployment_bundle_against_manifest,
+)
 
 EMPTY_ROOT = "0" * 64
 
@@ -238,6 +241,9 @@ def verify_checkpoint(
     verify_blob(checkpoint_path, checkpoint_bundle_path, doc)
     verify_workflow_binding(
         repo_root, doc, workflow_path, manifest
+    )
+    verify_deployment_bundle_against_manifest(
+        repo_root, doc, manifest
     )
 
     verified_commit = str(doc["verified_branch_commit"])

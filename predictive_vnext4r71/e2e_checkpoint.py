@@ -550,12 +550,12 @@ def main():
         "checkpoint_recovery_seconds":{"p50":statistics.median(recovery_seconds),"p95":recovery_p95,"n":len(recovery_seconds)},
         "full_checkpoint_operation_seconds":{"p50":statistics.median(checkpoint_operation_seconds),"p95":checkpoint_p95,"n":len(checkpoint_operation_seconds),"budget_seconds":720},
     }
-    audit_path=ROOT/"r72_e2e_audit_manifest.json"
+    audit_path=ROOT/"r73_e2e_audit_manifest.json"
     audit_bundle=audit_path.with_suffix(".sigstore.json")
     audit_path.write_bytes(canonical(audit))
     sign(audit_path,audit_bundle)
     preserved_tip=push_paths(
-        "R7.2 preserve signed positive E2E audit artifact",
+        "R7.3 preserve signed positive E2E audit artifact",
         audit_path,audit_bundle,
     )
     audit["preserved_tip"]=preserved_tip

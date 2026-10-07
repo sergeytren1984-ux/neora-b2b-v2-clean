@@ -1,0 +1,64 @@
+name: BTC predictive vNext4R7.1 successor watchdog
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/btc-predictive-vnext4r71-watchdog.yml
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_run:
+    workflows:
+      - BTC predictive vNext4R7.1 1h unified chain
+      - BTC predictive vNext4R7.1 4h unified chain
+      - BTC predictive vNext4R7.1 24h unified chain
+    types: [completed]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: btc-predictive-vnext4r71-successor-watchdog
+  cancel-in-progress: false
+
+jobs:
+  ensure-successor:
+    if: vars.BTC_VNEXT4R71_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        workflow:
+          - btc-predictive-vnext4r71-1h.yml
+          - btc-predictive-vnext4r71-4h.yml
+          - btc-predictive-vnext4r71-24h.yml
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Validate immutable source variable
+        env:
+          R71_SOURCE_SHA: ${{ vars.BTC_VNEXT4R71_SOURCE_SHA }}
+        run: '[[ "$R71_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]'
+
+      - name: Build immutable R7.1 liveness runtime
+        env:
+          R71_SOURCE_SHA: ${{ vars.BTC_VNEXT4R71_SOURCE_SHA }}
+        run: |
+          rm -rf /tmp/vnext4r71-runtime
+          mkdir -p /tmp/vnext4r71-runtime
+          git archive "$R71_SOURCE_SHA" | tar -x -C /tmp/vnext4r71-runtime
+
+      - name: Ensure chain has a live run or successor
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -I /tmp/vnext4r71-runtime/predictive_vnext4r71/chain_liveness.py \
+            --repo "$GITHUB_REPOSITORY" \
+            --workflow "${{ matrix.workflow }}" \
+            --ref main

@@ -61,6 +61,8 @@ def protocol(start:datetime,*,enabled=True):
     return {
         "schema":"btc-predictive-vnext4r71-negative-e2e-protocol-v1",
         "head":"1h",
+        "evidence_branch":NEG_BRANCH,
+        "evidence_raw_prefix":"predictive_vnext4r71_1h_raw/",
         "start_utc":start.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "admission_enabled":bool(enabled),
         "selected_model":"NEGATIVE_E2E_DUMMY",

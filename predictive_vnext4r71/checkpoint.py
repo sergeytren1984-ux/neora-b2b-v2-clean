@@ -127,6 +127,8 @@ def checkpoint_document(
     prefix_files_sha256: str,
     verified_commit_prefix_files_sha256: str,
     git_prefix_path_count: int,
+    previous_checkpoint_sequence: int,
+    previous_checkpoint_sha256: str | None,
     created_at_utc: str,
 ) -> dict:
     return {
@@ -138,6 +140,8 @@ def checkpoint_document(
         "prefix_files_sha256": prefix_files_sha256,
         "verified_commit_prefix_files_sha256": verified_commit_prefix_files_sha256,
         "git_prefix_path_count": int(git_prefix_path_count),
+        "previous_checkpoint_sequence": int(previous_checkpoint_sequence),
+        "previous_checkpoint_sha256": previous_checkpoint_sha256,
         "seen_idempotency_keys": sorted(state.seen_idempotency_keys),
         "seen_type_slot": sorted(state.seen_type_slot),
         "source_commit_sha": source_commit_sha,
@@ -154,6 +158,14 @@ def state_from_checkpoint(doc: dict) -> ChainState:
         raise ValueError("unexpected checkpoint schema")
     if doc.get("trading_authority") is not False:
         raise ValueError("checkpoint trading authority drift")
+    prev_seq=int(doc.get("previous_checkpoint_sequence",-1))
+    if prev_seq<0 or prev_seq>=int(doc["verified_through_sequence"]):
+        raise ValueError("checkpoint predecessor sequence invalid")
+    prev_sha=doc.get("previous_checkpoint_sha256")
+    if prev_seq==0 and prev_sha is not None:
+        raise ValueError("first checkpoint cannot name predecessor hash")
+    if prev_seq>0 and (not isinstance(prev_sha,str) or len(prev_sha)!=64):
+        raise ValueError("checkpoint predecessor hash missing")
     return ChainState(
         sequence=int(doc["verified_through_sequence"]),
         last_event_hash=doc.get("verified_through_event_hash"),

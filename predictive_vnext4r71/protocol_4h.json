@@ -1,6 +1,6 @@
 {
   "schema": "btc-predictive-vnext4r71-protocol-v1",
-  "status": "R7_2_REMEDIATION_PRE_FREEZE_NOT_PRODUCTION",
+  "status": "R7_3_REMEDIATION_PRE_FREEZE_NOT_PRODUCTION",
   "parent_r6_source_sha": "98d6ea6e981b3306f397a9105babc2e5d66ac7a0",
   "selected_model": "ensemble_equal",
   "numerical_core": "unchanged frozen R6 artifacts",
@@ -81,7 +81,17 @@
     "requires_workflow_manifest_binding": true,
     "requires_raw_integrity": true,
     "requires_exact_receipt_forecast_binding": true,
-    "requires_outcome_after_due": true
+    "requires_outcome_after_due": true,
+    "caller_supplied_current_tip_forbidden": true,
+    "actual_git_head_must_equal_fetched_remote_tip_before_replay": true,
+    "exact_checkout_bytes_required": [
+      "protocol",
+      "event_json",
+      "event_sigstore_bundle",
+      "raw",
+      "checkpoint",
+      "checkpoint_sigstore_bundle"
+    ]
   },
   "workflows": {
     "forecast": ".github/workflows/btc-predictive-vnext4r71-4h.yml",
@@ -123,13 +133,19 @@
     "local_sha256_required": true,
     "exact_event_publication_commit_byte_equality_required": true,
     "publication_commit_must_be_ancestor_of_remote_tip": true,
-    "admission_checkout_must_equal_remote_evidence_tip": true
+    "admission_checkout_must_equal_remote_evidence_tip": true,
+    "raw_path_must_encode_event_slot": true,
+    "raw_first_addition_commit_must_equal_event_publication_commit": true,
+    "raw_reuse_from_prior_commit_forbidden": true,
+    "checkout_bytes_must_equal_exact_remote_tip": true
   },
   "e2e_audit_artifacts": {
     "successful_positive_signed_e2e_must_be_preserved": true,
     "successful_negative_signed_e2e_must_be_preserved": true,
     "cosign_rekor_bundles_must_be_preserved": true,
-    "commit_ids_and_hashes_must_be_reported": true
+    "commit_ids_and_hashes_must_be_reported": true,
+    "targeted_stale_checkout_newer_tip_attack_required": true,
+    "prior_commit_raw_reuse_attack_required": true
   },
   "evidence_branch": "btc-predictive-vnext4r71-4h",
   "evidence_raw_prefix": "predictive_vnext4r71_4h_raw/"

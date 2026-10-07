@@ -7,6 +7,7 @@ import json
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -23,6 +24,8 @@ from predictive_vnext4r71.tail_research import (
     quantile_crossings,
     threshold_order_violations,
 )
+from predictive_vnext4r7.episodes import stress_episode_skill_summary
+from predictive_vnext4r71 import worker
 
 UTC = timezone.utc
 
@@ -206,6 +209,139 @@ class TailCoherenceTests(unittest.TestCase):
         projected=monotone_exceedance(raw)
         self.assertEqual(threshold_order_violations(projected),0)
 
+
+
+class StressEpisodeInferenceTests(unittest.TestCase):
+    def test_stress_episode_reporting_is_separate_and_explicit(self):
+        anchors=[
+            datetime(2026,1,1,hour=i,tzinfo=UTC)
+            for i in range(8)
+        ]
+        bins=[2,2,2,0,0,2,2,2]
+        brier=[.1,.2,.3,0,0,.4,.5,.6]
+        logloss=[.2,.2,.2,0,0,.3,.3,.3]
+        out=stress_episode_skill_summary(
+            anchors,bins,brier,logloss,
+            window_hours=1,
+            minimum_duration_hours=3,
+            minimum_separation_hours=4,
+            stress_bin=2,
+        )
+        self.assertEqual(out["count"],2)
+        self.assertEqual(
+            out["interpretation"],
+            "ROBUSTNESS_DIAGNOSTIC_NOT_STATISTICAL_INDEPENDENCE_PROOF",
+        )
+        self.assertGreater(out["episode_weighted_mean_brier_gain"],0)
+        self.assertGreater(out["episode_weighted_mean_logloss_gain"],0)
+
+
+class CheckpointFaultInjectionTests(unittest.TestCase):
+    def test_anchor_publication_failure_is_fail_closed(self):
+        freeze={
+            "type":"CONFIG_FROZEN_PRESTART",
+            "manifest":{"source_commit_sha":"3"*40},
+        }
+        events=[({"type":"ABSTAIN_DATA_INVALID"},None) for _ in range(23)]
+        events.insert(0,(freeze,None))
+        with tempfile.TemporaryDirectory() as td:
+            old_root=worker.EVIDENCE_ROOT
+            worker.EVIDENCE_ROOT=Path(td)
+            cfg={
+                "checkpoint":"cp/1h.json",
+                "events":"events",
+                "branch":"evidence",
+                "anchor_branch":"anchors",
+            }
+            try:
+                with (
+                    patch.object(worker,"prior_events",return_value=events),
+                    patch.object(
+                        worker,"create_signed_checkpoint",
+                        return_value={
+                            "verified_through_sequence":24,
+                            "verified_through_event_hash":"a"*64,
+                        },
+                    ),
+                    patch.object(
+                        worker,"commit_and_push_checkpoint",
+                        return_value="4"*40,
+                    ),
+                    patch.object(
+                        worker,
+                        "publish_checkpoint_anchor",
+                        side_effect=RuntimeError("INJECTED_ANCHOR_FAILURE"),
+                    ),
+                ):
+                    with self.assertRaisesRegex(
+                        RuntimeError,"INJECTED_ANCHOR_FAILURE"
+                    ):
+                        worker.maybe_checkpoint(cfg,"1h")
+            finally:
+                worker.EVIDENCE_ROOT=old_root
+
+    def test_anchor_recovery_failure_is_fail_closed(self):
+        freeze={
+            "type":"CONFIG_FROZEN_PRESTART",
+            "manifest":{"source_commit_sha":"3"*40},
+        }
+        with tempfile.TemporaryDirectory() as td:
+            old_root=worker.EVIDENCE_ROOT
+            root=Path(td)
+            worker.EVIDENCE_ROOT=root
+            checkpoint=root/"cp/1h.json"
+            checkpoint.parent.mkdir(parents=True)
+            checkpoint.write_text(
+                json.dumps({"verified_through_sequence":24})
+            )
+            cfg={
+                "checkpoint":"cp/1h.json",
+                "events":"events",
+                "branch":"evidence",
+                "anchor_branch":"anchors",
+            }
+            try:
+                with (
+                    patch.object(
+                        worker,"prior_events",
+                        return_value=[(freeze,None)],
+                    ),
+                    patch.object(
+                        worker,"should_checkpoint",
+                        return_value=False,
+                    ),
+                    patch.object(
+                        worker,"_ensure_checkpoint_anchor",
+                        side_effect=RuntimeError("INJECTED_RECOVERY_FAILURE"),
+                    ),
+                ):
+                    with self.assertRaisesRegex(
+                        RuntimeError,"INJECTED_RECOVERY_FAILURE"
+                    ):
+                        worker.maybe_checkpoint(cfg,"1h")
+            finally:
+                worker.EVIDENCE_ROOT=old_root
+
+
+class DeploymentBundleTests(unittest.TestCase):
+    def test_all_protocols_require_all_five_production_workflows(self):
+        root=Path(__file__).resolve().parents[1]
+        expected=list(worker.PRODUCTION_WORKFLOWS)
+        self.assertEqual(len(expected),5)
+        for head in ("1h","4h","24h"):
+            p=json.loads(
+                (root/f"predictive_vnext4r71/protocol_{head}.json").read_text()
+            )
+            req=p["signed_manifest_requirements"]
+            self.assertEqual(
+                req["all_production_workflows_required"],expected
+            )
+            self.assertTrue(
+                p["skill_inference"]["block_confidence_intervals_required"]
+            )
+            self.assertTrue(
+                p["skill_inference"]["separate_stress_episode_gate_required"]
+            )
 
 class WorkerIntegrationTests(unittest.TestCase):
     def test_worker_calls_checkpoint_after_complete_actions(self):

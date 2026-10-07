@@ -364,9 +364,21 @@ def main():
     bundle.unlink()
     expect_failure("missing_signature_bundle",d)
 
+    # 11. Rekor inclusion proof is mandatory even for an otherwise valid bundle.
+    d,freeze=prepare("corrupted_rekor_proof")
+    fc=forecast_event(3,digest(canonical(freeze)),start,d)
+    path,bundle=write_signed(d/"events",fc)
+    obj=json.loads(bundle.read_text())
+    entries=obj.get("verificationMaterial",{}).get("tlogEntries",[])
+    if not entries:
+        raise RuntimeError("negative E2E bundle unexpectedly lacks tlog entry")
+    entries[0]["inclusionProof"]={}
+    bundle.write_text(json.dumps(obj,separators=(",",":"),sort_keys=True))
+    expect_failure("corrupted_rekor_proof",d)
+
     print(json.dumps({
         "status":"R7_1_NEGATIVE_E2E_PASS",
-        "attacks":10,
+        "attacks":11,
         "real_oidc_rekor":True,
         "mandatory_admission_entrypoint":"predictive_vnext4r71/admission.py",
     },sort_keys=True))

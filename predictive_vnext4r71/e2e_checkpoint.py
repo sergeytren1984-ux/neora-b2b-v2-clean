@@ -1,7 +1,8 @@
-"""GitHub Actions E2E: real Sigstore events -> remote branch -> R7.1 checkpoint.
+"""GitHub Actions E2E: real Sigstore events -> remote branch -> R7.2 checkpoint.
 
-The branch is ephemeral and deleted by the workflow. This test uses real OIDC/Rekor
-signatures and remote git publication without touching R6 or any production branch.
+Successful audit branches are intentionally retained for independent read-only
+replay. This test uses real OIDC/Rekor signatures and remote git publication
+without touching R6 or any production evidence branch.
 """
 from __future__ import annotations
 
@@ -15,6 +16,10 @@ from pathlib import Path
 
 from predictive_vnext4r7.integrity import canonical, digest
 from predictive_vnext4r71.admission import run_admission
+from predictive_vnext4r71.integrity import (
+    REQUIRED_PROTOCOLS,
+    REQUIRED_PRODUCTION_WORKFLOWS,
+)
 from predictive_vnext4r71.checkpoint import event_files
 from predictive_vnext4r71.journal_runtime import load_incremental_journal
 from predictive_vnext4r71 import worker
@@ -100,7 +105,7 @@ def main():
     cmd("git","push","-u","origin","HEAD:"+e2e_branch)
 
     events_dir=ROOT/"r71_e2e_events"
-    raw_dir=ROOT/"r71_e2e_raw"
+    raw_dir=ROOT/"predictive_vnext4r71_1h_raw"/("r72-e2e-"+os.environ.get("GITHUB_RUN_ID","local"))
     checkpoint=ROOT/"r71_e2e_checkpoint"/"1h.json"
     events_dir.mkdir(exist_ok=True)
     raw_dir.mkdir(exist_ok=True)
@@ -135,6 +140,10 @@ def main():
             "anchor_branch":anchor_branch,
             "checkpoint_path":"r71_e2e_checkpoint/1h.json",
         },
+        "signed_manifest_requirements":{
+            "all_protocols_required":list(REQUIRED_PROTOCOLS),
+            "all_production_workflows_required":list(REQUIRED_PRODUCTION_WORKFLOWS),
+        },
         "admission":{
             "nonoverlap_window_hours":1,
             "minimum_calendar_days":42,
@@ -154,14 +163,21 @@ def main():
     protocol_path.write_bytes(canonical(protocol))
     push_paths("R7.1 E2E protocol",protocol_path)
 
-    workflow_bytes=subprocess.run(
-        ["git","-C",str(ROOT),"show",f"{source_sha}:{WORKFLOW}"],
-        check=True,capture_output=True,timeout=120
-    ).stdout
+    required_paths=list(REQUIRED_PROTOCOLS)+list(REQUIRED_PRODUCTION_WORKFLOWS)+[WORKFLOW]
+    path_hashes={}
+    for required_path in required_paths:
+        payload=subprocess.run(
+            ["git","-C",str(ROOT),"show",f"{source_sha}:{required_path}"],
+            check=True,capture_output=True,timeout=120,
+        ).stdout
+        path_hashes[required_path]=digest(payload)
     manifest={
-        "schema":"btc-predictive-vnext4r71-e2e-manifest-v1",
+        "schema":"btc-predictive-vnext4r72-e2e-manifest-v1",
         "source_commit_sha":source_sha,
-        "paths_sha256":{WORKFLOW:digest(workflow_bytes)},
+        "paths_sha256":path_hashes,
+        "all_protocols":list(REQUIRED_PROTOCOLS),
+        "deployment_workflows":list(REQUIRED_PRODUCTION_WORKFLOWS),
+        "evidence_branch":e2e_branch,
     }
 
     previous=None

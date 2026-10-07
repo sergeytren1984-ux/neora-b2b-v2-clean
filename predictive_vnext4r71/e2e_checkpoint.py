@@ -1,4 +1,4 @@
-"""GitHub Actions E2E: real Sigstore events -> remote branch -> R7.4 checkpoint.
+"""GitHub Actions E2E: real Sigstore events -> remote branch -> R7.5 checkpoint.
 
 Successful audit branches are intentionally retained for independent read-only
 replay. This test uses real OIDC/Rekor signatures and remote git publication
@@ -477,6 +477,45 @@ def main():
     if report["admission_ready"] is not False:
         raise RuntimeError("E2E short sample must not become admissible")
 
+    if report["governance"]["used_protocol_sha256"] != report["governance"]["signed_protocol_sha256"]:
+        raise RuntimeError("used protocol SHA is not the signed protocol SHA")
+    binding=report["governance"]["decision_binding"]
+    if binding["semantics"]!="SNAPSHOT_AS_OF_EXACT_EVIDENCE_SHA":
+        raise RuntimeError("decision snapshot semantics missing")
+    if binding["absolute_latest_tip_atomicity_claimed"] is not False:
+        raise RuntimeError("R7.5 must not claim impossible latest-tip atomicity")
+
+    # Reproduce the independent audit's local read/restore class without any
+    # verifier/scorer substitution. Dirty caller-visible policy and evidence
+    # bytes must not affect the private immutable snapshot used by admission.
+    original_protocol_bytes=protocol_path.read_bytes()
+    attack_protocol=json.loads(original_protocol_bytes)
+    attack_protocol["selected_model"]="UNSIGNED_ATTACKER_CHOICE"
+    attack_protocol["admission"]["minimum_calendar_days"]=0
+    event120=events_dir/"00000120.json"
+    original_event120=event120.read_bytes()
+    attack_event=json.loads(original_event120)
+    attack_event["reason"]="UNSIGNED_WORKING_TREE_MUTATION"
+    protocol_path.write_bytes(canonical(attack_protocol))
+    event120.write_bytes(canonical(attack_event))
+    try:
+        attacked=run_admission(
+            repo_root=str(ROOT),
+            protocol_path=str(protocol_path.relative_to(ROOT)),
+            events_dir=str(events_dir.relative_to(ROOT)),
+        )
+    finally:
+        protocol_path.write_bytes(original_protocol_bytes)
+        event120.write_bytes(original_event120)
+    if attacked["score"]["selected_model"]!="E2E_DUMMY":
+        raise RuntimeError("working-tree protocol mutation reached scoring")
+    if attacked["score"]["gates"]["calendar"] is not False:
+        raise RuntimeError("unsigned calendar policy mutation reached scoring")
+    if attacked["governance"]["used_protocol_sha256"]!=report["governance"]["used_protocol_sha256"]:
+        raise RuntimeError("protocol snapshot SHA changed under working-tree mutation")
+    if not attacked["governance"]["authenticated_protocol_snapshot"]:
+        raise RuntimeError("authenticated private protocol snapshot not reported")
+
     # Advance the remote evidence branch once, then prove that an older checkout
     # cannot spoof the newer tip. This reproduces the independent expert's HIGH
     # finding against the actual signed E2E evidence.
@@ -529,17 +568,17 @@ def main():
     # TOCTOU attack: start admission on the exact remote tip, then advance the
     # same evidence branch from inside scoring. Final admission must fail closed.
     original_score=admission_module.score_from_events
-    race_marker=ROOT/"r74_mid_admission_tip_advance.json"
+    race_marker=ROOT/"r75_mid_admission_tip_advance.json"
     race_state={"advanced_tip":None}
     def score_and_advance(*args,**kwargs):
         out=original_score(*args,**kwargs)
         race_marker.write_bytes(canonical({
-            "schema":"btc-predictive-vnext4r74-mid-admission-tip-advance-v1",
+            "schema":"btc-predictive-vnext4r75-mid-admission-tip-advance-v1",
             "source_sha":source_sha,
             "created_at_utc":datetime.now(UTC).isoformat(),
         }))
         race_state["advanced_tip"]=push_paths(
-            "R7.4 advance remote tip during admission scoring",
+            "R7.5 advance remote tip during admission scoring",
             race_marker,
         )
         return out
@@ -564,8 +603,8 @@ def main():
         raise RuntimeError("mid-admission tip attack did not advance remote branch")
 
     audit={
-        "schema":"btc-predictive-vnext4r74-e2e-audit-artifact-v1",
-        "status":"R7_4_E2E_PASS",
+        "schema":"btc-predictive-vnext4r75-e2e-audit-artifact-v1",
+        "status":"R7_5_E2E_PASS",
         "evidence_branch":e2e_branch,
         "source_sha":source_sha,
         "event_count":len(event_files(events_dir)),
@@ -582,6 +621,11 @@ def main():
         "stale_checkout_tip_attack_rejected":True,
         "mid_admission_tip_advance_attack_rejected":True,
         "mid_admission_tip_after_advance":race_state["advanced_tip"],
+        "local_protocol_read_restore_attack_rejected":True,
+        "working_tree_evidence_mutation_ignored":True,
+        "decision_semantics":report["governance"]["decision_binding"]["semantics"],
+        "used_protocol_sha256":report["governance"]["used_protocol_sha256"],
+        "signed_protocol_sha256":report["governance"]["signed_protocol_sha256"],
         "exact_checkout_head_verified":report["governance"]["exact_checkout_head_verified"],
         "exact_checkout_bytes_verified":report["governance"]["exact_checkout_bytes_verified"],
         "admission_status":report["score"]["status"],
@@ -590,12 +634,12 @@ def main():
         "checkpoint_recovery_seconds":{"p50":statistics.median(recovery_seconds),"p95":recovery_p95,"n":len(recovery_seconds)},
         "full_checkpoint_operation_seconds":{"p50":statistics.median(checkpoint_operation_seconds),"p95":checkpoint_p95,"n":len(checkpoint_operation_seconds),"budget_seconds":720},
     }
-    audit_path=ROOT/"r74_e2e_audit_manifest.json"
+    audit_path=ROOT/"r75_e2e_audit_manifest.json"
     audit_bundle=audit_path.with_suffix(".sigstore.json")
     audit_path.write_bytes(canonical(audit))
     sign(audit_path,audit_bundle)
     preserved_tip=push_paths(
-        "R7.4 preserve signed positive E2E audit artifact",
+        "R7.5 preserve signed positive E2E audit artifact",
         audit_path,audit_bundle,
     )
     audit["preserved_tip"]=preserved_tip

@@ -522,7 +522,7 @@ def manifest(cfg, source_sha):
         paths[path] = workflow_hash(workflow_commit, path)
 
     return {
-        "schema": "btc-predictive-vnext4r6-frozen-manifest-v1",
+        "schema": "btc-predictive-vnext4r71-frozen-manifest-v1",
         "source_commit_sha": source_sha,
         "paths_sha256": paths,
         "forecast_workflow": cfg["forecast_workflow"],

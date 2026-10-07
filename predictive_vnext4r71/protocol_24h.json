@@ -71,5 +71,9 @@
     "requires_raw_integrity": true,
     "requires_exact_receipt_forecast_binding": true,
     "requires_outcome_after_due": true
+  },
+  "workflows": {
+    "forecast": ".github/workflows/btc-predictive-vnext4r71-24h.yml",
+    "outcome": ".github/workflows/btc-predictive-vnext4r71-24h.yml"
   }
 }

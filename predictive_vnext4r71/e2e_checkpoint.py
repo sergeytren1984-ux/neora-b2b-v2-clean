@@ -163,7 +163,11 @@ def main():
     protocol_path.write_bytes(canonical(protocol))
     push_paths("R7.1 E2E protocol",protocol_path)
 
-    required_paths=list(REQUIRED_PROTOCOLS)+list(REQUIRED_PRODUCTION_WORKFLOWS)+[WORKFLOW]
+    required_paths=list(dict.fromkeys(
+        worker.static_paths(worker.CONFIG["1h"])
+        + list(REQUIRED_PRODUCTION_WORKFLOWS)
+        + [WORKFLOW]
+    ))
     path_hashes={}
     for required_path in required_paths:
         payload=subprocess.run(

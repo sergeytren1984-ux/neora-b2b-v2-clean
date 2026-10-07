@@ -265,6 +265,27 @@ def verify_latest_anchor(
             raise ValueError("anchored checkpoint hash mismatch")
         if digest(cb)!=doc["checkpoint_bundle_sha256"]:
             raise ValueError("anchored checkpoint bundle hash mismatch")
+        checkpoint_doc=json.loads(cp)
+        if cp!=canonical(checkpoint_doc):
+            raise ValueError("anchored checkpoint not canonical")
+        if checkpoint_doc.get("head")!=head:
+            raise ValueError("anchored checkpoint head mismatch")
+        if int(checkpoint_doc.get("verified_through_sequence",-1))!=int(
+            doc["verified_through_sequence"]
+        ):
+            raise ValueError("anchor/checkpoint sequence mismatch")
+        if checkpoint_doc.get("source_commit_sha")!=manifest.get("source_commit_sha"):
+            raise ValueError("anchored checkpoint source mismatch")
+        if checkpoint_doc.get("manifest_sha256")!=doc.get("manifest_sha256"):
+            raise ValueError("anchored checkpoint manifest mismatch")
+        with tempfile.TemporaryDirectory(prefix="r71-checkpoint-verify-") as td:
+            p=Path(td)/"checkpoint.json"
+            b=Path(td)/"checkpoint.sigstore.json"
+            p.write_bytes(cp); b.write_bytes(cb)
+            verify_blob(p,b,checkpoint_doc)
+            verify_workflow_binding(
+                repo_root,checkpoint_doc,workflow_path,manifest
+            )
         previous_raw=raw
         previous_doc=doc
         latest=doc

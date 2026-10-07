@@ -74,6 +74,7 @@ jobs:
               assert p["checkpointing"]["full_cryptographic_replay_before_admission"] is True
               assert p["checkpointing"]["anchor_required"] is True
               assert p["checkpointing"]["anchor_branch"] is None
+              assert p["checkpointing"]["checkpoint_path"]==f"predictive_vnext4r71_checkpoints/{head}.json"
           print("R7_1_PROTOCOLS_FAIL_CLOSED")
 
   tail-research:

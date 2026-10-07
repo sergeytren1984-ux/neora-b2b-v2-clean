@@ -1,8 +1,8 @@
-name: BTC predictive vNext4R7.3 read-only release gate
+name: BTC predictive vNext4R7.4 read-only release gate
 
 on:
   push:
-    branches: [btc-predictive-vnext4r73-remediation-20261007]
+    branches: [btc-predictive-vnext4r74-remediation-20261007]
     paths:
       - predictive_vnext4r71/**
       - predictive_vnext4r7/scorecard_core.py
@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: btc-predictive-vnext4r73-readonly-${{ github.ref }}
+  group: btc-predictive-vnext4r74-readonly-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -32,7 +32,7 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test -z "$(git status --porcelain)"
-          echo "R73_EXACT_SHA=$GITHUB_SHA"
+          echo "R74_EXACT_SHA=$GITHUB_SHA"
 
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
@@ -100,6 +100,9 @@ jobs:
               ae=p["admission_entrypoint"]
               assert ae["caller_supplied_current_tip_forbidden"] is True
               assert ae["actual_git_head_must_equal_fetched_remote_tip_before_replay"] is True
+              assert ae["remote_tip_revalidated_before_scoring"] is True
+              assert ae["remote_tip_revalidated_after_scoring"] is True
+              assert ae["remote_tip_toctou_fail_closed"] is True
               rp=p["raw_evidence_provenance"]
               assert rp["raw_first_addition_commit_must_equal_event_publication_commit"] is True
               assert rp["raw_reuse_from_prior_commit_forbidden"] is True
@@ -107,11 +110,11 @@ jobs:
               baseline=pathlib.Path(p["baseline_path"]).read_bytes()
               assert hashlib.sha256(artifact).hexdigest()==p["artifact_sha256"]
               assert hashlib.sha256(baseline).hexdigest()==p["baseline_sha256"]
-          print("R73_READONLY_POLICY_PASS")
+          print("R74_READONLY_POLICY_PASS")
           PY
 
       - name: Ensure tests did not mutate tracked candidate
         run: |
           git diff --exit-code
           git diff --cached --exit-code
-          echo "R73_READONLY_GATE_PASS"
+          echo "R74_READONLY_GATE_PASS"

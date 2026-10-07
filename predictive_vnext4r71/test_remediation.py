@@ -309,6 +309,67 @@ class StressEpisodeInferenceTests(unittest.TestCase):
         self.assertGreater(out["episode_weighted_mean_logloss_gain"],0)
 
 
+class PublicationFaultInjectionTests(unittest.TestCase):
+    def test_forecast_near_deadline_fails_before_git_publication(self):
+        with tempfile.TemporaryDirectory() as td:
+            old_root=worker.EVIDENCE_ROOT
+            worker.EVIDENCE_ROOT=Path(td)
+            try:
+                with (
+                    patch.object(worker,"remote_clean") as remote_clean,
+                    patch.object(worker,"cmd") as git_cmd,
+                ):
+                    with self.assertRaises(TimeoutError):
+                        worker.publish(
+                            {"events":"events","branch":"evidence"},
+                            {
+                                "type":"FORECAST_ISSUED",
+                                "idempotency_key":"forecast:20261007T000000Z",
+                                "head":"1h",
+                                "slot":"20261007T000000Z",
+                            },
+                            deadline=worker.utcnow()+timedelta(seconds=1),
+                        )
+                    remote_clean.assert_not_called()
+                    git_cmd.assert_not_called()
+            finally:
+                worker.EVIDENCE_ROOT=old_root
+
+    def test_cosign_or_rekor_signing_failure_never_commits_event(self):
+        with tempfile.TemporaryDirectory() as td:
+            old_root=worker.EVIDENCE_ROOT
+            root=Path(td)
+            worker.EVIDENCE_ROOT=root
+            (root/"events").mkdir()
+            try:
+                with (
+                    patch.object(worker,"remote_clean"),
+                    patch.object(worker,"prior_events",return_value=[]),
+                    patch.object(worker,"cmd") as git_cmd,
+                    patch.object(
+                        worker.subprocess,
+                        "run",
+                        side_effect=subprocess.CalledProcessError(
+                            1,["cosign","sign-blob"]
+                        ),
+                    ),
+                ):
+                    with self.assertRaises(subprocess.CalledProcessError):
+                        worker.publish(
+                            {"events":"events","branch":"evidence"},
+                            {
+                                "type":"ABSTAIN_DATA_INVALID",
+                                "idempotency_key":"abstain-data:20261007T000000Z",
+                                "head":"1h",
+                                "slot":"20261007T000000Z",
+                                "reason":"FAULT_INJECTION",
+                            },
+                        )
+                    git_cmd.assert_not_called()
+            finally:
+                worker.EVIDENCE_ROOT=old_root
+
+
 class CheckpointFaultInjectionTests(unittest.TestCase):
     def test_anchor_publication_failure_is_fail_closed(self):
         freeze={

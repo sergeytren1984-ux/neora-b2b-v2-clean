@@ -150,9 +150,12 @@ def git_bytes(commit, path):
 
 
 def identity(path):
+    expected_ref = os.environ.get(
+        "BTC_VNEXT4R71_EXPECTED_REF", "refs/heads/main"
+    )
     return (
         "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/"
-        f"{path}@refs/heads/main"
+        f"{path}@{expected_ref}"
     )
 
 
@@ -197,9 +200,13 @@ def signature_claim_args(event):
         "--certificate-github-workflow-repository",
         "sergeytren1984-ux/neora-b2b-v2-clean",
         "--certificate-github-workflow-ref",
-        "refs/heads/main",
+        os.environ.get(
+            "BTC_VNEXT4R71_EXPECTED_REF", "refs/heads/main"
+        ),
         "--certificate-github-workflow-trigger",
-        "workflow_dispatch",
+        os.environ.get(
+            "BTC_VNEXT4R71_EXPECTED_TRIGGER", "workflow_dispatch"
+        ),
     ]
 
 

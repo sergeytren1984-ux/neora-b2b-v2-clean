@@ -20,6 +20,7 @@ from predictive_vnext4r7.integrity import (
 )
 from predictive_vnext4r7.scorecard_core import score_from_events
 from predictive_vnext4r71.checkpoint import event_files
+from predictive_vnext4r71.anchor import verify_latest_anchor
 from predictive_vnext4r71.crypto import make_blob_verifier
 from predictive_vnext4r71.integrity import (
     validate_event_collection,
@@ -286,6 +287,25 @@ def run_admission(
         current_tip=current_tip,
         issuance_deadline=issuance_deadline,
     )
+
+    checkpoint_policy = protocol.get("checkpointing", {})
+    if checkpoint_policy.get("anchor_required") is not True:
+        raise ValueError("admission protocol does not require checkpoint anchor")
+    anchor_branch = checkpoint_policy.get("anchor_branch")
+    if not isinstance(anchor_branch, str) or not anchor_branch:
+        raise ValueError("admission checkpoint anchor branch missing")
+    anchor = verify_latest_anchor(
+        repo_root=root,
+        anchor_branch=anchor_branch,
+        head=head,
+        manifest=manifest,
+        workflow_path=forecast_workflow,
+        current_evidence_tip=current_tip,
+        verify_blob=verify_forecast_blob,
+        verify_workflow_binding=verify_event_workflow_against_manifest,
+    )
+    governance["checkpoint_anchor"] = anchor
+    governance["independent_checkpoint_anchor_verified"] = True
 
     # The numerical layer is permanently non-authoritative.
     score = score_from_events(

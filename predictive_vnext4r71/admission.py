@@ -358,9 +358,14 @@ def _verify_governance(
         )
         if Path(raw_rel).name != slot + ".json":
             raise ValueError("forecast raw path is not unique for slot: " + slot)
-        raw_addition_commit = _path_addition_commit(
-            root, current_tip, raw_rel
-        )
+        try:
+            raw_addition_commit = _path_addition_commit(
+                root, current_tip, raw_rel
+            )
+        except ValueError as ex:
+            raise ValueError(
+                "forecast raw bytes absent from publication commit: " + slot
+            ) from ex
         if raw_addition_commit != publication_commit:
             raise ValueError(
                 "forecast raw first publication differs from event publication commit: "
@@ -396,9 +401,14 @@ def _verify_governance(
         )
         if Path(raw_rel).name != slot + "-outcome.json":
             raise ValueError("outcome raw path is not unique for slot: " + slot)
-        raw_addition_commit = _path_addition_commit(
-            root, current_tip, raw_rel
-        )
+        try:
+            raw_addition_commit = _path_addition_commit(
+                root, current_tip, raw_rel
+            )
+        except ValueError as ex:
+            raise ValueError(
+                "outcome raw bytes absent from publication commit: " + slot
+            ) from ex
         if raw_addition_commit != publication_commit:
             raise ValueError(
                 "outcome raw first publication differs from event publication commit: "

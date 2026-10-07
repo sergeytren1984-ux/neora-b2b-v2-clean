@@ -18,6 +18,19 @@ from predictive_vnext4r7.integrity import (
     verify_event_workflow_against_manifest,
 )
 
+REQUIRED_PROTOCOLS = (
+    "predictive_vnext4r71/protocol_1h.json",
+    "predictive_vnext4r71/protocol_4h.json",
+    "predictive_vnext4r71/protocol_24h.json",
+)
+REQUIRED_PRODUCTION_WORKFLOWS = (
+    ".github/workflows/btc-predictive-vnext4r71-1h.yml",
+    ".github/workflows/btc-predictive-vnext4r71-4h.yml",
+    ".github/workflows/btc-predictive-vnext4r71-24h.yml",
+    ".github/workflows/btc-predictive-vnext4r71-watchdog.yml",
+    ".github/workflows/btc-predictive-vnext4r71-health.yml",
+)
+
 ALLOWED_TYPES = {
     "SCHEDULE_REGISTERED",
     "CONFIG_FROZEN_PRESTART",
@@ -187,15 +200,40 @@ def validate_event_collection(
     }
 
 
-def verify_raw_attachments(repo_root: Path, events: list[dict]) -> None:
+def safe_repo_relative_path(repo_root: Path, value: str) -> tuple[Path, str]:
+    if not isinstance(value, str) or not value:
+        raise ValueError("repository path missing")
+    rel = Path(value)
+    if rel.is_absolute() or ".." in rel.parts:
+        raise ValueError("unsafe repository-relative path")
+    root = repo_root.resolve()
+    resolved = (root / rel).resolve()
+    try:
+        normalized = str(resolved.relative_to(root))
+    except ValueError as ex:
+        raise ValueError("repository path escapes checkout") from ex
+    if normalized != value:
+        raise ValueError("repository path is not canonical relative path")
+    return resolved, normalized
+
+
+def verify_raw_attachments(
+    repo_root: Path,
+    events: list[dict],
+    *,
+    head: str,
+) -> None:
+    required_prefix = f"predictive_vnext4r71_{head}_raw/"
     for event in events:
         if event.get("type") not in {"FORECAST_ISSUED", "OUTCOME_RECORDED"}:
             continue
         raw_path = event.get("raw_path")
         raw_sha = event.get("raw_sha256")
-        if not isinstance(raw_path, str) or not isinstance(raw_sha, str):
+        if not isinstance(raw_sha, str) or len(raw_sha) != 64:
             raise ValueError("raw attachment metadata missing")
-        path = repo_root / raw_path
+        path, normalized = safe_repo_relative_path(repo_root, raw_path)
+        if not normalized.startswith(required_prefix):
+            raise ValueError("raw attachment outside frozen head raw prefix")
         if not path.exists() or digest(path.read_bytes()) != raw_sha:
             raise ValueError("raw attachment hash mismatch")
 
@@ -211,18 +249,16 @@ def verify_deployment_bundle_against_manifest(
     altering watchdog/health/another head and still remain admission-valid.
     """
     deployment = manifest.get("deployment_workflows")
-    if deployment is None:
-        # E2E fixtures predating deployment-bundle binding remain valid only
-        # inside remediation tests; production manifests always declare it.
-        return
-    if (
-        not isinstance(deployment, list)
-        or not deployment
-        or any(not isinstance(x, str) or not x for x in deployment)
-        or len(set(deployment)) != len(deployment)
-    ):
-        raise ValueError("invalid deployment workflow set in signed manifest")
-    for workflow_path in deployment:
+    protocols = manifest.get("all_protocols")
+    if deployment != list(REQUIRED_PRODUCTION_WORKFLOWS):
+        raise ValueError("signed manifest production workflow set is not exact")
+    if protocols != list(REQUIRED_PROTOCOLS):
+        raise ValueError("signed manifest protocol set is not exact")
+    hashes = manifest.get("paths_sha256", {})
+    for required in (*REQUIRED_PROTOCOLS, *REQUIRED_PRODUCTION_WORKFLOWS):
+        if required not in hashes:
+            raise ValueError("required deployment path absent from signed manifest")
+    for workflow_path in REQUIRED_PRODUCTION_WORKFLOWS:
         verify_event_workflow_against_manifest(
             repo_root, event, workflow_path, manifest
         )

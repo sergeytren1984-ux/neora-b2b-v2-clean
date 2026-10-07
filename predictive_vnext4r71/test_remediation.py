@@ -17,6 +17,7 @@ import numpy as np
 from predictive_vnext4r7.integrity import canonical, digest
 from predictive_vnext4r7.scorecard_core import score_from_events
 from predictive_vnext4r71.admission import (
+    _assert_remote_tip_still_exact,
     _verify_checkout_path_at_head,
     _verify_exact_checkout_remote_tip,
     run_admission,
@@ -260,6 +261,22 @@ class ExactCheckoutBindingTests(unittest.TestCase):
                 "admission checkout HEAD is not exact fetched remote evidence tip",
             ):
                 _verify_exact_checkout_remote_tip(root,"evidence")
+
+    def test_remote_tip_advance_during_admission_is_fail_closed(self):
+        expected="a"*40
+        with patch(
+            "predictive_vnext4r71.admission._verify_exact_checkout_remote_tip",
+            return_value="b"*40,
+        ):
+            with self.assertRaisesRegex(
+                ValueError,"remote evidence tip changed during scoring"
+            ):
+                _assert_remote_tip_still_exact(
+                    Path("."),
+                    "evidence",
+                    expected,
+                    phase="during scoring",
+                )
 
     def test_working_tree_bytes_must_equal_exact_head(self):
         with tempfile.TemporaryDirectory() as td:

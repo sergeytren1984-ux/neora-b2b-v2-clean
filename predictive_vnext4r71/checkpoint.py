@@ -25,6 +25,41 @@ class ChainState:
     seen_type_slot: set[str]
 
 
+def build_state(events: list[dict]) -> ChainState:
+    state = ChainState(
+        sequence=0,
+        last_event_hash=None,
+        prefix_root_sha256=EMPTY_ROOT,
+        seen_idempotency_keys=set(),
+        seen_type_slot=set(),
+    )
+    previous = None
+    for i, event in enumerate(events, 1):
+        raw = canonical(event)
+        if int(event.get("sequence", -1)) != i:
+            raise ValueError("event sequence gap while building checkpoint")
+        if event.get("previous_hash") != previous:
+            raise ValueError("event chain mismatch while building checkpoint")
+        key = event.get("idempotency_key")
+        if not isinstance(key, str) or key in state.seen_idempotency_keys:
+            raise ValueError("duplicate/missing idempotency key in checkpoint")
+        type_slot = "|".join(
+            [str(event.get("type")), str(event.get("head")), str(event.get("slot", ""))]
+        )
+        if type_slot in state.seen_type_slot:
+            raise ValueError("duplicate type/head/slot in checkpoint")
+        event_hash = digest(raw)
+        state.sequence = i
+        state.last_event_hash = event_hash
+        state.prefix_root_sha256 = root_step(
+            state.prefix_root_sha256, event_hash
+        )
+        state.seen_idempotency_keys.add(key)
+        state.seen_type_slot.add(type_slot)
+        previous = event_hash
+    return state
+
+
 def event_files(events_dir: Path) -> list[Path]:
     return sorted(
         p for p in events_dir.glob("*.json")

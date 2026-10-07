@@ -273,7 +273,6 @@ def main():
 
     # Fill the journal to the frozen 24-event checkpoint interval. These are
     # explicit data-abstention evidence, not forecasts or outcomes.
-    staged=[]
     for seq in range(6,25):
         fake_slot=(start+timedelta(minutes=seq)).strftime("%Y%m%dT%H%M%SZ")
         event=make_event(seq,previous,{
@@ -285,8 +284,7 @@ def main():
             "retryable_before_deadline":False,
             "trading_authority":False,
         })
-        path,_=write_sign_event(events_dir,event,push=False)
-        staged.extend([path,path.with_suffix(".sigstore.json")])
+        write_sign_event(events_dir,event,push=False)
         previous=digest(canonical(event))
     cmd("git","commit","-m","R7.1 E2E signed suffix through event 24")
     cmd("git","push","origin","HEAD:"+e2e_branch)
@@ -311,12 +309,16 @@ def main():
         "forecast_workflow":WORKFLOW,
         "outcome_workflow":WORKFLOW,
     }
+
+    checkpoint_operation_seconds=[]
+    t0=time.perf_counter()
     if not worker.maybe_checkpoint(cfg,"1h"):
         raise RuntimeError("worker did not create due checkpoint")
+    checkpoint_operation_seconds.append(time.perf_counter()-t0)
     if not checkpoint.exists() or not checkpoint.with_suffix(".sigstore.json").exists():
         raise RuntimeError("signed checkpoint files missing")
 
-    # Recovery path must now use the checkpoint, not replay 24 old signatures.
+    # Recovery path must now use the checkpoint, not replay old signatures.
     tip=cmd("git","rev-parse","HEAD")
     recovery_seconds=[]
     loaded=None
@@ -357,38 +359,46 @@ def main():
             event1,
         )
         sig_seconds.append(time.perf_counter()-t0)
-    sig_sorted=sorted(sig_seconds)
-    sig_p95=sig_sorted[min(len(sig_sorted)-1,int(.95*(len(sig_sorted)-1)))]
-    recovery_sorted=sorted(recovery_seconds)
-    recovery_p95=recovery_sorted[min(len(recovery_sorted)-1,int(.95*(len(recovery_sorted)-1)))]
 
-    # Build a second 24-event suffix and require the worker to advance the
-    # checkpoint and independent anchor chain again. This proves regular operation,
-    # not just first-checkpoint bootstrap.
-    for seq in range(25,49):
-        fake_slot=(start+timedelta(minutes=seq)).strftime("%Y%m%dT%H%M%SZ")
-        event=make_event(seq,previous,{
-            "type":"ABSTAIN_DATA_INVALID",
-            "idempotency_key":"abstain-data:"+fake_slot,
-            "head":"1h",
-            "slot":fake_slot,
-            "reason":"E2E_SECOND_CHECKPOINT_FILL",
-            "retryable_before_deadline":False,
-            "trading_authority":False,
-        })
-        write_sign_event(events_dir,event,push=False)
-        previous=digest(canonical(event))
-    cmd("git","commit","-m","R7.1 E2E signed suffix through event 48")
-    cmd("git","push","origin","HEAD:"+e2e_branch)
-    if not worker.maybe_checkpoint(cfg,"1h"):
-        raise RuntimeError("worker did not advance second due checkpoint")
-    tip=cmd("git","rev-parse","HEAD")
-    second_doc=json.loads(checkpoint.read_text())
-    if int(second_doc["verified_through_sequence"])!=48:
-        raise RuntimeError("second checkpoint sequence mismatch")
-    if int(second_doc["previous_checkpoint_sequence"])!=24:
-        raise RuntimeError("second checkpoint predecessor sequence mismatch")
-    loaded2=load_incremental_journal(
+    # Advance through five real 24-event checkpoint publications. Each timed
+    # sample includes suffix verification, checkpoint creation/signing, remote
+    # checkpoint push, independent anchor signing, and remote anchor push.
+    prior_checkpoint_sequence=24
+    for target_sequence in (48,72,96,120):
+        for seq in range(prior_checkpoint_sequence+1,target_sequence+1):
+            fake_slot=(start+timedelta(minutes=seq)).strftime("%Y%m%dT%H%M%SZ")
+            event=make_event(seq,previous,{
+                "type":"ABSTAIN_DATA_INVALID",
+                "idempotency_key":"abstain-data:"+fake_slot,
+                "head":"1h",
+                "slot":fake_slot,
+                "reason":"E2E_CHECKPOINT_FILL",
+                "retryable_before_deadline":False,
+                "trading_authority":False,
+            })
+            write_sign_event(events_dir,event,push=False)
+            previous=digest(canonical(event))
+        cmd(
+            "git","commit","-m",
+            f"R7.1 E2E signed suffix through event {target_sequence}"
+        )
+        cmd("git","push","origin","HEAD:"+e2e_branch)
+
+        t0=time.perf_counter()
+        if not worker.maybe_checkpoint(cfg,"1h"):
+            raise RuntimeError(
+                f"worker did not advance checkpoint to {target_sequence}"
+            )
+        checkpoint_operation_seconds.append(time.perf_counter()-t0)
+        tip=cmd("git","rev-parse","HEAD")
+        doc=json.loads(checkpoint.read_text())
+        if int(doc["verified_through_sequence"])!=target_sequence:
+            raise RuntimeError("checkpoint sequence mismatch")
+        if int(doc["previous_checkpoint_sequence"])!=prior_checkpoint_sequence:
+            raise RuntimeError("checkpoint predecessor sequence mismatch")
+        prior_checkpoint_sequence=target_sequence
+
+    loaded_final=load_incremental_journal(
         repo_root=ROOT,
         events_dir=events_dir,
         checkpoint_path=checkpoint,
@@ -404,8 +414,25 @@ def main():
         verify_checkpoint_blob=lambda p,b,e: worker.verify_signature(p,b,cfg,e),
         verify_workflow_binding=worker.verify_event_workflow_against_manifest,
     )
-    if not loaded2["checkpoint_used"] or loaded2["checkpoint_verified_through"]!=48:
-        raise RuntimeError("second checkpoint recovery path not active")
+    if (
+        not loaded_final["checkpoint_used"]
+        or loaded_final["checkpoint_verified_through"]!=120
+        or loaded_final["verified_suffix_event_count"]!=0
+    ):
+        raise RuntimeError("final checkpoint recovery path not active")
+
+    sig_sorted=sorted(sig_seconds)
+    sig_p95=sig_sorted[min(len(sig_sorted)-1,int(.95*(len(sig_sorted)-1)))]
+    recovery_sorted=sorted(recovery_seconds)
+    recovery_p95=recovery_sorted[
+        min(len(recovery_sorted)-1,int(.95*(len(recovery_sorted)-1))
+    ]
+    checkpoint_sorted=sorted(checkpoint_operation_seconds)
+    checkpoint_p95=checkpoint_sorted[
+        min(len(checkpoint_sorted)-1,int(.95*(len(checkpoint_sorted)-1))
+    ]
+    if checkpoint_p95>=720:
+        raise RuntimeError("full checkpoint operation exceeds frozen 12-minute budget")
 
     # Full admission path is mandatory and independent of checkpoint acceleration.
     report=run_admission(
@@ -433,6 +460,7 @@ def main():
         "full_cryptographic_replay":report["governance"]["full_cryptographic_replay"],
         "real_cosign_verify_seconds":{"p50":statistics.median(sig_seconds),"p95":sig_p95,"n":len(sig_seconds)},
         "checkpoint_recovery_seconds":{"p50":statistics.median(recovery_seconds),"p95":recovery_p95,"n":len(recovery_seconds)},
+        "full_checkpoint_operation_seconds":{"p50":statistics.median(checkpoint_operation_seconds),"p95":checkpoint_p95,"n":len(checkpoint_operation_seconds),"budget_seconds":720},
     },indent=2,sort_keys=True))
 
 

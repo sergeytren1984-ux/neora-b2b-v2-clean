@@ -48,6 +48,19 @@ CLASS_TO_ID = {
     "AMBIGUOUS_SAME_BAR": 3,
 }
 
+PROTOCOL_PATHS = (
+    "predictive_vnext4r71/protocol_1h.json",
+    "predictive_vnext4r71/protocol_4h.json",
+    "predictive_vnext4r71/protocol_24h.json",
+)
+PRODUCTION_WORKFLOWS = (
+    ".github/workflows/btc-predictive-vnext4r71-1h.yml",
+    ".github/workflows/btc-predictive-vnext4r71-4h.yml",
+    ".github/workflows/btc-predictive-vnext4r71-24h.yml",
+    ".github/workflows/btc-predictive-vnext4r71-watchdog.yml",
+    ".github/workflows/btc-predictive-vnext4r71-health.yml",
+)
+
 CONFIG = {
     "1h": {
         "head": "1h",
@@ -471,7 +484,7 @@ def ensure_delivery_receipt(cfg, forecast_event, deadline):
 
 
 def static_paths(cfg):
-    return [
+    paths = [
         "predictive_vnext4r71/worker.py",
         "predictive_vnext4r71/integrity.py",
         "predictive_vnext4r71/checkpoint.py",
@@ -480,6 +493,9 @@ def static_paths(cfg):
         "predictive_vnext4r71/crypto.py",
         "predictive_vnext4r71/admission.py",
         "predictive_vnext4r71/anchor.py",
+        "predictive_vnext4r71/scheduler.py",
+        "predictive_vnext4r71/chain_liveness.py",
+        "predictive_vnext4r71/health.py",
         "predictive_vnext4r7/scorecard_core.py",
         "predictive_vnext4r7/episodes.py",
         "predictive_vnext4r6/live_features.py",
@@ -487,10 +503,11 @@ def static_paths(cfg):
         "predictive_vnext4r6/control.py",
         "predictive_vnext4r6/freeze_metadata.json",
         "predictive_vnext4r6/baseline_metadata.json",
-        cfg["protocol"],
         cfg["artifact"],
         cfg["baseline"],
     ]
+    paths.extend(PROTOCOL_PATHS)
+    return list(dict.fromkeys(paths))
 
 def workflow_hash(commit, path):
     return digest(git_bytes(commit, path))
@@ -523,7 +540,7 @@ def manifest(cfg, source_sha):
         paths[path] = digest(local)
 
     workflow_commit = os.environ["GITHUB_SHA"]
-    for path in (cfg["forecast_workflow"], cfg["outcome_workflow"]):
+    for path in PRODUCTION_WORKFLOWS:
         paths[path] = workflow_hash(workflow_commit, path)
 
     return {
@@ -532,6 +549,8 @@ def manifest(cfg, source_sha):
         "paths_sha256": paths,
         "forecast_workflow": cfg["forecast_workflow"],
         "outcome_workflow": cfg["outcome_workflow"],
+        "all_protocols": list(PROTOCOL_PATHS),
+        "deployment_workflows": list(PRODUCTION_WORKFLOWS),
         "python_version": ".".join(map(str, sys.version_info[:3])),
         "numpy_version": np.__version__,
         "sklearn_version": sklearn.__version__,
@@ -580,13 +599,20 @@ def verify_signed_freeze(cfg, head, action):
     )
     if os.environ.get("BTC_VNEXT4R71_WORKFLOW_PATH") != expected:
         raise RuntimeError("workflow path environment mismatch")
-    if (
-        workflow_hash(os.environ["GITHUB_SHA"], expected)
-        != manifest_obj["paths_sha256"].get(expected)
-    ):
-        raise RuntimeError(
-            "current workflow content differs from signed freeze"
-        )
+    deployment = manifest_obj.get("deployment_workflows")
+    if deployment != list(PRODUCTION_WORKFLOWS):
+        raise RuntimeError("signed deployment workflow set mismatch")
+    for workflow_path in PRODUCTION_WORKFLOWS:
+        if (
+            workflow_hash(os.environ["GITHUB_SHA"], workflow_path)
+            != manifest_obj["paths_sha256"].get(workflow_path)
+        ):
+            raise RuntimeError(
+                "deployment workflow content differs from signed freeze: "
+                + workflow_path
+            )
+    if expected not in deployment:
+        raise RuntimeError("active workflow absent from signed deployment set")
     for path in static_paths(cfg):
         local = (CODE_ROOT / path).read_bytes()
         if digest(local) != manifest_obj["paths_sha256"].get(path):

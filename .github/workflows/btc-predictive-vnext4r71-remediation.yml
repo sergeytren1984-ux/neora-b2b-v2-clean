@@ -41,6 +41,7 @@ jobs:
           python -I -m py_compile predictive_vnext4r71/journal_runtime.py
           python -I -m py_compile predictive_vnext4r71/crypto.py
           python -I -m py_compile predictive_vnext4r71/admission.py
+          python -I -m py_compile predictive_vnext4r71/anchor.py
           python -I -m py_compile predictive_vnext4r71/worker.py
           python -I -m py_compile predictive_vnext4r71/tail_research.py
           python -I -m py_compile predictive_vnext4r71/e2e_checkpoint.py
@@ -65,6 +66,8 @@ jobs:
               assert p["admission_entrypoint"]["required"]=="predictive_vnext4r71/admission.py"
               assert p["checkpointing"]["exact_verified_branch_commit_prefix_required"] is True
               assert p["checkpointing"]["full_cryptographic_replay_before_admission"] is True
+              assert p["checkpointing"]["anchor_required"] is True
+              assert p["checkpointing"]["anchor_branch"] is None
           print("R7_1_PROTOCOLS_FAIL_CLOSED")
 
   tail-research:
@@ -144,3 +147,4 @@ jobs:
           R71_E2E_BRANCH: btc-predictive-vnext4r71-e2e-${{ github.run_id }}
         run: |
           git push origin --delete "$R71_E2E_BRANCH" || true
+          git push origin --delete "$R71_E2E_BRANCH-anchors" || true

@@ -23,12 +23,99 @@ from predictive_vnext4r71.checkpoint import event_files, verify_checkpoint
 from predictive_vnext4r71.anchor import verify_latest_anchor
 from predictive_vnext4r71.crypto import make_blob_verifier
 from predictive_vnext4r71.integrity import (
+    REQUIRED_PROTOCOLS,
+    REQUIRED_PRODUCTION_WORKFLOWS,
+    safe_repo_relative_path,
     validate_event_collection,
     verify_raw_attachments,
     verify_all_workflow_bindings,
 )
 
 UTC = timezone.utc
+
+FORBIDDEN_ADMISSION_KEYS = {
+    "diagnostic_cutoff_utc",
+    "historical_cutoff_utc",
+    "test_cutoff_utc",
+    "diagnostic_mode",
+    "historical_mode",
+    "test_mode",
+}
+
+
+def _reject_nonprospective_protocol(protocol: dict) -> None:
+    """Admission is prospective-only; diagnostic/historical cutoffs are fatal."""
+    def walk(value, path="protocol"):
+        if isinstance(value, dict):
+            for key, child in value.items():
+                low = str(key).lower()
+                if (
+                    key in FORBIDDEN_ADMISSION_KEYS
+                    or "diagnostic_cutoff" in low
+                    or "historical_cutoff" in low
+                    or "test_cutoff" in low
+                ):
+                    raise ValueError(
+                        "non-prospective admission control forbidden: "
+                        + path + "." + str(key)
+                    )
+                if low in {"mode", "evaluation_mode", "admission_mode"}:
+                    if str(child).upper() not in {"PROSPECTIVE", "LIVE_PROSPECTIVE"}:
+                        raise ValueError(
+                            "non-prospective admission mode forbidden: "
+                            + str(child)
+                        )
+                walk(child, path + "." + str(key))
+        elif isinstance(value, list):
+            for i, child in enumerate(value):
+                walk(child, path + f"[{i}]")
+    walk(protocol)
+
+
+def _path_addition_commit(
+    root: Path,
+    current_tip: str,
+    path: str,
+) -> str:
+    out = subprocess.run(
+        [
+            "git", "-C", str(root), "log", "--diff-filter=A",
+            "--format=%H", "--reverse", current_tip, "--", path,
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=180,
+    ).stdout.strip().splitlines()
+    if len(out) != 1:
+        raise ValueError("evidence path must have exactly one addition commit: " + path)
+    return out[0]
+
+
+def _verify_remote_evidence_tip(
+    root: Path,
+    manifest: dict,
+    current_tip: str,
+) -> str:
+    branch = manifest.get("evidence_branch")
+    if not isinstance(branch, str) or not branch:
+        raise ValueError("signed manifest evidence branch missing")
+    subprocess.run(
+        ["git", "-C", str(root), "fetch", "origin", branch],
+        check=True,
+        capture_output=True,
+        timeout=180,
+    )
+    remote_tip = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "origin/" + branch],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    ).stdout.strip()
+    if current_tip != remote_tip:
+        raise ValueError("admission checkout is not exact remote evidence tip")
+    return remote_tip
 
 
 def _git_bytes(root: Path, commit: str, path: str) -> bytes:
@@ -130,12 +217,14 @@ def _full_replay(
         outcome_workflow=outcome_workflow,
     )
 
-    deployment_workflows = set(
-        manifest.get("deployment_workflows")
-        or [forecast_workflow, outcome_workflow]
-    )
+    if manifest.get("all_protocols") != list(REQUIRED_PROTOCOLS):
+        raise ValueError("signed manifest protocol bundle is not exact")
+    if manifest.get("deployment_workflows") != list(
+        REQUIRED_PRODUCTION_WORKFLOWS
+    ):
+        raise ValueError("signed manifest production workflow bundle is not exact")
     _verify_manifest_source(
-        root, manifest, deployment_workflows
+        root, manifest, set(REQUIRED_PRODUCTION_WORKFLOWS)
     )
     return events, rekor, manifest, relation
 
@@ -167,7 +256,7 @@ def _verify_governance(
         e["slot"]: e for e in events if e.get("type") == "OUTCOME_RECORDED"
     }
 
-    verify_raw_attachments(root, events)
+    verify_raw_attachments(root, events, head=protocol["head"])
 
     for slot, forecast in forecasts.items():
         anchor = parse_utc(forecast["anchor_utc"])
@@ -191,14 +280,39 @@ def _verify_governance(
             str(events_dir.resolve().relative_to(root.resolve()))
             + f"/{int(forecast['sequence']):08d}.json"
         )
+        publication_commit = _path_addition_commit(
+            root, current_tip, event_path
+        )
+        if commit != publication_commit:
+            raise ValueError("receipt does not name forecast publication commit: " + slot)
         if _git_bytes(root, commit, event_path) != canonical(forecast):
             raise ValueError("receipt commit lacks exact forecast: " + slot)
+        raw_local, raw_rel = safe_repo_relative_path(
+            root, forecast["raw_path"]
+        )
+        if _git_bytes(root, commit, raw_rel) != raw_local.read_bytes():
+            raise ValueError("forecast raw bytes absent from publication commit: " + slot)
         _is_ancestor(root, commit, current_tip)
 
     for slot, outcome in outcomes.items():
         due = parse_utc(outcome["due_utc"])
         if rekor[int(outcome["sequence"])] < due:
             raise ValueError("outcome Rekor time before due: " + slot)
+        event_path = (
+            str(events_dir.resolve().relative_to(root.resolve()))
+            + f"/{int(outcome['sequence']):08d}.json"
+        )
+        publication_commit = _path_addition_commit(
+            root, current_tip, event_path
+        )
+        if _git_bytes(root, publication_commit, event_path) != canonical(outcome):
+            raise ValueError("outcome publication commit lacks exact event: " + slot)
+        raw_local, raw_rel = safe_repo_relative_path(
+            root, outcome["raw_path"]
+        )
+        if _git_bytes(root, publication_commit, raw_rel) != raw_local.read_bytes():
+            raise ValueError("outcome raw bytes absent from publication commit: " + slot)
+        _is_ancestor(root, publication_commit, current_tip)
 
     return {
         "full_cryptographic_replay": True,
@@ -221,6 +335,7 @@ def run_admission(
 ):
     root = Path(repo_root).resolve()
     protocol = json.loads((root / protocol_path).read_text())
+    _reject_nonprospective_protocol(protocol)
 
     # The signed protocol is authoritative. The public API intentionally has no
     # parameters for verification callbacks, start, horizon, deadline, ref or
@@ -336,22 +451,26 @@ def run_admission(
         issuance_deadline=issuance_deadline,
     )
 
-    manifest_req = protocol.get("signed_manifest_requirements", {})
+    manifest_req = protocol.get("signed_manifest_requirements")
+    if not isinstance(manifest_req, dict):
+        raise ValueError("signed_manifest_requirements missing")
     required_protocols = manifest_req.get("all_protocols_required")
     required_workflows = manifest_req.get("all_production_workflows_required")
-    if required_protocols is not None:
-        if manifest.get("all_protocols") != required_protocols:
-            raise ValueError("signed manifest protocol bundle incomplete")
-        for p in required_protocols:
-            if p not in manifest.get("paths_sha256", {}):
-                raise ValueError("required protocol absent from signed manifest")
-    if required_workflows is not None:
-        if manifest.get("deployment_workflows") != required_workflows:
-            raise ValueError("signed manifest workflow bundle incomplete")
-        for p in required_workflows:
-            if p not in manifest.get("paths_sha256", {}):
-                raise ValueError("required workflow absent from signed manifest")
+    if required_protocols != list(REQUIRED_PROTOCOLS):
+        raise ValueError("protocol required-protocol set is not exact")
+    if required_workflows != list(REQUIRED_PRODUCTION_WORKFLOWS):
+        raise ValueError("protocol required-workflow set is not exact")
+    if manifest.get("all_protocols") != list(REQUIRED_PROTOCOLS):
+        raise ValueError("signed manifest protocol bundle incomplete")
+    if manifest.get("deployment_workflows") != list(REQUIRED_PRODUCTION_WORKFLOWS):
+        raise ValueError("signed manifest workflow bundle incomplete")
+    for p in (*REQUIRED_PROTOCOLS, *REQUIRED_PRODUCTION_WORKFLOWS):
+        if p not in manifest.get("paths_sha256", {}):
+            raise ValueError("required deployment path absent from signed manifest")
     governance["complete_deployment_bundle_bound"] = True
+    governance["remote_evidence_tip"] = _verify_remote_evidence_tip(
+        root, manifest, current_tip
+    )
 
     checkpoint_policy = protocol.get("checkpointing", {})
     if checkpoint_policy.get("anchor_required") is not True:

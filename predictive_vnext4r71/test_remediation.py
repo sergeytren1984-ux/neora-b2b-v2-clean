@@ -4,6 +4,7 @@ from __future__ import annotations
 import ast
 import inspect
 import json
+import os
 import subprocess
 import tempfile
 import unittest
@@ -363,6 +364,40 @@ class CheckpointFaultInjectionTests(unittest.TestCase):
 
 
 class DeploymentBundleTests(unittest.TestCase):
+    def test_manifest_binds_all_protocols_and_workflows(self):
+        root=Path(__file__).resolve().parents[1]
+        old_root=worker.EVIDENCE_ROOT
+        worker.EVIDENCE_ROOT=root
+        try:
+            with (
+                patch.dict(
+                    os.environ,
+                    {"GITHUB_SHA": subprocess.run(
+                        ["git","rev-parse","HEAD"],
+                        cwd=root,check=True,capture_output=True,text=True,
+                    ).stdout.strip()},
+                    clear=False,
+                ),
+                patch.object(worker,"cmd",return_value="cosign-test"),
+            ):
+                manifest=worker.manifest(
+                    worker.CONFIG["1h"],
+                    os.environ["GITHUB_SHA"],
+                )
+            self.assertEqual(
+                manifest["all_protocols"],list(worker.PROTOCOL_PATHS)
+            )
+            self.assertEqual(
+                manifest["deployment_workflows"],
+                list(worker.PRODUCTION_WORKFLOWS),
+            )
+            for p in worker.PROTOCOL_PATHS:
+                self.assertIn(p,manifest["paths_sha256"])
+            for p in worker.PRODUCTION_WORKFLOWS:
+                self.assertIn(p,manifest["paths_sha256"])
+        finally:
+            worker.EVIDENCE_ROOT=old_root
+
     def test_all_protocols_require_all_five_production_workflows(self):
         root=Path(__file__).resolve().parents[1]
         expected=list(worker.PRODUCTION_WORKFLOWS)

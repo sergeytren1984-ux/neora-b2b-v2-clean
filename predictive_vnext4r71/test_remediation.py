@@ -16,7 +16,11 @@ import numpy as np
 
 from predictive_vnext4r7.integrity import canonical, digest
 from predictive_vnext4r7.scorecard_core import score_from_events
-from predictive_vnext4r71.admission import run_admission
+from predictive_vnext4r71.admission import (
+    _verify_checkout_path_at_head,
+    _verify_exact_checkout_remote_tip,
+    run_admission,
+)
 from predictive_vnext4r71.checkpoint import git_prefix_binding
 from predictive_vnext4r71.integrity import (
     REQUIRED_PROTOCOLS,
@@ -164,10 +168,11 @@ class AdmissionBoundaryTests(unittest.TestCase):
                 allow_admission=True,
             )
 
-    def test_public_admission_has_no_verifier_override(self):
+    def test_public_admission_has_no_verifier_or_tip_override(self):
         params=inspect.signature(run_admission).parameters
         self.assertNotIn("verify_forecast_blob",params)
         self.assertNotIn("verify_outcome_blob",params)
+        self.assertNotIn("current_tip",params)
 
     def test_disabled_signed_protocol_blocks_before_scoring(self):
         with tempfile.TemporaryDirectory() as td:
@@ -217,6 +222,65 @@ class AdmissionBoundaryTests(unittest.TestCase):
                     protocol_path="protocol.json",
                     events_dir="events",
                 )
+
+
+class ExactCheckoutBindingTests(unittest.TestCase):
+    def test_stale_checkout_cannot_claim_new_remote_tip(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)/"work"
+            bare=Path(td)/"remote.git"
+            root.mkdir()
+            subprocess.run(["git","init","--bare",str(bare)],check=True,capture_output=True)
+            subprocess.run(["git","init"],cwd=root,check=True,capture_output=True)
+            subprocess.run(["git","config","user.email","x@example.com"],cwd=root,check=True)
+            subprocess.run(["git","config","user.name","x"],cwd=root,check=True)
+            subprocess.run(["git","remote","add","origin",str(bare)],cwd=root,check=True)
+            (root/"a.txt").write_text("a")
+            subprocess.run(["git","add","a.txt"],cwd=root,check=True)
+            subprocess.run(["git","commit","-m","A"],cwd=root,check=True,capture_output=True)
+            a=subprocess.run(
+                ["git","rev-parse","HEAD"],cwd=root,check=True,
+                capture_output=True,text=True,
+            ).stdout.strip()
+            subprocess.run(["git","branch","-M","evidence"],cwd=root,check=True)
+            subprocess.run(
+                ["git","push","-u","origin","evidence"],
+                cwd=root,check=True,capture_output=True,
+            )
+            (root/"b.txt").write_text("b")
+            subprocess.run(["git","add","b.txt"],cwd=root,check=True)
+            subprocess.run(["git","commit","-m","B"],cwd=root,check=True,capture_output=True)
+            subprocess.run(
+                ["git","push","origin","evidence"],
+                cwd=root,check=True,capture_output=True,
+            )
+            subprocess.run(["git","checkout","--detach",a],cwd=root,check=True,capture_output=True)
+            with self.assertRaisesRegex(
+                ValueError,
+                "admission checkout HEAD is not exact fetched remote evidence tip",
+            ):
+                _verify_exact_checkout_remote_tip(root,"evidence")
+
+    def test_working_tree_bytes_must_equal_exact_head(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            subprocess.run(["git","init"],cwd=root,check=True,capture_output=True)
+            subprocess.run(["git","config","user.email","x@example.com"],cwd=root,check=True)
+            subprocess.run(["git","config","user.name","x"],cwd=root,check=True)
+            p=root/"x.json"
+            p.write_text('{"x":1}\n')
+            subprocess.run(["git","add","x.json"],cwd=root,check=True)
+            subprocess.run(["git","commit","-m","x"],cwd=root,check=True,capture_output=True)
+            head=subprocess.run(
+                ["git","rev-parse","HEAD"],cwd=root,check=True,
+                capture_output=True,text=True,
+            ).stdout.strip()
+            _verify_checkout_path_at_head(root,head,"x.json")
+            p.write_text('{"x":2}\n')
+            with self.assertRaisesRegex(
+                ValueError,"working-tree bytes differ from exact checkout HEAD"
+            ):
+                _verify_checkout_path_at_head(root,head,"x.json")
 
 
 class CheckpointGitBindingTests(unittest.TestCase):

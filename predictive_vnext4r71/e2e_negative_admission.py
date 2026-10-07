@@ -545,7 +545,12 @@ def main():
     )
     expect_failure(
         "raw_not_in_publication_commit",d,
-        "forecast raw bytes absent from publication commit",
+        # Under the immutable snapshot design the raw must exist at the final
+        # bound tip for admission to reach provenance checks. Because it was
+        # committed only after the forecast/receipt, the strongest reachable
+        # invariant is that its first Git publication is not the forecast
+        # publication commit. This is the intended fail-closed result.
+        "forecast raw first publication differs from event publication commit",
         publish_snapshot=False,
     )
 

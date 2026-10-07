@@ -369,6 +369,12 @@ def run_admission(
     head = protocol.get("head")
     if head not in {"1h", "4h", "24h"}:
         raise ValueError("protocol head invalid")
+    expected_raw_prefix=f"predictive_vnext4r71_{head}_raw/"
+    if protocol.get("evidence_raw_prefix") != expected_raw_prefix:
+        raise ValueError("protocol raw evidence prefix mismatch")
+    evidence_branch = protocol.get("evidence_branch")
+    if not isinstance(evidence_branch, str) or not evidence_branch:
+        raise ValueError("protocol evidence branch missing")
     if not protocol.get("start_utc"):
         raise ValueError("protocol start missing")
     start_utc = parse_utc(protocol["start_utc"])
@@ -446,6 +452,8 @@ def run_admission(
         verify_forecast_blob=verify_forecast_blob,
         verify_outcome_blob=verify_outcome_blob,
     )
+    if manifest.get("evidence_branch") != evidence_branch:
+        raise ValueError("signed manifest evidence branch differs from protocol")
     schedule = relation["schedule"]
     if int(schedule.get("deadline_minutes", -1)) != int(
         issuance_deadline.total_seconds() // 60

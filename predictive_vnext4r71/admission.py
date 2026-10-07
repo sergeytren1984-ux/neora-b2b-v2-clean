@@ -130,6 +130,19 @@ def _verify_exact_checkout_remote_tip(
     return actual_head
 
 
+def _assert_remote_tip_still_exact(
+    root: Path,
+    branch: str,
+    expected_tip: str,
+    *,
+    phase: str,
+) -> str:
+    observed = _verify_exact_checkout_remote_tip(root, branch)
+    if observed != expected_tip:
+        raise ValueError("remote evidence tip changed " + phase)
+    return observed
+
+
 def _verify_checkout_path_at_head(
     root: Path,
     head: str,
@@ -654,11 +667,12 @@ def run_admission(
 
     # Close the time-of-check/time-of-use gap: the evidence branch must still
     # point to this exact checkout after replay/checkpoint/anchor verification.
-    revalidated_tip = _verify_exact_checkout_remote_tip(
-        root, evidence_branch
+    _assert_remote_tip_still_exact(
+        root,
+        evidence_branch,
+        current_tip,
+        phase="before scoring",
     )
-    if revalidated_tip != current_tip:
-        raise ValueError("remote evidence tip changed before scoring")
     governance["remote_tip_revalidated_before_score"] = True
 
     score = score_from_events(
@@ -681,11 +695,12 @@ def run_admission(
 
     # Re-fetch once more immediately before the admission decision leaves this
     # function. If a writer advanced the branch while scoring, fail closed.
-    final_tip = _verify_exact_checkout_remote_tip(
-        root, evidence_branch
+    _assert_remote_tip_still_exact(
+        root,
+        evidence_branch,
+        current_tip,
+        phase="during scoring",
     )
-    if final_tip != current_tip:
-        raise ValueError("remote evidence tip changed during scoring")
     governance["remote_tip_revalidated_after_score"] = True
 
     return {

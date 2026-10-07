@@ -81,6 +81,18 @@ def create_signed_checkpoint(
     if binding["verified_commit_prefix_files_sha256"] != local_prefix:
         raise ValueError("verified git commit prefix differs from local prefix")
 
+    previous_checkpoint_sequence=0
+    previous_checkpoint_sha256=None
+    if checkpoint_path.exists():
+        previous_raw=checkpoint_path.read_bytes()
+        previous_doc=json.loads(previous_raw)
+        previous_checkpoint_sequence=int(
+            previous_doc.get("verified_through_sequence",0)
+        )
+        previous_checkpoint_sha256=digest(previous_raw)
+        if previous_checkpoint_sequence>=state.sequence:
+            raise ValueError("new checkpoint does not advance predecessor")
+
     doc = checkpoint_document(
         head=head,
         state=state,
@@ -91,6 +103,8 @@ def create_signed_checkpoint(
         prefix_files_sha256=local_prefix,
         verified_commit_prefix_files_sha256=binding["verified_commit_prefix_files_sha256"],
         git_prefix_path_count=binding["path_count"],
+        previous_checkpoint_sequence=previous_checkpoint_sequence,
+        previous_checkpoint_sha256=previous_checkpoint_sha256,
         created_at_utc=datetime.now(UTC).isoformat(),
     )
     checkpoint_path.parent.mkdir(parents=True, exist_ok=True)

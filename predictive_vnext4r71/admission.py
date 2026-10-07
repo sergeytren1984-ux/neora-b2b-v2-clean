@@ -19,7 +19,7 @@ from predictive_vnext4r7.integrity import (
     verify_event_workflow_against_manifest,
 )
 from predictive_vnext4r7.scorecard_core import score_from_events
-from predictive_vnext4r71.checkpoint import event_files
+from predictive_vnext4r71.checkpoint import event_files, verify_checkpoint
 from predictive_vnext4r71.anchor import verify_latest_anchor
 from predictive_vnext4r71.crypto import make_blob_verifier
 from predictive_vnext4r71.integrity import (
@@ -291,6 +291,26 @@ def run_admission(
     checkpoint_policy = protocol.get("checkpointing", {})
     if checkpoint_policy.get("anchor_required") is not True:
         raise ValueError("admission protocol does not require checkpoint anchor")
+    checkpoint_rel = checkpoint_policy.get("checkpoint_path")
+    if not isinstance(checkpoint_rel, str) or not checkpoint_rel:
+        raise ValueError("admission checkpoint path missing")
+    checkpoint_path = root / checkpoint_rel
+    checkpoint_bundle = checkpoint_path.with_suffix(".sigstore.json")
+    if not checkpoint_path.exists() or not checkpoint_bundle.exists():
+        raise ValueError("required signed checkpoint missing")
+    checkpoint_state = verify_checkpoint(
+        repo_root=root,
+        events_dir=root / events_dir,
+        checkpoint_path=checkpoint_path,
+        checkpoint_bundle_path=checkpoint_bundle,
+        manifest=manifest,
+        manifest_sha256=digest(canonical(manifest)),
+        workflow_path=forecast_workflow,
+        current_branch_tip=current_tip,
+        verify_blob=verify_forecast_blob,
+        verify_workflow_binding=verify_event_workflow_against_manifest,
+        expected_head=head,
+    )
     anchor_branch = checkpoint_policy.get("anchor_branch")
     if not isinstance(anchor_branch, str) or not anchor_branch:
         raise ValueError("admission checkpoint anchor branch missing")
@@ -304,6 +324,13 @@ def run_admission(
         verify_blob=verify_forecast_blob,
         verify_workflow_binding=verify_event_workflow_against_manifest,
     )
+    if int(anchor["verified_through_sequence"]) != int(checkpoint_state.sequence):
+        raise ValueError("anchor/checkpoint sequence mismatch")
+    governance["checkpoint"] = {
+        "verified": True,
+        "verified_through_sequence": checkpoint_state.sequence,
+        "verified_through_event_hash": checkpoint_state.last_event_hash,
+    }
     governance["checkpoint_anchor"] = anchor
     governance["independent_checkpoint_anchor_verified"] = True
 

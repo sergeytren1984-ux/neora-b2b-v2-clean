@@ -1,8 +1,8 @@
-name: BTC predictive vNext4R7.4 remediation
+name: BTC predictive vNext4R7.5 remediation
 
 on:
   push:
-    branches: [btc-predictive-vnext4r74-remediation-20261007]
+    branches: [btc-predictive-vnext4r75-remediation-20261007]
     paths:
       - predictive_vnext4r71/**
       - predictive_vnext4r7/scorecard_core.py
@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: btc-predictive-vnext4r74-remediation-${{ github.ref }}
+  group: btc-predictive-vnext4r75-remediation-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -88,7 +88,14 @@ jobs:
               assert ae["actual_git_head_must_equal_fetched_remote_tip_before_replay"] is True
               assert ae["remote_tip_revalidated_before_scoring"] is True
               assert ae["remote_tip_revalidated_after_scoring"] is True
-              assert ae["remote_tip_toctou_fail_closed"] is True
+              assert ae["remote_tip_toctou_fail_closed"] is False
+              assert ae["authenticated_protocol_loaded_from_immutable_git_object"] is True
+              assert ae["used_protocol_sha256_must_equal_signed_protocol_sha256"] is True
+              assert ae["private_detached_snapshot_for_all_file_reads"] is True
+              assert ae["decision_semantics"]=="SNAPSHOT_AS_OF_EXACT_EVIDENCE_SHA"
+              assert ae["absolute_latest_tip_atomicity_claimed"] is False
+              assert ae["consumer_must_reject_if_evidence_tip_differs"] is True
+              assert ae["consumer_compare_and_swap_or_lease_required_for_activation"] is True
               rp=p["raw_evidence_provenance"]
               assert rp["raw_first_addition_commit_must_equal_event_publication_commit"] is True
               assert rp["raw_reuse_from_prior_commit_forbidden"] is True
@@ -98,7 +105,7 @@ jobs:
               assert len(req["all_production_workflows_required"])==5
               for wf in req["all_production_workflows_required"]:
                   assert pathlib.Path(wf).exists(),wf
-          print("R7_4_PROTOCOLS_FAIL_CLOSED")
+          print("R7_5_PROTOCOLS_FAIL_CLOSED")
 
   tail-research:
     runs-on: ubuntu-latest
@@ -137,7 +144,7 @@ jobs:
                       assert v["projected_quantile_crossing_rows"]==0,(head,side,split,v)
                       assert v["projected_threshold_order_violation_rows"]==0,(head,side,split,v)
               print(head,row["gate"])
-          print("R7_4_TAIL_COHERENCE_PASS")
+          print("R7_5_TAIL_COHERENCE_PASS")
           PY
 
   signed-checkpoint-e2e:
@@ -167,7 +174,7 @@ jobs:
       - name: Real OIDC/Rekor checkpoint and full-admission replay
         env:
           PYTHONPATH: .
-          R71_E2E_BRANCH: btc-predictive-vnext4r74-e2e-${{ github.run_id }}
+          R71_E2E_BRANCH: btc-predictive-vnext4r75-e2e-${{ github.run_id }}
           R71_EXPECTED_TRIGGER: ${{ github.event_name }}
         run: PYTHONPATH=. python predictive_vnext4r71/e2e_checkpoint.py
 
@@ -199,6 +206,6 @@ jobs:
         env:
           PYTHONPATH: .
           R71_EXPECTED_TRIGGER: ${{ github.event_name }}
-          R74_NEGATIVE_E2E_BRANCH: btc-predictive-vnext4r74-negative-e2e-${{ github.run_id }}
+          R75_NEGATIVE_E2E_BRANCH: btc-predictive-vnext4r75-negative-e2e-${{ github.run_id }}
         run: PYTHONPATH=. python predictive_vnext4r71/e2e_negative_admission.py
 

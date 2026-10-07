@@ -1,0 +1,956 @@
+{
+  "heads": {
+    "1h": {
+      "downside": {
+        "quantiles": {
+          "0.5": {
+            "diagnostic_2026q3": {
+              "baseline_pinball": 0.30037816331452005,
+              "constant_baseline_barrier_multiples": 0.629008439762584,
+              "coverage": 0.5327190170940171,
+              "mean_prediction_barrier_multiples": 0.6836031770467951,
+              "n": 7488,
+              "pinball": 0.29546325108281585,
+              "target_coverage": 0.5
+            },
+            "test_2026h1": {
+              "baseline_pinball": 0.3192461681898255,
+              "constant_baseline_barrier_multiples": 0.629008439762584,
+              "coverage": 0.49604790419161676,
+              "mean_prediction_barrier_multiples": 0.6549675308403119,
+              "n": 16700,
+              "pinball": 0.31182614606619846,
+              "target_coverage": 0.5
+            }
+          },
+          "0.75": {
+            "diagnostic_2026q3": {
+              "baseline_pinball": 0.308208857061398,
+              "constant_baseline_barrier_multiples": 1.1725828782592531,
+              "coverage": 0.7727029914529915,
+              "mean_prediction_barrier_multiples": 1.2333116548019794,
+              "n": 7488,
+              "pinball": 0.2962843960636892,
+              "target_coverage": 0.75
+            },
+            "test_2026h1": {
+              "baseline_pinball": 0.3301358699327664,
+              "constant_baseline_barrier_multiples": 1.1725828782592531,
+              "coverage": 0.7398203592814371,
+              "mean_prediction_barrier_multiples": 1.1930732236058539,
+              "n": 16700,
+              "pinball": 0.3149328469233108,
+              "target_coverage": 0.75
+            }
+          },
+          "0.9": {
+            "diagnostic_2026q3": {
+              "baseline_pinball": 0.22020704132527197,
+              "constant_baseline_barrier_multiples": 1.9660237764687911,
+              "coverage": 0.9139957264957265,
+              "mean_prediction_barrier_multiples": 2.008157541307192,
+              "n": 7488,
+              "pinball": 0.20658855623362216,
+              "target_coverage": 0.9
+            },
+            "test_2026h1": {
+              "baseline_pinball": 0.23877681696953387,
+              "constant_baseline_barrier_multiples": 1.9660237764687911,
+              "coverage": 0.8950299401197604,
+              "mean_prediction_barrier_multiples": 1.935943657347602,
+              "n": 16700,
+              "pinball": 0.22249909423150013,
+              "target_coverage": 0.9
+            }
+          }
+        },
+        "thresholds": {
+          "1.0": {
+            "diagnostic_2026q3": {
+              "baseline_brier": 0.20880463430087645,
+              "brier": 0.20079039906517024,
+              "event_rate": 0.296474358974359,
+              "mean_probability": 0.32126200704136865,
+              "n": 7488
+            },
+            "test_2026h1": {
+              "baseline_brier": 0.21658808013649672,
+              "brier": 0.20617128107602262,
+              "event_rate": 0.317125748502994,
+              "mean_probability": 0.3101965719543556,
+              "n": 16700
+            },
+            "training_frequency": 0.3115515223605702
+          },
+          "1.5": {
+            "diagnostic_2026q3": {
+              "baseline_brier": 0.1351031481973645,
+              "brier": 0.1304902975908052,
+              "event_rate": 0.1609241452991453,
+              "mean_probability": 0.1782084754380433,
+              "n": 7488
+            },
+            "test_2026h1": {
+              "baseline_brier": 0.14561075020218095,
+              "brier": 0.13837441801008946,
+              "event_rate": 0.1768263473053892,
+              "mean_probability": 0.1711418946386011,
+              "n": 16700
+            },
+            "training_frequency": 0.16961801891679298
+          },
+          "2.0": {
+            "diagnostic_2026q3": {
+              "baseline_brier": 0.08173105827493259,
+              "brier": 0.07927194771553006,
+              "event_rate": 0.08974358974358974,
+              "mean_probability": 0.10288336023189885,
+              "n": 7488
+            },
+            "test_2026h1": {
+              "baseline_brier": 0.09112694889434665,
+              "brier": 0.08725876067192097,
+              "event_rate": 0.10137724550898204,
+              "mean_probability": 0.09922588484336642,
+              "n": 16700
+            },
+            "training_frequency": 0.09617635209024807
+          }
+        }
+      },
+      "feature_names": [
+        "ret_15m",
+        "ret_1h",
+        "ret_4h",
+        "ret_12h",
+        "ret_24h",
+        "ret_96h",
+        "mean_abs_1h",
+        "mean_abs_4h",
+        "mean_abs_12h",
+        "mean_abs_24h",
+        "std_1h",
+        "std_4h",
+        "std_12h",
+        "std_24h",
+        "range_4h",
+        "range_24h",
+        "vol_ratio_4h_24h",
+        "volume_ratio_1h_4h",
+        "volume_ratio_4h_24h",
+        "trades_ratio_1h_4h",
+        "trades_ratio_4h_24h",
+        "taker_ratio_15m",
+        "taker_ratio_1h",
+        "taker_ratio_4h",
+        "taker_accel_1h",
+        "efficiency_1h",
+        "efficiency_4h",
+        "dist_prev4h_high",
+        "dist_prev4h_low"
+      ],
+      "gate": {
+        "downside": {
+          "pass": true,
+          "q90_pinball_and_coverage_gate": true,
+          "threshold_brier_wins": 3,
+          "threshold_gate": true
+        },
+        "upside": {
+          "pass": true,
+          "q90_pinball_and_coverage_gate": true,
+          "threshold_brier_wins": 3,
+          "threshold_gate": true
+        }
+      },
+      "head": "1h",
+      "prospective_admission": false,
+      "schema": "btc-predictive-vnext4r7-tail-research-v1",
+      "source_sha256": "ca13cd2ede55d14c0ebd67ba1dcd14f8f793e1283e2f402d9452fc6e6c34d759",
+      "split": {
+        "calibration": "2025-07-01..2026-01-01",
+        "diagnostic_only_q3": "2026-07-08..2026-09-24",
+        "n_calibration": 17660,
+        "n_q3_diagnostic": 7488,
+        "n_test": 16700,
+        "n_train": 52123,
+        "q3_used_for_gate": false,
+        "selection_test": "2026-01-08..2026-07-01",
+        "train_labels_due_before": "2025-07-01T00:00:00Z"
+      },
+      "status": "RESEARCH_ONLY_NO_TRADING_AUTHORITY",
+      "target": {
+        "down": "(reference - future_min_low) / R6_barrier_distance",
+        "exceedance_thresholds": [
+          1.0,
+          1.5,
+          2.0
+        ],
+        "quantiles": [
+          0.5,
+          0.75,
+          0.9
+        ],
+        "unit": "multiples_of_frozen_R6_volatility_barrier",
+        "up": "(future_max_high - reference) / R6_barrier_distance"
+      },
+      "trading_authority": false,
+      "upside": {
+        "quantiles": {
+          "0.5": {
+            "diagnostic_2026q3": {
+              "baseline_pinball": 0.31553233668424047,
+              "constant_baseline_barrier_multiples": 0.6292900567471104,
+              "coverage": 0.5185630341880342,
+              "mean_prediction_barrier_multiples": 0.6591930643495902,
+              "n": 7488,
+              "pinball": 0.30869538827574583,
+              "target_coverage": 0.5
+            },
+            "test_2026h1": {
+              "baseline_pinball": 0.2928915147078124,
+              "constant_baseline_barrier_multiples": 0.6292900567471104,
+              "coverage": 0.5229940119760479,
+              "mean_prediction_barrier_multiples": 0.6525137528604859,
+              "n": 16700,
+              "pinball": 0.2865934273774584,
+              "target_coverage": 0.5
+            }
+          },
+          "0.75": {
+            "diagnostic_2026q3": {
+              "baseline_pinball": 0.3276571998384399,
+              "constant_baseline_barrier_multiples": 1.150978924615345,
+              "coverage": 0.7588141025641025,
+              "mean_prediction_barrier_multiples": 1.2061192175905222,
+              "n": 7488,
+              "pinball": 0.3140314637891624,
+              "target_coverage": 0.75
+            },
+            "test_2026h1": {
+              "baseline_pinball": 0.30090805525616954,
+              "constant_baseline_barrier_multiples": 1.150978924615345,
+              "coverage": 0.7608383233532934,
+              "mean_prediction_barrier_multiples": 1.1633981409899878,
+              "n": 16700,
+              "pinball": 0.2875911136155139,
+              "target_coverage": 0.75
+            }
+          },
+          "0.9": {
+            "diagnostic_2026q3": {
+              "baseline_pinball": 0.2373475966104075,
+              "constant_baseline_barrier_multiples": 1.8857756920490156,
+              "coverage": 0.8965010683760684,
+              "mean_prediction_barrier_multiples": 1.9435940295373153,
+              "n": 7488,
+              "pinball": 0.22178558599411222,
+              "target_coverage": 0.9
+            },
+            "test_2026h1": {
+              "baseline_pinball": 0.2157785837164233,
+              "constant_baseline_barrier_multiples": 1.8857756920490156,
+              "coverage": 0.8981437125748503,
+              "mean_prediction_barrier_multiples": 1.8205625452731595,
+              "n": 16700,
+              "pinball": 0.20061286722712793,
+              "target_coverage": 0.9
+            }
+          }
+        },
+        "thresholds": {
+          "1.0": {
+            "diagnostic_2026q3": {
+              "baseline_brier": 0.21363891100033255,
+              "brier": 0.2036169277392747,
+              "event_rate": 0.3092948717948718,
+              "mean_probability": 0.3100632965270801,
+              "n": 7488
+            },
+            "test_2026h1": {
+              "baseline_brier": 0.20601283312902377,
+              "brier": 0.19545785265329754,
+              "event_rate": 0.2895808383233533,
+              "mean_probability": 0.30230955972298895,
+              "n": 16700
+            },
+            "training_frequency": 0.3065825067628494
+          },
+          "1.5": {
+            "diagnostic_2026q3": {
+              "baseline_brier": 0.14249953121971323,
+              "brier": 0.13605558779347,
+              "event_rate": 0.171875,
+              "mean_probability": 0.16343539682868,
+              "n": 7488
+            },
+            "test_2026h1": {
+              "baseline_brier": 0.12990887946966692,
+              "brier": 0.1231518160930509,
+              "event_rate": 0.1534131736526946,
+              "mean_probability": 0.15526318103054204,
+              "n": 16700
+            },
+            "training_frequency": 0.15900849912706483
+          },
+          "2.0": {
+            "diagnostic_2026q3": {
+              "baseline_brier": 0.08763462205856479,
+              "brier": 0.08442721663014383,
+              "event_rate": 0.09695512820512821,
+              "mean_probability": 0.09315963056508463,
+              "n": 7488
+            },
+            "test_2026h1": {
+              "baseline_brier": 0.0783021913420822,
+              "brier": 0.07466431737707364,
+              "event_rate": 0.08562874251497006,
+              "mean_probability": 0.08476312613119835,
+              "n": 16700
+            },
+            "training_frequency": 0.08802256201676803
+          }
+        }
+      }
+    },
+    "24h": {
+      "downside": {
+        "quantiles": {
+          "0.5": {
+            "diagnostic_2026q3": {
+              "baseline_pinball": 0.30869946389188735,
+              "constant_baseline_barrier_multiples": 0.6256350560928601,
+              "coverage": 0.5635683760683761,
+              "mean_prediction_barrier_multiples": 0.8371529720088929,
+              "n": 1872,
+              "pinball": 0.2864171775821513,
+              "target_coverage": 0.5
+            },
+            "test_2026h1": {
+              "baseline_pinball": 0.35981758508420925,
+              "constant_baseline_barrier_multiples": 0.6256350560928601,
+              "coverage": 0.45809248554913296,
+              "mean_prediction_barrier_multiples": 0.7308428078182644,
+              "n": 4152,
+              "pinball": 0.3438328909861435,
+              "target_coverage": 0.5
+            }
+          },
+          "0.75": {
+            "diagnostic_2026q3": {
+              "baseline_pinball": 0.2943464781911548,
+              "constant_baseline_barrier_multiples": 1.2786437143678206,
+              "coverage": 0.8360042735042735,
+              "mean_prediction_barrier_multiples": 1.6832626668461073,
+              "n": 1872,
+              "pinball": 0.2949064663688508,
+              "target_coverage": 0.75
+            },
+            "test_2026h1": {
+              "baseline_pinball": 0.362674746143966,
+              "constant_baseline_barrier_multiples": 1.2786437143678206,
+              "coverage": 0.720616570327553,
+              "mean_prediction_barrier_multiples": 1.3717242583718894,
+              "n": 4152,
+              "pinball": 0.33965609781350636,
+              "target_coverage": 0.75
+            }
+          },
+          "0.9": {
+            "diagnostic_2026q3": {
+              "baseline_pinball": 0.1854464403390364,
+              "constant_baseline_barrier_multiples": 2.2515481081963316,
+              "coverage": 0.9423076923076923,
+              "mean_prediction_barrier_multiples": 2.7065968990937583,
+              "n": 1872,
+              "pinball": 0.2035749110538096,
+              "target_coverage": 0.9
+            },
+            "test_2026h1": {
+              "baseline_pinball": 0.25833622087165964,
+              "constant_baseline_barrier_multiples": 2.2515481081963316,
+              "coverage": 0.8872832369942196,
+              "mean_prediction_barrier_multiples": 2.1952369446942197,
+              "n": 4152,
+              "pinball": 0.22074081771075416,
+              "target_coverage": 0.9
+            }
+          }
+        },
+        "thresholds": {
+          "1.0": {
+            "diagnostic_2026q3": {
+              "baseline_brier": 0.22836072543706115,
+              "brier": 0.20805802169780538,
+              "event_rate": 0.35149572649572647,
+              "mean_probability": 0.3731685053911162,
+              "n": 1872
+            },
+            "test_2026h1": {
+              "baseline_brier": 0.23955197265541267,
+              "brier": 0.22688409476091873,
+              "event_rate": 0.3846339113680154,
+              "mean_probability": 0.3539236758673241,
+              "n": 4152
+            },
+            "training_frequency": 0.33114272460182465
+          },
+          "1.5": {
+            "diagnostic_2026q3": {
+              "baseline_brier": 0.16051209012546983,
+              "brier": 0.14652047900691423,
+              "event_rate": 0.20085470085470086,
+              "mean_probability": 0.2485472122721077,
+              "n": 1872
+            },
+            "test_2026h1": {
+              "baseline_brier": 0.17219089527676004,
+              "brier": 0.157214652791191,
+              "event_rate": 0.2203757225433526,
+              "mean_probability": 0.22551930403577358,
+              "n": 4152
+            },
+            "training_frequency": 0.20086593474563166
+          },
+          "2.0": {
+            "diagnostic_2026q3": {
+              "baseline_brier": 0.09611749559253738,
+              "brier": 0.09564878069559504,
+              "event_rate": 0.10737179487179487,
+              "mean_probability": 0.17309474597222937,
+              "n": 1872
+            },
+            "test_2026h1": {
+              "baseline_brier": 0.10991957393035115,
+              "brier": 0.10044356840833689,
+              "event_rate": 0.12572254335260116,
+              "mean_probability": 0.14243110098862186,
+              "n": 4152
+            },
+            "training_frequency": 0.12393691046853254
+          }
+        }
+      },
+      "feature_names": [
+        "ret_1h",
+        "ret_4h",
+        "ret_12h",
+        "ret_24h",
+        "ret_72h",
+        "ret_168h",
+        "mean_abs_4h",
+        "mean_abs_12h",
+        "mean_abs_24h",
+        "mean_abs_72h",
+        "std_4h",
+        "std_12h",
+        "std_24h",
+        "std_72h",
+        "range_24h",
+        "range_72h",
+        "vol_ratio_24_168",
+        "volume_ratio_4_24",
+        "volume_ratio_24_168",
+        "trades_ratio_4_24",
+        "trades_ratio_24_168",
+        "taker_ratio_1h",
+        "taker_ratio_4h",
+        "taker_ratio_24h",
+        "taker_accel_4h",
+        "efficiency_6h",
+        "efficiency_12h",
+        "efficiency_24h",
+        "dist_prev24_high",
+        "dist_prev24_low",
+        "ret_accel_4_vs_24",
+        "atr14_pct"
+      ],
+      "gate": {
+        "downside": {
+          "pass": true,
+          "q90_pinball_and_coverage_gate": true,
+          "threshold_brier_wins": 3,
+          "threshold_gate": true
+        },
+        "upside": {
+          "pass": true,
+          "q90_pinball_and_coverage_gate": true,
+          "threshold_brier_wins": 3,
+          "threshold_gate": true
+        }
+      },
+      "head": "24h",
+      "prospective_admission": false,
+      "schema": "btc-predictive-vnext4r7-tail-research-v1",
+      "source_sha256": "3e78a339e60fec957dea2c0884c6840d66a92351ac04b4198623f1da10165fc9",
+      "split": {
+        "calibration": "2025-07-01..2026-01-01",
+        "diagnostic_only_q3": "2026-07-08..2026-09-24",
+        "n_calibration": 4392,
+        "n_q3_diagnostic": 1872,
+        "n_test": 4152,
+        "n_train": 12934,
+        "q3_used_for_gate": false,
+        "selection_test": "2026-01-08..2026-07-01",
+        "train_labels_due_before": "2025-07-01T00:00:00Z"
+      },
+      "status": "RESEARCH_ONLY_NO_TRADING_AUTHORITY",
+      "target": {
+        "down": "(reference - future_min_low) / R6_barrier_distance",
+        "exceedance_thresholds": [
+          1.0,
+          1.5,
+          2.0
+        ],
+        "quantiles": [
+          0.5,
+          0.75,
+          0.9
+        ],
+        "unit": "multiples_of_frozen_R6_volatility_barrier",
+        "up": "(future_max_high - reference) / R6_barrier_distance"
+      },
+      "trading_authority": false,
+      "upside": {
+        "quantiles": {
+          "0.5": {
+            "diagnostic_2026q3": {
+              "baseline_pinball": 0.4221255040122681,
+              "constant_baseline_barrier_multiples": 0.6659033795052536,
+              "coverage": 0.563034188034188,
+              "mean_prediction_barrier_multiples": 0.9532479140740308,
+              "n": 1872,
+              "pinball": 0.426321832430987,
+              "target_coverage": 0.5
+            },
+            "test_2026h1": {
+              "baseline_pinball": 0.302817432473978,
+              "constant_baseline_barrier_multiples": 0.6659033795052536,
+              "coverage": 0.5828516377649325,
+              "mean_prediction_barrier_multiples": 0.7850129097889379,
+              "n": 4152,
+              "pinball": 0.2986534550507167,
+              "target_coverage": 0.5
+            }
+          },
+          "0.75": {
+            "diagnostic_2026q3": {
+              "baseline_pinball": 0.47183501318341453,
+              "constant_baseline_barrier_multiples": 1.2581216698350783,
+              "coverage": 0.7841880341880342,
+              "mean_prediction_barrier_multiples": 1.7401295497350102,
+              "n": 1872,
+              "pinball": 0.4544419805643599,
+              "target_coverage": 0.75
+            },
+            "test_2026h1": {
+              "baseline_pinball": 0.3154799026705517,
+              "constant_baseline_barrier_multiples": 1.2581216698350783,
+              "coverage": 0.7950385356454721,
+              "mean_prediction_barrier_multiples": 1.3638672118183903,
+              "n": 4152,
+              "pinball": 0.29284346458051985,
+              "target_coverage": 0.75
+            }
+          },
+          "0.9": {
+            "diagnostic_2026q3": {
+              "baseline_pinball": 0.3588358239883868,
+              "constant_baseline_barrier_multiples": 2.1816494431102846,
+              "coverage": 0.8899572649572649,
+              "mean_prediction_barrier_multiples": 2.607145913091605,
+              "n": 1872,
+              "pinball": 0.34282297489130276,
+              "target_coverage": 0.9
+            },
+            "test_2026h1": {
+              "baseline_pinball": 0.2206409476032557,
+              "constant_baseline_barrier_multiples": 2.1816494431102846,
+              "coverage": 0.8988439306358381,
+              "mean_prediction_barrier_multiples": 2.0534912121297486,
+              "n": 4152,
+              "pinball": 0.19034455631342295,
+              "target_coverage": 0.9
+            }
+          }
+        },
+        "thresholds": {
+          "1.0": {
+            "diagnostic_2026q3": {
+              "baseline_brier": 0.23283085016133848,
+              "brier": 0.21457940326561054,
+              "event_rate": 0.3659188034188034,
+              "mean_probability": 0.367714351478823,
+              "n": 1872
+            },
+            "test_2026h1": {
+              "baseline_brier": 0.2105751361617018,
+              "brier": 0.1959915541248039,
+              "event_rate": 0.29744701348747593,
+              "mean_probability": 0.35432188281954824,
+              "n": 4152
+            },
+            "training_frequency": 0.3374826039894851
+          },
+          "1.5": {
+            "diagnostic_2026q3": {
+              "baseline_brier": 0.1847342705597718,
+              "brier": 0.16641931415778277,
+              "event_rate": 0.23985042735042736,
+              "mean_probability": 0.23782868933529627,
+              "n": 1872
+            },
+            "test_2026h1": {
+              "baseline_brier": 0.14304358624682825,
+              "brier": 0.13045362670677296,
+              "event_rate": 0.1724470134874759,
+              "mean_probability": 0.20842515115786706,
+              "n": 4152
+            },
+            "training_frequency": 0.1907375908458327
+          },
+          "2.0": {
+            "diagnostic_2026q3": {
+              "baseline_brier": 0.14924046420769957,
+              "brier": 0.13251078936016972,
+              "event_rate": 0.17735042735042736,
+              "mean_probability": 0.16502874995060918,
+              "n": 1872
+            },
+            "test_2026h1": {
+              "baseline_brier": 0.08997822216768672,
+              "brier": 0.08238416566593958,
+              "event_rate": 0.09947013487475916,
+              "mean_probability": 0.13194395252927535,
+              "n": 4152
+            },
+            "training_frequency": 0.11952992113808567
+          }
+        }
+      }
+    },
+    "4h": {
+      "downside": {
+        "quantiles": {
+          "0.5": {
+            "diagnostic_2026q3": {
+              "baseline_pinball": 0.3153412696148904,
+              "constant_baseline_barrier_multiples": 0.654464252582038,
+              "coverage": 0.5480769230769231,
+              "mean_prediction_barrier_multiples": 0.7506459735673121,
+              "n": 7488,
+              "pinball": 0.31332155003552925,
+              "target_coverage": 0.5
+            },
+            "test_2026h1": {
+              "baseline_pinball": 0.3545569428363656,
+              "constant_baseline_barrier_multiples": 0.654464252582038,
+              "coverage": 0.4884947267497603,
+              "mean_prediction_barrier_multiples": 0.7028851398547893,
+              "n": 16688,
+              "pinball": 0.34278870350908,
+              "target_coverage": 0.5
+            }
+          },
+          "0.75": {
+            "diagnostic_2026q3": {
+              "baseline_pinball": 0.32865524091252846,
+              "constant_baseline_barrier_multiples": 1.2684325843146884,
+              "coverage": 0.7880608974358975,
+              "mean_prediction_barrier_multiples": 1.3666992530482704,
+              "n": 7488,
+              "pinball": 0.3161572947309435,
+              "target_coverage": 0.75
+            },
+            "test_2026h1": {
+              "baseline_pinball": 0.37013092806731246,
+              "constant_baseline_barrier_multiples": 1.2684325843146884,
+              "coverage": 0.738075263662512,
+              "mean_prediction_barrier_multiples": 1.298753976450873,
+              "n": 16688,
+              "pinball": 0.3484523199342214,
+              "target_coverage": 0.75
+            }
+          },
+          "0.9": {
+            "diagnostic_2026q3": {
+              "baseline_pinball": 0.2368205807058106,
+              "constant_baseline_barrier_multiples": 2.154728214535329,
+              "coverage": 0.9204059829059829,
+              "mean_prediction_barrier_multiples": 2.173182575753848,
+              "n": 7488,
+              "pinball": 0.2166155012173409,
+              "target_coverage": 0.9
+            },
+            "test_2026h1": {
+              "baseline_pinball": 0.26928233584464994,
+              "constant_baseline_barrier_multiples": 2.154728214535329,
+              "coverage": 0.8908796740172579,
+              "mean_prediction_barrier_multiples": 2.0795679083215184,
+              "n": 16688,
+              "pinball": 0.24835698475180473,
+              "target_coverage": 0.9
+            }
+          }
+        },
+        "thresholds": {
+          "1.0": {
+            "diagnostic_2026q3": {
+              "baseline_brier": 0.21732450408164222,
+              "brier": 0.2129426297124426,
+              "event_rate": 0.31837606837606836,
+              "mean_probability": 0.3622313251769856,
+              "n": 7488
+            },
+            "test_2026h1": {
+              "baseline_brier": 0.22860295812259485,
+              "brier": 0.21447772579913332,
+              "event_rate": 0.3527684563758389,
+              "mean_probability": 0.34516530637097376,
+              "n": 16688
+            },
+            "training_frequency": 0.33603269943006275
+          },
+          "1.5": {
+            "diagnostic_2026q3": {
+              "baseline_brier": 0.1465361643836498,
+              "brier": 0.14356055276859397,
+              "event_rate": 0.1778846153846154,
+              "mean_probability": 0.2139562047591874,
+              "n": 7488
+            },
+            "test_2026h1": {
+              "baseline_brier": 0.16453454812188945,
+              "brier": 0.15403298587904715,
+              "event_rate": 0.20739453499520613,
+              "mean_probability": 0.20325384202371083,
+              "n": 16688
+            },
+            "training_frequency": 0.19504519199401277
+          },
+          "2.0": {
+            "diagnostic_2026q3": {
+              "baseline_brier": 0.09366430929332178,
+              "brier": 0.09133998204575634,
+              "event_rate": 0.10443376068376069,
+              "mean_probability": 0.13093487265993264,
+              "n": 7488
+            },
+            "test_2026h1": {
+              "baseline_brier": 0.10871748259802247,
+              "brier": 0.10296783455164728,
+              "event_rate": 0.12404122722914669,
+              "mean_probability": 0.12192153557316672,
+              "n": 16688
+            },
+            "training_frequency": 0.11613670818061446
+          }
+        }
+      },
+      "feature_names": [
+        "ret_15m",
+        "ret_1h",
+        "ret_4h",
+        "ret_12h",
+        "ret_24h",
+        "ret_96h",
+        "mean_abs_1h",
+        "mean_abs_4h",
+        "mean_abs_12h",
+        "mean_abs_24h",
+        "std_1h",
+        "std_4h",
+        "std_12h",
+        "std_24h",
+        "range_4h",
+        "range_24h",
+        "vol_ratio_4h_24h",
+        "volume_ratio_1h_4h",
+        "volume_ratio_4h_24h",
+        "trades_ratio_1h_4h",
+        "trades_ratio_4h_24h",
+        "taker_ratio_15m",
+        "taker_ratio_1h",
+        "taker_ratio_4h",
+        "taker_accel_1h",
+        "efficiency_1h",
+        "efficiency_4h",
+        "dist_prev4h_high",
+        "dist_prev4h_low"
+      ],
+      "gate": {
+        "downside": {
+          "pass": true,
+          "q90_pinball_and_coverage_gate": true,
+          "threshold_brier_wins": 3,
+          "threshold_gate": true
+        },
+        "upside": {
+          "pass": true,
+          "q90_pinball_and_coverage_gate": true,
+          "threshold_brier_wins": 3,
+          "threshold_gate": true
+        }
+      },
+      "head": "4h",
+      "prospective_admission": false,
+      "schema": "btc-predictive-vnext4r7-tail-research-v1",
+      "source_sha256": "ca13cd2ede55d14c0ebd67ba1dcd14f8f793e1283e2f402d9452fc6e6c34d759",
+      "split": {
+        "calibration": "2025-07-01..2026-01-01",
+        "diagnostic_only_q3": "2026-07-08..2026-09-24",
+        "n_calibration": 17648,
+        "n_q3_diagnostic": 7488,
+        "n_test": 16688,
+        "n_train": 52111,
+        "q3_used_for_gate": false,
+        "selection_test": "2026-01-08..2026-07-01",
+        "train_labels_due_before": "2025-07-01T00:00:00Z"
+      },
+      "status": "RESEARCH_ONLY_NO_TRADING_AUTHORITY",
+      "target": {
+        "down": "(reference - future_min_low) / R6_barrier_distance",
+        "exceedance_thresholds": [
+          1.0,
+          1.5,
+          2.0
+        ],
+        "quantiles": [
+          0.5,
+          0.75,
+          0.9
+        ],
+        "unit": "multiples_of_frozen_R6_volatility_barrier",
+        "up": "(future_max_high - reference) / R6_barrier_distance"
+      },
+      "trading_authority": false,
+      "upside": {
+        "quantiles": {
+          "0.5": {
+            "diagnostic_2026q3": {
+              "baseline_pinball": 0.3518981806029044,
+              "constant_baseline_barrier_multiples": 0.6648032584037784,
+              "coverage": 0.5026709401709402,
+              "mean_prediction_barrier_multiples": 0.7162514534843251,
+              "n": 7488,
+              "pinball": 0.3411728905460342,
+              "target_coverage": 0.5
+            },
+            "test_2026h1": {
+              "baseline_pinball": 0.3129546595579793,
+              "constant_baseline_barrier_multiples": 0.6648032584037784,
+              "coverage": 0.5375119846596357,
+              "mean_prediction_barrier_multiples": 0.7001848099282483,
+              "n": 16688,
+              "pinball": 0.3066242541654257,
+              "target_coverage": 0.5
+            }
+          },
+          "0.75": {
+            "diagnostic_2026q3": {
+              "baseline_pinball": 0.3678110643089821,
+              "constant_baseline_barrier_multiples": 1.2436051080050707,
+              "coverage": 0.7553418803418803,
+              "mean_prediction_barrier_multiples": 1.3323265973569425,
+              "n": 7488,
+              "pinball": 0.35165631745630443,
+              "target_coverage": 0.75
+            },
+            "test_2026h1": {
+              "baseline_pinball": 0.32503202065709696,
+              "constant_baseline_barrier_multiples": 1.2436051080050707,
+              "coverage": 0.7603667305848514,
+              "mean_prediction_barrier_multiples": 1.248926553063399,
+              "n": 16688,
+              "pinball": 0.30832298379467915,
+              "target_coverage": 0.75
+            }
+          },
+          "0.9": {
+            "diagnostic_2026q3": {
+              "baseline_pinball": 0.2702696973035087,
+              "constant_baseline_barrier_multiples": 2.063659981063973,
+              "coverage": 0.9035790598290598,
+              "mean_prediction_barrier_multiples": 2.1502283845698247,
+              "n": 7488,
+              "pinball": 0.2554298030127422,
+              "target_coverage": 0.9
+            },
+            "test_2026h1": {
+              "baseline_pinball": 0.23157200954975046,
+              "constant_baseline_barrier_multiples": 2.063659981063973,
+              "coverage": 0.8975311601150527,
+              "mean_prediction_barrier_multiples": 1.963665574824665,
+              "n": 16688,
+              "pinball": 0.21187202479112074,
+              "target_coverage": 0.9
+            }
+          }
+        },
+        "thresholds": {
+          "1.0": {
+            "diagnostic_2026q3": {
+              "baseline_brier": 0.22754670878836722,
+              "brier": 0.21527480594777731,
+              "event_rate": 0.34922542735042733,
+              "mean_probability": 0.3424088804246675,
+              "n": 7488
+            },
+            "test_2026h1": {
+              "baseline_brier": 0.21377841227810554,
+              "brier": 0.2021034791154714,
+              "event_rate": 0.3081255992329818,
+              "mean_probability": 0.3279939525123899,
+              "n": 16688
+            },
+            "training_frequency": 0.33250177505708967
+          },
+          "1.5": {
+            "diagnostic_2026q3": {
+              "baseline_brier": 0.16165444726865494,
+              "brier": 0.15397190282640144,
+              "event_rate": 0.20232371794871795,
+              "mean_probability": 0.20262722094103286,
+              "n": 7488
+            },
+            "test_2026h1": {
+              "baseline_brier": 0.141885139321688,
+              "brier": 0.13351921334555772,
+              "event_rate": 0.17084132310642378,
+              "mean_probability": 0.1842184088836451,
+              "n": 16688
+            },
+            "training_frequency": 0.18602598299783155
+          },
+          "2.0": {
+            "diagnostic_2026q3": {
+              "baseline_brier": 0.10626087884758229,
+              "brier": 0.10255665091489875,
+              "event_rate": 0.12059294871794872,
+              "mean_probability": 0.12151699649558391,
+              "n": 7488
+            },
+            "test_2026h1": {
+              "baseline_brier": 0.09368157981480103,
+              "brier": 0.08823826223780037,
+              "event_rate": 0.10462607861936721,
+              "mean_probability": 0.10450753500791335,
+              "n": 16688
+            },
+            "training_frequency": 0.10608124964019112
+          }
+        }
+      }
+    }
+  },
+  "policy": {
+    "minimum_threshold_brier_wins": 2,
+    "production_integration": "FORBIDDEN_UNTIL_NEW_PROSPECTIVE_EPOCH",
+    "q3_role": "diagnostic only",
+    "q90_max_absolute_coverage_error": 0.05,
+    "require_q90_pinball_better_than_constant": true,
+    "selection_data": "2026H1 only"
+  },
+  "schema": "btc-predictive-vnext4r7-tail-research-suite-v1",
+  "trading_authority": false
+}

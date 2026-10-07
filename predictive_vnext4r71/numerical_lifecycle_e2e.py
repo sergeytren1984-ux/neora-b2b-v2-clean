@@ -196,7 +196,7 @@ def run():
         ),
         "4h":(
             "c386489ec54eb441fab7666036c5dcb1fca72e3ad7aa89fc32bf8e3575c04726",
-            "d4449b18d96162755d938d7b8b6da5ee126466ad9e4253ccac24d2c4d8c655",
+            "d4449b18d96162755d938d7b8b8b6da5ee126466ad9e4253ccac24d2c4d8c655",
         ),
         "24h":(
             "852ec232cd798d3939d50301dd0b3d30fb7e11e51ea3b6b1b5b9761abef57e09",

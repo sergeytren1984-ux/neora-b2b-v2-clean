@@ -16,6 +16,7 @@ from predictive_vnext4r71.integrity import (
     REQUIRED_PROTOCOLS,
     REQUIRED_PRODUCTION_WORKFLOWS,
 )
+from predictive_vnext4r71 import worker
 
 UTC=timezone.utc
 ROOT=Path(__file__).resolve().parents[1]
@@ -119,7 +120,11 @@ def authority_events(
     protocols_override=None,
 ):
     source_sha=os.environ["GITHUB_SHA"]
-    required_paths=list(REQUIRED_PROTOCOLS)+list(REQUIRED_PRODUCTION_WORKFLOWS)+[WORKFLOW]
+    required_paths=list(dict.fromkeys(
+        worker.static_paths(worker.CONFIG["1h"])
+        + list(REQUIRED_PRODUCTION_WORKFLOWS)
+        + [WORKFLOW]
+    ))
     hashes={}
     for required_path in required_paths:
         payload=subprocess.run(

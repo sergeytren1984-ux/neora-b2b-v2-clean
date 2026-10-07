@@ -130,5 +130,7 @@
     "successful_negative_signed_e2e_must_be_preserved": true,
     "cosign_rekor_bundles_must_be_preserved": true,
     "commit_ids_and_hashes_must_be_reported": true
-  }
+  },
+  "evidence_branch": "btc-predictive-vnext4r71-4h",
+  "evidence_raw_prefix": "predictive_vnext4r71_4h_raw/"
 }

@@ -122,3 +122,95 @@ def episode_summary(
             for e in episodes
         ],
     }
+
+
+def stress_episode_skill_summary(
+    anchors,
+    bins,
+    brier_gain,
+    logloss_gain,
+    *,
+    window_hours: int,
+    minimum_duration_hours: int,
+    minimum_separation_hours: int,
+    stress_bin: int = 2,
+):
+    """Report skill separately inside persistent high-volatility stress episodes.
+
+    This is deliberately distinct from the diversity-episode count. It does not
+    claim statistical independence of shocks; it is a robustness slice whose
+    thresholds are frozen in protocol before the prospective epoch.
+    """
+    if not (
+        len(anchors) == len(bins)
+        == len(brier_gain) == len(logloss_gain)
+    ):
+        raise ValueError("stress inputs length mismatch")
+
+    run_rows = _runs(anchors, bins)
+    window = timedelta(hours=window_hours)
+    min_duration = timedelta(hours=minimum_duration_hours)
+    min_separation = timedelta(hours=minimum_separation_hours)
+
+    qualified = []
+    for volatility_bin, start, last_anchor, observations in run_rows:
+        if int(volatility_bin) != int(stress_bin):
+            continue
+        end = last_anchor + window
+        if end - start < min_duration:
+            continue
+        qualified.append(
+            Episode(
+                volatility_bin=int(volatility_bin),
+                start=start,
+                end=end,
+                observations=observations,
+            )
+        )
+
+    counted = []
+    previous_start = None
+    for episode in qualified:
+        if (
+            previous_start is None
+            or episode.start - previous_start >= min_separation
+        ):
+            counted.append(episode)
+            previous_start = episode.start
+
+    rows = []
+    for episode in counted:
+        ids = [
+            i for i, anchor in enumerate(anchors)
+            if episode.start <= anchor < episode.end
+        ]
+        if not ids:
+            continue
+        bg = [float(brier_gain[i]) for i in ids]
+        lg = [float(logloss_gain[i]) for i in ids]
+        rows.append(
+            {
+                "start_utc": episode.start.isoformat(),
+                "end_utc": episode.end.isoformat(),
+                "observations": len(ids),
+                "mean_brier_gain": sum(bg) / len(bg),
+                "mean_logloss_gain": sum(lg) / len(lg),
+            }
+        )
+
+    return {
+        "interpretation": (
+            "ROBUSTNESS_DIAGNOSTIC_NOT_STATISTICAL_INDEPENDENCE_PROOF"
+        ),
+        "stress_bin": int(stress_bin),
+        "count": len(rows),
+        "episodes": rows,
+        "episode_weighted_mean_brier_gain": (
+            None if not rows
+            else sum(x["mean_brier_gain"] for x in rows) / len(rows)
+        ),
+        "episode_weighted_mean_logloss_gain": (
+            None if not rows
+            else sum(x["mean_logloss_gain"] for x in rows) / len(rows)
+        ),
+    }

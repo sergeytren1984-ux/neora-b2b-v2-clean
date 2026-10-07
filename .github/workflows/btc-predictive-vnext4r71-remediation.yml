@@ -45,6 +45,7 @@ jobs:
           python -I -m py_compile predictive_vnext4r71/worker.py
           python -I -m py_compile predictive_vnext4r71/tail_research.py
           python -I -m py_compile predictive_vnext4r71/e2e_checkpoint.py
+          python -I -m py_compile predictive_vnext4r71/benchmark_checkpoint_scale.py
           python -I -m py_compile predictive_vnext4r71/test_remediation.py
           python -I -m py_compile predictive_vnext4r7/scorecard_core.py
 
@@ -52,6 +53,11 @@ jobs:
         env:
           PYTHONPATH: .
         run: PYTHONPATH=. python predictive_vnext4r71/test_remediation.py -v
+
+      - name: Scale checkpoint binding to the expected 42-day journal
+        env:
+          PYTHONPATH: .
+        run: PYTHONPATH=. python predictive_vnext4r71/benchmark_checkpoint_scale.py
 
       - name: Verify protocol templates remain launch-disabled
         run: |

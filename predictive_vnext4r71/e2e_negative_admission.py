@@ -526,6 +526,19 @@ def main():
         ["git","commit","-m","R7.3 negative E2E receipt without raw publication"],
         cwd=ROOT,check=True,capture_output=True,text=True,
     )
+    # The immutable admission snapshot must contain the raw bytes so the test
+    # reaches the targeted provenance invariant. Add them only *after* the
+    # forecast and receipt commits; therefore they are present at the final tip
+    # but absent from the exact forecast publication commit.
+    raw_path=ROOT/fc["raw_path"]
+    subprocess.run(
+        ["git","add",str(raw_path.relative_to(ROOT))],
+        cwd=ROOT,check=True,
+    )
+    subprocess.run(
+        ["git","commit","-m","R7.5 negative E2E preserve raw after receipt"],
+        cwd=ROOT,check=True,capture_output=True,text=True,
+    )
     subprocess.run(
         ["git","push","origin","HEAD:"+NEG_BRANCH],
         cwd=ROOT,check=True,capture_output=True,text=True,

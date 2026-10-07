@@ -185,6 +185,7 @@ def verify_latest_anchor(
     verify_blob,
     verify_workflow_binding,
 )->dict:
+    """Verify the complete signed anchor chain and return its latest anchor."""
     _git(repo_root,"fetch","origin",anchor_branch)
     ref="origin/"+anchor_branch
     base=f"predictive_vnext4r71_checkpoint_anchors/{head}"
@@ -196,40 +197,55 @@ def verify_latest_anchor(
     )
     if not json_paths:
         raise ValueError("required checkpoint anchor missing")
-    path=json_paths[-1]
-    bundle_path=path[:-5]+".sigstore.json"
-    raw=_git_bytes(repo_root,ref,path)
-    bundle_raw=_git_bytes(repo_root,ref,bundle_path)
 
-    with tempfile.TemporaryDirectory(prefix="r71-anchor-verify-") as td:
-        p=Path(td)/"anchor.json"
-        b=Path(td)/"anchor.sigstore.json"
-        p.write_bytes(raw); b.write_bytes(bundle_raw)
-        doc=json.loads(raw)
-        if raw!=canonical(doc):
-            raise ValueError("anchor not canonical")
-        if doc.get("head")!=head or doc.get("anchor_branch")!=anchor_branch:
-            raise ValueError("anchor identity mismatch")
-        verify_blob(p,b,doc)
-        verify_workflow_binding(repo_root,doc,workflow_path,manifest)
+    previous_raw=None
+    latest=None
+    latest_path=None
+    for path in json_paths:
+        bundle_path=path[:-5]+".sigstore.json"
+        raw=_git_bytes(repo_root,ref,path)
+        bundle_raw=_git_bytes(repo_root,ref,bundle_path)
+        with tempfile.TemporaryDirectory(prefix="r71-anchor-verify-") as td:
+            p=Path(td)/"anchor.json"
+            b=Path(td)/"anchor.sigstore.json"
+            p.write_bytes(raw); b.write_bytes(bundle_raw)
+            doc=json.loads(raw)
+            if raw!=canonical(doc):
+                raise ValueError("anchor not canonical")
+            if doc.get("head")!=head or doc.get("anchor_branch")!=anchor_branch:
+                raise ValueError("anchor identity mismatch")
+            expected_previous=(
+                None if previous_raw is None else digest(previous_raw)
+            )
+            if doc.get("previous_anchor_hash")!=expected_previous:
+                raise ValueError("anchor hash chain broken")
+            verify_blob(p,b,doc)
+            verify_workflow_binding(repo_root,doc,workflow_path,manifest)
 
-    cp_commit=doc.get("checkpoint_remote_commit")
-    if not isinstance(cp_commit,str) or len(cp_commit)!=40:
-        raise ValueError("anchor checkpoint commit invalid")
-    subprocess.run(
-        ["git","-C",str(repo_root),"merge-base","--is-ancestor",cp_commit,current_evidence_tip],
-        check=True,capture_output=True,timeout=180
-    )
-    cp=_git_bytes(repo_root,cp_commit,doc["checkpoint_path"])
-    cb=_git_bytes(repo_root,cp_commit,doc["checkpoint_bundle_path"])
-    if digest(cp)!=doc["checkpoint_sha256"]:
-        raise ValueError("anchored checkpoint hash mismatch")
-    if digest(cb)!=doc["checkpoint_bundle_sha256"]:
-        raise ValueError("anchored checkpoint bundle hash mismatch")
+        cp_commit=doc.get("checkpoint_remote_commit")
+        if not isinstance(cp_commit,str) or len(cp_commit)!=40:
+            raise ValueError("anchor checkpoint commit invalid")
+        subprocess.run(
+            ["git","-C",str(repo_root),"merge-base","--is-ancestor",cp_commit,current_evidence_tip],
+            check=True,capture_output=True,timeout=180
+        )
+        cp=_git_bytes(repo_root,cp_commit,doc["checkpoint_path"])
+        cb=_git_bytes(repo_root,cp_commit,doc["checkpoint_bundle_path"])
+        if digest(cp)!=doc["checkpoint_sha256"]:
+            raise ValueError("anchored checkpoint hash mismatch")
+        if digest(cb)!=doc["checkpoint_bundle_sha256"]:
+            raise ValueError("anchored checkpoint bundle hash mismatch")
+        previous_raw=raw
+        latest=doc
+        latest_path=path
+
     return {
         "verified":True,
-        "verified_through_sequence":int(doc["verified_through_sequence"]),
-        "checkpoint_remote_commit":cp_commit,
+        "anchor_count":len(json_paths),
+        "verified_through_sequence":int(latest["verified_through_sequence"]),
+        "checkpoint_remote_commit":latest["checkpoint_remote_commit"],
         "anchor_remote_ref":ref,
-        "anchor_path":path,
+        "anchor_path":latest_path,
+        "full_anchor_chain_verified":True,
     }
+

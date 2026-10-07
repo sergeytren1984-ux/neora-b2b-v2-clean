@@ -20,7 +20,7 @@ def pct95(values):
     return x[min(len(x)-1,int(0.95*(len(x)-1)))]
 
 
-def run(n=12098, repeats=5):
+def run(n=12098, repeats=5, bundle_bytes=12288):
     with tempfile.TemporaryDirectory(prefix="r71-scale-") as td:
         root=Path(td)
         subprocess.run(["git","init"],cwd=root,check=True,capture_output=True)
@@ -29,7 +29,7 @@ def run(n=12098, repeats=5):
         d=root/"events"; d.mkdir()
         bundle_payload=(b'{"verificationMaterial":{"tlogEntries":[]},'
                         b'"mediaType":"application/vnd.dev.sigstore.bundle+json;version=0.3"}')
-        bundle_payload=bundle_payload+b" "*max(0,4096-len(bundle_payload))
+        bundle_payload=bundle_payload+b" "*max(0,bundle_bytes-len(bundle_payload))
         for i in range(1,n+1):
             event=(f'{{"sequence":{i},"payload":"'+("x"*512)+'"}\n').encode()
             p=d/f"{i:08d}.json"
@@ -61,7 +61,11 @@ def run(n=12098, repeats=5):
             "schema":"btc-predictive-vnext4r71-checkpoint-scale-benchmark-v1",
             "events":n,
             "event_plus_bundle_files":2*n,
-            "approx_payload_mb":(n*(512+4096))/(1024*1024),
+            "approx_payload_mb":(event_payload_bytes+n*len(bundle_payload))/(1024*1024),
+            "bundle_payload_bytes":len(bundle_payload),
+            "observed_preserved_bundle_mean_reference_bytes":12118.7,
+            "scope":"git_prefix_cpu_filesystem_only",
+            "raw_payload_and_network_latency_included":False,
             "repeats":repeats,
             "git_archive_prefix_seconds":{
                 "p50":statistics.median(archive_times),

@@ -425,11 +425,11 @@ def main():
     sig_p95=sig_sorted[min(len(sig_sorted)-1,int(.95*(len(sig_sorted)-1)))]
     recovery_sorted=sorted(recovery_seconds)
     recovery_p95=recovery_sorted[
-        min(len(recovery_sorted)-1,int(.95*(len(recovery_sorted)-1))
+        min(len(recovery_sorted)-1,int(.95*(len(recovery_sorted)-1)))
     ]
     checkpoint_sorted=sorted(checkpoint_operation_seconds)
     checkpoint_p95=checkpoint_sorted[
-        min(len(checkpoint_sorted)-1,int(.95*(len(checkpoint_sorted)-1))
+        min(len(checkpoint_sorted)-1,int(.95*(len(checkpoint_sorted)-1)))
     ]
     if checkpoint_p95>=720:
         raise RuntimeError("full checkpoint operation exceeds frozen 12-minute budget")

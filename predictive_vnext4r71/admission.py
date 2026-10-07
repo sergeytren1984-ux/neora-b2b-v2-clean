@@ -147,7 +147,12 @@ def _assert_remote_tip_still_exact(
     *,
     phase: str,
 ) -> str:
-    observed = _verify_exact_checkout_remote_tip(root, branch)
+    # The immutable checkout has already been authenticated and pinned before
+    # replay. Freshness checks must compare the remote branch directly with the
+    # bound evidence SHA; re-running the checkout-equality helper would collapse
+    # a legitimate remote advance into a generic checkout mismatch and obscure
+    # the TOCTOU invariant being enforced here.
+    observed = _fetch_remote_tip(root, branch)
     if observed != expected_tip:
         raise ValueError("remote evidence tip changed " + phase)
     return observed

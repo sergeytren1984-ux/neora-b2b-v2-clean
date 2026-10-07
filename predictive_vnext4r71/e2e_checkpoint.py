@@ -1,4 +1,4 @@
-"""GitHub Actions E2E: real Sigstore events -> remote branch -> R7.2 checkpoint.
+"""GitHub Actions E2E: real Sigstore events -> remote branch -> R7.3 checkpoint.
 
 Successful audit branches are intentionally retained for independent read-only
 replay. This test uses real OIDC/Rekor signatures and remote git publication
@@ -11,6 +11,7 @@ import os
 import subprocess
 import time
 import statistics
+import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 

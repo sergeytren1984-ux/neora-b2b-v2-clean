@@ -1,8 +1,8 @@
-name: BTC predictive vNext4R7.3 remediation
+name: BTC predictive vNext4R7.4 remediation
 
 on:
   push:
-    branches: [btc-predictive-vnext4r73-remediation-20261007]
+    branches: [btc-predictive-vnext4r74-remediation-20261007]
     paths:
       - predictive_vnext4r71/**
       - predictive_vnext4r7/scorecard_core.py
@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: btc-predictive-vnext4r73-remediation-${{ github.ref }}
+  group: btc-predictive-vnext4r74-remediation-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -86,6 +86,9 @@ jobs:
               ae=p["admission_entrypoint"]
               assert ae["caller_supplied_current_tip_forbidden"] is True
               assert ae["actual_git_head_must_equal_fetched_remote_tip_before_replay"] is True
+              assert ae["remote_tip_revalidated_before_scoring"] is True
+              assert ae["remote_tip_revalidated_after_scoring"] is True
+              assert ae["remote_tip_toctou_fail_closed"] is True
               rp=p["raw_evidence_provenance"]
               assert rp["raw_first_addition_commit_must_equal_event_publication_commit"] is True
               assert rp["raw_reuse_from_prior_commit_forbidden"] is True
@@ -95,7 +98,7 @@ jobs:
               assert len(req["all_production_workflows_required"])==5
               for wf in req["all_production_workflows_required"]:
                   assert pathlib.Path(wf).exists(),wf
-          print("R7_3_PROTOCOLS_FAIL_CLOSED")
+          print("R7_4_PROTOCOLS_FAIL_CLOSED")
 
   tail-research:
     runs-on: ubuntu-latest
@@ -134,7 +137,7 @@ jobs:
                       assert v["projected_quantile_crossing_rows"]==0,(head,side,split,v)
                       assert v["projected_threshold_order_violation_rows"]==0,(head,side,split,v)
               print(head,row["gate"])
-          print("R7_3_TAIL_COHERENCE_PASS")
+          print("R7_4_TAIL_COHERENCE_PASS")
           PY
 
   signed-checkpoint-e2e:
@@ -164,7 +167,7 @@ jobs:
       - name: Real OIDC/Rekor checkpoint and full-admission replay
         env:
           PYTHONPATH: .
-          R71_E2E_BRANCH: btc-predictive-vnext4r73-e2e-${{ github.run_id }}
+          R71_E2E_BRANCH: btc-predictive-vnext4r74-e2e-${{ github.run_id }}
           R71_EXPECTED_TRIGGER: ${{ github.event_name }}
         run: PYTHONPATH=. python predictive_vnext4r71/e2e_checkpoint.py
 
@@ -196,6 +199,6 @@ jobs:
         env:
           PYTHONPATH: .
           R71_EXPECTED_TRIGGER: ${{ github.event_name }}
-          R73_NEGATIVE_E2E_BRANCH: btc-predictive-vnext4r73-negative-e2e-${{ github.run_id }}
+          R74_NEGATIVE_E2E_BRANCH: btc-predictive-vnext4r74-negative-e2e-${{ github.run_id }}
         run: PYTHONPATH=. python predictive_vnext4r71/e2e_negative_admission.py
 

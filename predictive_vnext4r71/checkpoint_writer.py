@@ -77,6 +77,10 @@ def create_signed_checkpoint(
         state.sequence,
     )
 
+    local_prefix = prefix_file_digest(files, state.sequence)
+    if binding["verified_commit_prefix_files_sha256"] != local_prefix:
+        raise ValueError("verified git commit prefix differs from local prefix")
+
     doc = checkpoint_document(
         head=head,
         state=state,
@@ -84,8 +88,8 @@ def create_signed_checkpoint(
         manifest_sha256=digest(canonical(manifest)),
         workflow_commit=workflow_commit,
         verified_branch_commit=verified_branch_commit,
-        prefix_files_sha256=prefix_file_digest(files, state.sequence),
-        git_prefix_digest_sha256=binding["git_prefix_digest_sha256"],
+        prefix_files_sha256=local_prefix,
+        verified_commit_prefix_files_sha256=binding["verified_commit_prefix_files_sha256"],
         git_prefix_path_count=binding["path_count"],
         created_at_utc=datetime.now(UTC).isoformat(),
     )

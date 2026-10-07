@@ -1,4 +1,4 @@
-"""GitHub Actions E2E: real Sigstore events -> remote branch -> R7.3 checkpoint.
+"""GitHub Actions E2E: real Sigstore events -> remote branch -> R7.4 checkpoint.
 
 Successful audit branches are intentionally retained for independent read-only
 replay. This test uses real OIDC/Rekor signatures and remote git publication
@@ -24,6 +24,7 @@ from predictive_vnext4r71.integrity import (
 from predictive_vnext4r71.checkpoint import event_files
 from predictive_vnext4r71.journal_runtime import load_incremental_journal
 from predictive_vnext4r71 import worker
+from predictive_vnext4r71 import admission as admission_module
 
 UTC=timezone.utc
 ROOT=Path(__file__).resolve().parents[1]
@@ -525,9 +526,46 @@ def main():
             + stale_text[-1000:]
         )
 
+    # TOCTOU attack: start admission on the exact remote tip, then advance the
+    # same evidence branch from inside scoring. Final admission must fail closed.
+    original_score=admission_module.score_from_events
+    race_marker=ROOT/"r74_mid_admission_tip_advance.json"
+    race_state={"advanced_tip":None}
+    def score_and_advance(*args,**kwargs):
+        out=original_score(*args,**kwargs)
+        race_marker.write_bytes(canonical({
+            "schema":"btc-predictive-vnext4r74-mid-admission-tip-advance-v1",
+            "source_sha":source_sha,
+            "created_at_utc":datetime.now(UTC).isoformat(),
+        }))
+        race_state["advanced_tip"]=push_paths(
+            "R7.4 advance remote tip during admission scoring",
+            race_marker,
+        )
+        return out
+    admission_module.score_from_events=score_and_advance
+    try:
+        try:
+            admission_module.run_admission(
+                repo_root=str(ROOT),
+                protocol_path=str(protocol_path.relative_to(ROOT)),
+                events_dir=str(events_dir.relative_to(ROOT)),
+            )
+        except ValueError as ex:
+            if "remote evidence tip changed during scoring" not in str(ex):
+                raise
+        else:
+            raise RuntimeError(
+                "mid-admission remote tip advance was not rejected"
+            )
+    finally:
+        admission_module.score_from_events=original_score
+    if not race_state["advanced_tip"]:
+        raise RuntimeError("mid-admission tip attack did not advance remote branch")
+
     audit={
-        "schema":"btc-predictive-vnext4r73-e2e-audit-artifact-v1",
-        "status":"R7_3_E2E_PASS",
+        "schema":"btc-predictive-vnext4r74-e2e-audit-artifact-v1",
+        "status":"R7_4_E2E_PASS",
         "evidence_branch":e2e_branch,
         "source_sha":source_sha,
         "event_count":len(event_files(events_dir)),
@@ -542,6 +580,8 @@ def main():
         "remote_evidence_tip_before_tip_advance":report["governance"]["remote_evidence_tip"],
         "tip_after_advance":advanced_tip,
         "stale_checkout_tip_attack_rejected":True,
+        "mid_admission_tip_advance_attack_rejected":True,
+        "mid_admission_tip_after_advance":race_state["advanced_tip"],
         "exact_checkout_head_verified":report["governance"]["exact_checkout_head_verified"],
         "exact_checkout_bytes_verified":report["governance"]["exact_checkout_bytes_verified"],
         "admission_status":report["score"]["status"],
@@ -550,12 +590,12 @@ def main():
         "checkpoint_recovery_seconds":{"p50":statistics.median(recovery_seconds),"p95":recovery_p95,"n":len(recovery_seconds)},
         "full_checkpoint_operation_seconds":{"p50":statistics.median(checkpoint_operation_seconds),"p95":checkpoint_p95,"n":len(checkpoint_operation_seconds),"budget_seconds":720},
     }
-    audit_path=ROOT/"r73_e2e_audit_manifest.json"
+    audit_path=ROOT/"r74_e2e_audit_manifest.json"
     audit_bundle=audit_path.with_suffix(".sigstore.json")
     audit_path.write_bytes(canonical(audit))
     sign(audit_path,audit_bundle)
     preserved_tip=push_paths(
-        "R7.3 preserve signed positive E2E audit artifact",
+        "R7.4 preserve signed positive E2E audit artifact",
         audit_path,audit_bundle,
     )
     audit["preserved_tip"]=preserved_tip

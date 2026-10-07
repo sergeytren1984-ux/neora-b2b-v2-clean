@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from predictive_vnext4r7.integrity import canonical, digest
+from predictive_vnext4r71.integrity import verify_deployment_bundle_against_manifest
 
 UTC=timezone.utc
 
@@ -265,6 +266,9 @@ def verify_latest_anchor(
                 raise ValueError("anchor checkpoint predecessor hash broken")
             verify_blob(p,b,doc)
             verify_workflow_binding(repo_root,doc,workflow_path,manifest)
+            verify_deployment_bundle_against_manifest(
+                repo_root, doc, manifest
+            )
 
         cp_commit=doc.get("checkpoint_remote_commit")
         if not isinstance(cp_commit,str) or len(cp_commit)!=40:

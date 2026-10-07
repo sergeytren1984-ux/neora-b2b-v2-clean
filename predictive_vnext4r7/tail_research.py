@@ -86,10 +86,27 @@ def _fit_quantile(X, y, train, q):
     return model
 
 
-def _quantile_metrics(model, X, y, mask, train_values, q):
-    pred = np.maximum(model.predict(X[mask]), 0.0)
+def _quantile_calibration(model, X, y, calibration, train_values, q):
+    raw_cal = model.predict(X[calibration])
+    model_shift = float(np.quantile(y[calibration] - raw_cal, q))
     baseline_value = float(np.quantile(train_values, q))
-    baseline = np.full(len(pred), baseline_value)
+    baseline_shift = float(
+        np.quantile(y[calibration] - baseline_value, q)
+    )
+    return model_shift, baseline_value + baseline_shift
+
+
+def _quantile_metrics(
+    model,
+    X,
+    y,
+    mask,
+    q,
+    model_shift,
+    calibrated_baseline_value,
+):
+    pred = np.maximum(model.predict(X[mask]) + model_shift, 0.0)
+    baseline = np.full(len(pred), calibrated_baseline_value)
     actual = y[mask]
     return {
         "n": int(np.sum(mask)),
@@ -100,11 +117,19 @@ def _quantile_metrics(model, X, y, mask, train_values, q):
         "coverage": float(np.mean(actual <= pred)),
         "target_coverage": q,
         "mean_prediction_barrier_multiples": float(np.mean(pred)),
-        "constant_baseline_barrier_multiples": baseline_value,
+        "calibration_shift_barrier_multiples": float(model_shift),
+        "calibrated_constant_baseline_barrier_multiples": float(
+            calibrated_baseline_value
+        ),
     }
 
 
-def _fit_threshold_classifier(X, y, train):
+def _logit(p):
+    p = np.clip(np.asarray(p, dtype=float), 1e-6, 1 - 1e-6)
+    return np.log(p / (1 - p)).reshape(-1, 1)
+
+
+def _fit_threshold_classifier(X, y, train, calibration):
     if len(np.unique(y[train])) < 2:
         raise ValueError("threshold target has one training class")
     model = make_pipeline(
@@ -112,19 +137,46 @@ def _fit_threshold_classifier(X, y, train):
         LogisticRegression(C=0.03, max_iter=450),
     )
     model.fit(X[train], y[train])
-    return model
+
+    calibrator = None
+    if len(np.unique(y[calibration])) >= 2:
+        calibrator = LogisticRegression(C=0.05, max_iter=300)
+        calibrator.fit(
+            _logit(model.predict_proba(X[calibration])[:, 1]),
+            y[calibration],
+        )
+    train_frequency = float(np.mean(y[train]))
+    cal_frequency = float(np.mean(y[calibration]))
+    return model, calibrator, train_frequency, cal_frequency
 
 
-def _threshold_metrics(model, X, y, mask, train_frequency):
-    p = model.predict_proba(X[mask])[:, 1]
+def _threshold_probability(model, calibrator, X):
+    raw = model.predict_proba(X)[:, 1]
+    if calibrator is None:
+        return raw
+    return calibrator.predict_proba(_logit(raw))[:, 1]
+
+
+def _threshold_metrics(
+    model,
+    calibrator,
+    X,
+    y,
+    mask,
+    calibrated_baseline_frequency,
+):
+    p = _threshold_probability(model, calibrator, X[mask])
     actual = y[mask].astype(float)
-    baseline = np.full(len(p), float(train_frequency))
+    baseline = np.full(len(p), float(calibrated_baseline_frequency))
     return {
         "n": int(np.sum(mask)),
         "event_rate": float(np.mean(actual)),
         "mean_probability": float(np.mean(p)),
         "brier": brier_binary(p, actual),
         "baseline_brier": brier_binary(baseline, actual),
+        "calibrated_baseline_frequency": float(
+            calibrated_baseline_frequency
+        ),
     }
 
 
@@ -132,27 +184,45 @@ def evaluate_side(X, y, train, calibration, test, diagnostic_q3):
     result = {"quantiles": {}, "thresholds": {}}
     for q in QUANTILES:
         model = _fit_quantile(X, y, train, q)
+        shift, baseline_value = _quantile_calibration(
+            model, X, y, calibration, y[train], q
+        )
         result["quantiles"][str(q)] = {
             "test_2026h1": _quantile_metrics(
-                model, X, y, test, y[train], q
+                model, X, y, test, q, shift, baseline_value
             ),
             "diagnostic_2026q3": _quantile_metrics(
-                model, X, y, diagnostic_q3, y[train], q
+                model, X, y, diagnostic_q3, q, shift, baseline_value
             ),
         }
 
     for threshold in THRESHOLDS:
         label = y >= threshold
-        model = _fit_threshold_classifier(X, label, train)
-        train_frequency = float(np.mean(label[train]))
+        model, calibrator, train_frequency, cal_frequency = (
+            _fit_threshold_classifier(
+                X, label, train, calibration
+            )
+        )
         result["thresholds"][str(threshold)] = {
             "test_2026h1": _threshold_metrics(
-                model, X, label, test, train_frequency
+                model,
+                calibrator,
+                X,
+                label,
+                test,
+                cal_frequency,
             ),
             "diagnostic_2026q3": _threshold_metrics(
-                model, X, label, diagnostic_q3, train_frequency
+                model,
+                calibrator,
+                X,
+                label,
+                diagnostic_q3,
+                cal_frequency,
             ),
             "training_frequency": train_frequency,
+            "calibration_frequency": cal_frequency,
+            "probability_calibrated_on_2025h2": calibrator is not None,
         }
     return result
 

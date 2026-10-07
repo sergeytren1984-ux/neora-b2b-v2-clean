@@ -279,6 +279,9 @@ def main():
     os.environ["BTC_VNEXT4R71_START_UTC"]=start.isoformat()
     os.environ["BTC_VNEXT4R71_EXPECTED_REF"]=source_ref
     os.environ["BTC_VNEXT4R71_EXPECTED_TRIGGER"]=trigger
+    # worker was imported before the dynamic E2E start was chosen.
+    worker.EVIDENCE_ROOT=ROOT
+    worker.START=start
 
     cfg={
         "head":"1h",

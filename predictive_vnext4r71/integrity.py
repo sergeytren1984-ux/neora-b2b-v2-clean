@@ -110,7 +110,10 @@ def validate_event_collection(
             due = parse_utc(event.get("due_utc"))
             if due != slot_time + horizon:
                 raise ValueError("forecast due/horizon mismatch")
-            if parse_utc(event.get("published_at_utc")) >= slot_time + issuance_deadline:
+            published = parse_utc(event.get("published_at_utc"))
+            if published < slot_time:
+                raise ValueError("forecast published before anchor")
+            if published >= slot_time + issuance_deadline:
                 raise ValueError("forecast published after deadline")
             forecasts[slot] = event
         elif et == "DELIVERY_CONFIRMED":

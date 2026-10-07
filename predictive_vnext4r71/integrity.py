@@ -200,6 +200,34 @@ def verify_raw_attachments(repo_root: Path, events: list[dict]) -> None:
             raise ValueError("raw attachment hash mismatch")
 
 
+def verify_deployment_bundle_against_manifest(
+    repo_root: Path,
+    event: dict,
+    manifest: dict,
+) -> None:
+    """Bind every production workflow at the event's signing commit.
+
+    A later commit cannot keep the active head workflow unchanged while silently
+    altering watchdog/health/another head and still remain admission-valid.
+    """
+    deployment = manifest.get("deployment_workflows")
+    if deployment is None:
+        # E2E fixtures predating deployment-bundle binding remain valid only
+        # inside remediation tests; production manifests always declare it.
+        return
+    if (
+        not isinstance(deployment, list)
+        or not deployment
+        or any(not isinstance(x, str) or not x for x in deployment)
+        or len(set(deployment)) != len(deployment)
+    ):
+        raise ValueError("invalid deployment workflow set in signed manifest")
+    for workflow_path in deployment:
+        verify_event_workflow_against_manifest(
+            repo_root, event, workflow_path, manifest
+        )
+
+
 def verify_all_workflow_bindings(
     repo_root: Path,
     events: list[dict],
@@ -208,6 +236,7 @@ def verify_all_workflow_bindings(
     forecast_workflow: str,
     outcome_workflow: str,
 ) -> None:
+    seen_commits = set()
     for event in events:
         workflow = (
             outcome_workflow
@@ -217,3 +246,9 @@ def verify_all_workflow_bindings(
         verify_event_workflow_against_manifest(
             repo_root, event, workflow, manifest
         )
+        commit = str(event.get("workflow_commit", "")).lower()
+        if commit not in seen_commits:
+            verify_deployment_bundle_against_manifest(
+                repo_root, event, manifest
+            )
+            seen_commits.add(commit)

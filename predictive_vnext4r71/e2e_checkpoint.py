@@ -14,6 +14,7 @@ import statistics
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from unittest.mock import patch
 
 from predictive_vnext4r7.integrity import canonical, digest
 from predictive_vnext4r71.admission import run_admission
@@ -498,12 +499,28 @@ def main():
     attack_event["reason"]="UNSIGNED_WORKING_TREE_MUTATION"
     protocol_path.write_bytes(canonical(attack_protocol))
     event120.write_bytes(canonical(attack_event))
+    real_policy_check=admission_module._reject_nonprospective_protocol
+
+    def restore_working_tree_after_authenticated_parse(parsed_protocol):
+        # Exact timing reproduction of the independent audit's read/restore
+        # race. Only filesystem timing is hooked; verifier/scorer decisions are
+        # untouched. The parsed policy must already come from immutable Git
+        # bytes, so restoring caller-visible files cannot alter the decision.
+        protocol_path.write_bytes(original_protocol_bytes)
+        event120.write_bytes(original_event120)
+        return real_policy_check(parsed_protocol)
+
     try:
-        attacked=run_admission(
-            repo_root=str(ROOT),
-            protocol_path=str(protocol_path.relative_to(ROOT)),
-            events_dir=str(events_dir.relative_to(ROOT)),
-        )
+        with patch.object(
+            admission_module,
+            "_reject_nonprospective_protocol",
+            side_effect=restore_working_tree_after_authenticated_parse,
+        ):
+            attacked=run_admission(
+                repo_root=str(ROOT),
+                protocol_path=str(protocol_path.relative_to(ROOT)),
+                events_dir=str(events_dir.relative_to(ROOT)),
+            )
     finally:
         protocol_path.write_bytes(original_protocol_bytes)
         event120.write_bytes(original_event120)

@@ -463,6 +463,10 @@ def main():
     )
     if report["governance"]["full_cryptographic_replay"] is not True:
         raise RuntimeError("admission skipped full cryptographic replay")
+    if report["governance"]["complete_deployment_bundle_bound"] is not True:
+        raise RuntimeError("admission skipped complete deployment bundle")
+    if report["governance"]["raw_remote_publication_verified"] is not True:
+        raise RuntimeError("admission skipped remote raw publication proof")
     if report["admission_ready"] is not False:
         raise RuntimeError("E2E short sample must not become admissible")
 
@@ -479,6 +483,8 @@ def main():
         "anchor_tip":cmd("git","ls-remote","origin","refs/heads/"+anchor_branch).split()[0],
         "independent_checkpoint_anchor_verified":report["governance"]["independent_checkpoint_anchor_verified"],
         "complete_deployment_bundle_bound":report["governance"]["complete_deployment_bundle_bound"],
+        "raw_remote_publication_verified":report["governance"]["raw_remote_publication_verified"],
+        "remote_evidence_tip":report["governance"]["remote_evidence_tip"],
         "admission_status":report["score"]["status"],
         "full_cryptographic_replay":report["governance"]["full_cryptographic_replay"],
         "real_cosign_verify_seconds":{"p50":statistics.median(sig_seconds),"p95":sig_p95,"n":len(sig_seconds)},

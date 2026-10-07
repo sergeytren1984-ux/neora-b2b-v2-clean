@@ -212,32 +212,67 @@ def run_admission(
     repo_root: str,
     protocol_path: str,
     events_dir: str,
-    forecast_workflow: str,
-    outcome_workflow: str,
-    head: str,
-    start_utc: datetime,
-    horizon: timedelta,
-    issuance_deadline: timedelta,
-    repository: str,
-    expected_ref: str = "refs/heads/main",
-    expected_trigger: str = "workflow_dispatch",
     current_tip: str | None = None,
 ):
     root = Path(repo_root).resolve()
     protocol = json.loads((root / protocol_path).read_text())
 
-    # The signed protocol is authoritative. A caller cannot override this flag.
+    # The signed protocol is authoritative. The public API intentionally has no
+    # parameters for verification callbacks, start, horizon, deadline, ref or
+    # trigger that could override the frozen contract.
     if protocol.get("admission_enabled") is not True:
         return {
             "schema": "btc-predictive-vnext4r71-admission-v1",
-            "head": head,
+            "head": protocol.get("head"),
             "admission_ready": False,
             "status": "BLOCKED_PROTOCOL_ADMISSION_DISABLED",
             "trading_authority": False,
         }
 
-    if protocol.get("head") != head:
-        raise ValueError("protocol head mismatch")
+    head = protocol.get("head")
+    if head not in {"1h", "4h", "24h"}:
+        raise ValueError("protocol head invalid")
+    if not protocol.get("start_utc"):
+        raise ValueError("protocol start missing")
+    start_utc = parse_utc(protocol["start_utc"])
+
+    target = protocol.get("target", {})
+    if "horizon_seconds" in target:
+        horizon = timedelta(seconds=float(target["horizon_seconds"]))
+    elif "horizon_minutes" in target:
+        horizon = timedelta(minutes=float(target["horizon_minutes"]))
+    else:
+        raise ValueError("protocol horizon missing")
+
+    if "issuance_deadline_seconds" in protocol:
+        issuance_deadline = timedelta(
+            seconds=float(protocol["issuance_deadline_seconds"])
+        )
+    elif "issuance_deadline_minutes" in protocol:
+        issuance_deadline = timedelta(
+            minutes=float(protocol["issuance_deadline_minutes"])
+        )
+    else:
+        raise ValueError("protocol issuance deadline missing")
+
+    workflows = protocol.get("workflows", {})
+    forecast_workflow = workflows.get("forecast")
+    outcome_workflow = workflows.get("outcome")
+    if not isinstance(forecast_workflow, str) or not forecast_workflow:
+        raise ValueError("protocol forecast workflow missing")
+    if not isinstance(outcome_workflow, str) or not outcome_workflow:
+        raise ValueError("protocol outcome workflow missing")
+
+    binding = protocol.get("event_signature_binding", {})
+    repository = binding.get("github_workflow_repository")
+    expected_ref = binding.get("github_workflow_ref")
+    expected_trigger = binding.get("github_workflow_trigger")
+    if not all(
+        isinstance(x, str) and x
+        for x in (repository, expected_ref, expected_trigger)
+    ):
+        raise ValueError("protocol signature binding incomplete")
+
     if current_tip is None:
         current_tip = subprocess.run(
             ["git", "-C", str(root), "rev-parse", "HEAD"],
@@ -247,8 +282,6 @@ def run_admission(
             timeout=60,
         ).stdout.strip()
 
-    # Verifiers are constructed internally from the signed execution contract.
-    # The public admission API has no callback or "skip verification" parameter.
     verify_forecast_blob = make_blob_verifier(
         repository=repository,
         workflow_path=forecast_workflow,
@@ -276,6 +309,16 @@ def run_admission(
         verify_forecast_blob=verify_forecast_blob,
         verify_outcome_blob=verify_outcome_blob,
     )
+    schedule = relation["schedule"]
+    if int(schedule.get("deadline_minutes", -1)) != int(
+        issuance_deadline.total_seconds() // 60
+    ):
+        raise ValueError("schedule deadline differs from signed protocol")
+    if "issuance_deadline_minutes" in protocol and int(
+        protocol["issuance_deadline_minutes"]
+    ) != int(issuance_deadline.total_seconds() // 60):
+        raise ValueError("protocol deadline normalization mismatch")
+
     governance = _verify_governance(
         root=root,
         events=events,
@@ -334,7 +377,6 @@ def run_admission(
     governance["checkpoint_anchor"] = anchor
     governance["independent_checkpoint_anchor_verified"] = True
 
-    # The numerical layer is permanently non-authoritative.
     score = score_from_events(
         events,
         protocol,
@@ -367,11 +409,6 @@ def main():
     parser.add_argument("--config", required=True)
     args = parser.parse_args()
     cfg = json.loads(Path(args.config).read_text())
-    cfg["start_utc"] = parse_utc(cfg["start_utc"])
-    cfg["horizon"] = timedelta(minutes=int(cfg.pop("horizon_minutes")))
-    cfg["issuance_deadline"] = timedelta(
-        minutes=int(cfg.pop("issuance_deadline_minutes"))
-    )
     print(json.dumps(run_admission(**cfg), indent=2, sort_keys=True))
 
 

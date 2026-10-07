@@ -19,6 +19,9 @@ from predictive_vnext4r7.scorecard_core import score_from_events
 from predictive_vnext4r71.admission import run_admission
 from predictive_vnext4r71.checkpoint import git_prefix_binding
 from predictive_vnext4r71.integrity import (
+    REQUIRED_PROTOCOLS,
+    REQUIRED_PRODUCTION_WORKFLOWS,
+    safe_repo_relative_path,
     validate_event_collection,
     verify_deployment_bundle_against_manifest,
 )
@@ -27,6 +30,7 @@ from predictive_vnext4r71.tail_research import (
     monotone_quantiles,
     quantile_crossings,
     threshold_order_violations,
+    research_gate,
 )
 from predictive_vnext4r7.episodes import stress_episode_skill_summary
 from predictive_vnext4r71 import worker
@@ -177,6 +181,42 @@ class AdmissionBoundaryTests(unittest.TestCase):
             self.assertFalse(out["admission_ready"])
             self.assertEqual(out["status"],"BLOCKED_PROTOCOL_ADMISSION_DISABLED")
 
+    def test_diagnostic_cutoff_is_rejected_before_replay(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            p=root/"protocol.json"
+            p.write_text(json.dumps({
+                "admission_enabled":True,
+                "head":"1h",
+                "diagnostic_cutoff_utc":"2026-10-07T00:00:00Z",
+            }))
+            with self.assertRaisesRegex(
+                ValueError,"non-prospective admission control forbidden"
+            ):
+                run_admission(
+                    repo_root=str(root),
+                    protocol_path="protocol.json",
+                    events_dir="events",
+                )
+
+    def test_historical_mode_is_rejected_before_replay(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            p=root/"protocol.json"
+            p.write_text(json.dumps({
+                "admission_enabled":True,
+                "head":"1h",
+                "mode":"HISTORICAL",
+            }))
+            with self.assertRaisesRegex(
+                ValueError,"non-prospective admission mode forbidden"
+            ):
+                run_admission(
+                    repo_root=str(root),
+                    protocol_path="protocol.json",
+                    events_dir="events",
+                )
+
 
 class CheckpointGitBindingTests(unittest.TestCase):
     def test_claimed_sequence_must_exist_in_verified_commit_with_bundles(self):
@@ -212,6 +252,35 @@ class TailCoherenceTests(unittest.TestCase):
         self.assertGreater(threshold_order_violations(raw),0)
         projected=monotone_exceedance(raw)
         self.assertEqual(threshold_order_violations(projected),0)
+
+    def test_q3_diagnostic_cannot_change_research_gate(self):
+        side={
+            "thresholds":{
+                "1.0":{"selection_2026h1":{"brier":.1,"baseline_brier":.2}},
+                "1.5":{"selection_2026h1":{"brier":.1,"baseline_brier":.2}},
+                "2.0":{"selection_2026h1":{"brier":.3,"baseline_brier":.2}},
+            },
+            "quantiles":{
+                "0.9":{"selection_2026h1":{
+                    "pinball":.1,
+                    "baseline_pinball":.2,
+                    "coverage":.9,
+                }}
+            },
+            "coherence":{
+                "selection_2026h1":{
+                    "projected_quantile_crossing_rows":0,
+                    "projected_threshold_order_violation_rows":0,
+                },
+                "seen_diagnostic_2026q3":{
+                    "projected_quantile_crossing_rows":999,
+                    "projected_threshold_order_violation_rows":999,
+                },
+            },
+        }
+        gate=research_gate(side)
+        self.assertTrue(gate["coherence_gate"])
+        self.assertTrue(gate["pass"])
 
 
 
@@ -367,6 +436,26 @@ class CheckpointFaultInjectionTests(unittest.TestCase):
 
 
 class DeploymentBundleTests(unittest.TestCase):
+    def test_missing_deployment_bundle_is_rejected(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            with self.assertRaisesRegex(
+                ValueError,"production workflow set is not exact"
+            ):
+                verify_deployment_bundle_against_manifest(
+                    root,
+                    {"workflow_commit":"0"*40},
+                    {"paths_sha256":{}},
+                )
+
+    def test_safe_raw_path_rejects_traversal(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            with self.assertRaisesRegex(
+                ValueError,"unsafe repository-relative path"
+            ):
+                safe_repo_relative_path(root,"../escape.json")
+
     def test_manifest_binds_all_protocols_and_workflows(self):
         root=Path(__file__).resolve().parents[1]
         old_root=worker.EVIDENCE_ROOT

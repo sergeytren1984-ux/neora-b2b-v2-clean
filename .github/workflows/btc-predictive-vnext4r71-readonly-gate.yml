@@ -88,6 +88,7 @@ jobs:
           for head in ("1h","4h","24h"):
               p=json.loads(pathlib.Path(f"predictive_vnext4r71/protocol_{head}.json").read_text())
               assert p["parent_r6_source_sha"]=="98d6ea6e981b3306f397a9105babc2e5d66ac7a0"
+              assert p["parent_r6_candidate_sha"]=="faa0244a34516177c9e23cccc30f522462f7423f"
               assert p["admission_enabled"] is False
               assert p["trading_authority"] is False
               assert p["start_utc"] is None

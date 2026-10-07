@@ -63,7 +63,7 @@ def publish_checkpoint_anchor(
         raise ValueError("remote checkpoint commit lacks exact checkpoint bundle")
 
     with tempfile.TemporaryDirectory(prefix="r71-anchor-") as td:
-        work=Path(td)
+        work=Path(td)/"work"
         remote_before=_remote_branch_sha(repo_root,anchor_branch)
         if remote_before:
             _git(repo_root,"fetch","origin",anchor_branch)

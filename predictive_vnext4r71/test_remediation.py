@@ -122,6 +122,20 @@ def valid_chain(include_outcome=True):
     return events
 
 
+def _commit_protocol(root: Path, obj: dict) -> tuple[Path, str]:
+    subprocess.run(["git","init"],cwd=root,check=True,capture_output=True)
+    subprocess.run(["git","config","user.email","x@example.com"],cwd=root,check=True)
+    subprocess.run(["git","config","user.name","x"],cwd=root,check=True)
+    p=root/"protocol.json"
+    p.write_bytes(canonical(obj))
+    subprocess.run(["git","add","protocol.json"],cwd=root,check=True)
+    subprocess.run(["git","commit","-m","protocol"],cwd=root,check=True,capture_output=True)
+    head=subprocess.run(
+        ["git","rev-parse","HEAD"],cwd=root,check=True,capture_output=True,text=True
+    ).stdout.strip()
+    return p,head
+
+
 class EventInvariantTests(unittest.TestCase):
     def test_valid_relations_pass(self):
         out=validate_event_collection(
@@ -178,8 +192,7 @@ class AdmissionBoundaryTests(unittest.TestCase):
     def test_disabled_signed_protocol_blocks_before_scoring(self):
         with tempfile.TemporaryDirectory() as td:
             root=Path(td)
-            p=root/"protocol.json"
-            p.write_text(json.dumps({"admission_enabled":False,"head":"1h"}))
+            _commit_protocol(root,{"admission_enabled":False,"head":"1h"})
             out=run_admission(
                 repo_root=str(root),
                 protocol_path="protocol.json",
@@ -191,12 +204,11 @@ class AdmissionBoundaryTests(unittest.TestCase):
     def test_diagnostic_cutoff_is_rejected_before_replay(self):
         with tempfile.TemporaryDirectory() as td:
             root=Path(td)
-            p=root/"protocol.json"
-            p.write_text(json.dumps({
+            _commit_protocol(root,{
                 "admission_enabled":True,
                 "head":"1h",
                 "diagnostic_cutoff_utc":"2026-10-07T00:00:00Z",
-            }))
+            })
             with self.assertRaisesRegex(
                 ValueError,"non-prospective admission control forbidden"
             ):
@@ -209,12 +221,11 @@ class AdmissionBoundaryTests(unittest.TestCase):
     def test_historical_mode_is_rejected_before_replay(self):
         with tempfile.TemporaryDirectory() as td:
             root=Path(td)
-            p=root/"protocol.json"
-            p.write_text(json.dumps({
+            _commit_protocol(root,{
                 "admission_enabled":True,
                 "head":"1h",
                 "mode":"HISTORICAL",
-            }))
+            })
             with self.assertRaisesRegex(
                 ValueError,"non-prospective admission mode forbidden"
             ):
@@ -277,6 +288,36 @@ class ExactCheckoutBindingTests(unittest.TestCase):
                     expected,
                     phase="during scoring",
                 )
+
+    def test_working_tree_protocol_mutation_cannot_change_used_policy(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            p,head=_commit_protocol(root,{
+                "admission_enabled":False,
+                "head":"1h",
+                "selected_model":"SIGNED_MODEL",
+            })
+            signed_bytes=subprocess.run(
+                ["git","show",f"{head}:protocol.json"],
+                cwd=root,check=True,capture_output=True,
+            ).stdout
+            p.write_bytes(canonical({
+                "admission_enabled":True,
+                "head":"1h",
+                "selected_model":"UNSIGNED_ATTACKER_CHOICE",
+                "admission":{"minimum_calendar_days":0},
+            }))
+            out=run_admission(
+                repo_root=str(root),protocol_path="protocol.json",events_dir="events"
+            )
+            self.assertEqual(out["status"],"BLOCKED_PROTOCOL_ADMISSION_DISABLED")
+            self.assertTrue(out["governance"]["authenticated_protocol_snapshot"])
+            self.assertEqual(
+                out["governance"]["used_protocol_sha256"],digest(signed_bytes)
+            )
+            self.assertFalse(
+                out["governance"]["decision_binding"]["absolute_latest_tip_atomicity_claimed"]
+            )
 
     def test_working_tree_bytes_must_equal_exact_head(self):
         with tempfile.TemporaryDirectory() as td:

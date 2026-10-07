@@ -473,7 +473,7 @@ def main():
         cwd=ROOT,check=True,
     )
     subprocess.run(
-        ["git","commit","-m","R7.2 negative E2E forecast without raw publication"],
+        ["git","commit","-m","R7.3 negative E2E forecast without raw publication"],
         cwd=ROOT,check=True,capture_output=True,text=True,
     )
     forecast_commit=subprocess.run(
@@ -501,7 +501,7 @@ def main():
         cwd=ROOT,check=True,
     )
     subprocess.run(
-        ["git","commit","-m","R7.2 negative E2E receipt without raw publication"],
+        ["git","commit","-m","R7.3 negative E2E receipt without raw publication"],
         cwd=ROOT,check=True,capture_output=True,text=True,
     )
     subprocess.run(
@@ -595,7 +595,7 @@ def main():
         "artifacts":artifact_rows,
         "real_oidc_rekor":True,
     }
-    audit_path=ROOT/"r72_negative_e2e_audit_manifest.json"
+    audit_path=ROOT/"r73_negative_e2e_audit_manifest.json"
     audit_bundle=audit_path.with_suffix(".sigstore.json")
     audit_path.write_bytes(canonical(audit))
     sign(audit_path,audit_bundle)

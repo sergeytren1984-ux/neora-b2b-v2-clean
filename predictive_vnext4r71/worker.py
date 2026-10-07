@@ -36,6 +36,7 @@ from predictive_vnext4r71.checkpoint_writer import (
     create_signed_checkpoint,
     commit_and_push_checkpoint,
 )
+from predictive_vnext4r71.anchor import publish_checkpoint_anchor
 
 START = datetime.fromisoformat(os.environ.get("BTC_VNEXT4R71_START_UTC", "2099-01-01T00:00:00+00:00")).astimezone(UTC)
 DELIVERY_SAFETY = timedelta(minutes=2)
@@ -57,6 +58,7 @@ CONFIG = {
         "events": "predictive_vnext4r71_1h_events",
         "raw": "predictive_vnext4r71_1h_raw",
         "checkpoint": "predictive_vnext4r71_checkpoints/1h.json",
+        "anchor_branch": "btc-predictive-vnext4r71-1h-checkpoint-anchors",
         "cadence": timedelta(minutes=15),
         "deadline": timedelta(minutes=14),
         "interval": "15m",
@@ -76,6 +78,7 @@ CONFIG = {
         "events": "predictive_vnext4r71_4h_events",
         "raw": "predictive_vnext4r71_4h_raw",
         "checkpoint": "predictive_vnext4r71_checkpoints/4h.json",
+        "anchor_branch": "btc-predictive-vnext4r71-4h-checkpoint-anchors",
         "cadence": timedelta(minutes=15),
         "deadline": timedelta(minutes=14),
         "interval": "15m",
@@ -95,6 +98,7 @@ CONFIG = {
         "events": "predictive_vnext4r71_24h_events",
         "raw": "predictive_vnext4r71_24h_raw",
         "checkpoint": "predictive_vnext4r71_checkpoints/24h.json",
+        "anchor_branch": "btc-predictive-vnext4r71-24h-checkpoint-anchors",
         "cadence": timedelta(hours=1),
         "deadline": timedelta(minutes=45),
         "interval": "1h",
@@ -475,6 +479,7 @@ def static_paths(cfg):
         "predictive_vnext4r71/journal_runtime.py",
         "predictive_vnext4r71/crypto.py",
         "predictive_vnext4r71/admission.py",
+        "predictive_vnext4r71/anchor.py",
         "predictive_vnext4r7/scorecard_core.py",
         "predictive_vnext4r7/episodes.py",
         "predictive_vnext4r6/live_features.py",
@@ -1088,14 +1093,38 @@ def _sign_checkpoint(path, bundle):
     )
 
 
+def _ensure_checkpoint_anchor(cfg, head, checkpoint, manifest_obj):
+    if not checkpoint.exists():
+        return None
+    bundle = checkpoint.with_suffix(".sigstore.json")
+    if not bundle.exists():
+        raise RuntimeError("checkpoint exists without signature bundle")
+    doc = json.loads(checkpoint.read_bytes())
+    rel = str(checkpoint.resolve().relative_to(EVIDENCE_ROOT))
+    checkpoint_commit = cmd("git", "log", "-1", "--format=%H", "--", rel)
+    if not checkpoint_commit:
+        raise RuntimeError("checkpoint publication commit missing")
+    return publish_checkpoint_anchor(
+        repo_root=EVIDENCE_ROOT,
+        anchor_branch=cfg["anchor_branch"],
+        base_commit=manifest_obj["source_commit_sha"],
+        evidence_branch=cfg["branch"],
+        head=head,
+        checkpoint_path=checkpoint,
+        checkpoint_bundle_path=bundle,
+        checkpoint_doc=doc,
+        checkpoint_remote_commit=checkpoint_commit,
+        workflow_commit=os.environ["GITHUB_SHA"],
+        sign_blob=_sign_checkpoint,
+        require_bundle_time=bundle_time,
+        verify_blob=lambda p,b,e: verify_signature(p,b,cfg,e),
+    )
+
+
 def maybe_checkpoint(cfg, head):
     checkpoint = EVIDENCE_ROOT / cfg["checkpoint"]
     events_with_time = prior_events(cfg)
     events = [event for event, _ in events_with_time]
-    if not should_checkpoint(
-        len(events), checkpoint, interval_events=24
-    ):
-        return False
     freezes = [
         event for event in events
         if event.get("type") == "CONFIG_FROZEN_PRESTART"
@@ -1103,26 +1132,52 @@ def maybe_checkpoint(cfg, head):
     if len(freezes) != 1:
         raise RuntimeError("checkpoint requires exactly one signed freeze")
     manifest_obj = freezes[0]["manifest"]
-    create_signed_checkpoint(
-        repo_root=EVIDENCE_ROOT,
-        events_dir=EVIDENCE_ROOT / cfg["events"],
-        checkpoint_path=checkpoint,
-        checkpoint_bundle_path=checkpoint.with_suffix(".sigstore.json"),
-        events=events,
-        head=head,
-        manifest=manifest_obj,
-        workflow_commit=os.environ["GITHUB_SHA"],
-        sign_blob=_sign_checkpoint,
-        require_bundle_time=bundle_time,
+
+    if should_checkpoint(
+        len(events), checkpoint, interval_events=24
+    ):
+        checkpoint_doc = create_signed_checkpoint(
+            repo_root=EVIDENCE_ROOT,
+            events_dir=EVIDENCE_ROOT / cfg["events"],
+            checkpoint_path=checkpoint,
+            checkpoint_bundle_path=checkpoint.with_suffix(".sigstore.json"),
+            events=events,
+            head=head,
+            manifest=manifest_obj,
+            workflow_commit=os.environ["GITHUB_SHA"],
+            sign_blob=_sign_checkpoint,
+            require_bundle_time=bundle_time,
+        )
+        checkpoint_commit = commit_and_push_checkpoint(
+            repo_root=EVIDENCE_ROOT,
+            branch=cfg["branch"],
+            checkpoint_path=checkpoint,
+            checkpoint_bundle_path=checkpoint.with_suffix(".sigstore.json"),
+            head=head,
+        )
+        publish_checkpoint_anchor(
+            repo_root=EVIDENCE_ROOT,
+            anchor_branch=cfg["anchor_branch"],
+            base_commit=manifest_obj["source_commit_sha"],
+            evidence_branch=cfg["branch"],
+            head=head,
+            checkpoint_path=checkpoint,
+            checkpoint_bundle_path=checkpoint.with_suffix(".sigstore.json"),
+            checkpoint_doc=checkpoint_doc,
+            checkpoint_remote_commit=checkpoint_commit,
+            workflow_commit=os.environ["GITHUB_SHA"],
+            sign_blob=_sign_checkpoint,
+            require_bundle_time=bundle_time,
+            verify_blob=lambda p,b,e: verify_signature(p,b,cfg,e),
+        )
+        return True
+
+    # Recovery is fail-closed: a checkpoint without its independent anchor is
+    # repaired/verified on the next worker action instead of being silently trusted.
+    _ensure_checkpoint_anchor(
+        cfg, head, checkpoint, manifest_obj
     )
-    commit_and_push_checkpoint(
-        repo_root=EVIDENCE_ROOT,
-        branch=cfg["branch"],
-        checkpoint_path=checkpoint,
-        checkpoint_bundle_path=checkpoint.with_suffix(".sigstore.json"),
-        head=head,
-    )
-    return True
+    return False
 
 
 def main():

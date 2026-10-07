@@ -277,7 +277,7 @@ class ExactCheckoutBindingTests(unittest.TestCase):
     def test_remote_tip_advance_during_admission_is_fail_closed(self):
         expected="a"*40
         with patch(
-            "predictive_vnext4r71.admission._verify_exact_checkout_remote_tip",
+            "predictive_vnext4r71.admission._fetch_remote_tip",
             return_value="b"*40,
         ):
             with self.assertRaisesRegex(

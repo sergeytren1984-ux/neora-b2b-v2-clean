@@ -6,7 +6,8 @@ on:
     paths:
       - predictive_vnext4r71/**
       - predictive_vnext4r7/scorecard_core.py
-      - .github/workflows/btc-predictive-vnext4r71-remediation.yml
+      - predictive_vnext4r7/episodes.py
+      - .github/workflows/btc-predictive-vnext4r71-*.yml
   workflow_dispatch: {}
 
 permissions:

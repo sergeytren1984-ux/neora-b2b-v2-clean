@@ -57,6 +57,7 @@ jobs:
           python -I -m py_compile predictive_vnext4r71/e2e_checkpoint.py
           python -I -m py_compile predictive_vnext4r71/e2e_negative_admission.py
           python -I -m py_compile predictive_vnext4r71/benchmark_checkpoint_scale.py
+          python -I -m py_compile predictive_vnext4r71/numerical_lifecycle_e2e.py
           python -I -m py_compile predictive_vnext4r71/test_remediation.py
           python -I -m py_compile predictive_vnext4r7/scorecard_core.py
           python -I -m py_compile predictive_vnext4r7/episodes.py
@@ -65,6 +66,11 @@ jobs:
         env:
           PYTHONPATH: .
         run: PYTHONPATH=. python predictive_vnext4r71/test_remediation.py -v
+
+      - name: Real R6 numerical worker lifecycle
+        env:
+          PYTHONPATH: .
+        run: PYTHONPATH=. python predictive_vnext4r71/numerical_lifecycle_e2e.py
 
       - name: Expected-journal scale benchmark
         env:
@@ -112,6 +118,10 @@ jobs:
               assert ae["consumer_compare_and_swap_or_lease_required_for_activation"] is True
               assert ae["consumer_validation_entrypoint"]=="predictive_vnext4r71.admission.assert_snapshot_decision_current"
               assert ae["consumer_snapshot_freshness_guard_required"] is True
+              ea=p["e2e_audit_artifacts"]
+              assert ea["real_r6_numerical_worker_lifecycle_required"] is True
+              assert ea["e2e_dummy_insufficient_for_numerical_lifecycle"] is True
+              assert ea["numerical_lifecycle_fixture_is_engineering_not_prospective_market_evidence"] is True
               rp=p["raw_evidence_provenance"]
               assert rp["raw_first_addition_commit_must_equal_event_publication_commit"] is True
               assert rp["raw_reuse_from_prior_commit_forbidden"] is True

@@ -1,6 +1,6 @@
 {
   "schema": "btc-predictive-vnext4r71-protocol-v1",
-  "status": "R7_4_REMEDIATION_PRE_FREEZE_NOT_PRODUCTION",
+  "status": "R7_5_REMEDIATION_PRE_FREEZE_NOT_PRODUCTION",
   "parent_r6_source_sha": "98d6ea6e981b3306f397a9105babc2e5d66ac7a0",
   "selected_model": "ensemble_equal",
   "numerical_core": "unchanged frozen R6 artifacts",
@@ -94,7 +94,14 @@
     ],
     "remote_tip_revalidated_before_scoring": true,
     "remote_tip_revalidated_after_scoring": true,
-    "remote_tip_toctou_fail_closed": true
+    "remote_tip_toctou_fail_closed": false,
+    "authenticated_protocol_loaded_from_immutable_git_object": true,
+    "used_protocol_sha256_must_equal_signed_protocol_sha256": true,
+    "private_detached_snapshot_for_all_file_reads": true,
+    "decision_semantics": "SNAPSHOT_AS_OF_EXACT_EVIDENCE_SHA",
+    "absolute_latest_tip_atomicity_claimed": false,
+    "consumer_must_reject_if_evidence_tip_differs": true,
+    "consumer_compare_and_swap_or_lease_required_for_activation": true
   },
   "workflows": {
     "forecast": ".github/workflows/btc-predictive-vnext4r71-4h.yml",
@@ -140,7 +147,8 @@
     "raw_path_must_encode_event_slot": true,
     "raw_first_addition_commit_must_equal_event_publication_commit": true,
     "raw_reuse_from_prior_commit_forbidden": true,
-    "checkout_bytes_must_equal_exact_remote_tip": true
+    "checkout_bytes_must_equal_exact_remote_tip": true,
+    "all_admission_file_reads_from_private_immutable_snapshot": true
   },
   "e2e_audit_artifacts": {
     "successful_positive_signed_e2e_must_be_preserved": true,
@@ -149,7 +157,10 @@
     "commit_ids_and_hashes_must_be_reported": true,
     "targeted_stale_checkout_newer_tip_attack_required": true,
     "prior_commit_raw_reuse_attack_required": true,
-    "mid_admission_remote_tip_advance_attack_required": true
+    "mid_admission_remote_tip_advance_attack_required": true,
+    "local_protocol_read_restore_race_required": true,
+    "working_tree_evidence_mutation_ignored_by_private_snapshot_required": true,
+    "snapshot_decision_binding_required": true
   },
   "evidence_branch": "btc-predictive-vnext4r71-4h",
   "evidence_raw_prefix": "predictive_vnext4r71_4h_raw/"

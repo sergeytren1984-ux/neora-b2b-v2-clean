@@ -89,6 +89,7 @@ def wait_until(target:datetime):
 def main():
     source_sha=os.environ["GITHUB_SHA"]
     e2e_branch=os.environ["R71_E2E_BRANCH"]
+    anchor_branch=e2e_branch+"-anchors"
     source_ref=os.environ["GITHUB_REF"]
     trigger=os.environ.get("R71_EXPECTED_TRIGGER","push")
 
@@ -119,6 +120,10 @@ def main():
         "artifact_sha256":"a"*64,
         "baseline_sha256":"b"*64,
         "multiple_head_correction":{"per_head_alpha":1/60},
+        "checkpointing":{
+            "anchor_required":True,
+            "anchor_branch":anchor_branch,
+        },
         "admission":{
             "nonoverlap_window_hours":1,
             "minimum_calendar_days":42,
@@ -289,6 +294,7 @@ def main():
         "events":str(events_dir.relative_to(ROOT)),
         "raw":str(raw_dir.relative_to(ROOT)),
         "checkpoint":str(checkpoint.relative_to(ROOT)),
+        "anchor_branch":anchor_branch,
         "horizon":horizon,
         "deadline":deadline,
         "forecast_workflow":WORKFLOW,
@@ -350,6 +356,8 @@ def main():
         "event_count":len(event_files(events_dir)),
         "checkpoint_sequence":json.loads(checkpoint.read_text())["verified_through_sequence"],
         "checkpoint_remote_tip":tip,
+        "anchor_branch":anchor_branch,
+        "independent_checkpoint_anchor_verified":report["governance"]["independent_checkpoint_anchor_verified"],
         "admission_status":report["score"]["status"],
         "full_cryptographic_replay":report["governance"]["full_cryptographic_replay"],
     },indent=2,sort_keys=True))

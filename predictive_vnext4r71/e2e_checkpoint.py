@@ -130,6 +130,7 @@ def main():
         "baseline_sha256":"b"*64,
         "multiple_head_correction":{"per_head_alpha":1/60},
         "checkpointing":{
+            "interval_events":24,
             "anchor_required":True,
             "anchor_branch":anchor_branch,
             "checkpoint_path":"r71_e2e_checkpoint/1h.json",

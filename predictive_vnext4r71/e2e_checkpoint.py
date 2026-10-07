@@ -220,7 +220,7 @@ def main():
 
     wait_until(start+timedelta(seconds=1))
 
-    raw_f=raw_dir/"forecast.json"
+    raw_f=raw_dir/(slot+".json")
     raw_f.write_bytes(canonical({"slot":slot,"source":"E2E","klines":[]}))
     forecast=make_event(3,previous,{
         "type":"FORECAST_ISSUED",
@@ -273,7 +273,7 @@ def main():
     previous=digest(canonical(receipt))
 
     wait_until(due+timedelta(seconds=1))
-    raw_o=raw_dir/"outcome.json"
+    raw_o=raw_dir/(slot+"-outcome.json")
     raw_o.write_bytes(canonical({"slot":slot,"due_utc":due.isoformat(),"klines":[]}))
     outcome=make_event(5,previous,{
         "type":"OUTCOME_RECORDED",
@@ -461,7 +461,6 @@ def main():
         repo_root=str(ROOT),
         protocol_path=str(protocol_path.relative_to(ROOT)),
         events_dir=str(events_dir.relative_to(ROOT)),
-        current_tip=tip,
     )
     if report["governance"]["full_cryptographic_replay"] is not True:
         raise RuntimeError("admission skipped full cryptographic replay")
@@ -469,12 +468,65 @@ def main():
         raise RuntimeError("admission skipped complete deployment bundle")
     if report["governance"]["raw_remote_publication_verified"] is not True:
         raise RuntimeError("admission skipped remote raw publication proof")
+    if report["governance"]["exact_checkout_head_verified"] is not True:
+        raise RuntimeError("admission skipped exact checkout HEAD proof")
+    if report["governance"]["exact_checkout_bytes_verified"] is not True:
+        raise RuntimeError("admission skipped exact checkout byte proof")
     if report["admission_ready"] is not False:
         raise RuntimeError("E2E short sample must not become admissible")
 
+    # Advance the remote evidence branch once, then prove that an older checkout
+    # cannot spoof the newer tip. This reproduces the independent expert's HIGH
+    # finding against the actual signed E2E evidence.
+    advance_path=ROOT/"r73_tip_advance_marker.json"
+    advance_path.write_bytes(canonical({
+        "schema":"btc-predictive-vnext4r73-tip-advance-v1",
+        "source_sha":source_sha,
+        "previous_tip":tip,
+        "created_at_utc":datetime.now(UTC).isoformat(),
+    }))
+    advanced_tip=push_paths(
+        "R7.3 advance remote tip for stale-checkout attack",
+        advance_path,
+    )
+    stale_dir=Path("/tmp/r73-stale-checkout")
+    subprocess.run(
+        ["git","-C",str(ROOT),"worktree","remove",str(stale_dir),"--force"],
+        check=False,capture_output=True,text=True,
+    )
+    subprocess.run(
+        ["git","-C",str(ROOT),"worktree","add","--detach",str(stale_dir),tip],
+        check=True,capture_output=True,text=True,timeout=180,
+    )
+    stale_code=(
+        "import sys;"
+        f"sys.path.insert(0,{str(stale_dir)!r});"
+        "from predictive_vnext4r71.admission import run_admission;"
+        f"run_admission(repo_root={str(stale_dir)!r},"
+        f"protocol_path={str(protocol_path.relative_to(ROOT))!r},"
+        f"events_dir={str(events_dir.relative_to(ROOT))!r})"
+    )
+    stale_run=subprocess.run(
+        [sys.executable,"-I","-c",stale_code],
+        cwd=stale_dir,capture_output=True,text=True,timeout=900,
+    )
+    subprocess.run(
+        ["git","-C",str(ROOT),"worktree","remove",str(stale_dir),"--force"],
+        check=True,capture_output=True,text=True,timeout=180,
+    )
+    stale_text=(stale_run.stdout or "")+(stale_run.stderr or "")
+    if stale_run.returncode==0 or (
+        "admission checkout HEAD is not exact fetched remote evidence tip"
+        not in stale_text
+    ):
+        raise RuntimeError(
+            "stale checkout / newer remote tip attack was not rejected: "
+            + stale_text[-1000:]
+        )
+
     audit={
-        "schema":"btc-predictive-vnext4r72-e2e-audit-artifact-v1",
-        "status":"R7_2_E2E_PASS",
+        "schema":"btc-predictive-vnext4r73-e2e-audit-artifact-v1",
+        "status":"R7_3_E2E_PASS",
         "evidence_branch":e2e_branch,
         "source_sha":source_sha,
         "event_count":len(event_files(events_dir)),
@@ -486,7 +538,11 @@ def main():
         "independent_checkpoint_anchor_verified":report["governance"]["independent_checkpoint_anchor_verified"],
         "complete_deployment_bundle_bound":report["governance"]["complete_deployment_bundle_bound"],
         "raw_remote_publication_verified":report["governance"]["raw_remote_publication_verified"],
-        "remote_evidence_tip":report["governance"]["remote_evidence_tip"],
+        "remote_evidence_tip_before_tip_advance":report["governance"]["remote_evidence_tip"],
+        "tip_after_advance":advanced_tip,
+        "stale_checkout_tip_attack_rejected":True,
+        "exact_checkout_head_verified":report["governance"]["exact_checkout_head_verified"],
+        "exact_checkout_bytes_verified":report["governance"]["exact_checkout_bytes_verified"],
         "admission_status":report["score"]["status"],
         "full_cryptographic_replay":report["governance"]["full_cryptographic_replay"],
         "real_cosign_verify_seconds":{"p50":statistics.median(sig_seconds),"p95":sig_p95,"n":len(sig_seconds)},

@@ -320,6 +320,7 @@ def _verify_governance(
         "all_rekor_inclusion_proofs_verified": True,
         "workflow_content_binding_verified": True,
         "raw_hashes_verified": True,
+        "raw_remote_publication_verified": True,
         "receipt_forecast_exact_binding_verified": True,
         "remote_commit_ancestry_verified": True,
         "event_count": len(events),

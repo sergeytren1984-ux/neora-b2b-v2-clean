@@ -97,6 +97,12 @@ jobs:
               assert req["all_production_workflows_required"]==expected
               assert p["skill_inference"]["block_confidence_intervals_required"] is True
               assert p["skill_inference"]["separate_stress_episode_gate_required"] is True
+              ae=p["admission_entrypoint"]
+              assert ae["caller_supplied_current_tip_forbidden"] is True
+              assert ae["actual_git_head_must_equal_fetched_remote_tip_before_replay"] is True
+              rp=p["raw_evidence_provenance"]
+              assert rp["raw_first_addition_commit_must_equal_event_publication_commit"] is True
+              assert rp["raw_reuse_from_prior_commit_forbidden"] is True
               artifact=pathlib.Path(p["artifact_path"]).read_bytes()
               baseline=pathlib.Path(p["baseline_path"]).read_bytes()
               assert hashlib.sha256(artifact).hexdigest()==p["artifact_sha256"]

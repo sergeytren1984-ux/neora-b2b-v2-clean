@@ -11,7 +11,7 @@ from datetime import datetime, timedelta, timezone
 
 import numpy as np
 
-from predictive_vnext4r7.episodes import episode_summary
+from predictive_vnext4r7.episodes import episode_summary, stress_episode_skill_summary
 from predictive_vnext4r7.integrity import parse_utc, validate_event_collection
 
 UTC = timezone.utc
@@ -211,6 +211,23 @@ def score_from_events(
         minimum_duration_hours=int(ep["minimum_duration_hours"]),
         minimum_separation_hours=int(ep["minimum_separation_hours"]),
     )
+    stress_policy = adm.get("stress_episode_policy")
+    stress = None
+    if stress_policy is not None:
+        stress = stress_episode_skill_summary(
+            anchors,
+            bins,
+            brier_gain,
+            logloss_gain,
+            window_hours=nonoverlap_hours,
+            minimum_duration_hours=int(
+                stress_policy["minimum_duration_hours"]
+            ),
+            minimum_separation_hours=int(
+                stress_policy["minimum_separation_hours"]
+            ),
+            stress_bin=int(stress_policy["stress_bin"]),
+        )
 
     result.update(
         {
@@ -221,7 +238,11 @@ def score_from_events(
             "logloss_gain_mean": float(np.mean(logloss_gain)),
             "block_lower_bounds": lowers,
             "volatility_episode_policy": ep,
+            "volatility_episode_interpretation": (
+                "HEURISTIC_DIVERSITY_REQUIREMENT_NOT_INDEPENDENCE_PROOF"
+            ),
             "independent_volatility_episodes": episodes,
+            "stress_episode_robustness": stress,
         }
     )
 
@@ -244,6 +265,19 @@ def score_from_events(
         "block_ci": all(
             value is not None and value > 0
             for value in lowers.values()
+        ),
+        "stress_robustness": (
+            True
+            if stress_policy is None
+            else (
+                stress is not None
+                and stress["count"]
+                >= int(stress_policy["minimum_episodes_for_skill_claim"])
+                and stress["episode_weighted_mean_brier_gain"] is not None
+                and stress["episode_weighted_mean_brier_gain"] > 0
+                and stress["episode_weighted_mean_logloss_gain"] is not None
+                and stress["episode_weighted_mean_logloss_gain"] > 0
+            )
         ),
         "calibration": model_metrics["ece10"]
         <= baseline_metrics["ece10"]

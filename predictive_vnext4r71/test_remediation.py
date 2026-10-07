@@ -280,6 +280,45 @@ class CheckpointFaultInjectionTests(unittest.TestCase):
             finally:
                 worker.EVIDENCE_ROOT=old_root
 
+    def test_checkpoint_remote_push_failure_is_fail_closed(self):
+        freeze={
+            "type":"CONFIG_FROZEN_PRESTART",
+            "manifest":{"source_commit_sha":"3"*40},
+        }
+        events=[({"type":"ABSTAIN_DATA_INVALID"},None) for _ in range(23)]
+        events.insert(0,(freeze,None))
+        with tempfile.TemporaryDirectory() as td:
+            old_root=worker.EVIDENCE_ROOT
+            worker.EVIDENCE_ROOT=Path(td)
+            cfg={
+                "checkpoint":"cp/1h.json",
+                "events":"events",
+                "branch":"evidence",
+                "anchor_branch":"anchors",
+            }
+            try:
+                with (
+                    patch.object(worker,"prior_events",return_value=events),
+                    patch.object(
+                        worker,"create_signed_checkpoint",
+                        return_value={
+                            "verified_through_sequence":24,
+                            "verified_through_event_hash":"a"*64,
+                        },
+                    ),
+                    patch.object(
+                        worker,
+                        "commit_and_push_checkpoint",
+                        side_effect=RuntimeError("INJECTED_REMOTE_PUSH_FAILURE"),
+                    ),
+                ):
+                    with self.assertRaisesRegex(
+                        RuntimeError,"INJECTED_REMOTE_PUSH_FAILURE"
+                    ):
+                        worker.maybe_checkpoint(cfg,"1h")
+            finally:
+                worker.EVIDENCE_ROOT=old_root
+
     def test_anchor_recovery_failure_is_fail_closed(self):
         freeze={
             "type":"CONFIG_FROZEN_PRESTART",

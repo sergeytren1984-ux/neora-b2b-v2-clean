@@ -34,6 +34,7 @@ from predictive_vnext4r71.tail_research import (
 )
 from predictive_vnext4r7.episodes import stress_episode_skill_summary
 from predictive_vnext4r71 import worker
+from predictive_vnext4r71 import chain_liveness
 
 UTC = timezone.utc
 
@@ -368,6 +369,50 @@ class PublicationFaultInjectionTests(unittest.TestCase):
                     git_cmd.assert_not_called()
             finally:
                 worker.EVIDENCE_ROOT=old_root
+
+
+class LivenessAndDeadlineFaultTests(unittest.TestCase):
+    def test_restart_after_deadline_records_slot_missed_not_forecast(self):
+        fixed_now=datetime(2026,10,7,12,16,tzinfo=UTC)
+        start=fixed_now-timedelta(minutes=16)
+        published=[]
+        old_start=worker.START
+        worker.START=start
+        try:
+            with (
+                patch.object(worker,"utcnow",return_value=fixed_now),
+                patch.object(worker,"verify_signed_freeze",return_value=[]),
+                patch.object(
+                    worker,
+                    "publish",
+                    side_effect=lambda cfg,obj,**kw: published.append(obj),
+                ),
+            ):
+                worker.mark_missed(
+                    {
+                        "deadline":timedelta(minutes=14),
+                        "cadence":timedelta(minutes=15),
+                    },
+                    "1h",
+                )
+            self.assertEqual(len(published),1)
+            self.assertEqual(published[0]["type"],"SLOT_MISSED")
+            self.assertEqual(published[0]["reason"],"NO_TIMELY_FORECAST")
+        finally:
+            worker.START=old_start
+
+    def test_github_api_outage_is_fail_closed_for_liveness(self):
+        with patch.object(
+            chain_liveness,
+            "list_runs",
+            side_effect=RuntimeError("INJECTED_API_OUTAGE"),
+        ):
+            with self.assertRaisesRegex(
+                RuntimeError,"INJECTED_API_OUTAGE"
+            ):
+                chain_liveness.ensure(
+                    "owner/repo","workflow.yml","token"
+                )
 
 
 class CheckpointFaultInjectionTests(unittest.TestCase):

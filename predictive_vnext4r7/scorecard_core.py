@@ -108,8 +108,15 @@ def score_from_events(
     *,
     start_utc,
     horizon,
-    allow_admission,
+    allow_admission=False,
 ):
+    # R7.1 security boundary: this numerical calculator can never authorize
+    # admission. Only predictive_vnext4r71.admission.run_admission() may promote
+    # verified gates to admission_ready=true after full cryptographic replay.
+    if allow_admission:
+        raise RuntimeError(
+            "direct admission forbidden; use R7.1 mandatory admission entrypoint"
+        )
     head = protocol["head"]
     validate_event_collection(
         events,
@@ -243,10 +250,11 @@ def score_from_events(
         + float(adm["calibration_max_ece10_degradation_vs_primary"]),
     }
     result["gates"] = gates
-    if allow_admission and all(gates.values()):
-        result["status"] = "PROSPECTIVE_GATE_PASS"
-        result["admission_ready"] = True
-        result["prospective_winner"] = protocol["selected_model"]
-    else:
-        result["status"] = "PROSPECTIVE_GATE_PENDING_OR_FAIL"
+    result["admission_ready"] = False
+    result["prospective_winner"] = None
+    result["status"] = (
+        "NUMERICAL_GATES_PASS_VERIFICATION_REQUIRED"
+        if all(gates.values())
+        else "PROSPECTIVE_GATE_PENDING_OR_FAIL"
+    )
     return result

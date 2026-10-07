@@ -248,6 +248,20 @@ def main():
     pp=write_protocol(common,p)
     authority_events(common/"events",start,pp)
 
+    # 3. valid OIDC identity but workflow content mismatch against signed manifest.
+    # Create it before the common start so the targeted failure is workflow binding,
+    # not late pre-start authority.
+    d=case_dir("workflow_manifest_mismatch")
+    shutil.copy2(common/"protocol.json",d/"protocol.json")
+    authority_events(
+        d/"events",start,d/"protocol.json",
+        workflow_hash_override="0"*64,
+    )
+    expect_failure(
+        "workflow_manifest_mismatch",d,
+        "workflow content differs from signed frozen manifest",
+    )
+
     while datetime.now(UTC)<start+timedelta(seconds=1):
         time.sleep(.25)
 
@@ -259,18 +273,6 @@ def main():
             shutil.copy2(common/"events"/n,d/"events"/n)
         freeze=json.loads((d/"events"/"00000002.json").read_text())
         return d,freeze
-
-    # 3. valid OIDC identity but workflow content mismatch against signed manifest.
-    d=case_dir("workflow_manifest_mismatch")
-    shutil.copy2(common/"protocol.json",d/"protocol.json")
-    authority_events(
-        d/"events",start,d/"protocol.json",
-        workflow_hash_override="0"*64,
-    )
-    expect_failure(
-        "workflow_manifest_mismatch",d,
-        "workflow content differs from signed frozen manifest",
-    )
 
     # 4. a signed event modified after signing must fail Cosign verification.
     d,freeze=prepare("signature_tamper")

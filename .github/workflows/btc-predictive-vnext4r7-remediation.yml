@@ -43,7 +43,10 @@ jobs:
         run: |
           python -I -m py_compile predictive_vnext4r7/integrity.py
           python -I -m py_compile predictive_vnext4r7/checkpoint.py
+          python -I -m py_compile predictive_vnext4r7/checkpoint_writer.py
+          python -I -m py_compile predictive_vnext4r7/journal_runtime.py
           python -I -m py_compile predictive_vnext4r7/episodes.py
+          python -I -m py_compile predictive_vnext4r7/scorecard_core.py
           python -I -m py_compile predictive_vnext4r7/tail_research.py
           python -I -m py_compile predictive_vnext4r7/audit_r6_bindings.py
           python -I -m py_compile predictive_vnext4r7/test_remediation.py

@@ -162,7 +162,10 @@
     "mid_admission_remote_tip_advance_attack_required": true,
     "local_protocol_read_restore_race_required": true,
     "working_tree_evidence_mutation_ignored_by_private_snapshot_required": true,
-    "snapshot_decision_binding_required": true
+    "snapshot_decision_binding_required": true,
+    "real_r6_numerical_worker_lifecycle_required": true,
+    "e2e_dummy_insufficient_for_numerical_lifecycle": true,
+    "numerical_lifecycle_fixture_is_engineering_not_prospective_market_evidence": true
   },
   "evidence_branch": "btc-predictive-vnext4r71-1h",
   "evidence_raw_prefix": "predictive_vnext4r71_1h_raw/"

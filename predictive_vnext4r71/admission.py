@@ -25,6 +25,7 @@ from predictive_vnext4r71.crypto import make_blob_verifier
 from predictive_vnext4r71.integrity import (
     validate_event_collection,
     verify_raw_attachments,
+    verify_all_workflow_bindings,
 )
 
 UTC = timezone.utc
@@ -121,16 +122,20 @@ def _full_replay(
     if schedule.get("source_commit_sha") != manifest.get("source_commit_sha"):
         raise ValueError("schedule/freeze source mismatch")
 
-    for event in events:
-        workflow = (
-            outcome_workflow
-            if event.get("type") == "OUTCOME_RECORDED"
-            else forecast_workflow
-        )
-        verify_event_workflow_against_manifest(root, event, workflow, manifest)
+    verify_all_workflow_bindings(
+        root,
+        events,
+        manifest,
+        forecast_workflow=forecast_workflow,
+        outcome_workflow=outcome_workflow,
+    )
 
+    deployment_workflows = set(
+        manifest.get("deployment_workflows")
+        or [forecast_workflow, outcome_workflow]
+    )
     _verify_manifest_source(
-        root, manifest, {forecast_workflow, outcome_workflow}
+        root, manifest, deployment_workflows
     )
     return events, rekor, manifest, relation
 
@@ -330,6 +335,23 @@ def run_admission(
         current_tip=current_tip,
         issuance_deadline=issuance_deadline,
     )
+
+    manifest_req = protocol.get("signed_manifest_requirements", {})
+    required_protocols = manifest_req.get("all_protocols_required")
+    required_workflows = manifest_req.get("all_production_workflows_required")
+    if required_protocols is not None:
+        if manifest.get("all_protocols") != required_protocols:
+            raise ValueError("signed manifest protocol bundle incomplete")
+        for p in required_protocols:
+            if p not in manifest.get("paths_sha256", {}):
+                raise ValueError("required protocol absent from signed manifest")
+    if required_workflows is not None:
+        if manifest.get("deployment_workflows") != required_workflows:
+            raise ValueError("signed manifest workflow bundle incomplete")
+        for p in required_workflows:
+            if p not in manifest.get("paths_sha256", {}):
+                raise ValueError("required workflow absent from signed manifest")
+    governance["complete_deployment_bundle_bound"] = True
 
     checkpoint_policy = protocol.get("checkpointing", {})
     if checkpoint_policy.get("anchor_required") is not True:

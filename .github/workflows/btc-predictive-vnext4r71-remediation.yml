@@ -83,6 +83,13 @@ jobs:
               assert p["skill_inference"]["block_confidence_intervals_required"] is True
               assert p["skill_inference"]["separate_stress_episode_gate_required"] is True
               assert p["admission"]["stress_episode_policy"]["minimum_episodes_for_skill_claim"]==3
+              ae=p["admission_entrypoint"]
+              assert ae["caller_supplied_current_tip_forbidden"] is True
+              assert ae["actual_git_head_must_equal_fetched_remote_tip_before_replay"] is True
+              rp=p["raw_evidence_provenance"]
+              assert rp["raw_first_addition_commit_must_equal_event_publication_commit"] is True
+              assert rp["raw_reuse_from_prior_commit_forbidden"] is True
+              assert rp["checkout_bytes_must_equal_exact_remote_tip"] is True
               req=p["signed_manifest_requirements"]
               assert len(req["all_protocols_required"])==3
               assert len(req["all_production_workflows_required"])==5

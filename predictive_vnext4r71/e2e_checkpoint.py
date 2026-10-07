@@ -108,7 +108,7 @@ def main():
     raw_dir=ROOT/"predictive_vnext4r71_1h_raw"/("r72-e2e-"+os.environ.get("GITHUB_RUN_ID","local"))
     checkpoint=ROOT/"r71_e2e_checkpoint"/"1h.json"
     events_dir.mkdir(exist_ok=True)
-    raw_dir.mkdir(exist_ok=True)
+    raw_dir.mkdir(parents=True,exist_ok=True)
 
     # Give keyless signing + remote authority publication ample pre-start time.
     start=(datetime.now(UTC)+timedelta(seconds=75)).replace(microsecond=0)

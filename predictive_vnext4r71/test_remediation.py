@@ -18,7 +18,10 @@ from predictive_vnext4r7.integrity import canonical, digest
 from predictive_vnext4r7.scorecard_core import score_from_events
 from predictive_vnext4r71.admission import run_admission
 from predictive_vnext4r71.checkpoint import git_prefix_binding
-from predictive_vnext4r71.integrity import validate_event_collection
+from predictive_vnext4r71.integrity import (
+    validate_event_collection,
+    verify_deployment_bundle_against_manifest,
+)
 from predictive_vnext4r71.tail_research import (
     monotone_exceedance,
     monotone_quantiles,
@@ -395,6 +398,29 @@ class DeploymentBundleTests(unittest.TestCase):
                 self.assertIn(p,manifest["paths_sha256"])
             for p in worker.PRODUCTION_WORKFLOWS:
                 self.assertIn(p,manifest["paths_sha256"])
+        finally:
+            worker.EVIDENCE_ROOT=old_root
+
+    def test_deployment_bundle_rejects_one_changed_workflow(self):
+        root=Path(__file__).resolve().parents[1]
+        head=subprocess.run(
+            ["git","rev-parse","HEAD"],
+            cwd=root,check=True,capture_output=True,text=True,
+        ).stdout.strip()
+        old_root=worker.EVIDENCE_ROOT
+        worker.EVIDENCE_ROOT=root
+        try:
+            with (
+                patch.dict(os.environ,{"GITHUB_SHA":head},clear=False),
+                patch.object(worker,"cmd",return_value="cosign-test"),
+            ):
+                manifest=worker.manifest(worker.CONFIG["1h"],head)
+            victim=manifest["deployment_workflows"][-1]
+            manifest["paths_sha256"][victim]="0"*64
+            with self.assertRaises(ValueError):
+                verify_deployment_bundle_against_manifest(
+                    root,{"workflow_commit":head},manifest
+                )
         finally:
             worker.EVIDENCE_ROOT=old_root
 

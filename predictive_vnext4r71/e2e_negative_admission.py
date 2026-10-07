@@ -1,4 +1,4 @@
-"""Real OIDC/Rekor negative E2E attacks against the mandatory R7.1 admission path."""
+"""Real OIDC/Rekor negative E2E attacks against the mandatory R7.3 admission path."""
 from __future__ import annotations
 
 import copy
@@ -25,10 +25,10 @@ WORKFLOW=".github/workflows/btc-predictive-vnext4r71-remediation.yml"
 BASE=ROOT/"r71_negative_e2e"
 RUN_ID=os.environ.get("GITHUB_RUN_ID","local")
 NEG_BRANCH=os.environ.get(
-    "R72_NEGATIVE_E2E_BRANCH",
-    "btc-predictive-vnext4r72-negative-e2e-"+RUN_ID,
+    "R73_NEGATIVE_E2E_BRANCH",
+    "btc-predictive-vnext4r73-negative-e2e-"+RUN_ID,
 )
-RAW_ROOT=ROOT/"predictive_vnext4r71_1h_raw"/("r72-negative-"+RUN_ID)
+RAW_ROOT=ROOT/"predictive_vnext4r71_1h_raw"/("r73-negative-"+RUN_ID)
 
 
 def sign(path:Path,bundle:Path):
@@ -137,7 +137,7 @@ def authority_events(
     if workflow_hash_override is not None:
         hashes[WORKFLOW]=workflow_hash_override
     manifest={
-        "schema":"btc-predictive-vnext4r72-negative-e2e-manifest-v1",
+        "schema":"btc-predictive-vnext4r73-negative-e2e-manifest-v1",
         "source_commit_sha":source_sha,
         "paths_sha256":hashes,
         "all_protocols":(
@@ -262,11 +262,11 @@ def main():
     BASE.mkdir()
     RAW_ROOT.mkdir(parents=True,exist_ok=True)
     subprocess.run(
-        ["git","config","user.name","btc-predictive-r72-negative-e2e[bot]"],
+        ["git","config","user.name","btc-predictive-r73-negative-e2e[bot]"],
         cwd=ROOT,check=True,
     )
     subprocess.run(
-        ["git","config","user.email","btc-predictive-r72-negative-e2e[bot]@users.noreply.github.com"],
+        ["git","config","user.email","btc-predictive-r73-negative-e2e[bot]@users.noreply.github.com"],
         cwd=ROOT,check=True,
     )
     subprocess.run(

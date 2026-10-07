@@ -30,8 +30,10 @@ def run(n=12098, repeats=5, bundle_bytes=12288):
         bundle_payload=(b'{"verificationMaterial":{"tlogEntries":[]},'
                         b'"mediaType":"application/vnd.dev.sigstore.bundle+json;version=0.3"}')
         bundle_payload=bundle_payload+b" "*max(0,bundle_bytes-len(bundle_payload))
+        event_payload_bytes=0
         for i in range(1,n+1):
             event=(f'{{"sequence":{i},"payload":"'+("x"*512)+'"}\n').encode()
+            event_payload_bytes+=len(event)
             p=d/f"{i:08d}.json"
             p.write_bytes(event)
             p.with_suffix(".sigstore.json").write_bytes(bundle_payload)

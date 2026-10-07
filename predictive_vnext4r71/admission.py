@@ -221,8 +221,6 @@ def run_admission(
     expected_ref: str = "refs/heads/main",
     expected_trigger: str = "workflow_dispatch",
     current_tip: str | None = None,
-    verify_forecast_blob=None,
-    verify_outcome_blob=None,
 ):
     root = Path(repo_root).resolve()
     protocol = json.loads((root / protocol_path).read_text())
@@ -248,22 +246,22 @@ def run_admission(
             timeout=60,
         ).stdout.strip()
 
-    if verify_forecast_blob is None:
-        verify_forecast_blob = make_blob_verifier(
-            repository=repository,
-            workflow_path=forecast_workflow,
-            ref=expected_ref,
-            trigger=expected_trigger,
-            repo_root=root,
-        )
-    if verify_outcome_blob is None:
-        verify_outcome_blob = make_blob_verifier(
-            repository=repository,
-            workflow_path=outcome_workflow,
-            ref=expected_ref,
-            trigger=expected_trigger,
-            repo_root=root,
-        )
+    # Verifiers are constructed internally from the signed execution contract.
+    # The public admission API has no callback or "skip verification" parameter.
+    verify_forecast_blob = make_blob_verifier(
+        repository=repository,
+        workflow_path=forecast_workflow,
+        ref=expected_ref,
+        trigger=expected_trigger,
+        repo_root=root,
+    )
+    verify_outcome_blob = make_blob_verifier(
+        repository=repository,
+        workflow_path=outcome_workflow,
+        ref=expected_ref,
+        trigger=expected_trigger,
+        repo_root=root,
+    )
 
     events, rekor, manifest, relation = _full_replay(
         root=root,

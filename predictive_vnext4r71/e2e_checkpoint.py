@@ -493,6 +493,8 @@ def main():
     attack_protocol=json.loads(original_protocol_bytes)
     attack_protocol["selected_model"]="UNSIGNED_ATTACKER_CHOICE"
     attack_protocol["admission"]["minimum_calendar_days"]=0
+    attack_protocol["admission_enabled"]=False
+    attack_protocol["evidence_branch"]="UNSIGNED_ATTACKER_BRANCH"
     event120=events_dir/"00000120.json"
     original_event120=event120.read_bytes()
     attack_event=json.loads(original_event120)
@@ -524,12 +526,22 @@ def main():
     finally:
         protocol_path.write_bytes(original_protocol_bytes)
         event120.write_bytes(original_event120)
-    if attacked["score"]["selected_model"]!="E2E_DUMMY":
-        raise RuntimeError("working-tree protocol mutation reached scoring")
-    if attacked["score"]["gates"]["calendar"] is not False:
-        raise RuntimeError("unsigned calendar policy mutation reached scoring")
+    # The attack sets admission_enabled=False and points evidence_branch at a
+    # nonexistent unsigned branch. If the first working-tree parse leaked into
+    # policy, admission would either block immediately or fail fetching that
+    # branch. Reaching the same authenticated snapshot result proves the policy
+    # object came from the immutable Git bytes, even when the short E2E sample
+    # has no due non-overlap window and therefore omits score.selected_model.
+    if attacked.get("status")=="BLOCKED_PROTOCOL_ADMISSION_DISABLED":
+        raise RuntimeError("working-tree admission_enabled mutation reached policy")
+    if attacked.get("head")!=report.get("head"):
+        raise RuntimeError("working-tree protocol head mutation reached admission")
     if attacked["governance"]["used_protocol_sha256"]!=report["governance"]["used_protocol_sha256"]:
         raise RuntimeError("protocol snapshot SHA changed under working-tree mutation")
+    if attacked["governance"]["decision_binding"]["evidence_branch"]!=binding["evidence_branch"]:
+        raise RuntimeError("working-tree evidence_branch mutation reached admission")
+    if attacked["governance"]["decision_binding"]["protocol_sha256"]!=binding["protocol_sha256"]:
+        raise RuntimeError("working-tree protocol bytes changed decision binding")
     if not attacked["governance"]["authenticated_protocol_snapshot"]:
         raise RuntimeError("authenticated private protocol snapshot not reported")
 

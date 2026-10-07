@@ -1,0 +1,105 @@
+name: BTC predictive vNext4R7.1 read-only release gate
+
+on:
+  push:
+    branches: [btc-predictive-vnext4r71-remediation-20261007]
+    paths:
+      - predictive_vnext4r71/**
+      - predictive_vnext4r7/scorecard_core.py
+      - predictive_vnext4r7/episodes.py
+      - .github/workflows/btc-predictive-vnext4r71-*.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: btc-predictive-vnext4r71-readonly-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  immutable-readonly-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Prove exact immutable checkout
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain)"
+          echo "R71_EXACT_SHA=$GITHUB_SHA"
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+
+      - run: python -m pip install --disable-pip-version-check numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
+
+      - name: Compile release candidate
+        run: |
+          python -I -m py_compile predictive_vnext4r71/integrity.py
+          python -I -m py_compile predictive_vnext4r71/checkpoint.py
+          python -I -m py_compile predictive_vnext4r71/checkpoint_writer.py
+          python -I -m py_compile predictive_vnext4r71/journal_runtime.py
+          python -I -m py_compile predictive_vnext4r71/crypto.py
+          python -I -m py_compile predictive_vnext4r71/admission.py
+          python -I -m py_compile predictive_vnext4r71/anchor.py
+          python -I -m py_compile predictive_vnext4r71/worker.py
+          python -I -m py_compile predictive_vnext4r71/scheduler.py
+          python -I -m py_compile predictive_vnext4r71/chain_liveness.py
+          python -I -m py_compile predictive_vnext4r71/health.py
+          python -I -m py_compile predictive_vnext4r71/tail_research.py
+          python -I -m py_compile predictive_vnext4r71/e2e_checkpoint.py
+          python -I -m py_compile predictive_vnext4r71/e2e_negative_admission.py
+          python -I -m py_compile predictive_vnext4r71/benchmark_checkpoint_scale.py
+          python -I -m py_compile predictive_vnext4r71/test_remediation.py
+          python -I -m py_compile predictive_vnext4r7/scorecard_core.py
+          python -I -m py_compile predictive_vnext4r7/episodes.py
+
+      - name: Adversarial and fault-injection regression
+        env:
+          PYTHONPATH: .
+        run: PYTHONPATH=. python predictive_vnext4r71/test_remediation.py -v
+
+      - name: Expected-journal scale benchmark
+        env:
+          PYTHONPATH: .
+        run: PYTHONPATH=. python predictive_vnext4r71/benchmark_checkpoint_scale.py
+
+      - name: Verify release policy is fail-closed and complete
+        run: |
+          python - <<'PY'
+          import json,pathlib
+          expected=[
+            ".github/workflows/btc-predictive-vnext4r71-1h.yml",
+            ".github/workflows/btc-predictive-vnext4r71-4h.yml",
+            ".github/workflows/btc-predictive-vnext4r71-24h.yml",
+            ".github/workflows/btc-predictive-vnext4r71-watchdog.yml",
+            ".github/workflows/btc-predictive-vnext4r71-health.yml",
+          ]
+          for wf in expected:
+              text=pathlib.Path(wf).read_text()
+              assert "BTC_VNEXT4R71_ENABLED" in text,wf
+          for head in ("1h","4h","24h"):
+              p=json.loads(pathlib.Path(f"predictive_vnext4r71/protocol_{head}.json").read_text())
+              assert p["admission_enabled"] is False
+              assert p["trading_authority"] is False
+              assert p["start_utc"] is None
+              assert p["prospective_start_utc"] is None
+              req=p["signed_manifest_requirements"]
+              assert req["all_production_workflows_required"]==expected
+              assert p["skill_inference"]["block_confidence_intervals_required"] is True
+              assert p["skill_inference"]["separate_stress_episode_gate_required"] is True
+          print("R71_READONLY_POLICY_PASS")
+          PY
+
+      - name: Ensure tests did not mutate tracked candidate
+        run: |
+          git diff --exit-code
+          git diff --cached --exit-code
+          echo "R71_READONLY_GATE_PASS"

@@ -213,6 +213,7 @@ def verify_latest_anchor(
         raise ValueError("required checkpoint anchor missing")
 
     previous_raw=None
+    previous_doc=None
     latest=None
     latest_path=None
     for path in json_paths:
@@ -233,6 +234,18 @@ def verify_latest_anchor(
             )
             if doc.get("previous_anchor_hash")!=expected_previous:
                 raise ValueError("anchor hash chain broken")
+            expected_prev_seq=(
+                0 if previous_doc is None
+                else int(previous_doc["verified_through_sequence"])
+            )
+            expected_prev_cp_sha=(
+                None if previous_doc is None
+                else previous_doc["checkpoint_sha256"]
+            )
+            if int(doc.get("previous_checkpoint_sequence",-1))!=expected_prev_seq:
+                raise ValueError("anchor checkpoint predecessor sequence broken")
+            if doc.get("previous_checkpoint_sha256")!=expected_prev_cp_sha:
+                raise ValueError("anchor checkpoint predecessor hash broken")
             verify_blob(p,b,doc)
             verify_workflow_binding(repo_root,doc,workflow_path,manifest)
 
@@ -250,6 +263,7 @@ def verify_latest_anchor(
         if digest(cb)!=doc["checkpoint_bundle_sha256"]:
             raise ValueError("anchored checkpoint bundle hash mismatch")
         previous_raw=raw
+        previous_doc=doc
         latest=doc
         latest_path=path
 

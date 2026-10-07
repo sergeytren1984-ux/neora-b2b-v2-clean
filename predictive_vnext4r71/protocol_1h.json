@@ -105,5 +105,6 @@
       ".github/workflows/btc-predictive-vnext4r71-watchdog.yml",
       ".github/workflows/btc-predictive-vnext4r71-health.yml"
     ]
-  }
+  },
+  "parent_r6_candidate_sha": "faa0244a34516177c9e23cccc30f522462f7423f"
 }

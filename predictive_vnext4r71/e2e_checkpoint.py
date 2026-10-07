@@ -361,6 +361,51 @@ def main():
     recovery_sorted=sorted(recovery_seconds)
     recovery_p95=recovery_sorted[min(len(recovery_sorted)-1,int(.95*(len(recovery_sorted)-1)))]
 
+    # Build a second 24-event suffix and require the worker to advance the
+    # checkpoint and independent anchor chain again. This proves regular operation,
+    # not just first-checkpoint bootstrap.
+    for seq in range(25,49):
+        fake_slot=(start+timedelta(minutes=seq)).strftime("%Y%m%dT%H%M%SZ")
+        event=make_event(seq,previous,{
+            "type":"ABSTAIN_DATA_INVALID",
+            "idempotency_key":"abstain-data:"+fake_slot,
+            "head":"1h",
+            "slot":fake_slot,
+            "reason":"E2E_SECOND_CHECKPOINT_FILL",
+            "retryable_before_deadline":False,
+            "trading_authority":False,
+        })
+        write_sign_event(events_dir,event,push=False)
+        previous=digest(canonical(event))
+    cmd("git","commit","-m","R7.1 E2E signed suffix through event 48")
+    cmd("git","push","origin","HEAD:"+e2e_branch)
+    if not worker.maybe_checkpoint(cfg,"1h"):
+        raise RuntimeError("worker did not advance second due checkpoint")
+    tip=cmd("git","rev-parse","HEAD")
+    second_doc=json.loads(checkpoint.read_text())
+    if int(second_doc["verified_through_sequence"])!=48:
+        raise RuntimeError("second checkpoint sequence mismatch")
+    if int(second_doc["previous_checkpoint_sequence"])!=24:
+        raise RuntimeError("second checkpoint predecessor sequence mismatch")
+    loaded2=load_incremental_journal(
+        repo_root=ROOT,
+        events_dir=events_dir,
+        checkpoint_path=checkpoint,
+        checkpoint_bundle_path=checkpoint.with_suffix(".sigstore.json"),
+        head="1h",
+        horizon=horizon,
+        issuance_deadline=deadline,
+        start_utc=start,
+        current_branch_tip=tip,
+        forecast_workflow=WORKFLOW,
+        outcome_workflow=WORKFLOW,
+        verify_event_blob=lambda p,b,e: worker.verify_signature(p,b,cfg,e),
+        verify_checkpoint_blob=lambda p,b,e: worker.verify_signature(p,b,cfg,e),
+        verify_workflow_binding=worker.verify_event_workflow_against_manifest,
+    )
+    if not loaded2["checkpoint_used"] or loaded2["checkpoint_verified_through"]!=48:
+        raise RuntimeError("second checkpoint recovery path not active")
+
     # Full admission path is mandatory and independent of checkpoint acceleration.
     report=run_admission(
         repo_root=str(ROOT),
@@ -379,6 +424,7 @@ def main():
         "source_sha":source_sha,
         "event_count":len(event_files(events_dir)),
         "checkpoint_sequence":json.loads(checkpoint.read_text())["verified_through_sequence"],
+        "anchor_count":report["governance"]["checkpoint_anchor"]["anchor_count"],
         "checkpoint_remote_tip":tip,
         "anchor_branch":anchor_branch,
         "independent_checkpoint_anchor_verified":report["governance"]["independent_checkpoint_anchor_verified"],

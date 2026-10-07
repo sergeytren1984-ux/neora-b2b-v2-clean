@@ -652,6 +652,15 @@ def run_admission(
     )
     governance["exact_checkout_bytes_verified"] = True
 
+    # Close the time-of-check/time-of-use gap: the evidence branch must still
+    # point to this exact checkout after replay/checkpoint/anchor verification.
+    revalidated_tip = _verify_exact_checkout_remote_tip(
+        root, evidence_branch
+    )
+    if revalidated_tip != current_tip:
+        raise ValueError("remote evidence tip changed before scoring")
+    governance["remote_tip_revalidated_before_score"] = True
+
     score = score_from_events(
         events,
         protocol,
@@ -669,6 +678,16 @@ def run_admission(
         "PROSPECTIVE_GATE_PASS_FULLY_VERIFIED"
         if passed else "PROSPECTIVE_GATE_PENDING_OR_FAIL"
     )
+
+    # Re-fetch once more immediately before the admission decision leaves this
+    # function. If a writer advanced the branch while scoring, fail closed.
+    final_tip = _verify_exact_checkout_remote_tip(
+        root, evidence_branch
+    )
+    if final_tip != current_tip:
+        raise ValueError("remote evidence tip changed during scoring")
+    governance["remote_tip_revalidated_after_score"] = True
+
     return {
         "schema": "btc-predictive-vnext4r71-admission-v1",
         "head": head,

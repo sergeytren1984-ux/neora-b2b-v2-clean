@@ -1,0 +1,71 @@
+{
+  "schema": "btc-predictive-vnext4r71-protocol-v1",
+  "status": "R7_1_REMEDIATION_PRE_FREEZE_NOT_PRODUCTION",
+  "parent_r6_source_sha": "98d6ea6e981b3306f397a9105babc2e5d66ac7a0",
+  "selected_model": "ensemble_equal",
+  "numerical_core": "unchanged frozen R6 artifacts",
+  "checkpointing": {
+    "interval_events": 24,
+    "critical_path": "signed checkpoint + exact git prefix binding + full verification of suffix",
+    "exact_verified_branch_commit_prefix_required": true,
+    "event_and_bundle_bytes_required": true,
+    "full_cryptographic_replay_before_admission": true,
+    "checkpoint_failure_policy": "FAIL_CLOSED_NO_SILENT_DOWNGRADE"
+  },
+  "workflow_binding": {
+    "every_event_workflow_commit_must_match_signed_manifest_content_hash": true
+  },
+  "event_invariants": {
+    "unique_type_head_slot": true,
+    "canonical_idempotency_keys": true,
+    "enforce_slot_anchor_due": true
+  },
+  "tail_magnitude_head": {
+    "production": false,
+    "research_only": true,
+    "q3_role": "SEEN_DIAGNOSTIC_NOT_HOLDOUT",
+    "monotone_quantiles_required": true,
+    "monotone_nested_threshold_probabilities_required": true
+  },
+  "prospective_start_utc": null,
+  "admission_enabled": false,
+  "trading_authority": false,
+  "multiple_head_correction": {
+    "familywise_alpha": 0.05,
+    "heads": 3,
+    "method": "Bonferroni one-sided lower bound",
+    "per_head_alpha": 0.016666666666666666
+  },
+  "head": "4h",
+  "artifact_path": "predictive_vnext4r6/head_4h.joblib",
+  "artifact_sha256": "c386489ec54eb441fab7666036c5dcb1fca72e3ad7aa89fc32bf8e3575c04726",
+  "baseline_path": "predictive_vnext4r6/baseline_4h.json",
+  "baseline_sha256": "d4449b18d96162755d938d7b8b8b6da5ee126466ad9e4253ccac24d2c4d8c655",
+  "horizon_hours": 4,
+  "admission": {
+    "minimum_calendar_days": 42,
+    "minimum_fixed_phase_nonoverlap_windows": 150,
+    "nonoverlap_window_hours": 4,
+    "minimum_independent_volatility_episodes": 12,
+    "require_all_three_volatility_bins": true,
+    "block_lengths_days": [
+      14,
+      28
+    ],
+    "calibration_max_ece10_degradation_vs_primary": 0.02,
+    "volatility_episode_policy": {
+      "minimum_duration_hours": 8,
+      "minimum_separation_hours": 16
+    }
+  },
+  "start_utc": null,
+  "admission_entrypoint": {
+    "required": "predictive_vnext4r71/admission.py",
+    "direct_score_admission_forbidden": true,
+    "requires_full_cosign_rekor_replay": true,
+    "requires_workflow_manifest_binding": true,
+    "requires_raw_integrity": true,
+    "requires_exact_receipt_forecast_binding": true,
+    "requires_outcome_after_due": true
+  }
+}

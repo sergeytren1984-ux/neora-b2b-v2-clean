@@ -354,6 +354,12 @@ def run_admission(
         verify_workflow_binding=verify_event_workflow_against_manifest,
         expected_head=head,
     )
+    interval_events=int(checkpoint_policy.get("interval_events",0))
+    if interval_events<=0:
+        raise ValueError("checkpoint interval invalid")
+    uncheckpointed=len(events)-int(checkpoint_state.sequence)
+    if uncheckpointed<0 or uncheckpointed>=interval_events:
+        raise ValueError("checkpoint stale beyond frozen interval")
     anchor_branch = checkpoint_policy.get("anchor_branch")
     if not isinstance(anchor_branch, str) or not anchor_branch:
         raise ValueError("admission checkpoint anchor branch missing")
@@ -373,6 +379,8 @@ def run_admission(
         "verified": True,
         "verified_through_sequence": checkpoint_state.sequence,
         "verified_through_event_hash": checkpoint_state.last_event_hash,
+        "uncheckpointed_suffix_events": uncheckpointed,
+        "maximum_allowed_uncheckpointed_suffix_events": interval_events-1,
     }
     governance["checkpoint_anchor"] = anchor
     governance["independent_checkpoint_anchor_verified"] = True

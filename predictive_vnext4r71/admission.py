@@ -92,14 +92,24 @@ def _path_addition_commit(
     return out[0]
 
 
-def _verify_remote_evidence_tip(
+def _verify_exact_checkout_remote_tip(
     root: Path,
-    manifest: dict,
-    current_tip: str,
+    branch: str,
 ) -> str:
-    branch = manifest.get("evidence_branch")
+    """Fail closed unless the actual checkout HEAD equals fetched remote tip.
+
+    There is deliberately no caller-supplied tip override. This check executes
+    before replay/scoring and binds every later verification to the real checkout.
+    """
     if not isinstance(branch, str) or not branch:
-        raise ValueError("signed manifest evidence branch missing")
+        raise ValueError("evidence branch missing")
+    actual_head = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    ).stdout.strip()
     subprocess.run(
         ["git", "-C", str(root), "fetch", "origin", branch],
         check=True,
@@ -113,9 +123,65 @@ def _verify_remote_evidence_tip(
         text=True,
         timeout=60,
     ).stdout.strip()
-    if current_tip != remote_tip:
-        raise ValueError("admission checkout is not exact remote evidence tip")
-    return remote_tip
+    if actual_head != remote_tip:
+        raise ValueError(
+            "admission checkout HEAD is not exact fetched remote evidence tip"
+        )
+    return actual_head
+
+
+def _verify_checkout_path_at_head(
+    root: Path,
+    head: str,
+    relative_path: str,
+) -> None:
+    local = root / relative_path
+    if not local.exists():
+        raise ValueError("required checkout path missing: " + relative_path)
+    try:
+        committed = _git_bytes(root, head, relative_path)
+    except subprocess.CalledProcessError as ex:
+        raise ValueError(
+            "required path absent from exact checkout HEAD: " + relative_path
+        ) from ex
+    if committed != local.read_bytes():
+        raise ValueError(
+            "working-tree bytes differ from exact checkout HEAD: " + relative_path
+        )
+
+
+def _verify_exact_checkout_snapshot(
+    *,
+    root: Path,
+    head: str,
+    protocol_path: str,
+    events_dir: Path,
+    events: list[dict],
+    checkpoint_path: Path,
+) -> None:
+    """Bind protocol, event, bundle, raw and checkpoint bytes to exact HEAD."""
+    _verify_checkout_path_at_head(root, head, protocol_path)
+    rel_events = str(events_dir.resolve().relative_to(root.resolve()))
+    raw_seen = set()
+    for event in events:
+        seq = int(event["sequence"])
+        for suffix in (".json", ".sigstore.json"):
+            _verify_checkout_path_at_head(
+                root, head, f"{rel_events}/{seq:08d}{suffix}"
+            )
+        if event.get("type") in {"FORECAST_ISSUED", "OUTCOME_RECORDED"}:
+            raw_rel = str(event["raw_path"])
+            if raw_rel in raw_seen:
+                raise ValueError("raw path reused by multiple evidence events")
+            raw_seen.add(raw_rel)
+            _verify_checkout_path_at_head(root, head, raw_rel)
+    checkpoint_rel = str(
+        checkpoint_path.resolve().relative_to(root.resolve())
+    )
+    _verify_checkout_path_at_head(root, head, checkpoint_rel)
+    _verify_checkout_path_at_head(
+        root, head, str(checkpoint_path.with_suffix(".sigstore.json").resolve().relative_to(root.resolve()))
+    )
 
 
 def _git_bytes(root: Path, commit: str, path: str) -> bytes:
@@ -290,6 +356,16 @@ def _verify_governance(
         raw_local, raw_rel = safe_repo_relative_path(
             root, forecast["raw_path"]
         )
+        if Path(raw_rel).name != slot + ".json":
+            raise ValueError("forecast raw path is not unique for slot: " + slot)
+        raw_addition_commit = _path_addition_commit(
+            root, current_tip, raw_rel
+        )
+        if raw_addition_commit != publication_commit:
+            raise ValueError(
+                "forecast raw first publication differs from event publication commit: "
+                + slot
+            )
         try:
             committed_raw = _git_bytes(root, commit, raw_rel)
         except subprocess.CalledProcessError as ex:
@@ -318,6 +394,16 @@ def _verify_governance(
         raw_local, raw_rel = safe_repo_relative_path(
             root, outcome["raw_path"]
         )
+        if Path(raw_rel).name != slot + "-outcome.json":
+            raise ValueError("outcome raw path is not unique for slot: " + slot)
+        raw_addition_commit = _path_addition_commit(
+            root, current_tip, raw_rel
+        )
+        if raw_addition_commit != publication_commit:
+            raise ValueError(
+                "outcome raw first publication differs from event publication commit: "
+                + slot
+            )
         try:
             committed_raw = _git_bytes(root, publication_commit, raw_rel)
         except subprocess.CalledProcessError as ex:
@@ -348,7 +434,6 @@ def run_admission(
     repo_root: str,
     protocol_path: str,
     events_dir: str,
-    current_tip: str | None = None,
 ):
     root = Path(repo_root).resolve()
     protocol = json.loads((root / protocol_path).read_text())
@@ -416,14 +501,9 @@ def run_admission(
     ):
         raise ValueError("protocol signature binding incomplete")
 
-    if current_tip is None:
-        current_tip = subprocess.run(
-            ["git", "-C", str(root), "rev-parse", "HEAD"],
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=60,
-        ).stdout.strip()
+    current_tip = _verify_exact_checkout_remote_tip(
+        root, evidence_branch
+    )
 
     verify_forecast_blob = make_blob_verifier(
         repository=repository,
@@ -493,9 +573,10 @@ def run_admission(
         if p not in manifest.get("paths_sha256", {}):
             raise ValueError("required deployment path absent from signed manifest")
     governance["complete_deployment_bundle_bound"] = True
-    governance["remote_evidence_tip"] = _verify_remote_evidence_tip(
-        root, manifest, current_tip
-    )
+    if manifest.get("evidence_branch") != evidence_branch:
+        raise ValueError("signed manifest evidence branch differs from protocol")
+    governance["remote_evidence_tip"] = current_tip
+    governance["exact_checkout_head_verified"] = True
 
     checkpoint_policy = protocol.get("checkpointing", {})
     if checkpoint_policy.get("anchor_required") is not True:
@@ -550,6 +631,16 @@ def run_admission(
     }
     governance["checkpoint_anchor"] = anchor
     governance["independent_checkpoint_anchor_verified"] = True
+
+    _verify_exact_checkout_snapshot(
+        root=root,
+        head=current_tip,
+        protocol_path=protocol_path,
+        events_dir=root / events_dir,
+        events=events,
+        checkpoint_path=checkpoint_path,
+    )
+    governance["exact_checkout_bytes_verified"] = True
 
     score = score_from_events(
         events,

@@ -123,6 +123,7 @@ def main():
         "checkpointing":{
             "anchor_required":True,
             "anchor_branch":anchor_branch,
+            "checkpoint_path":"r71_e2e_checkpoint/1h.json",
         },
         "admission":{
             "nonoverlap_window_hours":1,

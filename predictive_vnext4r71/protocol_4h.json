@@ -101,7 +101,9 @@
     "decision_semantics": "SNAPSHOT_AS_OF_EXACT_EVIDENCE_SHA",
     "absolute_latest_tip_atomicity_claimed": false,
     "consumer_must_reject_if_evidence_tip_differs": true,
-    "consumer_compare_and_swap_or_lease_required_for_activation": true
+    "consumer_compare_and_swap_or_lease_required_for_activation": true,
+    "consumer_validation_entrypoint": "predictive_vnext4r71.admission.assert_snapshot_decision_current",
+    "consumer_snapshot_freshness_guard_required": true
   },
   "workflows": {
     "forecast": ".github/workflows/btc-predictive-vnext4r71-4h.yml",

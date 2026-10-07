@@ -1,0 +1,61 @@
+{
+  "schema": "btc-predictive-vnext4r7-remediation-policy-v1",
+  "status": "REMEDIATION_CANDIDATE_NOT_PRODUCTION",
+  "parent_r6_source_sha": "98d6ea6e981b3306f397a9105babc2e5d66ac7a0",
+  "parent_r6_numeric_candidate_sha": "faa0244a34516177c9e23cccc30f522462f7423f",
+  "changes": {
+    "immutable_workflow_verification": {
+      "required": true,
+      "rule": "For every signed event/checkpoint, git-show the workflow bytes at event.workflow_commit and require SHA256 equality with the signed pre-start manifest path hash."
+    },
+    "incremental_checkpoints": {
+      "required": true,
+      "checkpoint_every_events": 24,
+      "critical_path": "Verify one signed checkpoint + cheap prefix file digest + Cosign/Rekor only for suffix events.",
+      "full_verification": "Required periodically and before any admission decision."
+    },
+    "event_invariants": {
+      "required": true,
+      "uniqueness": "(type,head,slot) must be unique for forecast, delivery, outcome and missed events; schedule/freeze unique per head.",
+      "canonical_keys": true,
+      "enforce_slot_anchor_due_relationship": true
+    },
+    "volatility_episodes": {
+      "1h": {
+        "nonoverlap_window_hours": 1,
+        "minimum_duration_hours": 3,
+        "minimum_separation_hours": 6
+      },
+      "4h": {
+        "nonoverlap_window_hours": 4,
+        "minimum_duration_hours": 8,
+        "minimum_separation_hours": 16
+      },
+      "24h": {
+        "nonoverlap_window_hours": 24,
+        "minimum_duration_hours": 48,
+        "minimum_separation_hours": 72
+      },
+      "note": "Values are fixed before successor prospective launch and are not tuned on R7 outcomes."
+    },
+    "tail_magnitude_research": {
+      "production": false,
+      "target_unit": "multiples of frozen R6 volatility barrier",
+      "quantiles": [
+        0.5,
+        0.75,
+        0.9
+      ],
+      "exceedance_thresholds": [
+        1,
+        1.5,
+        2
+      ],
+      "selection_period": "2026H1",
+      "q3_role": "diagnostic only"
+    }
+  },
+  "prospective_start_utc": null,
+  "admission_enabled": false,
+  "trading_authority": false
+}

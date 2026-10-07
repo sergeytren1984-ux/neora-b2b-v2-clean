@@ -1,6 +1,6 @@
 {
   "schema": "btc-predictive-vnext4r71-protocol-v1",
-  "status": "R7_1_REMEDIATION_PRE_FREEZE_NOT_PRODUCTION",
+  "status": "R7_2_REMEDIATION_PRE_FREEZE_NOT_PRODUCTION",
   "parent_r6_source_sha": "98d6ea6e981b3306f397a9105babc2e5d66ac7a0",
   "selected_model": "ensemble_equal",
   "numerical_core": "unchanged frozen R6 artifacts",
@@ -29,7 +29,8 @@
     "research_only": true,
     "q3_role": "SEEN_DIAGNOSTIC_NOT_HOLDOUT",
     "monotone_quantiles_required": true,
-    "monotone_nested_threshold_probabilities_required": true
+    "monotone_nested_threshold_probabilities_required": true,
+    "q3_used_for_any_gate": false
   },
   "prospective_start_utc": null,
   "admission_enabled": false,
@@ -106,5 +107,28 @@
       ".github/workflows/btc-predictive-vnext4r71-health.yml"
     ]
   },
-  "parent_r6_candidate_sha": "faa0244a34516177c9e23cccc30f522462f7423f"
+  "parent_r6_candidate_sha": "faa0244a34516177c9e23cccc30f522462f7423f",
+  "admission_mode": "PROSPECTIVE",
+  "forbidden_admission_controls": [
+    "diagnostic_cutoff_utc",
+    "historical_cutoff_utc",
+    "test_cutoff_utc",
+    "diagnostic_mode",
+    "historical_mode",
+    "test_mode"
+  ],
+  "raw_evidence_provenance": {
+    "safe_repository_relative_path_required": true,
+    "head_specific_raw_prefix_required": "predictive_vnext4r71_1h_raw/",
+    "local_sha256_required": true,
+    "exact_event_publication_commit_byte_equality_required": true,
+    "publication_commit_must_be_ancestor_of_remote_tip": true,
+    "admission_checkout_must_equal_remote_evidence_tip": true
+  },
+  "e2e_audit_artifacts": {
+    "successful_positive_signed_e2e_must_be_preserved": true,
+    "successful_negative_signed_e2e_must_be_preserved": true,
+    "cosign_rekor_bundles_must_be_preserved": true,
+    "commit_ids_and_hashes_must_be_reported": true
+  }
 }

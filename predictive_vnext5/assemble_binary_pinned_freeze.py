@@ -308,6 +308,8 @@ def main(argv=None):
         "f4_adversarial_regression_sha256":
             sha(HERE/"f4_adversarial_regression.py"),
         "provenance_e2e_sha256":sha(HERE/"provenance_e2e.py"),
+        "evidence_workflow_sha256":
+            sha(ROOT/".github/workflows/btc-predictive-vnext5r3-evidence.yml"),
         "predictor_sha256":sha(HERE/"predictor.py"),
         "evaluation_authority":{
             "sole_admission_entrypoint":

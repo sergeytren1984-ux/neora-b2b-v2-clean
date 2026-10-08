@@ -10,6 +10,8 @@ import numpy as np
 from predictive_vnext4.core import full_proba, _hazard_cumulative
 
 RAW_CLASSES=("LOWER_FIRST","UPPER_FIRST","NEITHER","AMBIGUOUS_SAME_BAR")
+DOMAIN_ABS_TOL=1e-12
+PROB_SUM_TOL=1e-8
 
 
 def _calibrated(calibrator, raw):
@@ -28,14 +30,47 @@ def _augment(base, lower_sigma, upper_sigma):
     return np.column_stack((b,extra))
 
 
+def _inclusive(value, low, high, *, tol=DOMAIN_ABS_TOL):
+    if not math.isfinite(value):
+        return False
+    return (
+        (value > low or math.isclose(value, low, rel_tol=0.0, abs_tol=tol))
+        and
+        (value < high or math.isclose(value, high, rel_tol=0.0, abs_tol=tol))
+    )
+
+
 def validate_sigma_domain(lower_sigma, upper_sigma):
     lo=float(lower_sigma);up=float(upper_sigma)
-    if not (0.25 <= lo <= 3.0 and 0.25 <= up <= 3.0):
+    if not (_inclusive(lo,0.25,3.0) and _inclusive(up,0.25,3.0)):
         raise ValueError("OUT_OF_DOMAIN_NO_MODEL_PROBABILITY")
     ratio=lo/up
-    if not (0.1 <= ratio <= 10.0):
+    if not _inclusive(ratio,0.1,10.0):
         raise ValueError("OUT_OF_DOMAIN_NO_MODEL_PROBABILITY")
     return lo,up
+
+
+def _normalize_model_probability(raw):
+    p=np.asarray(raw,dtype=float)
+    if p.shape!=(4,) or not np.all(np.isfinite(p)) or np.any(p<0.0):
+        raise ValueError("INVALID_MODEL_PROBABILITY")
+    total=float(p.sum())
+    if not math.isfinite(total) or total<=0.0:
+        raise ValueError("INVALID_MODEL_PROBABILITY")
+    p=p/total
+    if not np.all(np.isfinite(p)) or np.any(p<0.0):
+        raise ValueError("INVALID_MODEL_PROBABILITY")
+    return p
+
+
+def _validated_display_probability(raw):
+    p=np.asarray(raw,dtype=float)
+    if p.shape!=(4,) or not np.all(np.isfinite(p)) or np.any(p<0.0):
+        raise ValueError("INVALID_RAW_PROBABILITY")
+    total=float(p.sum())
+    if not math.isfinite(total) or abs(total-1.0)>PROB_SUM_TOL:
+        raise ValueError("INVALID_RAW_PROBABILITY")
+    return p/total
 
 
 def zone_edges_to_sigmas(reference, lower_zone, upper_zone, vol, horizon_steps):
@@ -70,8 +105,7 @@ def classifier_raw_probability(bundle, base_features, lower_sigma, upper_sigma):
         raw=full_proba(item["model"],X)
         out.append(_calibrated(item["calibrator"],raw)[0])
     p=np.mean(np.vstack(out),axis=0)
-    p=p/max(float(p.sum()),1e-12)
-    return p
+    return _normalize_model_probability(p)
 
 
 def hazard_raw_probability(bundle, base_features, lower_sigma, upper_sigma):
@@ -83,13 +117,11 @@ def hazard_raw_probability(bundle, base_features, lower_sigma, upper_sigma):
         int(bundle["hazard_step"]),
     )
     p=_calibrated(bundle["calibrator"],raw)[0]
-    return p/max(float(p.sum()),1e-12)
+    return _normalize_model_probability(p)
 
 
 def display_three_state(raw):
-    p=np.asarray(raw,dtype=float)
-    if p.shape!=(4,):
-        raise ValueError("expected four raw probabilities")
+    p=_validated_display_probability(raw)
     out={
         "DOWN":float(p[0]+0.5*p[3]),
         "RANGE":float(p[2]),

@@ -67,7 +67,8 @@
     "full_signature_rekor_replay_required": true,
     "raw_first_addition_commit_equals_event_publication_commit": true,
     "forecast_delivery_receipt_required": true,
-    "source_workflow_content_bound_to_signed_manifest": true
+    "source_workflow_content_bound_to_signed_manifest": true,
+    "events_dir_template": "predictive_vnext5_evidence/{head}/events"
   },
   "row_derivation": {
     "forecast_issued_at_utc": "max(FORECAST_ISSUED Rekor integrated time, DELIVERY_CONFIRMED Rekor integrated time)",

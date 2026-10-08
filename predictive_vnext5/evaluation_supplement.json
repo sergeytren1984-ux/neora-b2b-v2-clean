@@ -1,6 +1,6 @@
 {
-  "schema": "btc-predictive-vnext5r3-evaluation-supplement-v3",
-  "status": "FROZEN_PRESTART_PROVENANCE_BOUND",
+  "schema": "btc-predictive-vnext5r4-evaluation-supplement-v4",
+  "status": "FROZEN_PRESTART_NUMERICAL_PROVENANCE_BOUND",
   "scope": "canonical +/-1sigma prospective admission only",
   "raw_class_order": [
     "LOWER_FIRST",
@@ -51,7 +51,7 @@
     ],
     "prediction_raw": "exact array[4]; each element numeric, finite, non-negative; sum=1 within 1e-8",
     "outcome_class": "Python/JSON integer 0..3 only; bool and fractional numeric values forbidden",
-    "forecast_time": "anchor_utc <= forecast_issued_at_utc <= anchor_utc + frozen forecast deadline",
+    "forecast_time": "anchor_utc <= forecast_issued_at_utc < anchor_utc + frozen forecast deadline",
     "outcome_time": "due_utc <= outcome_recorded_at_utc <= evaluation cutoff_utc",
     "unknown_fields": "REJECT",
     "custom_zone_fields": "REJECT in primary admission; custom-zone evaluation is a separate non-authoritative path"
@@ -257,6 +257,10 @@
       "exact remote evidence tip snapshot"
     ],
     "forecast_time_authority": "max forecast/receipt Rekor integratedTime",
-    "outcome_time_authority": "outcome Rekor integratedTime"
+    "outcome_time_authority": "outcome Rekor integratedTime",
+    "upstream_numerical_replay_required": true,
+    "signed_event_extra_fields_rejected_before_derivation": true,
+    "production_predictions_recomputed_from_market_raw": true,
+    "production_outcomes_recomputed_from_forward_market_raw": true
   }
 }

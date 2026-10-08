@@ -37,12 +37,14 @@
       "head_24h_classifier.joblib",
       "head_24h_competing_risks.joblib",
       "selftest_vectors.json",
+      "parent_freeze_manifest.json",
       "evaluation_runtime.json",
       "build_environment.json",
       "model_behavior_fingerprint.json",
       "freeze_manifest.json"
     ],
-    "final_package_published_only_after_match": true
+    "final_package_published_only_after_match": true,
+    "retraining_for_freeze_forbidden": true
   },
   "predictive_model_change": false,
   "historical_model_selection_change": false,

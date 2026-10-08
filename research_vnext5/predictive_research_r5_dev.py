@@ -71,7 +71,7 @@ def calibrated_hazard(X,y,when,train,cal,test):
     ptest=_hazard_cumulative(
         model,X[test],HORIZON_STEPS,HAZARD_STEP
     )
-    return r1.calibrate(pcal,ptest,y[cal])
+    return r1.calibrate(pcal,ptest,y[cal],4)
 
 
 def fold_metrics(p,base,y,dates,canon):

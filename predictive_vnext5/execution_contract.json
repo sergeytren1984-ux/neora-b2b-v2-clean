@@ -1,5 +1,5 @@
 {
-  "schema": "btc-predictive-vnext5r4-execution-contract-v1",
+  "schema": "btc-predictive-vnext5r4-execution-contract-v2",
   "status": "FROZEN_PRESTART",
   "required_source_paths": [
     ".github/workflows/btc-predictive-vnext5r4-evidence.yml",
@@ -21,7 +21,8 @@
     "predictive_vnext4/core.py",
     "predictive_vnext4r71/crypto.py",
     "predictive_vnext4r71/integrity.py",
-    "predictive_vnext4r7/integrity.py"
+    "predictive_vnext4r7/integrity.py",
+    "predictive_vnext5/production_journal.py"
   ],
   "runtime": {
     "python": "3.12.14",
@@ -58,5 +59,17 @@
     "worker_checkout_head_must_equal_signed_source_sha": true,
     "arbitrary_working_tree_imports_forbidden": true
   },
-  "trading_authority": false
+  "trading_authority": false,
+  "production_path": {
+    "workflow": ".github/workflows/btc-predictive-vnext5r4-evidence.yml",
+    "worker": "predictive_vnext5/production_journal.py",
+    "numerical_core": "predictive_vnext5/production_emitter.py",
+    "actions": [
+      "register",
+      "forecast",
+      "outcome"
+    ],
+    "automatic_start": false,
+    "registration_requires_workflow_dispatch": true
+  }
 }

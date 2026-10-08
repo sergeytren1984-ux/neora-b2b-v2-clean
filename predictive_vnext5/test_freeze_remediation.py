@@ -13,6 +13,7 @@ import numpy as np
 
 from predictive_vnext5 import predictor
 from predictive_vnext5 import prospective_score as score
+from predictive_vnext5 import verified_evidence as evidence
 
 
 class PredictorBoundaryTests(unittest.TestCase):
@@ -156,6 +157,52 @@ class EvaluationSemanticsTests(unittest.TestCase):
         self.assertEqual(len(grid),1)
         self.assertIn(("1h",self.start),by)
 
+
+    def test_exact_deadline_is_rejected_consistently(self):
+        row=self.row()
+        row["forecast_issued_at_utc"]=(self.start+timedelta(minutes=14)).isoformat()
+        with self.assertRaisesRegex(ValueError,"late forecast"):
+            score.validate_rows([row],"1h",self.start,self.start+timedelta(hours=1))
+
+    def test_signed_event_extra_custom_fields_rejected_before_derivation(self):
+        base={
+            "schema":"btc-predictive-vnext5r4-evidence-event-v1",
+            "sequence":3,
+            "previous_hash":"0"*64,
+            "workflow_commit":"1"*40,
+            "published_at_utc":self.start.isoformat(),
+            "type":"FORECAST_ISSUED",
+            "idempotency_key":"forecast:test",
+            "head":"1h",
+            "trading_authority":False,
+            "slot":"test",
+            "anchor_utc":self.start.isoformat(),
+            "due_utc":(self.start+timedelta(hours=1)).isoformat(),
+            "query_type":"CANONICAL",
+            "target_id":"CANONICAL_SIGMA_1_1_V1",
+            "lower_sigma":1.0,
+            "upper_sigma":1.0,
+            "predictions":{"1h":[.25,.25,.5,0.0]},
+            "artifact_sha256":{"1h":"a"*64},
+            "volatility":.002,
+            "reference_price":80000.0,
+            "lower_price":79000.0,
+            "upper_price":81000.0,
+            "feature_sha256":"b"*64,
+            "raw_path":"predictive_vnext5_1h_raw/test.json",
+            "raw_sha256":"c"*64,
+            "producer_mode":"PRODUCTION",
+        }
+        evidence._validate_exact_event_schema(base)
+        for key,value in (
+            ("custom_zone",[82000,87000]),
+            ("actual_query_type","CUSTOM_ZONE"),
+            ("free_form_note","anything"),
+        ):
+            attack=dict(base);attack[key]=value
+            with self.assertRaisesRegex(ValueError,"forbidden fields"):
+                evidence._validate_exact_event_schema(attack)
+
     def test_modified_runtime_rejected(self):
         runtime=score.authoritative_runtime()
         changed=copy.deepcopy(runtime)
@@ -236,7 +283,7 @@ class FreezeBindingTests(unittest.TestCase):
             "frozen_source_runtime_sha256":
                 root/"predictive_vnext5/frozen_evaluation_runtime.json",
             "evidence_workflow_sha256":
-                root/".github/workflows/btc-predictive-vnext5r3-evidence.yml",
+                root/".github/workflows/btc-predictive-vnext5r4-evidence.yml",
         }
         for key,path in expected.items():
             self.assertEqual(
@@ -249,6 +296,29 @@ class FreezeBindingTests(unittest.TestCase):
         source=(root/"predictive_vnext5/frozen_evaluation_runtime.json").read_bytes()
         packaged=(root/"predictive_vnext5/build/evaluation_runtime.json").read_bytes()
         self.assertEqual(source,packaged)
+
+
+    def test_execution_contract_requires_complete_runtime_and_producer_graph(self):
+        root=self.root()
+        contract=json.loads(
+            (root/"predictive_vnext5/execution_contract.json").read_text()
+        )
+        required=set(contract["required_source_paths"])
+        must={
+            "predictive_vnext5/verified_evidence.py",
+            "predictive_vnext5/prospective_admission.py",
+            "predictive_vnext5/admission_worker.py",
+            "predictive_vnext5/prospective_score.py",
+            "predictive_vnext5/production_emitter.py",
+            "predictive_vnext5/production_journal.py",
+            "predictive_vnext5/frozen_evaluation_runtime.json",
+            "predictive_vnext4r6/live_features.py",
+            "predictive_vnext4/core.py",
+            "predictive_vnext4r71/crypto.py",
+            "predictive_vnext4r7/integrity.py",
+            ".github/workflows/btc-predictive-vnext5r4-evidence.yml",
+        }
+        self.assertTrue(must.issubset(required))
 
     def test_evidence_template_preserves_model_authority(self):
         root=self.root()

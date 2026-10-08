@@ -1,0 +1,91 @@
+{
+  "schema": "btc-predictive-vnext5-research-acceptance-policy-v1",
+  "status": "FROZEN_BEFORE_RESEARCH_RUN",
+  "parent_engineering_source_sha": "34304b7650421dfd07d3c9e9b2f7f3c937b96ec1",
+  "trading_authority": false,
+  "prospective_skill_proven": false,
+  "direction_gate": {
+    "min_folds": 4,
+    "min_wins": 4,
+    "min_positive_ci_folds": 3,
+    "min_mean_brier_gain": 0.01,
+    "max_mean_ece10": 0.06,
+    "selection": "lowest_mean_brier_among_passing_candidates"
+  },
+  "zone_gate": {
+    "min_folds": 4,
+    "min_wins": 3,
+    "min_positive_ci_folds": 2,
+    "min_mean_brier_gain": 0.005,
+    "max_ambiguous_fraction": 0.015,
+    "selection": "lowest_mean_brier_among_passing_candidates"
+  },
+  "immutable_target_definition": {
+    "direction_corridor_sigma": 0.5,
+    "direction_classes": [
+      "DOWN",
+      "RANGE",
+      "UP"
+    ],
+    "zone_sigma_pairs": [
+      [
+        0.25,
+        2.5
+      ],
+      [
+        0.5,
+        0.5
+      ],
+      [
+        0.5,
+        2
+      ],
+      [
+        0.75,
+        1.5
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1.5,
+        0.75
+      ],
+      [
+        1.5,
+        1.5
+      ],
+      [
+        2,
+        0.5
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        2.5,
+        0.25
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        3
+      ]
+    ],
+    "ambiguous_display_mapping": "split 0.5/0.5 between DOWN and UP; raw probability always preserved"
+  },
+  "exogenous_feature_policy": {
+    "macro_daily_market": "exclude from core until new causal ablation passes",
+    "funding_oi": "exclude from core until publication-time-safe ablation passes",
+    "breakout_memory": "eligible only for 1h candidate because prior R6 gate passed only 1h"
+  }
+}

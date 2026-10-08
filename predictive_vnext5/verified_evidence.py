@@ -192,6 +192,9 @@ def verify_evidence_snapshot(
     root=Path(root).resolve()
     if not HEX40.fullmatch(str(current_tip)):
         raise ValueError("invalid evidence tip")
+    actual_head=_git(root,"rev-parse","HEAD").strip()
+    if actual_head!=current_tip:
+        raise ValueError("snapshot HEAD differs from bound evidence tip")
 
     protocol_file=root/protocol_path
     protocol_bytes=protocol_file.read_bytes()
@@ -274,6 +277,10 @@ def verify_evidence_snapshot(
         raise ValueError("manifest source ref mismatch")
     if manifest.get("workflow_trigger")!=trigger:
         raise ValueError("manifest trigger mismatch")
+    if manifest.get("model_artifact_sha256")!=artifacts:
+        raise ValueError("signed manifest model artifact binding mismatch")
+    if manifest.get("trading_authority") is not False:
+        raise ValueError("signed manifest trading authority drift")
     _verify_source_manifest(root,manifest,source_sha)
 
     template_path="predictive_vnext5/evidence_protocol_template.json"
@@ -325,6 +332,8 @@ def verify_evidence_snapshot(
 
     rekor={}
     for event,path in zip(events,files):
+        if event.get("trading_authority") is not False:
+            raise ValueError("evidence event trading authority drift")
         if event.get("workflow_commit")!=source_sha:
             raise ValueError("event workflow commit differs from frozen source")
         # Bind workflow bytes independently at the signing commit.

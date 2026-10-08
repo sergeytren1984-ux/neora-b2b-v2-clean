@@ -235,6 +235,8 @@ class FreezeBindingTests(unittest.TestCase):
                 root/"predictive_vnext5/evidence_protocol_template.json",
             "frozen_source_runtime_sha256":
                 root/"predictive_vnext5/frozen_evaluation_runtime.json",
+            "evidence_workflow_sha256":
+                root/".github/workflows/btc-predictive-vnext5r3-evidence.yml",
         }
         for key,path in expected.items():
             self.assertEqual(

@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 import sys
 import time
+import json
 from datetime import timedelta
 from pathlib import Path
 
@@ -107,6 +108,24 @@ def session(head):
         else ACTIVE_SESSION_RUNTIME
     )
     session_deadline = started + runtime
+    initial_anchor = START if started < START else slot_floor(started, cfg["cadence"])
+    initial_cutoff = initial_anchor + cfg["deadline"] - DEADLINE_SAFETY
+    print(
+        "R76_SESSION_READY " + json.dumps(
+            {
+                "head": head,
+                "started_at": started.isoformat(),
+                "session_deadline": session_deadline.isoformat(),
+                "initial_anchor": initial_anchor.isoformat(),
+                "initial_cutoff": initial_cutoff.isoformat(),
+                "seconds_to_initial_cutoff": (initial_cutoff-started).total_seconds(),
+                "zero_restart_lag_claimed": False,
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        ),
+        flush=True,
+    )
 
     invoke(head, "forecast")
     if utcnow() >= START:

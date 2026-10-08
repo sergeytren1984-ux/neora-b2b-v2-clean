@@ -1,6 +1,6 @@
 {
-  "schema": "btc-predictive-vnext5r41-prospective-protocol-v5",
-  "status": "FROZEN_PRESTART_ACCEPTANCE_FINALIZATION_START_UTC_NULL",
+  "schema": "btc-predictive-vnext5r42-prospective-protocol-v6",
+  "status": "FROZEN_PRESTART_TRUST_AND_OUTCOME_BINDING_START_UTC_NULL",
   "start_utc": null,
   "timezone_internal": "UTC",
   "reporting_timezone": "MSK",
@@ -103,7 +103,12 @@
     "deadline_interval": "anchor <= issued < deadline",
     "consumer_side_snapshot_contract_required_before_automatic_use": true,
     "signed_a5_negative_e2e_required": true,
-    "full_grid_a5_semantic_regression_required": true
+    "full_grid_a5_semantic_regression_required": true,
+    "trusted_approved_source_sha_outside_journal_required": true,
+    "journal_source_sha_cannot_select_executable_code": true,
+    "consumer_arbitrary_decision_input_forbidden": true,
+    "outcome_barriers_bound_to_verified_forecast_required": true,
+    "signed_joint_outcome_target_negative_e2e_required": true
   },
   "authority": {
     "prospective_skill_proven": false,
@@ -136,7 +141,7 @@
     "forecast_time_interval": "anchor <= Rekor(forecast,receipt) < deadline",
     "outcome_must_be_available_by_evaluation_cutoff": true,
     "prediction_replay": "signed closed market candles -> frozen features -> exact model binary -> probabilities/barriers",
-    "outcome_replay": "signed forward market candles -> frozen barriers -> first-passage class",
+    "outcome_replay": "signed forward market candles -> verified forecast barriers -> first-passage class",
     "executed_evaluator": "detached checkout whose HEAD equals signed source_commit_sha",
     "full_dependency_hash_coverage_required": true,
     "remote_tip_revalidated_after_scoring": true,
@@ -147,6 +152,12 @@
     "consumer_exact_tip_recheck_required": true,
     "consumer_cutoff_head_source_schema_binding_required": true,
     "production_writer_serialization_required": true,
-    "production_signer_identity_recheck_before_publish": true
+    "production_signer_identity_recheck_before_publish": true,
+    "trusted_source_bootstrap": "externally approved exact source SHA + launcher checkout equality before evidence parsing",
+    "journal_source_selects_executable_code": false,
+    "consumer_calls_authoritative_admission_directly": true,
+    "arbitrary_decision_object_consumer_input": false,
+    "outcome_barrier_authority": "verified/recomputed forecast lower_price and upper_price for same slot",
+    "outcome_event_barrier_equality_required": true
   }
 }

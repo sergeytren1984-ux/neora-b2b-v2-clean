@@ -1,0 +1,199 @@
+{
+  "schema": "btc-predictive-vnext5r1-evaluation-supplement-v1",
+  "status": "FROZEN_PRESTART",
+  "scope": "canonical +/-1sigma prospective admission only",
+  "raw_class_order": [
+    "LOWER_FIRST",
+    "UPPER_FIRST",
+    "NEITHER",
+    "AMBIGUOUS_SAME_BAR"
+  ],
+  "display_mapping": {
+    "DOWN": "LOWER_FIRST + 0.5 * AMBIGUOUS_SAME_BAR",
+    "RANGE": "NEITHER",
+    "UP": "UPPER_FIRST + 0.5 * AMBIGUOUS_SAME_BAR"
+  },
+  "input_row_schema": {
+    "required": [
+      "head",
+      "candidate_id",
+      "anchor_utc",
+      "forecast_issued_at_utc",
+      "due_utc",
+      "outcome_recorded_at_utc",
+      "prediction_raw",
+      "outcome_class",
+      "volatility"
+    ],
+    "prediction_raw": "array[4], finite, non-negative, sum 1 within 1e-8",
+    "outcome_class": "integer 0..3 in raw_class_order"
+  },
+  "anchor_grid": {
+    "1h": {
+      "cadence_minutes": 60,
+      "utc_hours": "all",
+      "minute": 0,
+      "forecast_deadline_minutes": 14,
+      "horizon_minutes": 60
+    },
+    "4h": {
+      "cadence_minutes": 240,
+      "utc_hours": [
+        0,
+        4,
+        8,
+        12,
+        16,
+        20
+      ],
+      "minute": 0,
+      "forecast_deadline_minutes": 14,
+      "horizon_minutes": 240
+    },
+    "24h": {
+      "cadence_minutes": 1440,
+      "utc_hours": [
+        0
+      ],
+      "minute": 0,
+      "forecast_deadline_minutes": 45,
+      "horizon_minutes": 1440
+    }
+  },
+  "canonical_target": {
+    "lower_sigma": 1,
+    "upper_sigma": 1
+  },
+  "baseline": {
+    "name": "due_causal_rolling90d_frozen_volatility_bin",
+    "volatility_bins": "two exact per-head edges from evaluation_runtime.json, derived as 1/3 and 2/3 quantiles of frozen training canonical volatility with numpy method=linear",
+    "rolling_days": 90,
+    "causal_rule": "only prior rows whose due_utc is strictly before current anchor_utc",
+    "preferred_pool": "same frozen volatility bin",
+    "min_rows": 30,
+    "fallback_1": "all prior causal rows in rolling 90d if >=30",
+    "fallback_2": "frozen training prior for same volatility bin from evaluation_runtime.json",
+    "fallback_3": "frozen global training prior",
+    "dirichlet_alpha_per_class": 0.5,
+    "raw_classes": 4
+  },
+  "metrics": {
+    "brier": "mean over rows of sum_k (p_k - 1[y=k])^2",
+    "log_loss": "mean -log(max(p_y,1e-12))",
+    "ece10": {
+      "definition": "confidence ECE on raw 4-state probabilities",
+      "confidence": "max class probability",
+      "accuracy": "argmax prediction equals raw outcome class",
+      "bins": [
+        [
+          0,
+          0.1
+        ],
+        [
+          0.1,
+          0.2
+        ],
+        [
+          0.2,
+          0.3
+        ],
+        [
+          0.3,
+          0.4
+        ],
+        [
+          0.4,
+          0.5
+        ],
+        [
+          0.5,
+          0.6
+        ],
+        [
+          0.6,
+          0.7
+        ],
+        [
+          0.7,
+          0.8
+        ],
+        [
+          0.8,
+          0.9
+        ],
+        [
+          0.9,
+          1
+        ]
+      ],
+      "interval_rule": "left-closed/right-open except final bin includes 1.0",
+      "empty_bins": "ignored",
+      "weighting": "row-count fraction"
+    }
+  },
+  "confidence_interval": {
+    "metric": "paired per-row Brier gain = baseline_loss - candidate_loss",
+    "confidence_level": 0.95,
+    "block": "ISO week Monday 00:00 UTC of anchor",
+    "bootstrap_resamples": 2000,
+    "seed": 20261008,
+    "resample_rule": "sample number_of_unique_week_blocks blocks with replacement; concatenate all rows from sampled blocks",
+    "interval": "percentile 2.5% / 97.5%",
+    "minimum_unique_blocks": 4,
+    "pass_rule": "lower bound strictly > 0"
+  },
+  "gates": {
+    "calibration_max_ece10": 0.05,
+    "calibration_max_ece10_degradation_vs_baseline": 0.015,
+    "brier_gain_mean_strictly_positive": true,
+    "brier_gain_ci_lower_strictly_positive": true,
+    "logloss_gain_mean_strictly_positive": true,
+    "incomplete_due_grid_blocks_acceptance": true,
+    "duplicates_block_acceptance": true,
+    "late_forecast_blocks_affected_slot": true,
+    "early_outcome_blocks_affected_slot": true
+  },
+  "decision_minima": {
+    "1h": {
+      "calendar_days": 42,
+      "fixed_phase_nonoverlap_windows": 500
+    },
+    "4h": {
+      "calendar_days": 42,
+      "fixed_phase_nonoverlap_windows": 150
+    },
+    "24h": {
+      "calendar_days": 60,
+      "fixed_phase_nonoverlap_windows": 45
+    }
+  },
+  "candidates": {
+    "1h": [
+      "1h"
+    ],
+    "4h": [
+      "4h"
+    ],
+    "24h": [
+      "24h_classifier",
+      "24h_competing_risks"
+    ]
+  },
+  "challenger_24h": {
+    "selection_not_before_decision_minima": true,
+    "if_only_one_passes": "select the passing challenger",
+    "if_both_pass": "require paired weekly-block 95% CI lower bound >0 for Brier loss advantage of winner over loser",
+    "if_both_pass_without_significant_difference": "NO_WINNER_CONTINUE_PROSPECTIVE",
+    "if_neither_passes": "NO_WINNER_REWORK"
+  },
+  "custom_zones": {
+    "statistical_authority": "none unless exact zone pair preregistered before START",
+    "not_used_for_primary_admission": true
+  },
+  "authority": {
+    "start_utc": null,
+    "prospective_skill_proven": false,
+    "trading_authority": false,
+    "immutable_after_start": true
+  }
+}

@@ -148,7 +148,7 @@ def main():
             "messages":attacks,
         }
 
-    # The old CLI attack must no longer be expressible: --runtime is not accepted.
+    # Standalone scorer CLI is no longer an admission surface at all.
     with tempfile.TemporaryDirectory() as td:
         p=Path(td)/"rows.jsonl"
         p.write_text("\n".join(json.dumps(x,separators=(",",":")) for x in rows("4h"))+"\n")
@@ -164,9 +164,10 @@ def main():
             ],
             capture_output=True,text=True,
         )
-        if proc.returncode==0 or "unrecognized arguments: --runtime" not in proc.stderr:
-            raise AssertionError("CLI runtime override unexpectedly accepted")
-        report["cli_runtime_override"]="REJECTED"
+        message=proc.stderr+proc.stdout
+        if proc.returncode==0 or "non-authoritative" not in message:
+            raise AssertionError("standalone JSONL scorer unexpectedly authoritative")
+        report["standalone_jsonl_scorer"]="REJECTED_NON_AUTHORITATIVE"
 
     print(json.dumps({
         "status":"VNEXT5R2_F4_ADVERSARIAL_REGRESSION_PASS",

@@ -1,7 +1,10 @@
 """Regression tests for vNext5R1 freeze audit findings F2-F4."""
 from __future__ import annotations
+import hashlib
+import json
 import math
 import unittest
+from pathlib import Path
 from datetime import datetime, timezone, timedelta
 
 import numpy as np
@@ -88,6 +91,44 @@ class EvaluationSemanticsTests(unittest.TestCase):
         # Row 1 cannot use row 0 because its due equals current anchor and rule is strict.
         frozen=score.smoothed([10,10,10,1],.5)
         np.testing.assert_allclose(p[1],frozen,rtol=0,atol=1e-15)
+
+
+
+class FreezeBindingTests(unittest.TestCase):
+    def test_binary_pinned_manifest_matches_parent_hashes(self):
+        root=Path(__file__).resolve().parents[1]
+        build=root/"predictive_vnext5/build"
+        manifest=json.loads((build/"freeze_manifest.json").read_text())
+        contract=json.loads(
+            (root/"predictive_vnext5/reproducibility_contract.json").read_text()
+        )
+        parent=contract["model_authority"]["parent"]["inner_sha256"]
+        self.assertEqual(
+            manifest["model_authority"]["mode"],
+            "INHERITED_IMMUTABLE_PARENT_BINARY",
+        )
+        self.assertFalse(manifest["model_authority"]["retraining_performed"])
+        for name,row in manifest["artifacts"].items():
+            actual=hashlib.sha256((build/name).read_bytes()).hexdigest()
+            self.assertEqual(actual,parent[name])
+            self.assertEqual(row["sha256"],parent[name])
+
+    def test_protocol_binds_one_executable_scorer(self):
+        root=Path(__file__).resolve().parents[1]
+        p=json.loads(
+            (root/"predictive_vnext5/prospective_protocol.json").read_text()
+        )
+        binding=p["evaluation_binding"]
+        self.assertTrue(binding["scorer_is_only_admission_implementation"])
+        self.assertTrue(binding["changes_after_start_forbidden"])
+        self.assertEqual(
+            binding["scorer_path"],
+            "predictive_vnext5/prospective_score.py",
+        )
+        self.assertEqual(
+            binding["supplement_path"],
+            "predictive_vnext5/evaluation_supplement.json",
+        )
 
 
 if __name__=="__main__":

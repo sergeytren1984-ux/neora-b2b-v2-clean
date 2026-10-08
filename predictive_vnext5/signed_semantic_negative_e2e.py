@@ -1,4 +1,4 @@
-"""Real OIDC/Rekor signed semantic-negative E2E for vNext5R4.1.
+"""Real OIDC/Rekor signed semantic-negative E2E for vNext5R4.2.
 
 The job proves that an event genuinely signed by the allowed workflow identity is
 still rejected when it carries undeclared custom-target annotations.  The same
@@ -23,8 +23,8 @@ from predictive_vnext5.verified_evidence import (
 UTC=timezone.utc
 ROOT=Path(__file__).resolve().parents[1]
 REPO="sergeytren1984-ux/neora-b2b-v2-clean"
-WORKFLOW=".github/workflows/btc-predictive-vnext5r41-evidence.yml"
-EVENT_SCHEMA="btc-predictive-vnext5r41-evidence-event-v1"
+WORKFLOW=".github/workflows/btc-predictive-vnext5r42-evidence.yml"
+EVENT_SCHEMA="btc-predictive-vnext5r42-evidence-event-v1"
 
 
 def cmd(*args,check=True):
@@ -77,7 +77,7 @@ def write_signed(branch,events_dir,obj):
     sign(path,bundle)
     push(
         branch,
-        f"vNext5R4.1 signed semantic negative #{obj['sequence']} {obj['type']}",
+        f"vNext5R4.2 signed semantic negative #{obj['sequence']} {obj['type']}",
         path,bundle,
     )
     return path,bundle
@@ -118,7 +118,7 @@ def main():
     trigger=os.environ.get("GITHUB_EVENT_NAME","push")
     run_id=os.environ.get("GITHUB_RUN_ID","local")
     branch=(
-        f"btc-predictive-vnext5r41-a5-negative-{run_id}-"
+        f"btc-predictive-vnext5r42-a5-negative-{run_id}-"
         f"attempt-{os.environ.get('GITHUB_RUN_ATTEMPT','1')}"
     )
 
@@ -138,7 +138,7 @@ def main():
     events_dir.mkdir(parents=True,exist_ok=True)
 
     protocol={
-        "schema":"btc-predictive-vnext5r41-a5-negative-protocol-v1",
+        "schema":"btc-predictive-vnext5r42-a5-negative-protocol-v1",
         "mode":"MARKET_REPLAY_E2E",
         "head":"4h",
         "events_dir":str(events_dir.relative_to(ROOT)),
@@ -150,7 +150,7 @@ def main():
     }
     protocol_path=ROOT/f"vnext5r41_a5_negative_{run_id}_protocol.json"
     protocol_path.write_bytes(canonical(protocol))
-    push(branch,"vNext5R4.1 A5 negative protocol",protocol_path)
+    push(branch,"vNext5R4.2 A5 negative protocol",protocol_path)
 
     execution=json.loads(
         (ROOT/"predictive_vnext5/execution_contract.json").read_text()
@@ -162,7 +162,7 @@ def main():
     artifact=cfg["artifact_sha256"]
     start=(datetime.now(UTC)+timedelta(minutes=5)).replace(microsecond=0)
     manifest={
-        "schema":"btc-predictive-vnext5r41-a5-negative-manifest-v1",
+        "schema":"btc-predictive-vnext5r42-a5-negative-manifest-v1",
         "source_commit_sha":source_sha,
         "source_ref":source_ref,
         "workflow_trigger":trigger,
@@ -265,7 +265,7 @@ def main():
         raise RuntimeError("signed A5 custom-field attack unexpectedly accepted")
 
     print(json.dumps({
-        "status":"VNEXT5R41_SIGNED_A5_NEGATIVE_E2E_PASS",
+        "status":"VNEXT5R42_SIGNED_A5_NEGATIVE_E2E_PASS",
         "source_sha":source_sha,
         "evidence_branch":branch,
         "evidence_tip":tip,

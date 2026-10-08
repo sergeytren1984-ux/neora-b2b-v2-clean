@@ -242,7 +242,7 @@ def validate_rows(rows,head,start,cutoff):
         issued=parse_utc(row["forecast_issued_at_utc"])
         if issued<a:
             raise ValueError("forecast issued before anchor")
-        if issued>a+deadline:
+        if issued>=a+deadline:
             raise ValueError("late forecast")
         recorded=parse_utc(row["outcome_recorded_at_utc"])
         if recorded<due:

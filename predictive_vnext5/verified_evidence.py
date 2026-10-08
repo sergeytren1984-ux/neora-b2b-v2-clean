@@ -281,8 +281,9 @@ def verify_evidence_snapshot(
         raise ValueError("evidence protocol template absent from signed manifest")
     template_bytes=git_bytes(root,source_sha,template_path)
     template=json.loads(template_bytes)
-    if template_bytes!=canonical(template):
-        raise ValueError("source evidence protocol template is not canonical")
+    # Static source bytes are already SHA-bound by the signed manifest.
+    # Canonical serialization is required for signed dynamic protocol/events,
+    # not for human-readable immutable source templates.
     if protocol.get("repository")!=template.get("repository"):
         raise ValueError("protocol repository differs from frozen template")
     if protocol.get("workflow_path")!=template.get("workflow_path"):

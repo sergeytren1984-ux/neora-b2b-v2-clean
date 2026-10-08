@@ -168,6 +168,13 @@ def build_evaluation_runtime():
     }
 
 
+def _fingerprint_float(value):
+    # Diagnostic fingerprint only.  Independent runners with the exact same
+    # model bytes differed by at most ~5.6e-17 from floating-point execution.
+    # Quantize only the audit fingerprint, never model inference.
+    return round(float(value),15)
+
+
 def behavior_fingerprint():
     vec=json.loads((BUILD/"selftest_vectors.json").read_text())
     bundles={
@@ -190,12 +197,17 @@ def behavior_fingerprint():
         for lo,up in pairs:
             raw=func(bundle,base,lo,up)
             result[name][f"{lo:g}_{up:g}"]={
-                "raw":[float(x) for x in raw],
-                "display":predictor.display_three_state(raw),
+                "raw":[_fingerprint_float(x) for x in raw],
+                "display":{
+                    k:_fingerprint_float(v)
+                    for k,v in predictor.display_three_state(raw).items()
+                },
             }
     return {
         "schema":"btc-predictive-vnext5r1-model-behavior-fingerprint-v1",
         "pairs":[list(x) for x in pairs],
+        "round_decimal_places":15,
+        "raw_inference_is_not_quantized":True,
         "models":result,
     }
 

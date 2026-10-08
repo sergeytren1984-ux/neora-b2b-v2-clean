@@ -1,23 +1,24 @@
-"""Read-only consumer-side snapshot guard for vNext5R4.1.
+"""Authenticated read-only consumer boundary for vNext5R4.2.
 
-A verified admission decision is a statement about one exact evidence snapshot.
-This module is the mandatory boundary before any caller may treat that decision
-as current.  It never authorizes trading or performs side effects.
+The consumer no longer accepts a caller-supplied decision object.  It obtains
+the decision only by invoking the trusted prospective admission launcher with
+an approved source SHA supplied outside the evidence journal, then rechecks the
+remote evidence tip immediately before returning a current snapshot.
 """
 from __future__ import annotations
 
-import json
 import re
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
 from predictive_vnext4r7.integrity import canonical, digest
+from predictive_vnext5.prospective_admission import run_verified_admission
 
 HEX40=re.compile(r"^[0-9a-f]{40}$")
 UTC=timezone.utc
-DECISION_SCHEMA="btc-predictive-vnext5r41-verified-admission-v1"
-CONSUMER_SCHEMA="btc-predictive-vnext5r41-current-snapshot-v1"
+DECISION_SCHEMA="btc-predictive-vnext5r42-verified-admission-v1"
+CONSUMER_SCHEMA="btc-predictive-vnext5r42-current-snapshot-v1"
 
 
 def _git(root:Path,*args):
@@ -44,24 +45,16 @@ def _utc(value):
     return dt.astimezone(UTC)
 
 
-def assert_current_snapshot(
+def _validate_authenticated_decision(
     decision:dict,
     *,
-    repo_root:str,
     expected_head:str,
     expected_cutoff_utc:str,
-    expected_source_sha:str|None=None,
-    expected_evidence_branch:str|None=None,
+    approved_source_sha:str,
+    expected_evidence_branch:str,
 ):
-    """Fail closed unless a verified decision is still current at consumption.
-
-    The returned object is read-only decision support.  It deliberately keeps
-    trading_authority=False even when admission_ready=True.
-    """
-    if type(decision) is not dict:
-        raise ValueError("verified admission decision must be an object")
-    if decision.get("schema")!=DECISION_SCHEMA:
-        raise ValueError("unverified or unsupported admission decision schema")
+    if type(decision) is not dict or decision.get("schema")!=DECISION_SCHEMA:
+        raise ValueError("authenticated admission decision schema mismatch")
     if decision.get("head")!=expected_head:
         raise ValueError("decision head mismatch")
     if _utc(decision.get("cutoff_utc"))!=_utc(expected_cutoff_utc):
@@ -90,6 +83,8 @@ def assert_current_snapshot(
         "standalone_jsonl_admission_forbidden",
         "remote_tip_revalidated_after_scoring",
         "numerical_provenance_replayed",
+        "trusted_source_bootstrap_verified",
+        "outcome_barriers_bound_to_forecast",
     )
     for key in required_true:
         if governance.get(key) is not True:
@@ -102,29 +97,58 @@ def assert_current_snapshot(
     branch=governance.get("evidence_branch")
     tip=str(governance.get("evidence_tip","")).lower()
     source=str(governance.get("verified_source_commit_sha","")).lower()
-    if not isinstance(branch,str) or not branch:
-        raise ValueError("evidence branch missing from decision")
+    trusted=str(governance.get("trusted_approved_source_sha","")).lower()
+    if branch!=expected_evidence_branch:
+        raise ValueError("consumer evidence branch mismatch")
     if not HEX40.fullmatch(tip):
         raise ValueError("invalid decision evidence tip")
-    if not HEX40.fullmatch(source):
-        raise ValueError("invalid decision source commit")
-    if expected_evidence_branch is not None and branch!=expected_evidence_branch:
-        raise ValueError("consumer evidence branch mismatch")
-    if expected_source_sha is not None and source!=str(expected_source_sha).lower():
-        raise ValueError("consumer source commit mismatch")
+    if source!=str(approved_source_sha).lower():
+        raise ValueError("consumer verified source mismatch")
+    if trusted!=str(approved_source_sha).lower():
+        raise ValueError("consumer trusted source mismatch")
+    return governance
+
+
+def consume_verified_admission(
+    *,
+    repo_root:str,
+    approved_source_sha:str,
+    head:str,
+    evidence_branch:str,
+    protocol_path:str,
+    cutoff_utc:str,
+    model_root:str,
+):
+    """Run authoritative verification and consume only that in-memory result."""
+    decision=run_verified_admission(
+        repo_root=repo_root,
+        approved_source_sha=approved_source_sha,
+        head=head,
+        evidence_branch=evidence_branch,
+        protocol_path=protocol_path,
+        cutoff_utc=cutoff_utc,
+        model_root=model_root,
+    )
+    governance=_validate_authenticated_decision(
+        decision,
+        expected_head=head,
+        expected_cutoff_utc=cutoff_utc,
+        approved_source_sha=approved_source_sha,
+        expected_evidence_branch=evidence_branch,
+    )
 
     root=Path(repo_root).resolve()
-    current=_remote_tip(root,branch)
-    if current!=tip:
+    current=_remote_tip(root,evidence_branch)
+    if current!=governance["evidence_tip"]:
         raise ValueError("admission decision is stale at consumer boundary")
 
     return {
         "schema":CONSUMER_SCHEMA,
-        "head":expected_head,
-        "cutoff_utc":_utc(expected_cutoff_utc).isoformat(),
-        "evidence_branch":branch,
-        "evidence_tip":tip,
-        "source_commit_sha":source,
+        "head":head,
+        "cutoff_utc":_utc(cutoff_utc).isoformat(),
+        "evidence_branch":evidence_branch,
+        "evidence_tip":governance["evidence_tip"],
+        "source_commit_sha":governance["verified_source_commit_sha"],
         "decision_sha256":digest(canonical(decision)),
         "snapshot_current":True,
         "admission_ready":bool(decision.get("admission_ready")),
@@ -136,8 +160,8 @@ def assert_current_snapshot(
 
 def main():
     raise SystemExit(
-        "consumer guard is a library boundary; pass an in-memory verified "
-        "admission decision from prospective_admission.py"
+        "consumer is a library boundary; use consume_verified_admission() "
+        "with an externally approved source SHA"
     )
 
 

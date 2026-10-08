@@ -1,0 +1,226 @@
+name: BTC predictive vNext5R4.2 trust-target freeze
+
+on:
+  push:
+    branches:
+      - btc-predictive-vnext5r42-trust-barrier-remediation-20261008
+    paths:
+      - 'predictive_vnext5/**'
+      - '.github/workflows/btc-predictive-vnext5r42-evidence.yml'
+      - '.github/workflows/btc-predictive-vnext5r42-freeze.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: btc-predictive-vnext5r42-trust-target-freeze
+  cancel-in-progress: true
+
+env:
+  PYTHONHASHSEED: "0"
+  OPENBLAS_NUM_THREADS: "1"
+  OMP_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  VECLIB_MAXIMUM_THREADS: "1"
+  NUMEXPR_NUM_THREADS: "1"
+
+jobs:
+  assemble:
+    strategy:
+      fail-fast: false
+      matrix:
+        builder: [a, b]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+
+      - name: Install exact frozen environment
+        run: |
+          python -m pip install --disable-pip-version-check \
+            numpy==2.2.6 scipy==1.18.1 scikit-learn==1.7.2 \
+            joblib==1.5.2 threadpoolctl==3.7.0
+
+      - name: Download exact parent numerical authority
+        uses: actions/download-artifact@v4
+        with:
+          name: btc-vnext5-first-passage-freeze
+          path: /tmp/parent-freeze
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 37746080651
+
+      - name: Assemble successor without retraining
+        env:
+          PYTHONPATH: .
+        run: |
+          rm -rf predictive_vnext5/build
+          python predictive_vnext5/assemble_binary_pinned_freeze.py \
+            --parent-dir /tmp/parent-freeze
+          python -m py_compile \
+            predictive_vnext5/verified_evidence.py \
+            predictive_vnext5/prospective_admission.py \
+            predictive_vnext5/admission_worker.py \
+            predictive_vnext5/admission_consumer.py \
+            predictive_vnext5/prospective_score.py \
+            predictive_vnext5/production_emitter.py \
+            predictive_vnext5/production_journal.py \
+            predictive_vnext5/market_replay_e2e.py \
+            predictive_vnext5/signed_semantic_negative_e2e.py \
+            predictive_vnext5/signed_outcome_negative_e2e.py \
+            predictive_vnext5/trust_bootstrap_regression.py
+          python predictive_vnext5/selftest.py
+          python -m unittest predictive_vnext5.test_freeze_remediation -v
+          python predictive_vnext5/f4_adversarial_regression.py
+          python predictive_vnext5/trust_bootstrap_regression.py
+
+      - name: Upload independent assembly
+        uses: actions/upload-artifact@v4
+        with:
+          name: vnext5r42-assembly-${{ matrix.builder }}
+          path: predictive_vnext5/build/**
+          if-no-files-found: error
+          retention-days: 90
+
+  compare:
+    needs: assemble
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+
+      - name: Install exact frozen environment
+        run: |
+          python -m pip install --disable-pip-version-check \
+            numpy==2.2.6 scipy==1.18.1 scikit-learn==1.7.2 \
+            joblib==1.5.2 threadpoolctl==3.7.0
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: vnext5r42-assembly-a
+          path: /tmp/build-a
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: vnext5r42-assembly-b
+          path: /tmp/build-b
+
+      - name: Exact-byte compare independent assemblies
+        env:
+          PYTHONPATH: .
+        run: |
+          python predictive_vnext5/compare_freeze_builds.py \
+            --a /tmp/build-a \
+            --b /tmp/build-b \
+            --output /tmp/reproducibility_report.json
+
+      - name: Assemble authoritative package
+        run: |
+          rm -rf predictive_vnext5/build
+          mkdir -p predictive_vnext5/build
+          find /tmp/build-a -type f -maxdepth 5 -exec cp {} predictive_vnext5/build/ \;
+          cp /tmp/reproducibility_report.json predictive_vnext5/build/reproducibility_report.json
+
+      - name: Final trust-target regression
+        env:
+          PYTHONPATH: .
+        run: |
+          python predictive_vnext5/selftest.py
+          python -m unittest predictive_vnext5.test_freeze_remediation -v
+          python predictive_vnext5/f4_adversarial_regression.py
+          python predictive_vnext5/trust_bootstrap_regression.py
+          python - <<'PY'
+          import json,pathlib
+          root=pathlib.Path(".")
+          rep=json.loads((root/"predictive_vnext5/build/reproducibility_report.json").read_text())
+          assert rep["status"]=="PASS"
+          p=json.loads((root/"predictive_vnext5/prospective_protocol.json").read_text())
+          assert p["authority"]["start_utc"] is None
+          assert p["authority"]["prospective_skill_proven"] is False
+          assert p["authority"]["trading_authority"] is False
+          b=p["evaluation_binding"]
+          assert b["journal_source_selects_executable_code"] is False
+          assert b["consumer_calls_authoritative_admission_directly"] is True
+          assert b["arbitrary_decision_object_consumer_input"] is False
+          assert b["outcome_event_barrier_equality_required"] is True
+          print("VNEXT5R42_TRUST_TARGET_FREEZE_PASS")
+          PY
+
+      - name: Print authoritative hashes
+        run: |
+          sha256sum \
+            predictive_vnext5/reproducibility_contract.json \
+            predictive_vnext5/evaluation_supplement.json \
+            predictive_vnext5/prospective_protocol.json \
+            predictive_vnext5/prospective_score.py \
+            predictive_vnext5/prospective_admission.py \
+            predictive_vnext5/admission_worker.py \
+            predictive_vnext5/admission_consumer.py \
+            predictive_vnext5/verified_evidence.py \
+            predictive_vnext5/evidence_protocol_template.json \
+            predictive_vnext5/execution_contract.json \
+            predictive_vnext5/production_emitter.py \
+            predictive_vnext5/production_journal.py \
+            predictive_vnext5/market_replay_e2e.py \
+            predictive_vnext5/signed_semantic_negative_e2e.py \
+            predictive_vnext5/signed_outcome_negative_e2e.py \
+            predictive_vnext5/trust_bootstrap_regression.py \
+            predictive_vnext5/frozen_evaluation_runtime.json \
+            predictive_vnext5/f4_adversarial_regression.py \
+            predictive_vnext5/freeze_spec.json \
+            predictive_vnext5/predictor.py \
+            predictive_vnext5/assemble_binary_pinned_freeze.py \
+            .github/workflows/btc-predictive-vnext5r42-evidence.yml \
+            .github/workflows/btc-predictive-vnext5r42-freeze.yml \
+            predictive_vnext5/build/*
+
+      - name: Upload authoritative R4.2 freeze
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-vnext5r42-first-passage-freeze
+          path: |
+            predictive_vnext5/reproducibility_contract.json
+            predictive_vnext5/evaluation_supplement.json
+            predictive_vnext5/prospective_protocol.json
+            predictive_vnext5/prospective_score.py
+            predictive_vnext5/prospective_admission.py
+            predictive_vnext5/admission_worker.py
+            predictive_vnext5/admission_consumer.py
+            predictive_vnext5/verified_evidence.py
+            predictive_vnext5/evidence_protocol_template.json
+            predictive_vnext5/execution_contract.json
+            predictive_vnext5/production_emitter.py
+            predictive_vnext5/production_journal.py
+            predictive_vnext5/market_replay_e2e.py
+            predictive_vnext5/signed_semantic_negative_e2e.py
+            predictive_vnext5/signed_outcome_negative_e2e.py
+            predictive_vnext5/trust_bootstrap_regression.py
+            predictive_vnext5/frozen_evaluation_runtime.json
+            predictive_vnext5/f4_adversarial_regression.py
+            predictive_vnext5/freeze_spec.json
+            predictive_vnext5/predictor.py
+            predictive_vnext5/assemble_binary_pinned_freeze.py
+            predictive_vnext5/selftest.py
+            predictive_vnext5/test_freeze_remediation.py
+            predictive_vnext5/compare_freeze_builds.py
+            .github/workflows/btc-predictive-vnext5r42-evidence.yml
+            .github/workflows/btc-predictive-vnext5r42-freeze.yml
+            predictive_vnext5/build/**
+          if-no-files-found: error
+          retention-days: 90

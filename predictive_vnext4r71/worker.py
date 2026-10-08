@@ -1062,7 +1062,24 @@ def outcomes(cfg, head):
                 float(forecast_event["lower_price"]),
                 float(forecast_event["upper_price"]),
             )
-        except Exception:
+        except Exception as ex:
+            print(
+                "R76_OUTCOME_RETRY_ERROR " + json.dumps(
+                    {
+                        "head": head,
+                        "slot": forecast_event.get("slot"),
+                        "due_utc": forecast_event.get("due_utc"),
+                        "observed_at_utc": utcnow().isoformat(),
+                        "error_type": type(ex).__name__,
+                        "error": str(ex)[:500],
+                        "retryable": True,
+                        "fake_outcome_written": False,
+                    },
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ),
+                flush=True,
+            )
             continue
 
         rawdir = EVIDENCE_ROOT / cfg["raw"]

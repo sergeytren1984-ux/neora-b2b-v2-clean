@@ -1,6 +1,6 @@
 {
-  "schema": "btc-predictive-vnext5r2-evaluation-supplement-v2",
-  "status": "FROZEN_PRESTART_STRICT_CANONICAL_AUTHORITY",
+  "schema": "btc-predictive-vnext5r3-evaluation-supplement-v3",
+  "status": "FROZEN_PRESTART_PROVENANCE_BOUND",
   "scope": "canonical +/-1sigma prospective admission only",
   "raw_class_order": [
     "LOWER_FIRST",
@@ -236,16 +236,27 @@
     "immutable_after_start": true
   },
   "runtime_authority": {
-    "mode": "SOLE_FROZEN_RUNTIME_FROM_PACKAGE",
-    "path": "predictive_vnext5/build/evaluation_runtime.json",
-    "manifest_path": "predictive_vnext5/build/freeze_manifest.json",
-    "runtime_cli_override_allowed": false,
-    "required_hash_bindings": [
-      "evaluation_runtime_sha256",
-      "evaluation_supplement_sha256",
-      "prospective_protocol_sha256",
-      "prospective_scorer_sha256"
-    ],
+    "mode": "SOLE_SOURCE_FROZEN_RUNTIME",
+    "path": "predictive_vnext5/frozen_evaluation_runtime.json",
+    "caller_override_allowed": false,
+    "cryptographic_binding": "signed evidence source manifest path SHA256",
     "modified_runtime": "FAIL_CLOSED"
+  },
+  "input_authority": {
+    "row_format_role": "INTERNAL_DERIVED_SCORING_FORMAT",
+    "sole_row_deriver": "predictive_vnext5/verified_evidence.py",
+    "sole_admission_entrypoint": "predictive_vnext5/prospective_admission.py",
+    "standalone_jsonl_admission_authority": false,
+    "required_upstream_proofs": [
+      "full Cosign signature replay",
+      "Rekor inclusion proof replay",
+      "event hash-chain verification",
+      "signed source manifest/workflow binding",
+      "raw attachment hash and first-publication commit binding",
+      "forecast delivery receipt binding",
+      "exact remote evidence tip snapshot"
+    ],
+    "forecast_time_authority": "max forecast/receipt Rekor integratedTime",
+    "outcome_time_authority": "outcome Rekor integratedTime"
   }
 }

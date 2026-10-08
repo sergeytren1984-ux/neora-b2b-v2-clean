@@ -345,8 +345,8 @@ def main():
                 REPRO["acceptance"]["independent_builds"],
             "exact_byte_match_required":
                 REPRO["acceptance"]["exact_byte_match_required"],
-            "passed":False,
-            "note":"set true only by post-build independent-runner compare job",
+            "verification":"POST_BUILD_TWIN_RUNNER_COMPARE_REQUIRED",
+            "note":"authoritative PASS is recorded in reproducibility_report.json after exact-byte comparison",
         },
         "historical_selection_exhausted":True,
         "next_valid_selection_evidence":"CLEAN_PROSPECTIVE_EPOCH",

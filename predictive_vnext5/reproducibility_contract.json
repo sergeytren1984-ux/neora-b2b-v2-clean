@@ -1,0 +1,48 @@
+{
+  "schema": "btc-predictive-vnext5r1-reproducibility-contract-v1",
+  "status": "FROZEN_BEFORE_BUILD",
+  "platform": {
+    "system": "Linux",
+    "machine": "x86_64"
+  },
+  "python": "3.12.14",
+  "packages": {
+    "numpy": "2.2.6",
+    "scipy": "1.18.1",
+    "scikit_learn": "1.7.2",
+    "joblib": "1.5.2",
+    "threadpoolctl": "3.7.0"
+  },
+  "environment": {
+    "PYTHONHASHSEED": "0",
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1"
+  },
+  "serialization": {
+    "format": "joblib",
+    "pickle_protocol": 5,
+    "compression": [
+      "zlib",
+      3
+    ]
+  },
+  "acceptance": {
+    "independent_builds": 2,
+    "exact_byte_match_required": [
+      "head_1h_classifier.joblib",
+      "head_4h_classifier.joblib",
+      "head_24h_classifier.joblib",
+      "head_24h_competing_risks.joblib",
+      "freeze_manifest.json",
+      "selftest_vectors.json",
+      "evaluation_runtime.json",
+      "build_environment.json"
+    ],
+    "final_package_published_only_after_match": true
+  },
+  "predictive_model_change": false,
+  "historical_model_selection_change": false
+}

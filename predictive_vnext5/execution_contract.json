@@ -1,0 +1,62 @@
+{
+  "schema": "btc-predictive-vnext5r4-execution-contract-v1",
+  "status": "FROZEN_PRESTART",
+  "required_source_paths": [
+    ".github/workflows/btc-predictive-vnext5r4-evidence.yml",
+    "predictive_vnext5/evidence_protocol_template.json",
+    "predictive_vnext5/execution_contract.json",
+    "predictive_vnext5/verified_evidence.py",
+    "predictive_vnext5/prospective_admission.py",
+    "predictive_vnext5/admission_worker.py",
+    "predictive_vnext5/prospective_score.py",
+    "predictive_vnext5/evaluation_supplement.json",
+    "predictive_vnext5/frozen_evaluation_runtime.json",
+    "predictive_vnext5/prospective_protocol.json",
+    "predictive_vnext5/freeze_spec.json",
+    "predictive_vnext5/reproducibility_contract.json",
+    "predictive_vnext5/predictor.py",
+    "predictive_vnext5/production_emitter.py",
+    "predictive_vnext5/market_replay_e2e.py",
+    "predictive_vnext4r6/live_features.py",
+    "predictive_vnext4/core.py",
+    "predictive_vnext4r71/crypto.py",
+    "predictive_vnext4r71/integrity.py",
+    "predictive_vnext4r7/integrity.py"
+  ],
+  "runtime": {
+    "python": "3.12.14",
+    "packages": {
+      "numpy": "2.2.6",
+      "scipy": "1.18.1",
+      "scikit_learn": "1.7.2",
+      "joblib": "1.5.2",
+      "threadpoolctl": "3.7.0"
+    },
+    "env": {
+      "PYTHONHASHSEED": "0",
+      "OPENBLAS_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1"
+    }
+  },
+  "model_authority": {
+    "parent_run_id": 37746080651,
+    "parent_artifact_name": "btc-vnext5-first-passage-freeze",
+    "files": {
+      "head_1h_classifier.joblib": "9c24cb79f59a6a0b09e0f2980521e071c02cf749e4d14f88713b096fa569ed83",
+      "head_4h_classifier.joblib": "1076407df238eb827ba36b7d69075802940dc84d1954f89943d76db93e542535",
+      "head_24h_classifier.joblib": "1d024c9df3386b4a27ecd0aedb95eacf2fa6bf083ff119ace93dd5303f96c1ac",
+      "head_24h_competing_risks.joblib": "a842001ff27500457dc2cece889c63111a6430fa29cf22633b9d7d5626539f0d"
+    }
+  },
+  "admission_execution": {
+    "launcher": "predictive_vnext5/prospective_admission.py",
+    "worker": "predictive_vnext5/admission_worker.py",
+    "worker_must_execute_from_detached_signed_source_checkout": true,
+    "worker_checkout_head_must_equal_signed_source_sha": true,
+    "arbitrary_working_tree_imports_forbidden": true
+  },
+  "trading_authority": false
+}

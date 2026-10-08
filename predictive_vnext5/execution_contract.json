@@ -1,6 +1,6 @@
 {
-  "schema": "btc-predictive-vnext5r41-execution-contract-v3",
-  "status": "FROZEN_PRESTART_ACCEPTANCE_FINALIZATION",
+  "schema": "btc-predictive-vnext5r42-execution-contract-v4",
+  "status": "FROZEN_PRESTART_TRUST_AND_TARGET_BINDING_REMEDIATION",
   "required_source_paths": [
     "predictive_vnext5/evidence_protocol_template.json",
     "predictive_vnext5/execution_contract.json",
@@ -22,9 +22,11 @@
     "predictive_vnext4r71/integrity.py",
     "predictive_vnext4r7/integrity.py",
     "predictive_vnext5/production_journal.py",
-    ".github/workflows/btc-predictive-vnext5r41-evidence.yml",
     "predictive_vnext5/admission_consumer.py",
-    "predictive_vnext5/signed_semantic_negative_e2e.py"
+    "predictive_vnext5/signed_semantic_negative_e2e.py",
+    ".github/workflows/btc-predictive-vnext5r42-evidence.yml",
+    "predictive_vnext5/trust_bootstrap_regression.py",
+    "predictive_vnext5/signed_outcome_negative_e2e.py"
   ],
   "runtime": {
     "python": "3.12.14",
@@ -59,11 +61,15 @@
     "worker": "predictive_vnext5/admission_worker.py",
     "worker_must_execute_from_detached_signed_source_checkout": true,
     "worker_checkout_head_must_equal_signed_source_sha": true,
-    "arbitrary_working_tree_imports_forbidden": true
+    "arbitrary_working_tree_imports_forbidden": true,
+    "trusted_source_sha_must_be_supplied_outside_journal": true,
+    "launcher_checkout_must_equal_approved_source_sha": true,
+    "journal_source_sha_never_selects_executable_code": true,
+    "trusted_worker_authenticates_journal": true
   },
   "trading_authority": false,
   "production_path": {
-    "workflow": ".github/workflows/btc-predictive-vnext5r41-evidence.yml",
+    "workflow": ".github/workflows/btc-predictive-vnext5r42-evidence.yml",
     "worker": "predictive_vnext5/production_journal.py",
     "numerical_core": "predictive_vnext5/production_emitter.py",
     "actions": [
@@ -81,6 +87,15 @@
     "exact_tip_recheck_required": true,
     "cutoff_head_source_schema_binding_required": true,
     "standalone_calculator_output_forbidden": true,
-    "trading_authority_always_false": true
+    "trading_authority_always_false": true,
+    "arbitrary_decision_object_input_forbidden": true,
+    "consumer_invokes_authoritative_admission_itself": true,
+    "trusted_approved_source_sha_required": true
+  },
+  "outcome_contract": {
+    "authoritative_barriers": "verified/recomputed FORECAST_ISSUED for same slot",
+    "outcome_barrier_claims_must_equal_forecast": true,
+    "outcome_label_recomputed_with_forecast_barriers": true,
+    "joint_barrier_label_touch_tamper_must_fail_closed": true
   }
 }

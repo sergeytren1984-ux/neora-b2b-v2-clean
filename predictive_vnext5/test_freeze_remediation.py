@@ -6,6 +6,8 @@ import hashlib
 import json
 import math
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -14,6 +16,8 @@ import numpy as np
 from predictive_vnext5 import predictor
 from predictive_vnext5 import prospective_score as score
 from predictive_vnext5 import verified_evidence as evidence
+from predictive_vnext5 import admission_consumer as consumer
+from predictive_vnext5 import production_journal as journal
 
 
 class PredictorBoundaryTests(unittest.TestCase):
@@ -166,7 +170,7 @@ class EvaluationSemanticsTests(unittest.TestCase):
 
     def test_signed_event_extra_custom_fields_rejected_before_derivation(self):
         base={
-            "schema":"btc-predictive-vnext5r4-evidence-event-v1",
+            "schema":"btc-predictive-vnext5r41-evidence-event-v1",
             "sequence":3,
             "previous_hash":"0"*64,
             "workflow_commit":"1"*40,
@@ -203,12 +207,140 @@ class EvaluationSemanticsTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,"forbidden fields"):
                 evidence._validate_exact_event_schema(attack)
 
+    def test_full_4h_grid_extra_fields_rejected_before_derivation(self):
+        start=datetime(2026,10,12,tzinfo=timezone.utc)
+        rejected=0
+        for i in range(252):
+            a=start+timedelta(hours=4*i)
+            event={
+                "schema":"btc-predictive-vnext5r41-evidence-event-v1",
+                "sequence":3,
+                "previous_hash":"0"*64,
+                "workflow_commit":"1"*40,
+                "published_at_utc":a.isoformat(),
+                "type":"FORECAST_ISSUED",
+                "idempotency_key":"forecast:"+a.isoformat(),
+                "head":"4h",
+                "trading_authority":False,
+                "slot":a.strftime("%Y%m%dT%H%M%SZ"),
+                "anchor_utc":a.isoformat(),
+                "due_utc":(a+timedelta(hours=4)).isoformat(),
+                "query_type":"CANONICAL",
+                "target_id":"CANONICAL_SIGMA_1_1_V1",
+                "lower_sigma":1.0,
+                "upper_sigma":1.0,
+                "predictions":{"4h":[.25,.25,.5,0.0]},
+                "artifact_sha256":{"4h":"a"*64},
+                "volatility":.002,
+                "reference_price":83000.0,
+                "lower_price":82500.0,
+                "upper_price":83500.0,
+                "feature_sha256":"b"*64,
+                "raw_path":"predictive_vnext5_4h_raw/test.json",
+                "raw_sha256":"c"*64,
+                "producer_mode":"PRODUCTION",
+                "custom_zone":[82000.0,87000.0],
+                "actual_query_type":"CUSTOM_ZONE",
+            }
+            with self.assertRaisesRegex(ValueError,"forbidden fields"):
+                evidence._validate_exact_event_schema(event)
+            rejected+=1
+        self.assertEqual(rejected,252)
+
     def test_modified_runtime_rejected(self):
         runtime=score.authoritative_runtime()
         changed=copy.deepcopy(runtime)
         changed["heads"]["1h"]["volatility_bin_edges"]=[10.0,20.0]
         with self.assertRaisesRegex(ValueError,"non-authoritative runtime"):
             score.authoritative_runtime(changed)
+
+
+class ConsumerBoundaryTests(unittest.TestCase):
+    def decision(self):
+        tip="a"*40
+        source="b"*40
+        return {
+            "schema":"btc-predictive-vnext5r41-verified-admission-v1",
+            "head":"4h",
+            "cutoff_utc":"2026-12-01T00:00:00+00:00",
+            "admission_ready":True,
+            "selected_candidate":"4h",
+            "prospective_skill_proven":False,
+            "trading_authority":False,
+            "governance":{
+                "full_cryptographic_replay":True,
+                "all_event_signatures_verified":True,
+                "all_rekor_inclusion_proofs_verified":True,
+                "event_hash_chain_verified":True,
+                "workflow_content_binding_verified":True,
+                "static_source_manifest_verified":True,
+                "execution_contract_verified":True,
+                "executed_source_bytes_verified":True,
+                "raw_hashes_verified":True,
+                "raw_remote_publication_verified":True,
+                "forecast_delivery_receipt_verified":True,
+                "canonical_rows_derived_only_from_verified_journal":True,
+                "standalone_jsonl_admission_forbidden":True,
+                "remote_tip_revalidated_after_scoring":True,
+                "numerical_provenance_replayed":True,
+                "protocol_mode":"PROSPECTIVE",
+                "admission_eligible":True,
+                "evidence_branch":"test-evidence",
+                "evidence_tip":tip,
+                "verified_source_commit_sha":source,
+            },
+        }
+
+    def test_current_snapshot_guard_passes_exact_tip_only(self):
+        d=self.decision()
+        with patch.object(consumer,"_remote_tip",return_value="a"*40):
+            got=consumer.assert_current_snapshot(
+                d,repo_root=".",expected_head="4h",
+                expected_cutoff_utc="2026-12-01T00:00:00Z",
+                expected_source_sha="b"*40,
+                expected_evidence_branch="test-evidence",
+            )
+        self.assertTrue(got["snapshot_current"])
+        self.assertTrue(got["admission_ready"])
+        self.assertFalse(got["trading_authority"])
+
+    def test_current_snapshot_guard_rejects_stale_tip(self):
+        d=self.decision()
+        with patch.object(consumer,"_remote_tip",return_value="c"*40):
+            with self.assertRaisesRegex(ValueError,"stale"):
+                consumer.assert_current_snapshot(
+                    d,repo_root=".",expected_head="4h",
+                    expected_cutoff_utc="2026-12-01T00:00:00Z",
+                )
+
+    def test_consumer_rejects_calculator_output(self):
+        d=self.decision()
+        d.pop("schema")
+        with self.assertRaisesRegex(ValueError,"schema"):
+            consumer.assert_current_snapshot(
+                d,repo_root=".",expected_head="4h",
+                expected_cutoff_utc="2026-12-01T00:00:00Z",
+            )
+
+    def test_production_signer_drift_rejected_before_publication(self):
+        verified=SimpleNamespace(
+            source_commit_sha="d"*40,
+            governance={
+                "source_ref":"refs/heads/frozen",
+                "workflow_trigger":"workflow_dispatch",
+            },
+        )
+        good={
+            "GITHUB_SHA":"d"*40,
+            "GITHUB_REF":"refs/heads/frozen",
+            "GITHUB_EVENT_NAME":"workflow_dispatch",
+        }
+        with patch.dict("os.environ",good,clear=False):
+            journal._assert_current_signer_matches_registration(verified)
+        bad={**good,"GITHUB_REF":"refs/heads/wrong"}
+        with patch.dict("os.environ",bad,clear=False):
+            with self.assertRaisesRegex(RuntimeError,"ref"):
+                journal._assert_current_signer_matches_registration(verified)
 
 
 class FreezeBindingTests(unittest.TestCase):
@@ -255,6 +387,13 @@ class FreezeBindingTests(unittest.TestCase):
         self.assertTrue(b["changes_after_start_forbidden"])
         self.assertTrue(b["runtime_override_forbidden"])
         self.assertTrue(b["strict_canonical_schema_required"])
+        self.assertEqual(
+            b["consumer_guard_path"],
+            "predictive_vnext5/admission_consumer.py",
+        )
+        self.assertTrue(b["consumer_exact_tip_recheck_required"])
+        self.assertTrue(b["production_writer_serialization_required"])
+        self.assertTrue(b["production_signer_identity_recheck_before_publish"])
         self.assertTrue(b["full_signature_rekor_replay_required"])
         self.assertTrue(b["raw_remote_publication_required"])
         self.assertTrue(b["delivery_receipt_binding_required"])
@@ -276,14 +415,28 @@ class FreezeBindingTests(unittest.TestCase):
                 root/"predictive_vnext5/prospective_score.py",
             "prospective_admission_sha256":
                 root/"predictive_vnext5/prospective_admission.py",
+            "admission_worker_sha256":
+                root/"predictive_vnext5/admission_worker.py",
+            "admission_consumer_sha256":
+                root/"predictive_vnext5/admission_consumer.py",
             "verified_evidence_sha256":
                 root/"predictive_vnext5/verified_evidence.py",
             "evidence_protocol_template_sha256":
                 root/"predictive_vnext5/evidence_protocol_template.json",
+            "execution_contract_sha256":
+                root/"predictive_vnext5/execution_contract.json",
+            "production_emitter_sha256":
+                root/"predictive_vnext5/production_emitter.py",
+            "production_journal_sha256":
+                root/"predictive_vnext5/production_journal.py",
+            "market_replay_e2e_sha256":
+                root/"predictive_vnext5/market_replay_e2e.py",
+            "signed_semantic_negative_e2e_sha256":
+                root/"predictive_vnext5/signed_semantic_negative_e2e.py",
             "frozen_source_runtime_sha256":
                 root/"predictive_vnext5/frozen_evaluation_runtime.json",
             "evidence_workflow_sha256":
-                root/".github/workflows/btc-predictive-vnext5r4-evidence.yml",
+                root/".github/workflows/btc-predictive-vnext5r41-evidence.yml",
         }
         for key,path in expected.items():
             self.assertEqual(
@@ -311,12 +464,14 @@ class FreezeBindingTests(unittest.TestCase):
             "predictive_vnext5/prospective_score.py",
             "predictive_vnext5/production_emitter.py",
             "predictive_vnext5/production_journal.py",
+            "predictive_vnext5/admission_consumer.py",
+            "predictive_vnext5/signed_semantic_negative_e2e.py",
             "predictive_vnext5/frozen_evaluation_runtime.json",
             "predictive_vnext4r6/live_features.py",
             "predictive_vnext4/core.py",
             "predictive_vnext4r71/crypto.py",
             "predictive_vnext4r7/integrity.py",
-            ".github/workflows/btc-predictive-vnext5r4-evidence.yml",
+            ".github/workflows/btc-predictive-vnext5r41-evidence.yml",
         }
         self.assertTrue(must.issubset(required))
 

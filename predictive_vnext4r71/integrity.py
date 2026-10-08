@@ -29,6 +29,7 @@ REQUIRED_PRODUCTION_WORKFLOWS = (
     ".github/workflows/btc-predictive-vnext4r71-24h.yml",
     ".github/workflows/btc-predictive-vnext4r71-watchdog.yml",
     ".github/workflows/btc-predictive-vnext4r71-health.yml",
+    ".github/workflows/btc-predictive-vnext4r76-activation.yml",
 )
 
 ALLOWED_TYPES = {

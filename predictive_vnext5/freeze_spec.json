@@ -1,6 +1,6 @@
 {
-  "schema": "btc-predictive-vnext5r1-first-passage-freeze-spec-v1",
-  "status": "REMEDIATED_PRESTART_FROZEN_CANDIDATE_REQUIRES_INDEPENDENT_REVIEW",
+  "schema": "btc-predictive-vnext5r2-first-passage-freeze-spec-v2",
+  "status": "F4_REMEDIATED_PRESTART_FROZEN_CANDIDATE_REQUIRES_INDEPENDENT_REVIEW",
   "parent_engineering_source_sha": "34304b7650421dfd07d3c9e9b2f7f3c937b96ec1",
   "research_lineage": {
     "r1": {
@@ -197,22 +197,34 @@
     "independent_review_required_before_start": true
   },
   "remediation": {
-    "source_audit": "BTC_vNext5_First_Passage_independent_audit_20261008",
-    "findings_closed_by_candidate": [
+    "source_audit": "BTC_vNext5R1_independent_reaudit_20261008",
+    "prior_verdict": "REWORK_PREDICTIVE_FREEZE_NO_GO",
+    "already_closed": [
       "F1",
       "F2",
-      "F3",
-      "F4"
+      "F3"
+    ],
+    "targeted_in_this_successor": [
+      "R1-F4a",
+      "R1-F4b",
+      "R1-F4c",
+      "R1-F4d"
     ],
     "predictive_architecture_changed": false,
+    "model_binaries_changed": false,
+    "calibration_changed": false,
+    "weights_changed": false,
+    "features_changed": false,
+    "target_changed": false,
+    "thresholds_changed": false,
     "historical_model_selection_changed": false,
-    "notes": [
-      "F1: exact environment + twin independent runner byte comparison",
-      "F2: inclusive ratio boundary with floating-point tolerance",
-      "F3: fail-closed probability boundary validation",
-      "F4: executable frozen evaluation supplement/scorer/runtime"
-    ],
-    "F1_resolution": "preserve exact original model bytes; twin-runner assembly must match byte-for-byte; no retraining"
+    "fixes": {
+      "R1-F4a": "strict canonical row schema; forecast issued >= anchor; strict integer outcome enum; bool/fractional reject",
+      "R1-F4b": "sole package runtime; no CLI override; runtime/supplement/protocol/scorer hashes verified against freeze manifest before scoring",
+      "R1-F4c": "primary admission requires query_type=CANONICAL, target_id=CANONICAL_SIGMA_1_1_V1 and exact +/-1 sigma; custom/unknown fields reject",
+      "R1-F4d": "as-of cutoff semantics; outcome_recorded_at_utc must be <= cutoff_utc"
+    },
+    "validation": "full-grid adversarial regression on 1h/4h/24h plus twin-runner exact-byte assembly"
   },
   "model_authority": {
     "mode": "INHERITED_IMMUTABLE_PARENT_BINARY",

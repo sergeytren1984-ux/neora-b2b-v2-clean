@@ -1,0 +1,28 @@
+{
+  "schema": "btc-predictive-vnext5r2-acceptance-policy-v1",
+  "status": "FROZEN_BEFORE_R2_RESULT",
+  "parent_r1_source_sha": "f2b2c31f20d019d653076bd149b3a3e0b2b03a0f",
+  "trading_authority": false,
+  "prospective_skill_proven": false,
+  "overall_zone_gate": {
+    "min_folds": 4,
+    "min_wins": 4,
+    "min_positive_ci_folds": 3,
+    "min_mean_brier_gain": 0.007,
+    "max_mean_ece10": 0.05,
+    "max_ece10_degradation_vs_baseline": 0.015,
+    "max_ambiguous_fraction": 0.015
+  },
+  "canonical_1sigma_gate": {
+    "min_folds": 4,
+    "min_wins": 4,
+    "min_positive_ci_folds": 3,
+    "min_mean_brier_gain": 0.005,
+    "max_mean_ece10": 0.05,
+    "max_ece10_degradation_vs_baseline": 0.015,
+    "max_ambiguous_fraction": 0.015
+  },
+  "model_selection": "minimum sum of overall + canonical mean Brier among passing candidates",
+  "baseline": "rolling 90d, same barrier-pair, same frozen volatility bin, due-time causal",
+  "no_post_result_threshold_changes": true
+}

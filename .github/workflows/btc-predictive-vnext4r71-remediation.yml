@@ -2,7 +2,7 @@ name: BTC predictive vNext4R7.6 remediation
 
 on:
   push:
-    branches: [btc-predictive-vnext4r76-remediation-20261007]
+    branches: [btc-predictive-vnext4r76-remediation-20261008]
     paths:
       - predictive_vnext4r71/**
       - predictive_vnext4r7/scorecard_core.py

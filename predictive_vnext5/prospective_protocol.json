@@ -1,6 +1,6 @@
 {
-  "schema": "btc-predictive-vnext5r4-prospective-protocol-v4",
-  "status": "FROZEN_PRESTART_PRODUCTION_NUMERICAL_PROVENANCE_START_UTC_NULL",
+  "schema": "btc-predictive-vnext5r41-prospective-protocol-v5",
+  "status": "FROZEN_PRESTART_ACCEPTANCE_FINALIZATION_START_UTC_NULL",
   "start_utc": null,
   "timezone_internal": "UTC",
   "reporting_timezone": "MSK",
@@ -101,7 +101,9 @@
     "complete_execution_dependency_manifest_required": true,
     "detached_signed_source_execution_required": true,
     "deadline_interval": "anchor <= issued < deadline",
-    "consumer_side_snapshot_contract_required_before_automatic_use": true
+    "consumer_side_snapshot_contract_required_before_automatic_use": true,
+    "signed_a5_negative_e2e_required": true,
+    "full_grid_a5_semantic_regression_required": true
   },
   "authority": {
     "prospective_skill_proven": false,
@@ -140,6 +142,11 @@
     "remote_tip_revalidated_after_scoring": true,
     "decision_semantics": "SNAPSHOT_AS_OF_EXACT_EVIDENCE_SHA",
     "changes_after_start_forbidden": true,
-    "strict_canonical_schema_required": true
+    "strict_canonical_schema_required": true,
+    "consumer_guard_path": "predictive_vnext5/admission_consumer.py",
+    "consumer_exact_tip_recheck_required": true,
+    "consumer_cutoff_head_source_schema_binding_required": true,
+    "production_writer_serialization_required": true,
+    "production_signer_identity_recheck_before_publish": true
   }
 }

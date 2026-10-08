@@ -410,15 +410,20 @@ def fetch_outcome_raw(head,anchor,due):
 
 
 def nearest_closed_anchor(head,now=None):
+    """Frozen primary UTC phase: hourly, four-hourly, daily 00 UTC."""
     now=(now or datetime.now(UTC)).astimezone(UTC)
+    base=now.replace(minute=0,second=0,microsecond=0)
+    if head=="1h":
+        return base
+    if head=="4h":
+        return base.replace(hour=(base.hour//4)*4)
     if head=="24h":
-        return now.replace(minute=0,second=0,microsecond=0)
-    minute=(now.minute//15)*15
-    return now.replace(minute=minute,second=0,microsecond=0)
+        return base.replace(hour=0)
+    raise ValueError("invalid head")
 
 
 def historical_replay_anchor(head,now=None):
-    """Return a completed real-market anchor for engineering replay only."""
+    """Completed real-market anchor for non-prospective engineering replay."""
     now=(now or datetime.now(UTC)).astimezone(UTC)
     cfg=HEADS[head]
     safe=now-cfg["horizon"]-timedelta(hours=2)

@@ -20,7 +20,7 @@ from predictive_vnext5.prospective_score import validate_canonical_row_schema
 UTC=timezone.utc
 ROOT=Path(__file__).resolve().parents[1]
 REPO="sergeytren1984-ux/neora-b2b-v2-clean"
-WORKFLOW=".github/workflows/btc-predictive-vnext5r3-provenance-e2e.yml"
+WORKFLOW=".github/workflows/btc-predictive-vnext5r3-evidence.yml"
 
 
 def cmd(*args,check=True):

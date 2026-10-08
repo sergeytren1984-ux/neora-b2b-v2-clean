@@ -7,6 +7,7 @@ on:
     paths:
       - 'predictive_vnext5/**'
       - '.github/workflows/btc-predictive-vnext5r3-evidence.yml'
+      - '.github/workflows/btc-predictive-vnext5r3-freeze.yml'
   workflow_dispatch:
 
 permissions:

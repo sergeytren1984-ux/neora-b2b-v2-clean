@@ -1,4 +1,4 @@
-"""Real OIDC/Rekor negative E2E attacks against the mandatory R7.5 admission path."""
+"""Real OIDC/Rekor negative E2E attacks against the mandatory R7.6 admission path."""
 from __future__ import annotations
 
 import copy
@@ -237,7 +237,7 @@ def _publish_case_snapshot(name,case_dir):
     ).returncode != 0
     if changed:
         subprocess.run(
-            ["git","commit","-m",f"R7.5 negative E2E snapshot {name}"],
+            ["git","commit","-m",f"R7.6 negative E2E snapshot {name}"],
             cwd=ROOT,check=True,capture_output=True,text=True,
         )
     subprocess.run(
@@ -536,7 +536,7 @@ def main():
         cwd=ROOT,check=True,
     )
     subprocess.run(
-        ["git","commit","-m","R7.5 negative E2E preserve raw after receipt"],
+        ["git","commit","-m","R7.6 negative E2E preserve raw after receipt"],
         cwd=ROOT,check=True,capture_output=True,text=True,
     )
     subprocess.run(
@@ -648,7 +648,7 @@ def main():
         cwd=ROOT,check=True,
     )
     subprocess.run(
-        ["git","commit","-m","R7.5 preserve signed negative E2E artifacts"],
+        ["git","commit","-m","R7.6 preserve signed negative E2E artifacts"],
         cwd=ROOT,check=True,capture_output=True,text=True,
     )
     subprocess.run(

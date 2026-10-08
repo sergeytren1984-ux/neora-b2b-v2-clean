@@ -1,0 +1,244 @@
+name: BTC predictive vNext5R4.2 signed evidence authority
+
+on:
+  push:
+    branches:
+      - btc-predictive-vnext5r42-trust-barrier-remediation-20261008
+    paths:
+      - 'predictive_vnext5/**'
+      - '.github/workflows/btc-predictive-vnext5r42-evidence.yml'
+      - '.github/workflows/btc-predictive-vnext5r42-freeze.yml'
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Engineering replay or production journal action'
+        required: true
+        type: choice
+        options:
+          - market_replay_e2e
+          - register
+          - forecast
+          - outcome
+        default: market_replay_e2e
+      head:
+        description: 'Production head'
+        required: false
+        type: choice
+        options: [1h, 4h, 24h]
+        default: 1h
+      evidence_branch:
+        description: 'Registered production evidence branch'
+        required: false
+        type: string
+      start_utc:
+        description: 'Future UTC phase for register only'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  id-token: write
+  actions: read
+
+concurrency:
+  group: btc-predictive-vnext5r42-signed-evidence-${{ inputs.head || 'all' }}
+  cancel-in-progress: false
+
+env:
+  PYTHONHASHSEED: "0"
+  OPENBLAS_NUM_THREADS: "1"
+  OMP_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  VECLIB_MAXIMUM_THREADS: "1"
+  NUMEXPR_NUM_THREADS: "1"
+
+jobs:
+  real-market-signed-e2e:
+    if: github.event_name == 'push' || inputs.action == 'market_replay_e2e'
+    strategy:
+      fail-fast: false
+      matrix:
+        head: [1h, 4h, 24h]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+
+      - name: Install exact frozen runtime
+        run: |
+          python -m pip install --disable-pip-version-check \
+            numpy==2.2.6 scipy==1.18.1 scikit-learn==1.7.2 \
+            joblib==1.5.2 threadpoolctl==3.7.0
+
+      - name: Download exact immutable numerical authority
+        uses: actions/download-artifact@v4
+        with:
+          name: btc-vnext5-first-passage-freeze
+          path: /tmp/vnext5-model-authority
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 37746080651
+
+      - name: Real-market artifact-to-outcome signed replay
+        env:
+          PYTHONPATH: .
+          VNEXT5R4_E2E_HEAD: ${{ matrix.head }}
+          VNEXT5_MODEL_ROOT: /tmp/vnext5-model-authority
+        run: |
+          python predictive_vnext5/market_replay_e2e.py
+
+      - name: Upload replay result
+        uses: actions/upload-artifact@v4
+        with:
+          name: vnext5r42-real-market-e2e-${{ matrix.head }}
+          path: vnext5r4_market_e2e_result_${{ matrix.head }}.json
+          if-no-files-found: error
+          retention-days: 90
+
+  signed-a5-negative-e2e:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: Install exact frozen runtime
+        run: |
+          python -m pip install --disable-pip-version-check \
+            numpy==2.2.6 scipy==1.18.1 scikit-learn==1.7.2 \
+            joblib==1.5.2 threadpoolctl==3.7.0
+      - name: Download exact immutable numerical authority
+        uses: actions/download-artifact@v4
+        with:
+          name: btc-vnext5-first-passage-freeze
+          path: /tmp/vnext5-model-authority
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 37746080651
+      - name: Real-signer custom-field rejection
+        env:
+          PYTHONPATH: .
+          VNEXT5_MODEL_ROOT: /tmp/vnext5-model-authority
+        run: |
+          python predictive_vnext5/signed_semantic_negative_e2e.py
+
+  signed-outcome-target-negative-e2e:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: Install exact frozen runtime
+        run: |
+          python -m pip install --disable-pip-version-check \
+            numpy==2.2.6 scipy==1.18.1 scikit-learn==1.7.2 \
+            joblib==1.5.2 threadpoolctl==3.7.0
+      - name: Download exact immutable numerical authority
+        uses: actions/download-artifact@v4
+        with:
+          name: btc-vnext5-first-passage-freeze
+          path: /tmp/vnext5-model-authority
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 37746080651
+      - name: Real-signer joint outcome-target tamper rejection
+        env:
+          PYTHONPATH: .
+          VNEXT5_MODEL_ROOT: /tmp/vnext5-model-authority
+        run: |
+          python predictive_vnext5/signed_outcome_negative_e2e.py
+
+  trust-bootstrap-regression:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - name: Install exact frozen runtime
+        run: |
+          python -m pip install --disable-pip-version-check \
+            numpy==2.2.6 scipy==1.18.1 scikit-learn==1.7.2 \
+            joblib==1.5.2 threadpoolctl==3.7.0
+      - name: Reproduce unsigned-source attack and consumer injection
+        env:
+          PYTHONPATH: .
+        run: |
+          python predictive_vnext5/trust_bootstrap_regression.py
+
+  production-journal:
+    if: github.event_name == 'workflow_dispatch' && inputs.action != 'market_replay_e2e'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: Install exact frozen runtime
+        run: |
+          python -m pip install --disable-pip-version-check \
+            numpy==2.2.6 scipy==1.18.1 scikit-learn==1.7.2 \
+            joblib==1.5.2 threadpoolctl==3.7.0
+      - name: Download exact immutable numerical authority
+        uses: actions/download-artifact@v4
+        with:
+          name: btc-vnext5-first-passage-freeze
+          path: /tmp/vnext5-model-authority
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 37746080651
+      - name: Execute frozen production journal action
+        env:
+          PYTHONPATH: .
+          VNEXT5_ACTION: ${{ inputs.action }}
+          VNEXT5_HEAD: ${{ inputs.head }}
+          VNEXT5_EVIDENCE_BRANCH: ${{ inputs.evidence_branch }}
+          VNEXT5_START_UTC: ${{ inputs.start_utc }}
+          VNEXT5_MODEL_ROOT: /tmp/vnext5-model-authority
+        run: |
+          test -n "$VNEXT5_EVIDENCE_BRANCH"
+          python predictive_vnext5/production_journal.py

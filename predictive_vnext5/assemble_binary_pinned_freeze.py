@@ -1,4 +1,4 @@
-"""Assemble remediated vNext5R4 production-provenance freeze from exact parent model binaries.
+"""Assemble remediated vNext5R4.1 acceptance-finalization freeze from exact parent model binaries.
 
 No training occurs here. The four numerical model binaries are inherited
 byte-for-byte from the parent freeze artifact and verified against frozen SHA256
@@ -85,7 +85,7 @@ def assert_environment():
         })
     stable.sort(key=lambda x:json.dumps(x,sort_keys=True))
     return {
-        "schema":"btc-predictive-vnext5r4-build-environment-v5",
+        "schema":"btc-predictive-vnext5r41-build-environment-v6",
         "platform":REPRO["platform"],
         "python":platform.python_version(),
         "packages":actual,
@@ -264,8 +264,8 @@ def main(argv=None):
         raise RuntimeError("copied model binaries changed")
 
     manifest={
-        "schema":"btc-predictive-vnext5r4-production-provenance-freeze-manifest-v5",
-        "status":"PRODUCTION_NUMERICAL_PROVENANCE_PRESTART_BINARY_PINNED_PACKAGE",
+        "schema":"btc-predictive-vnext5r41-acceptance-finalization-freeze-manifest-v6",
+        "status":"ACCEPTANCE_FINALIZATION_PRESTART_BINARY_PINNED_PACKAGE",
         "model_authority":{
             "mode":"INHERITED_IMMUTABLE_PARENT_BINARY",
             "parent_source_sha":
@@ -301,6 +301,7 @@ def main(argv=None):
         "prospective_scorer_sha256":sha(HERE/"prospective_score.py"),
         "prospective_admission_sha256":sha(HERE/"prospective_admission.py"),
         "admission_worker_sha256":sha(HERE/"admission_worker.py"),
+        "admission_consumer_sha256":sha(HERE/"admission_consumer.py"),
         "verified_evidence_sha256":sha(HERE/"verified_evidence.py"),
         "evidence_protocol_template_sha256":
             sha(HERE/"evidence_protocol_template.json"),
@@ -308,18 +309,22 @@ def main(argv=None):
         "production_emitter_sha256":sha(HERE/"production_emitter.py"),
         "production_journal_sha256":sha(HERE/"production_journal.py"),
         "market_replay_e2e_sha256":sha(HERE/"market_replay_e2e.py"),
+        "signed_semantic_negative_e2e_sha256":
+            sha(HERE/"signed_semantic_negative_e2e.py"),
         "frozen_source_runtime_sha256":
             sha(HERE/"frozen_evaluation_runtime.json"),
         "f4_adversarial_regression_sha256":
             sha(HERE/"f4_adversarial_regression.py"),
         "evidence_workflow_sha256":
-            sha(ROOT/".github/workflows/btc-predictive-vnext5r4-evidence.yml"),
+            sha(ROOT/".github/workflows/btc-predictive-vnext5r41-evidence.yml"),
         "predictor_sha256":sha(HERE/"predictor.py"),
         "evaluation_authority":{
             "sole_admission_entrypoint":
                 "predictive_vnext5/prospective_admission.py",
             "isolated_worker":
                 "predictive_vnext5/admission_worker.py",
+            "consumer_guard":
+                "predictive_vnext5/admission_consumer.py",
             "evidence_verifier":
                 "predictive_vnext5/verified_evidence.py",
             "calculator_only":
@@ -346,6 +351,10 @@ def main(argv=None):
             "rekor_time_authority":True,
             "exact_remote_tip_snapshot_required":True,
             "deadline_interval":"[anchor, deadline)",
+            "consumer_exact_tip_recheck_required":True,
+            "consumer_trading_authority":False,
+            "production_writer_serialization_required":True,
+            "production_signer_identity_recheck_before_publish":True,
         },
         "historical_model_selection_change":False,
         "predictive_model_change":False,

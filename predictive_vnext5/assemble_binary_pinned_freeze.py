@@ -1,4 +1,4 @@
-"""Assemble remediated vNext5R2 freeze from exact parent model binaries.
+"""Assemble remediated vNext5R3 provenance-bound freeze from exact parent model binaries.
 
 No training occurs here. The four numerical model binaries are inherited
 byte-for-byte from the parent freeze artifact and verified against frozen SHA256
@@ -85,7 +85,7 @@ def assert_environment():
         })
     stable.sort(key=lambda x:json.dumps(x,sort_keys=True))
     return {
-        "schema":"btc-predictive-vnext5r2-build-environment-v3",
+        "schema":"btc-predictive-vnext5r3-build-environment-v4",
         "platform":REPRO["platform"],
         "python":platform.python_version(),
         "packages":actual,
@@ -243,10 +243,10 @@ def main(argv=None):
         raise RuntimeError("parent freeze manifest SHA mismatch")
     shutil.copyfile(parent_manifest,BUILD/"parent_freeze_manifest.json")
 
-    runtime=build_evaluation_runtime()
-    (BUILD/"evaluation_runtime.json").write_text(
-        json.dumps(runtime,indent=2,sort_keys=True)+"\n"
-    )
+    source_runtime=HERE/"frozen_evaluation_runtime.json"
+    if not source_runtime.exists():
+        raise RuntimeError("frozen source evaluation runtime missing")
+    shutil.copyfile(source_runtime,BUILD/"evaluation_runtime.json")
     (BUILD/"build_environment.json").write_text(
         json.dumps(env,indent=2,sort_keys=True)+"\n"
     )
@@ -264,8 +264,8 @@ def main(argv=None):
         raise RuntimeError("copied model binaries changed")
 
     manifest={
-        "schema":"btc-predictive-vnext5r2-binary-pinned-freeze-manifest-v3",
-        "status":"F4_REMEDIATED_PRESTART_BINARY_PINNED_PACKAGE",
+        "schema":"btc-predictive-vnext5r3-provenance-bound-freeze-manifest-v4",
+        "status":"PROVENANCE_BOUND_PRESTART_BINARY_PINNED_PACKAGE",
         "model_authority":{
             "mode":"INHERITED_IMMUTABLE_PARENT_BINARY",
             "parent_source_sha":
@@ -299,15 +299,32 @@ def main(argv=None):
         "evaluation_supplement_sha256":
             sha(HERE/"evaluation_supplement.json"),
         "prospective_scorer_sha256":sha(HERE/"prospective_score.py"),
+        "prospective_admission_sha256":sha(HERE/"prospective_admission.py"),
+        "verified_evidence_sha256":sha(HERE/"verified_evidence.py"),
+        "evidence_protocol_template_sha256":
+            sha(HERE/"evidence_protocol_template.json"),
+        "frozen_source_runtime_sha256":
+            sha(HERE/"frozen_evaluation_runtime.json"),
         "f4_adversarial_regression_sha256":
             sha(HERE/"f4_adversarial_regression.py"),
+        "provenance_e2e_sha256":sha(HERE/"provenance_e2e.py"),
         "predictor_sha256":sha(HERE/"predictor.py"),
         "evaluation_authority":{
+            "sole_admission_entrypoint":
+                "predictive_vnext5/prospective_admission.py",
+            "evidence_verifier":
+                "predictive_vnext5/verified_evidence.py",
+            "calculator_only":
+                "predictive_vnext5/prospective_score.py",
+            "arbitrary_jsonl_admission":False,
             "runtime_override_allowed":False,
+            "runtime_source_controlled":True,
             "primary_query_type":"CANONICAL",
             "primary_target_id":"CANONICAL_SIGMA_1_1_V1",
             "strict_row_schema":True,
             "as_of_cutoff_semantics":True,
+            "rekor_time_authority":True,
+            "exact_remote_tip_snapshot_required":True,
         },
         "historical_model_selection_change":False,
         "predictive_model_change":False,

@@ -85,7 +85,7 @@ def _validate_exact_event_schema(event:dict):
         raise ValueError(
             "signed event contains forbidden fields: "+",".join(sorted(extra))
         )
-    if event.get("schema")!="btc-predictive-vnext5r4-evidence-event-v1":
+    if event.get("schema")!="btc-predictive-vnext5r41-evidence-event-v1":
         raise ValueError("unexpected evidence event schema")
 
 
@@ -663,7 +663,7 @@ def verify_evidence_snapshot(
             })
 
     governance={
-        "schema":"btc-predictive-vnext5r3-evidence-governance-v1",
+        "schema":"btc-predictive-vnext5r41-evidence-governance-v1",
         "full_cryptographic_replay":True,
         "all_event_signatures_verified":True,
         "all_rekor_inclusion_proofs_verified":True,

@@ -763,7 +763,11 @@ def _run_admission_snapshot(
         "protocol_sha256": digest(protocol_bytes),
         "absolute_latest_tip_atomicity_claimed": False,
         "consumer_must_reject_if_evidence_tip_differs": True,
-        "consumer_validation_entrypoint": "predictive_vnext4r71.admission.assert_snapshot_decision_current",
+        "consumer_freshness_entrypoint": "predictive_vnext4r71.admission.assert_snapshot_decision_current",
+        "consumer_validation_entrypoint": "predictive_vnext4r71.activation.consume_under_exclusive_lease",
+        "exclusive_side_effect_lease_required": True,
+        "lease_provider": "github-actions-concurrency",
+        "lease_group": f"btc-predictive-vnext4r71-{head}-unified-chain",
     }
 
     return {

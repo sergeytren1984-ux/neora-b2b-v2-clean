@@ -8,6 +8,7 @@ verification of an exact fetched evidence-branch snapshot.
 from __future__ import annotations
 
 import json
+import math
 import re
 import subprocess
 from dataclasses import dataclass

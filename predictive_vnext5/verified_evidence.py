@@ -273,6 +273,32 @@ def verify_evidence_snapshot(
         raise ValueError("manifest trigger mismatch")
     _verify_source_manifest(root,manifest,source_sha)
 
+    template_path="predictive_vnext5/evidence_protocol_template.json"
+    if template_path not in manifest.get("paths_sha256",{}):
+        raise ValueError("evidence protocol template absent from signed manifest")
+    template_bytes=git_bytes(root,source_sha,template_path)
+    template=json.loads(template_bytes)
+    if template_bytes!=canonical(template):
+        raise ValueError("source evidence protocol template is not canonical")
+    if protocol.get("repository")!=template.get("repository"):
+        raise ValueError("protocol repository differs from frozen template")
+    if protocol.get("workflow_path")!=template.get("workflow_path"):
+        raise ValueError("protocol workflow differs from frozen template")
+    if protocol.get("canonical_target")!=template.get("canonical_target"):
+        raise ValueError("protocol canonical target differs from frozen template")
+    frozen_head=template.get("heads",{}).get(head)
+    if not isinstance(frozen_head,dict):
+        raise ValueError("head absent from frozen evidence template")
+    for key in ("candidates","artifact_sha256"):
+        if cfg.get(key)!=frozen_head.get(key):
+            raise ValueError("protocol head "+key+" differs from frozen template")
+    if mode=="PROSPECTIVE":
+        for key in ("horizon_minutes","forecast_deadline_minutes"):
+            if cfg.get(key)!=frozen_head.get(key):
+                raise ValueError("protocol "+key+" differs from frozen template")
+        if "horizon_seconds" in cfg or "forecast_deadline_seconds" in cfg:
+            raise ValueError("production protocol cannot override duration units")
+
     repository=protocol.get("repository")
     workflow_path=protocol.get("workflow_path")
     if repository!="sergeytren1984-ux/neora-b2b-v2-clean":

@@ -301,6 +301,9 @@ def verify_evidence_snapshot(
                 raise ValueError("protocol "+key+" differs from frozen template")
         if "horizon_seconds" in cfg or "forecast_deadline_seconds" in cfg:
             raise ValueError("production protocol cannot override duration units")
+        expected_events=template["journal"]["events_dir_template"].format(head=head)
+        if protocol.get("events_dir")!=expected_events:
+            raise ValueError("production events_dir differs from frozen template")
 
     repository=protocol.get("repository")
     workflow_path=protocol.get("workflow_path")

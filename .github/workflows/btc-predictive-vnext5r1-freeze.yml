@@ -1,4 +1,4 @@
-name: BTC predictive vNext5R1 reproducible first-passage freeze
+name: BTC predictive vNext5R1 reproducible binary-pinned freeze
 
 on:
   push:
@@ -11,9 +11,10 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
-  group: btc-predictive-vnext5r1-reproducible-freeze
+  group: btc-predictive-vnext5r1-binary-pinned-freeze
   cancel-in-progress: true
 
 env:
@@ -25,13 +26,13 @@ env:
   NUMEXPR_NUM_THREADS: "1"
 
 jobs:
-  build:
+  assemble:
     strategy:
       fail-fast: false
       matrix:
         builder: [a, b]
     runs-on: ubuntu-24.04
-    timeout-minutes: 330
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -46,37 +47,41 @@ jobs:
           python -m pip install --disable-pip-version-check \
             numpy==2.2.6 scipy==1.18.1 scikit-learn==1.7.2 \
             joblib==1.5.2 threadpoolctl==3.7.0
-          python -VV
-          python -m pip freeze | sort
-          python - <<'PY'
-          import json,threadpoolctl
-          print(json.dumps(threadpoolctl.threadpool_info(),indent=2,sort_keys=True))
-          PY
 
-      - name: Rebuild fixed historical sources
+      - name: Download exact parent frozen model artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: btc-vnext5-first-passage-freeze
+          path: /tmp/parent-freeze
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 37746080651
+
+      - name: Rebuild only deterministic evaluation sources
         run: |
           python research_vnext/fetch_hourly.py
           python research_vnext4r6/fetch_15m_r6.py
 
-      - name: Build frozen package independently
+      - name: Assemble without retraining
         env:
           PYTHONPATH: .
         run: |
           rm -rf predictive_vnext5/build
-          python predictive_vnext5/freeze_first_passage.py
+          python predictive_vnext5/assemble_binary_pinned_freeze.py \
+            --parent-dir /tmp/parent-freeze
           python predictive_vnext5/selftest.py
           python -m unittest predictive_vnext5.test_freeze_remediation -v
 
-      - name: Upload independent build
+      - name: Upload independent assembly
         uses: actions/upload-artifact@v4
         with:
-          name: vnext5r1-build-${{ matrix.builder }}
+          name: vnext5r1-assembly-${{ matrix.builder }}
           path: predictive_vnext5/build/**
           if-no-files-found: error
           retention-days: 90
 
   compare:
-    needs: build
+    needs: assemble
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
@@ -96,15 +101,15 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: vnext5r1-build-a
+          name: vnext5r1-assembly-a
           path: /tmp/build-a
 
       - uses: actions/download-artifact@v4
         with:
-          name: vnext5r1-build-b
+          name: vnext5r1-assembly-b
           path: /tmp/build-b
 
-      - name: Exact-byte compare independent builds
+      - name: Exact-byte compare independent assemblies
         env:
           PYTHONPATH: .
         run: |
@@ -113,7 +118,7 @@ jobs:
             --b /tmp/build-b \
             --output /tmp/reproducibility_report.json
 
-      - name: Assemble authoritative package from build A
+      - name: Assemble authoritative package from assembly A
         run: |
           rm -rf predictive_vnext5/build
           mkdir -p predictive_vnext5/build
@@ -128,10 +133,13 @@ jobs:
           python -m unittest predictive_vnext5.test_freeze_remediation -v
           python - <<'PY'
           import json,pathlib
-          p=pathlib.Path("predictive_vnext5/build/reproducibility_report.json")
-          x=json.loads(p.read_text())
+          x=json.loads(
+              pathlib.Path(
+                  "predictive_vnext5/build/reproducibility_report.json"
+              ).read_text()
+          )
           assert x["status"]=="PASS"
-          print("VNEXT5R1_EXACT_BYTE_REPRODUCIBILITY_PASS")
+          print("VNEXT5R1_BINARY_PINNED_EXACT_BYTE_REPRODUCIBILITY_PASS")
           PY
 
       - name: Print authoritative inner hashes
@@ -143,7 +151,7 @@ jobs:
             predictive_vnext5/freeze_spec.json \
             predictive_vnext5/prospective_protocol.json \
             predictive_vnext5/predictor.py \
-            predictive_vnext5/freeze_first_passage.py \
+            predictive_vnext5/assemble_binary_pinned_freeze.py \
             predictive_vnext5/build/*
 
       - name: Upload authoritative remediated freeze
@@ -157,7 +165,7 @@ jobs:
             predictive_vnext5/freeze_spec.json
             predictive_vnext5/prospective_protocol.json
             predictive_vnext5/predictor.py
-            predictive_vnext5/freeze_first_passage.py
+            predictive_vnext5/assemble_binary_pinned_freeze.py
             predictive_vnext5/selftest.py
             predictive_vnext5/test_freeze_remediation.py
             predictive_vnext5/compare_freeze_builds.py

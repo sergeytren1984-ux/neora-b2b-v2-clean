@@ -22,8 +22,7 @@ import numpy as np
 HERE=Path(__file__).resolve().parent
 SUPPLEMENT_PATH=HERE/"evaluation_supplement.json"
 PROTOCOL_PATH=HERE/"prospective_protocol.json"
-MANIFEST_PATH=HERE/"build/freeze_manifest.json"
-RUNTIME_PATH=HERE/"build/evaluation_runtime.json"
+RUNTIME_PATH=HERE/"frozen_evaluation_runtime.json"
 SUPPLEMENT=json.loads(SUPPLEMENT_PATH.read_text())
 EPS=1e-12
 
@@ -91,35 +90,17 @@ def _canonical_sigma(value,expected,name):
 
 
 def authoritative_runtime(runtime_override=None):
-    """Load the sole frozen runtime and verify all evaluation bindings.
+    """Load the sole frozen source-controlled baseline runtime.
 
-    A caller may pass a runtime object only for compatibility with direct
-    programmatic tests.  It must be exactly equal to the authoritative runtime;
-    otherwise scoring fails closed.  The CLI exposes no runtime override.
+    Cryptographic binding of these bytes to the exact source commit is enforced
+    by prospective_admission -> verified_evidence.  Direct caller replacement is
+    rejected here as an additional fail-closed guard.
     """
-    manifest=json.loads(MANIFEST_PATH.read_text())
-    runtime_bytes=RUNTIME_PATH.read_bytes()
-    runtime=json.loads(runtime_bytes)
-
-    checks={
-        "evaluation_runtime_sha256":file_sha256(RUNTIME_PATH),
-        "evaluation_supplement_sha256":file_sha256(SUPPLEMENT_PATH),
-        "prospective_protocol_sha256":file_sha256(PROTOCOL_PATH),
-        "prospective_scorer_sha256":file_sha256(Path(__file__).resolve()),
-    }
-    for key,actual in checks.items():
-        expected=manifest.get(key)
-        if expected!=actual:
-            raise ValueError(f"frozen evaluation binding mismatch: {key}")
-
-    if runtime.get("supplement_sha256")!=checks["evaluation_supplement_sha256"]:
-        raise ValueError("runtime supplement binding mismatch")
-
+    runtime=json.loads(RUNTIME_PATH.read_text())
     if runtime_override is not None:
         if not isinstance(runtime_override,dict) or runtime_override!=runtime:
             raise ValueError("non-authoritative runtime rejected")
     return runtime
-
 
 def brier_losses(p,y):
     one=np.eye(4,dtype=float)[np.asarray(y,dtype=int)]
@@ -461,17 +442,10 @@ def load_rows(path):
 
 
 def main(argv=None):
-    p=argparse.ArgumentParser()
-    p.add_argument("--events-jsonl",required=True)
-    p.add_argument("--head",required=True,choices=("1h","4h","24h"))
-    p.add_argument("--start-utc",required=True)
-    p.add_argument("--cutoff-utc",required=True)
-    args=p.parse_args(argv)
-    result=score(
-        load_rows(args.events_jsonl),
-        args.head,args.start_utc,args.cutoff_utc,
+    raise SystemExit(
+        "standalone JSONL scoring is non-authoritative; "
+        "use predictive_vnext5/prospective_admission.py"
     )
-    print(json.dumps(result,indent=2,sort_keys=True))
 
 
 if __name__=="__main__":

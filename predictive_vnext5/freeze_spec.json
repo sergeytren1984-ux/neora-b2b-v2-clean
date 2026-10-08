@@ -211,6 +211,15 @@
       "F2: inclusive ratio boundary with floating-point tolerance",
       "F3: fail-closed probability boundary validation",
       "F4: executable frozen evaluation supplement/scorer/runtime"
-    ]
+    ],
+    "F1_resolution": "preserve exact original model bytes; twin-runner assembly must match byte-for-byte; no retraining"
+  },
+  "model_authority": {
+    "mode": "INHERITED_IMMUTABLE_PARENT_BINARY",
+    "parent_source_sha": "e2ccec5e5e9b4bd56de1af804af7313dd2b00c27",
+    "parent_run_id": 37746080651,
+    "parent_artifact_id": 11535947469,
+    "retraining_for_freeze_forbidden": true,
+    "builder": "predictive_vnext5/assemble_binary_pinned_freeze.py"
   }
 }

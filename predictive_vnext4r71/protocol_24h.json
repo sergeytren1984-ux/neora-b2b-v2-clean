@@ -1,6 +1,6 @@
 {
   "schema": "btc-predictive-vnext4r71-protocol-v1",
-  "status": "R7_5_REMEDIATION_PRE_FREEZE_NOT_PRODUCTION",
+  "status": "R7_6_REMEDIATION_PRE_FREEZE_NOT_PRODUCTION",
   "parent_r6_source_sha": "98d6ea6e981b3306f397a9105babc2e5d66ac7a0",
   "selected_model": "ensemble_equal",
   "numerical_core": "unchanged frozen R6 artifacts",
@@ -102,7 +102,7 @@
     "absolute_latest_tip_atomicity_claimed": false,
     "consumer_must_reject_if_evidence_tip_differs": true,
     "consumer_compare_and_swap_or_lease_required_for_activation": true,
-    "consumer_validation_entrypoint": "predictive_vnext4r71.admission.assert_snapshot_decision_current",
+    "consumer_validation_entrypoint": "predictive_vnext4r71.activation.consume_under_exclusive_lease",
     "consumer_snapshot_freshness_guard_required": true
   },
   "workflows": {
@@ -126,7 +126,8 @@
       ".github/workflows/btc-predictive-vnext4r71-4h.yml",
       ".github/workflows/btc-predictive-vnext4r71-24h.yml",
       ".github/workflows/btc-predictive-vnext4r71-watchdog.yml",
-      ".github/workflows/btc-predictive-vnext4r71-health.yml"
+      ".github/workflows/btc-predictive-vnext4r71-health.yml",
+      ".github/workflows/btc-predictive-vnext4r76-activation.yml"
     ]
   },
   "parent_r6_candidate_sha": "faa0244a34516177c9e23cccc30f522462f7423f",
@@ -168,5 +169,17 @@
     "numerical_lifecycle_fixture_is_engineering_not_prospective_market_evidence": true
   },
   "evidence_branch": "btc-predictive-vnext4r71-24h",
-  "evidence_raw_prefix": "predictive_vnext4r71_24h_raw/"
+  "evidence_raw_prefix": "predictive_vnext4r71_24h_raw/",
+  "activation_policy": {
+    "trading_activation_enabled": false,
+    "side_effects_forbidden_without_exclusive_lease": true,
+    "lease_provider": "github-actions-concurrency",
+    "activation_workflow": ".github/workflows/btc-predictive-vnext4r76-activation.yml",
+    "activation_entrypoint": "predictive_vnext4r71.activation.consume_under_exclusive_lease",
+    "evidence_writer_must_share_concurrency_group": true,
+    "concurrency_group": "btc-predictive-vnext4r71-24h-unified-chain",
+    "freshness_guard_immediately_before_side_effect": true,
+    "post_side_effect_freshness_check_for_audit": true,
+    "activation_requires_new_independent_audit": true
+  }
 }

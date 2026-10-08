@@ -1,9 +1,9 @@
 {
-  "schema": "btc-predictive-vnext5r4-evidence-protocol-template-v1",
+  "schema": "btc-predictive-vnext5r41-evidence-protocol-template-v2",
   "status": "PRESTART_TEMPLATE_NO_REGISTERED_START",
   "repository": "sergeytren1984-ux/neora-b2b-v2-clean",
-  "event_schema": "btc-predictive-vnext5r4-evidence-event-v1",
-  "workflow_path": ".github/workflows/btc-predictive-vnext5r4-evidence.yml",
+  "event_schema": "btc-predictive-vnext5r41-evidence-event-v1",
+  "workflow_path": ".github/workflows/btc-predictive-vnext5r41-evidence.yml",
   "registration": {
     "start_utc": null,
     "evidence_branch": null,
@@ -72,7 +72,10 @@
     "strict_per_event_schema_before_derivation": true,
     "custom_annotations_forbidden_in_primary_events": true,
     "numerical_replay_from_raw_required": true,
-    "execution_contract_path": "predictive_vnext5/execution_contract.json"
+    "execution_contract_path": "predictive_vnext5/execution_contract.json",
+    "real_signer_semantic_negative_e2e_required": true,
+    "full_grid_a5_regression_required": true,
+    "consumer_guard_path": "predictive_vnext5/admission_consumer.py"
   },
   "row_derivation": {
     "forecast_issued_at_utc": "max(FORECAST_ISSUED Rekor integrated time, DELIVERY_CONFIRMED Rekor integrated time)",

@@ -286,6 +286,7 @@ def verify_evidence_snapshot(
     current_tip:str,
     expected_branch:str,
     allow_e2e_short_horizon:bool=False,
+    allow_market_replay:bool=False,
     source_checkout:Path|None=None,
     model_root:Path|None=None,
     require_numerical_replay:bool=True,
@@ -303,7 +304,12 @@ def verify_evidence_snapshot(
     if protocol_bytes!=canonical(protocol):
         raise ValueError("protocol is not canonical")
     mode=protocol.get("mode","PROSPECTIVE")
-    if mode!="PROSPECTIVE" and not (allow_e2e_short_horizon and mode=="E2E"):
+    allowed_mode=(
+        mode=="PROSPECTIVE"
+        or (allow_e2e_short_horizon and mode=="E2E")
+        or (allow_market_replay and mode=="MARKET_REPLAY_E2E")
+    )
+    if not allowed_mode:
         raise ValueError("non-prospective evidence protocol forbidden")
 
     head=protocol.get("head")
@@ -358,7 +364,10 @@ def verify_evidence_snapshot(
     if not isinstance(source_ref,str) or not source_ref.startswith("refs/heads/"):
         raise ValueError("invalid signed source ref")
     allowed_triggers={"workflow_dispatch","schedule"}
-    if allow_e2e_short_horizon and mode=="E2E":
+    if (
+        (allow_e2e_short_horizon and mode=="E2E")
+        or (allow_market_replay and mode=="MARKET_REPLAY_E2E")
+    ):
         allowed_triggers.add("push")
     if trigger not in allowed_triggers:
         raise ValueError("invalid signed workflow trigger")
@@ -478,12 +487,13 @@ def verify_evidence_snapshot(
             due=parse_utc(event.get("due_utc"))
             if due!=anchor+horizon:
                 raise ValueError("forecast horizon mismatch")
-            if parse_utc(event.get("published_at_utc"))<anchor:
-                raise ValueError("forecast published before anchor")
-            if rekor[event["sequence"]]<anchor:
-                raise ValueError("forecast Rekor time before anchor")
-            if rekor[event["sequence"]]>=anchor+deadline:
-                raise ValueError("forecast Rekor time late")
+            if mode!="MARKET_REPLAY_E2E":
+                if parse_utc(event.get("published_at_utc"))<anchor:
+                    raise ValueError("forecast published before anchor")
+                if rekor[event["sequence"]]<anchor:
+                    raise ValueError("forecast Rekor time before anchor")
+                if rekor[event["sequence"]]>=anchor+deadline:
+                    raise ValueError("forecast Rekor time late")
             if event.get("artifact_sha256")!=artifacts:
                 raise ValueError("forecast artifact binding mismatch")
             predictions=event.get("predictions")
@@ -530,8 +540,13 @@ def verify_evidence_snapshot(
                         raise ValueError(
                             "forecast probability differs from model replay: "+candidate
                         )
-                if event.get("producer_mode")!="PRODUCTION":
-                    raise ValueError("production admission requires production producer mode")
+                expected_mode=(
+                    "MARKET_REPLAY_E2E"
+                    if mode=="MARKET_REPLAY_E2E"
+                    else "PRODUCTION"
+                )
+                if event.get("producer_mode")!=expected_mode:
+                    raise ValueError("producer mode differs from protocol mode")
             forecasts[slot]=(event,path,event_commit)
         elif et=="DELIVERY_CONFIRMED":
             if slot in receipts:
@@ -545,10 +560,11 @@ def verify_evidence_snapshot(
             due=parse_utc(event.get("due_utc"))
             if due!=anchor+horizon:
                 raise ValueError("outcome horizon mismatch")
-            if parse_utc(event.get("published_at_utc"))<due:
-                raise ValueError("outcome published before due")
-            if rekor[event["sequence"]]<due:
-                raise ValueError("outcome Rekor time before due")
+            if mode!="MARKET_REPLAY_E2E":
+                if parse_utc(event.get("published_at_utc"))<due:
+                    raise ValueError("outcome published before due")
+                if rekor[event["sequence"]]<due:
+                    raise ValueError("outcome Rekor time before due")
             if event.get("outcome_class") not in RAW_CLASS_TO_ID:
                 raise ValueError("invalid signed outcome class")
             _verify_raw_publication(root,current_tip,event,path,raw_prefix)
@@ -573,8 +589,13 @@ def verify_evidence_snapshot(
                         rel_tol=0.0,abs_tol=1e-12,
                     ):
                         raise ValueError("outcome numerical provenance mismatch: "+key)
-                if event.get("producer_mode")!="PRODUCTION":
-                    raise ValueError("production admission requires production producer mode")
+                expected_mode=(
+                    "MARKET_REPLAY_E2E"
+                    if mode=="MARKET_REPLAY_E2E"
+                    else "PRODUCTION"
+                )
+                if event.get("producer_mode")!=expected_mode:
+                    raise ValueError("producer mode differs from protocol mode")
             outcomes[slot]=(event,path)
         elif et=="SLOT_MISSED":
             continue
@@ -594,10 +615,11 @@ def verify_evidence_snapshot(
             raise ValueError("delivery target event hash mismatch")
         if receipt.get("remote_commit_sha")!=forecast_commit:
             raise ValueError("delivery receipt does not name forecast publication commit")
-        if rekor[receipt["sequence"]]>=anchor+deadline:
-            raise ValueError("delivery receipt Rekor time late")
-        if rekor[receipt["sequence"]]<anchor:
-            raise ValueError("delivery receipt Rekor time before anchor")
+        if mode!="MARKET_REPLAY_E2E":
+            if rekor[receipt["sequence"]]>=anchor+deadline:
+                raise ValueError("delivery receipt Rekor time late")
+            if rekor[receipt["sequence"]]<anchor:
+                raise ValueError("delivery receipt Rekor time before anchor")
         event_rel=str(fpath.resolve().relative_to(root.resolve()))
         if git_bytes(root,forecast_commit,event_rel)!=canonical(forecast):
             raise ValueError("receipt publication commit lacks exact forecast")
@@ -662,6 +684,8 @@ def verify_evidence_snapshot(
         "derived_row_count":len(rows),
         "row_time_authority":"REKOR_INTEGRATED_TIME",
         "arbitrary_jsonl_input_used":False,
+        "protocol_mode":mode,
+        "admission_eligible":mode=="PROSPECTIVE",
         "trading_authority":False,
     }
     return VerifiedEvidence(

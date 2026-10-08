@@ -1,0 +1,65 @@
+name: BTC predictive vNext4R7.6 exclusive activation consumer
+
+on:
+  workflow_dispatch:
+    inputs:
+      head:
+        description: Evidence head
+        required: true
+        type: choice
+        options: [1h, 4h, 24h]
+      report_path:
+        description: Repository-relative admission report path
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+# This group is intentionally identical to the production writer group.
+# It is the cross-process lease required before any future external side effect.
+concurrency:
+  group: btc-predictive-vnext4r71-${{ inputs.head }}-unified-chain
+  cancel-in-progress: false
+
+jobs:
+  validate-exclusive-consumer:
+    if: vars.BTC_VNEXT4R76_ACTIVATION_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: btc-predictive-vnext4r71-${{ inputs.head }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Build exact immutable runtime
+        env:
+          R71_SOURCE_SHA: ${{ vars.BTC_VNEXT4R71_SOURCE_SHA }}
+        run: |
+          [[ "$R71_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git fetch origin main
+          rm -rf /tmp/vnext4r71-runtime
+          mkdir -p /tmp/vnext4r71-runtime
+          git archive "$R71_SOURCE_SHA" | tar -x -C /tmp/vnext4r71-runtime
+
+      - name: Validate exclusive consumer path without side effect
+        env:
+          BTC_VNEXT4R71_SOURCE_SHA: ${{ vars.BTC_VNEXT4R71_SOURCE_SHA }}
+          BTC_VNEXT4R76_LEASE_PROVIDER: github-actions-concurrency
+          BTC_VNEXT4R76_LEASE_GROUP: btc-predictive-vnext4r71-${{ inputs.head }}-unified-chain
+          BTC_VNEXT4R76_ACTIVATION_WORKFLOW: .github/workflows/btc-predictive-vnext4r76-activation.yml
+        run: |
+          test -f "${{ inputs.report_path }}"
+          python -I /tmp/vnext4r71-runtime/predictive_vnext4r71/activation.py \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --report "${{ inputs.report_path }}" \
+            --head "${{ inputs.head }}" \
+            --validate-only
+
+      - name: Trading activation remains disabled
+        run: |
+          echo "R76_TRADING_AUTHORITY_DISABLED"
+          exit 0

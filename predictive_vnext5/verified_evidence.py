@@ -85,7 +85,7 @@ def _validate_exact_event_schema(event:dict):
         raise ValueError(
             "signed event contains forbidden fields: "+",".join(sorted(extra))
         )
-    if event.get("schema")!="btc-predictive-vnext5r41-evidence-event-v1":
+    if event.get("schema")!="btc-predictive-vnext5r42-evidence-event-v1":
         raise ValueError("unexpected evidence event schema")
 
 

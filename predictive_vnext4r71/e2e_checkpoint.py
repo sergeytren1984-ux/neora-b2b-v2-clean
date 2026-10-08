@@ -597,12 +597,12 @@ def main():
     # TOCTOU attack: start admission on the exact remote tip, then advance the
     # same evidence branch from inside scoring. Final admission must fail closed.
     original_score=admission_module.score_from_events
-    race_marker=ROOT/"r75_mid_admission_tip_advance.json"
+    race_marker=ROOT/"r76_mid_admission_tip_advance.json"
     race_state={"advanced_tip":None}
     def score_and_advance(*args,**kwargs):
         out=original_score(*args,**kwargs)
         race_marker.write_bytes(canonical({
-            "schema":"btc-predictive-vnext4r75-mid-admission-tip-advance-v1",
+            "schema":"btc-predictive-vnext4r76-mid-admission-tip-advance-v1",
             "source_sha":source_sha,
             "created_at_utc":datetime.now(UTC).isoformat(),
         }))
@@ -632,8 +632,8 @@ def main():
         raise RuntimeError("mid-admission tip attack did not advance remote branch")
 
     audit={
-        "schema":"btc-predictive-vnext4r75-e2e-audit-artifact-v1",
-        "status":"R7_5_E2E_PASS",
+        "schema":"btc-predictive-vnext4r76-e2e-audit-artifact-v1",
+        "status":"R7_6_E2E_PASS",
         "evidence_branch":e2e_branch,
         "source_sha":source_sha,
         "event_count":len(event_files(events_dir)),
@@ -663,7 +663,7 @@ def main():
         "checkpoint_recovery_seconds":{"p50":statistics.median(recovery_seconds),"p95":recovery_p95,"n":len(recovery_seconds)},
         "full_checkpoint_operation_seconds":{"p50":statistics.median(checkpoint_operation_seconds),"p95":checkpoint_p95,"n":len(checkpoint_operation_seconds),"budget_seconds":720},
     }
-    audit_path=ROOT/"r75_e2e_audit_manifest.json"
+    audit_path=ROOT/"r76_e2e_audit_manifest.json"
     audit_bundle=audit_path.with_suffix(".sigstore.json")
     audit_path.write_bytes(canonical(audit))
     sign(audit_path,audit_bundle)

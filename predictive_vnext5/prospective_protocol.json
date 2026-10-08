@@ -1,6 +1,6 @@
 {
-  "schema": "btc-predictive-vnext5r2-prospective-protocol-v2",
-  "status": "FROZEN_PRESTART_F4_REMEDIATED_START_UTC_NULL",
+  "schema": "btc-predictive-vnext5r3-prospective-protocol-v3",
+  "status": "FROZEN_PRESTART_PROVENANCE_BOUND_START_UTC_NULL",
   "start_utc": null,
   "timezone_internal": "UTC",
   "reporting_timezone": "MSK",
@@ -61,7 +61,7 @@
     "multiclass Log Loss",
     "ECE10"
   ],
-  "primary_baseline": "exact implementation defined by evaluation_supplement.json + evaluation_runtime.json",
+  "primary_baseline": "exact implementation in prospective_score.py using source-frozen frozen_evaluation_runtime.json",
   "secondary_metrics": [
     "DOWN/UP PR-AUC",
     "DOWN/UP ROC-AUC",
@@ -89,7 +89,10 @@
     "strict_canonical_schema_required": true,
     "runtime_manifest_hash_binding_required": true,
     "as_of_cutoff_semantics": true,
-    "custom_zone_rows_excluded_from_primary_admission": true
+    "custom_zone_rows_excluded_from_primary_admission": true,
+    "cryptographically_verified_evidence_rows_required": true,
+    "rekor_time_authority_required": true,
+    "standalone_jsonl_scoring_never_authorizes_admission": true
   },
   "authority": {
     "prospective_skill_proven": false,
@@ -97,18 +100,27 @@
     "no_model_change_after_start": true
   },
   "evaluation_binding": {
-    "supplement_path": "predictive_vnext5/evaluation_supplement.json",
-    "scorer_path": "predictive_vnext5/prospective_score.py",
-    "runtime_path": "predictive_vnext5/build/evaluation_runtime.json",
-    "manifest_path": "predictive_vnext5/build/freeze_manifest.json",
-    "exact_hashes_bound_in_freeze_manifest": true,
-    "scorer_is_only_admission_implementation": true,
+    "sole_admission_entrypoint": "predictive_vnext5/prospective_admission.py",
+    "evidence_verifier_path": "predictive_vnext5/verified_evidence.py",
+    "calculator_path": "predictive_vnext5/prospective_score.py",
+    "evaluation_supplement_path": "predictive_vnext5/evaluation_supplement.json",
+    "frozen_runtime_path": "predictive_vnext5/frozen_evaluation_runtime.json",
+    "evidence_protocol_template_path": "predictive_vnext5/evidence_protocol_template.json",
+    "arbitrary_jsonl_admission_forbidden": true,
     "runtime_override_forbidden": true,
+    "exact_remote_tip_snapshot_required": true,
+    "full_signature_rekor_replay_required": true,
+    "raw_remote_publication_required": true,
+    "delivery_receipt_binding_required": true,
+    "row_time_authority": "REKOR_INTEGRATED_TIME",
+    "strict_canonical_schema_required": true,
     "primary_query_type": "CANONICAL",
     "primary_target_id": "CANONICAL_SIGMA_1_1_V1",
-    "strict_row_schema_required": true,
+    "custom_zone_rows_forbidden_in_primary_admission": true,
     "forecast_must_not_precede_anchor": true,
     "outcome_must_be_available_by_evaluation_cutoff": true,
+    "remote_tip_revalidated_after_scoring": true,
+    "decision_semantics": "SNAPSHOT_AS_OF_EXACT_EVIDENCE_SHA",
     "changes_after_start_forbidden": true
   }
 }

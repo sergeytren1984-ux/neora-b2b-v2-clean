@@ -253,7 +253,10 @@ def verify_evidence_snapshot(
     trigger=schedule.get("workflow_trigger")
     if not isinstance(source_ref,str) or not source_ref.startswith("refs/heads/"):
         raise ValueError("invalid signed source ref")
-    if trigger not in {"workflow_dispatch","schedule"}:
+    allowed_triggers={"workflow_dispatch","schedule"}
+    if allow_e2e_short_horizon and mode=="E2E":
+        allowed_triggers.add("push")
+    if trigger not in allowed_triggers:
         raise ValueError("invalid signed workflow trigger")
     if freeze.get("source_ref")!=source_ref or freeze.get("workflow_trigger")!=trigger:
         raise ValueError("freeze signing authority mismatch")

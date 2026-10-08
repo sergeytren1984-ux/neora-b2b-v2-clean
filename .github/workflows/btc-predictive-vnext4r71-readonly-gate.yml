@@ -1,20 +1,21 @@
-name: BTC predictive vNext4R7.5 read-only release gate
+name: BTC predictive vNext4R7.6 read-only release gate
 
 on:
   push:
-    branches: [btc-predictive-vnext4r75-remediation-20261007]
+    branches: [btc-predictive-vnext4r76-remediation-20261007]
     paths:
       - predictive_vnext4r71/**
       - predictive_vnext4r7/scorecard_core.py
       - predictive_vnext4r7/episodes.py
       - .github/workflows/btc-predictive-vnext4r71-*.yml
+      - .github/workflows/btc-predictive-vnext4r76-activation.yml
   workflow_dispatch: {}
 
 permissions:
   contents: read
 
 concurrency:
-  group: btc-predictive-vnext4r75-readonly-${{ github.ref }}
+  group: btc-predictive-vnext4r76-readonly-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -32,7 +33,7 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test -z "$(git status --porcelain)"
-          echo "R75_EXACT_SHA=$GITHUB_SHA"
+          echo "R76_EXACT_SHA=$GITHUB_SHA"
 
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
@@ -48,6 +49,7 @@ jobs:
           python -I -m py_compile predictive_vnext4r71/journal_runtime.py
           python -I -m py_compile predictive_vnext4r71/crypto.py
           python -I -m py_compile predictive_vnext4r71/admission.py
+          python -I -m py_compile predictive_vnext4r71/activation.py
           python -I -m py_compile predictive_vnext4r71/anchor.py
           python -I -m py_compile predictive_vnext4r71/worker.py
           python -I -m py_compile predictive_vnext4r71/scheduler.py
@@ -87,10 +89,15 @@ jobs:
             ".github/workflows/btc-predictive-vnext4r71-24h.yml",
             ".github/workflows/btc-predictive-vnext4r71-watchdog.yml",
             ".github/workflows/btc-predictive-vnext4r71-health.yml",
+            ".github/workflows/btc-predictive-vnext4r76-activation.yml",
           ]
           for wf in expected:
               text=pathlib.Path(wf).read_text()
-              assert "BTC_VNEXT4R71_ENABLED" in text,wf
+              if wf.endswith("vnext4r76-activation.yml"):
+                  assert "BTC_VNEXT4R76_ACTIVATION_ENABLED" in text,wf
+                  assert "unified-chain" in text,wf
+              else:
+                  assert "BTC_VNEXT4R71_ENABLED" in text,wf
           for head in ("1h","4h","24h"):
               p=json.loads(pathlib.Path(f"predictive_vnext4r71/protocol_{head}.json").read_text())
               assert p["parent_r6_source_sha"]=="98d6ea6e981b3306f397a9105babc2e5d66ac7a0"
@@ -116,8 +123,13 @@ jobs:
               assert ae["absolute_latest_tip_atomicity_claimed"] is False
               assert ae["consumer_must_reject_if_evidence_tip_differs"] is True
               assert ae["consumer_compare_and_swap_or_lease_required_for_activation"] is True
-              assert ae["consumer_validation_entrypoint"]=="predictive_vnext4r71.admission.assert_snapshot_decision_current"
+              assert ae["consumer_validation_entrypoint"]=="predictive_vnext4r71.activation.consume_under_exclusive_lease"
               assert ae["consumer_snapshot_freshness_guard_required"] is True
+              ap=p["activation_policy"]
+              assert ap["trading_activation_enabled"] is False
+              assert ap["side_effects_forbidden_without_exclusive_lease"] is True
+              assert ap["lease_provider"]=="github-actions-concurrency"
+              assert ap["concurrency_group"]==f"btc-predictive-vnext4r71-{head}-unified-chain"
               ea=p["e2e_audit_artifacts"]
               assert ea["real_r6_numerical_worker_lifecycle_required"] is True
               assert ea["e2e_dummy_insufficient_for_numerical_lifecycle"] is True
@@ -129,11 +141,11 @@ jobs:
               baseline=pathlib.Path(p["baseline_path"]).read_bytes()
               assert hashlib.sha256(artifact).hexdigest()==p["artifact_sha256"]
               assert hashlib.sha256(baseline).hexdigest()==p["baseline_sha256"]
-          print("R75_READONLY_POLICY_PASS")
+          print("R76_READONLY_POLICY_PASS")
           PY
 
       - name: Ensure tests did not mutate tracked candidate
         run: |
           git diff --exit-code
           git diff --cached --exit-code
-          echo "R75_READONLY_GATE_PASS"
+          echo "R76_READONLY_GATE_PASS"

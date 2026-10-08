@@ -1,9 +1,9 @@
 {
-  "schema": "btc-predictive-vnext5r3-evidence-protocol-template-v1",
+  "schema": "btc-predictive-vnext5r4-evidence-protocol-template-v1",
   "status": "PRESTART_TEMPLATE_NO_REGISTERED_START",
   "repository": "sergeytren1984-ux/neora-b2b-v2-clean",
-  "event_schema": "btc-predictive-vnext5r3-evidence-event-v1",
-  "workflow_path": ".github/workflows/btc-predictive-vnext5r3-evidence.yml",
+  "event_schema": "btc-predictive-vnext5r4-evidence-event-v1",
+  "workflow_path": ".github/workflows/btc-predictive-vnext5r4-evidence.yml",
   "registration": {
     "start_utc": null,
     "evidence_branch": null,
@@ -68,14 +68,18 @@
     "raw_first_addition_commit_equals_event_publication_commit": true,
     "forecast_delivery_receipt_required": true,
     "source_workflow_content_bound_to_signed_manifest": true,
-    "events_dir_template": "predictive_vnext5_evidence/{head}/events"
+    "events_dir_template": "predictive_vnext5_evidence/{head}/events",
+    "strict_per_event_schema_before_derivation": true,
+    "custom_annotations_forbidden_in_primary_events": true,
+    "numerical_replay_from_raw_required": true,
+    "execution_contract_path": "predictive_vnext5/execution_contract.json"
   },
   "row_derivation": {
     "forecast_issued_at_utc": "max(FORECAST_ISSUED Rekor integrated time, DELIVERY_CONFIRMED Rekor integrated time)",
     "outcome_recorded_at_utc": "OUTCOME_RECORDED Rekor integrated time",
-    "prediction_raw": "signed FORECAST_ISSUED predictions[candidate_id]",
-    "volatility": "signed FORECAST_ISSUED volatility",
-    "outcome_class": "signed OUTCOME_RECORDED outcome_class mapped to frozen raw class order",
+    "prediction_raw": "recomputed from signed market raw + exact model bytes; signed value must match",
+    "volatility": "recomputed from signed market raw; signed value must match",
+    "outcome_class": "recomputed first-passage from signed forward candles; signed value must match",
     "arbitrary_jsonl_input_forbidden": true
   },
   "authority": {

@@ -1,6 +1,6 @@
 {
-  "schema": "btc-predictive-vnext5r3-first-passage-freeze-spec-v3",
-  "status": "PROVENANCE_BOUND_PRESTART_FROZEN_CANDIDATE_REQUIRES_INDEPENDENT_REVIEW",
+  "schema": "btc-predictive-vnext5r4-first-passage-freeze-spec-v4",
+  "status": "R3_AUDIT_REMEDIATED_PRESTART_CANDIDATE_REQUIRES_INDEPENDENT_REVIEW",
   "parent_engineering_source_sha": "34304b7650421dfd07d3c9e9b2f7f3c937b96ec1",
   "research_lineage": {
     "r1": {
@@ -197,36 +197,25 @@
     "independent_review_required_before_start": true
   },
   "remediation": {
-    "source_audits": [
-      "BTC_vNext5R1_independent_reaudit_20261008",
-      "followup_F4_provenance_gap_identified_after_internal_review"
-    ],
-    "prior_r2_source_sha": "267bc3d4975d44967950a0473b54c7b475c306ed",
+    "source_audit": "BTC_vNext5R3_independent_expertise_20261008",
+    "prior_verdict": "REWORK_NO_GO",
+    "prior_source_sha": "d20ac6c5e5e7e34690c8abcdd889df249aa18bc4",
+    "findings": {
+      "R3-01": "strict required/allowed schema on signed event before field derivation; custom annotations reject",
+      "R3-02": "frozen production emitter/journal plus exact model-byte numerical replay from signed market raw; real-market signed E2E all heads",
+      "R3-03": "complete mandatory dependency manifest plus detached exact signed-source execution worker",
+      "R3-04": "half-open forecast deadline anchor<=issued<deadline everywhere"
+    },
     "predictive_architecture_changed": false,
     "model_binaries_changed": false,
     "calibration_changed": false,
     "weights_changed": false,
     "features_changed": false,
     "target_changed": false,
-    "thresholds_changed": false,
+    "statistical_thresholds_changed": false,
     "historical_model_selection_changed": false,
-    "row_level_f4_fixes_inherited": true,
-    "provenance_gap_closed_by": [
-      "no arbitrary forecast/outcome JSONL in sole admission path",
-      "private exact remote-tip snapshot",
-      "full Cosign/Rekor replay before row derivation",
-      "signed source manifest/workflow binding",
-      "raw first-publication commit binding",
-      "forecast delivery receipt binding",
-      "Rekor integrated time used as forecast/outcome time authority",
-      "static source-frozen baseline runtime",
-      "remote tip revalidated after scoring"
-    ],
-    "validation": [
-      "unit/adversarial regression",
-      "twin-runner exact-byte package assembly",
-      "real OIDC/Rekor signed provenance E2E"
-    ]
+    "baseline_changed": false,
+    "start_registered": false
   },
   "model_authority": {
     "mode": "INHERITED_IMMUTABLE_PARENT_BINARY",

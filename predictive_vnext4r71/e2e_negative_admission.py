@@ -25,10 +25,10 @@ WORKFLOW=".github/workflows/btc-predictive-vnext4r71-remediation.yml"
 BASE=ROOT/"r71_negative_e2e"
 RUN_ID=os.environ.get("GITHUB_RUN_ID","local")
 NEG_BRANCH=os.environ.get(
-    "R75_NEGATIVE_E2E_BRANCH",
-    "btc-predictive-vnext4r75-negative-e2e-"+RUN_ID,
+    "R76_NEGATIVE_E2E_BRANCH",
+    "btc-predictive-vnext4r76-negative-e2e-"+RUN_ID,
 )
-RAW_ROOT=ROOT/"predictive_vnext4r71_1h_raw"/("r75-negative-"+RUN_ID)
+RAW_ROOT=ROOT/"predictive_vnext4r71_1h_raw"/("r76-negative-"+RUN_ID)
 
 
 def sign(path:Path,bundle:Path):
@@ -137,7 +137,7 @@ def authority_events(
     if workflow_hash_override is not None:
         hashes[WORKFLOW]=workflow_hash_override
     manifest={
-        "schema":"btc-predictive-vnext4r75-negative-e2e-manifest-v1",
+        "schema":"btc-predictive-vnext4r76-negative-e2e-manifest-v1",
         "source_commit_sha":source_sha,
         "paths_sha256":hashes,
         "all_protocols":(
@@ -284,11 +284,11 @@ def main():
     BASE.mkdir()
     RAW_ROOT.mkdir(parents=True,exist_ok=True)
     subprocess.run(
-        ["git","config","user.name","btc-predictive-r75-negative-e2e[bot]"],
+        ["git","config","user.name","btc-predictive-r76-negative-e2e[bot]"],
         cwd=ROOT,check=True,
     )
     subprocess.run(
-        ["git","config","user.email","btc-predictive-r75-negative-e2e[bot]@users.noreply.github.com"],
+        ["git","config","user.email","btc-predictive-r76-negative-e2e[bot]@users.noreply.github.com"],
         cwd=ROOT,check=True,
     )
     subprocess.run(
@@ -628,8 +628,8 @@ def main():
                 "size":p.stat().st_size,
             })
     audit={
-        "schema":"btc-predictive-vnext4r75-negative-e2e-audit-v1",
-        "status":"R7_5_NEGATIVE_E2E_PASS",
+        "schema":"btc-predictive-vnext4r76-negative-e2e-audit-v1",
+        "status":"R7_6_NEGATIVE_E2E_PASS",
         "source_sha":os.environ["GITHUB_SHA"],
         "evidence_branch":NEG_BRANCH,
         "attacks":16,
@@ -637,7 +637,7 @@ def main():
         "artifacts":artifact_rows,
         "real_oidc_rekor":True,
     }
-    audit_path=ROOT/"r75_negative_e2e_audit_manifest.json"
+    audit_path=ROOT/"r76_negative_e2e_audit_manifest.json"
     audit_bundle=audit_path.with_suffix(".sigstore.json")
     audit_path.write_bytes(canonical(audit))
     sign(audit_path,audit_bundle)
@@ -659,7 +659,7 @@ def main():
         ["git","rev-parse","HEAD"],cwd=ROOT,check=True,capture_output=True,text=True,
     ).stdout.strip()
     print(json.dumps({
-        "status":"R7_5_NEGATIVE_E2E_PASS",
+        "status":"R7_6_NEGATIVE_E2E_PASS",
         "attacks":16,
         "real_oidc_rekor":True,
         "preserved_branch":NEG_BRANCH,

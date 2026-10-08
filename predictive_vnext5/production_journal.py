@@ -1,4 +1,4 @@
-"""Production signed journal worker for vNext5R4.
+"""Production signed journal worker for vNext5R4.1.
 
 Actions:
 - register: create signed pre-start protocol/schedule/freeze for one head;
@@ -291,9 +291,20 @@ def register(head,branch,start,model_root):
         _remove_worktree(root)
 
 
+def _assert_current_signer_matches_registration(verified):
+    governance=verified.governance
+    if os.environ.get("GITHUB_SHA")!=verified.source_commit_sha:
+        raise RuntimeError("current workflow SHA differs from registered source")
+    if os.environ.get("GITHUB_REF")!=governance.get("source_ref"):
+        raise RuntimeError("current workflow ref differs from registered signer ref")
+    if os.environ.get("GITHUB_EVENT_NAME")!=governance.get("workflow_trigger"):
+        raise RuntimeError("current workflow trigger differs from registered signer trigger")
+
+
 def _registration(root,head,branch,model_root):
     protocol_rel=f"predictive_vnext5_evidence/{head}/protocol.json"
     v=_verify_branch(root,head,branch,protocol_rel,model_root)
+    _assert_current_signer_matches_registration(v)
     return protocol_rel,v
 
 

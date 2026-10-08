@@ -63,9 +63,10 @@ class EvaluationSemanticsTests(unittest.TestCase):
         start=datetime(2026,10,9,tzinfo=timezone.utc)
         cutoff=start+timedelta(days=3)
         grid=score.expected_anchor_grid("24h",start,cutoff)
-        self.assertEqual(len(grid),2)
+        self.assertEqual(len(grid),3)
         self.assertEqual(grid[0],start)
         self.assertEqual(grid[1],start+timedelta(days=1))
+        self.assertEqual(grid[2],start+timedelta(days=2))
 
     def test_baseline_is_due_causal(self):
         runtime={"volatility_bin_edges":[.01,.02],

@@ -1,11 +1,11 @@
-"""Sole prospective admission launcher for vNext5R4.
+"""Sole prospective admission launcher for vNext5R4.2.
 
-The launcher itself performs no scoring and imports no evaluator/model modules.
-It fetches an exact evidence tip, discovers the claimed source SHA, creates two
-detached worktrees, and executes admission_worker.py from the claimed source
-checkout under Python isolated mode.  The worker cryptographically verifies that
-the claimed source SHA is the signed source authority before any decision can
-return.
+Trust bootstrap rule: no source SHA read from evidence may select executable
+code.  The caller must provide an approved source SHA from deployment/freeze
+configuration outside the evidence journal.  This launcher must itself execute
+from that exact approved commit.  Only then is the trusted admission worker
+loaded from a detached checkout of the same approved commit and allowed to
+authenticate the journal.
 """
 from __future__ import annotations
 
@@ -19,6 +19,7 @@ import tempfile
 from pathlib import Path
 
 HEX40=re.compile(r"^[0-9a-f]{40}$")
+LAUNCHER_ROOT=Path(__file__).resolve().parents[1]
 
 
 def _git(root:Path,*args):
@@ -58,22 +59,29 @@ def _remove(root:Path,path:Path):
     shutil.rmtree(path.parent,ignore_errors=True)
 
 
-def _claimed_source(evidence_root:Path,protocol_path:str)->str:
-    protocol=json.loads((evidence_root/protocol_path).read_text())
-    events_dir=protocol.get("events_dir")
-    if not isinstance(events_dir,str):
-        raise ValueError("protocol events_dir missing")
-    event_path=evidence_root/events_dir/"00000001.json"
-    event=json.loads(event_path.read_text())
-    source=str(event.get("source_commit_sha","")).lower()
-    if not HEX40.fullmatch(source):
-        raise ValueError("schedule does not claim a valid source commit")
-    return source
+def _trusted_approved_source(repo_root:Path,approved_source_sha:str)->str:
+    approved=str(approved_source_sha).lower()
+    if not HEX40.fullmatch(approved):
+        raise ValueError("approved source SHA must be an exact 40-hex commit")
+
+    launcher_head=_git(LAUNCHER_ROOT,"rev-parse","HEAD")
+    if launcher_head!=approved:
+        raise ValueError(
+            "launcher checkout is not the externally approved source commit"
+        )
+
+    # Ensure the approved object exists in the repository used for worktrees,
+    # but never derive approval from evidence content.
+    resolved=_git(repo_root,"rev-parse",approved+"^{commit}")
+    if resolved!=approved:
+        raise ValueError("approved source SHA does not resolve exactly")
+    return approved
 
 
 def run_verified_admission(
     *,
     repo_root:str,
+    approved_source_sha:str,
     head:str,
     evidence_branch:str,
     protocol_path:str,
@@ -82,12 +90,13 @@ def run_verified_admission(
     allow_e2e_short_horizon:bool=False,
 ):
     root=Path(repo_root).resolve()
+    approved=_trusted_approved_source(root,approved_source_sha)
+
+    # Evidence is snapshotted independently.  No event is parsed to choose code.
     tip=_fetch_remote_tip(root,evidence_branch)
-    evidence=_worktree(root,tip,"vnext5r4-evidence-")
-    source=None
+    evidence=_worktree(root,tip,"vnext5r42-evidence-")
+    source=_worktree(root,approved,"vnext5r42-approved-source-")
     try:
-        source_sha=_claimed_source(evidence,protocol_path)
-        source=_worktree(root,source_sha,"vnext5r4-source-")
         code=(
             "import sys;"
             f"sys.path.insert(0,{str(source)!r});"
@@ -98,6 +107,7 @@ def run_verified_admission(
             sys.executable,"-I","-c",code,
             "--repo-root",str(root),
             "--source-root",str(source),
+            "--approved-source-sha",approved,
             "--evidence-root",str(evidence),
             "--evidence-tip",tip,
             "--evidence-branch",evidence_branch,
@@ -111,15 +121,19 @@ def run_verified_admission(
         proc=subprocess.run(
             argv,check=True,capture_output=True,text=True,timeout=900
         )
-        return json.loads(proc.stdout)
+        decision=json.loads(proc.stdout)
+        governance=decision.get("governance",{})
+        if governance.get("trusted_approved_source_sha")!=approved:
+            raise ValueError("worker decision lacks trusted approved source binding")
+        return decision
     finally:
-        if source is not None:
-            _remove(root,source)
+        _remove(root,source)
         _remove(root,evidence)
 
 
 def main(argv=None):
     p=argparse.ArgumentParser()
+    p.add_argument("--approved-source-sha",required=True)
     p.add_argument("--head",required=True,choices=("1h","4h","24h"))
     p.add_argument("--evidence-branch",required=True)
     p.add_argument("--protocol-path",required=True)
@@ -129,6 +143,7 @@ def main(argv=None):
     args=p.parse_args(argv)
     result=run_verified_admission(
         repo_root=args.repo_root,
+        approved_source_sha=args.approved_source_sha,
         head=args.head,
         evidence_branch=args.evidence_branch,
         protocol_path=args.protocol_path,

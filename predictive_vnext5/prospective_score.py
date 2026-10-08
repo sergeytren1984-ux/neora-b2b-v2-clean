@@ -1,12 +1,17 @@
-"""Executable prospective scorer for frozen vNext5 first-passage.
+"""Authoritative prospective scorer for frozen vNext5 first-passage R2.
 
-No model training occurs here.  It evaluates canonical +/-1 sigma prospective
-rows under the exact baseline, metric, due-grid, calibration and CI semantics
-declared in evaluation_supplement.json.
+The numerical model is unchanged.  This module closes evaluator-input findings:
+- canonical primary rows only;
+- forecast issuance must be at/after anchor and before the frozen deadline;
+- outcome class is a strict integer enum (bool/fractional values rejected);
+- outcome must be observable no later than the requested evaluation cutoff;
+- runtime/supplement/protocol/scorer are hash-bound to the frozen manifest;
+- custom-zone rows can never enter canonical primary admission.
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 from datetime import datetime, timezone, timedelta
@@ -15,26 +20,105 @@ from pathlib import Path
 import numpy as np
 
 HERE=Path(__file__).resolve().parent
-SUPPLEMENT=json.loads((HERE/"evaluation_supplement.json").read_text())
+SUPPLEMENT_PATH=HERE/"evaluation_supplement.json"
+PROTOCOL_PATH=HERE/"prospective_protocol.json"
+MANIFEST_PATH=HERE/"build/freeze_manifest.json"
+RUNTIME_PATH=HERE/"build/evaluation_runtime.json"
+SUPPLEMENT=json.loads(SUPPLEMENT_PATH.read_text())
 EPS=1e-12
+
+CANONICAL_SCHEMA=SUPPLEMENT["input_row_schema"]["schema"]
+CANONICAL_QUERY_TYPE=SUPPLEMENT["input_row_schema"]["query_type"]
+CANONICAL_TARGET_ID=SUPPLEMENT["input_row_schema"]["target_id"]
+CANONICAL_LOWER_SIGMA=float(SUPPLEMENT["canonical_target"]["lower_sigma"])
+CANONICAL_UPPER_SIGMA=float(SUPPLEMENT["canonical_target"]["upper_sigma"])
+REQUIRED_KEYS=set(SUPPLEMENT["input_row_schema"]["required"])
+ALLOWED_KEYS=set(SUPPLEMENT["input_row_schema"]["allowed"])
+
+
+def file_sha256(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
 def parse_utc(value):
-    dt=datetime.fromisoformat(str(value).replace("Z","+00:00"))
+    if type(value) is not str:
+        raise ValueError("timestamp must be an ISO-8601 string")
+    dt=datetime.fromisoformat(value.replace("Z","+00:00"))
     if dt.tzinfo is None:
         raise ValueError("timestamp must be timezone-aware UTC")
-    dt=dt.astimezone(timezone.utc)
-    return dt
+    return dt.astimezone(timezone.utc)
+
+
+def _strict_number(value,name):
+    if isinstance(value,bool) or not isinstance(value,(int,float,np.integer,np.floating)):
+        raise ValueError(f"{name} must be numeric")
+    out=float(value)
+    if not math.isfinite(out):
+        raise ValueError(f"{name} must be finite")
+    return out
 
 
 def probability(raw):
-    p=np.asarray(raw,dtype=float)
-    if p.shape!=(4,) or not np.all(np.isfinite(p)) or np.any(p<0):
+    if not isinstance(raw,(list,tuple)) or len(raw)!=4:
+        raise ValueError("prediction_raw must be array[4]")
+    vals=[]
+    for x in raw:
+        if isinstance(x,bool) or not isinstance(x,(int,float,np.integer,np.floating)):
+            raise ValueError("prediction_raw contains non-numeric value")
+        vals.append(float(x))
+    p=np.asarray(vals,dtype=float)
+    if not np.all(np.isfinite(p)) or np.any(p<0):
         raise ValueError("invalid raw probability")
     total=float(p.sum())
     if abs(total-1.0)>1e-8:
         raise ValueError("raw probability must sum to one")
     return p/total
+
+
+def strict_outcome_class(value):
+    if type(value) is not int:
+        raise ValueError("outcome_class must be strict integer enum 0..3")
+    if value<0 or value>3:
+        raise ValueError("outcome_class must be strict integer enum 0..3")
+    return value
+
+
+def _canonical_sigma(value,expected,name):
+    v=_strict_number(value,name)
+    if not math.isclose(v,float(expected),rel_tol=0.0,abs_tol=1e-12):
+        raise ValueError("non-canonical target is forbidden in primary admission")
+    return v
+
+
+def authoritative_runtime(runtime_override=None):
+    """Load the sole frozen runtime and verify all evaluation bindings.
+
+    A caller may pass a runtime object only for compatibility with direct
+    programmatic tests.  It must be exactly equal to the authoritative runtime;
+    otherwise scoring fails closed.  The CLI exposes no runtime override.
+    """
+    manifest=json.loads(MANIFEST_PATH.read_text())
+    runtime_bytes=RUNTIME_PATH.read_bytes()
+    runtime=json.loads(runtime_bytes)
+
+    checks={
+        "evaluation_runtime_sha256":file_sha256(RUNTIME_PATH),
+        "evaluation_supplement_sha256":file_sha256(SUPPLEMENT_PATH),
+        "prospective_protocol_sha256":file_sha256(PROTOCOL_PATH),
+        "prospective_scorer_sha256":file_sha256(Path(__file__).resolve()),
+    }
+    for key,actual in checks.items():
+        expected=manifest.get(key)
+        if expected!=actual:
+            raise ValueError(f"frozen evaluation binding mismatch: {key}")
+
+    if runtime.get("supplement_sha256")!=checks["evaluation_supplement_sha256"]:
+        raise ValueError("runtime supplement binding mismatch")
+
+    if runtime_override is not None:
+        if not isinstance(runtime_override,dict) or runtime_override!=runtime:
+            raise ValueError("non-authoritative runtime rejected")
+    return runtime
 
 
 def brier_losses(p,y):
@@ -123,6 +207,26 @@ def expected_anchor_grid(head,start,cutoff):
     return out
 
 
+def validate_canonical_row_schema(row):
+    if type(row) is not dict:
+        raise ValueError("prospective row must be object")
+    keys=set(row)
+    missing=REQUIRED_KEYS-keys
+    extra=keys-ALLOWED_KEYS
+    if missing:
+        raise ValueError("missing canonical row fields: "+",".join(sorted(missing)))
+    if extra:
+        raise ValueError("unexpected canonical row fields: "+",".join(sorted(extra)))
+    if row["schema"]!=CANONICAL_SCHEMA:
+        raise ValueError("canonical row schema mismatch")
+    if row["query_type"]!=CANONICAL_QUERY_TYPE:
+        raise ValueError("custom/non-canonical row forbidden in primary admission")
+    if row["target_id"]!=CANONICAL_TARGET_ID:
+        raise ValueError("canonical target id mismatch")
+    _canonical_sigma(row["lower_sigma"],CANONICAL_LOWER_SIGMA,"lower_sigma")
+    _canonical_sigma(row["upper_sigma"],CANONICAL_UPPER_SIGMA,"upper_sigma")
+
+
 def validate_rows(rows,head,start,cutoff):
     horizon=timedelta(
         minutes=int(SUPPLEMENT["anchor_grid"][head]["horizon_minutes"])
@@ -132,13 +236,22 @@ def validate_rows(rows,head,start,cutoff):
     )
     candidates=expected_candidates(head)
     by={}
+    seen_any=False
     for row in rows:
-        if row.get("head")!=head or row.get("candidate_id") not in candidates:
+        if type(row) is not dict:
+            raise ValueError("prospective row must be object")
+        # Rows for other heads are ignored only after their schema is known.
+        # This prevents malformed/custom rows from masquerading as harmless extras.
+        if row.get("head")!=head:
             continue
+        seen_any=True
+        validate_canonical_row_schema(row)
+        if row["candidate_id"] not in candidates:
+            raise ValueError("candidate_id is not authorized for head")
         a=parse_utc(row["anchor_utc"])
         validate_anchor(head,a)
         if not (start<=a and a+horizon<=cutoff):
-            continue
+            raise ValueError("row anchor outside requested evaluation grid")
         key=(row["candidate_id"],a)
         if key in by:
             raise ValueError("duplicate prospective row")
@@ -146,17 +259,19 @@ def validate_rows(rows,head,start,cutoff):
         if due!=a+horizon:
             raise ValueError("due_utc mismatch")
         issued=parse_utc(row["forecast_issued_at_utc"])
+        if issued<a:
+            raise ValueError("forecast issued before anchor")
         if issued>a+deadline:
             raise ValueError("late forecast")
         recorded=parse_utc(row["outcome_recorded_at_utc"])
         if recorded<due:
             raise ValueError("outcome recorded before due")
-        y=int(row["outcome_class"])
-        if y<0 or y>3:
-            raise ValueError("invalid outcome class")
+        if recorded>cutoff:
+            raise ValueError("outcome recorded after evaluation cutoff")
+        y=strict_outcome_class(row["outcome_class"])
         p=probability(row["prediction_raw"])
-        vol=float(row["volatility"])
-        if not math.isfinite(vol) or vol<=0:
+        vol=_strict_number(row["volatility"],"volatility")
+        if vol<=0:
             raise ValueError("invalid volatility")
         by[key]={
             **row,
@@ -167,6 +282,8 @@ def validate_rows(rows,head,start,cutoff):
             "_vol":vol,
         }
 
+    if not seen_any:
+        raise ValueError("no rows for requested head")
     grid=expected_anchor_grid(head,start,cutoff)
     missing=[]
     for a in grid:
@@ -187,6 +304,12 @@ def canonical_outcome_rows(by,grid,head):
             q=by[(other,a)]
             if q["_y"]!=r["_y"] or abs(q["_vol"]-r["_vol"])>1e-15:
                 raise ValueError("24h challenger outcome/volatility mismatch")
+            if (
+                q["outcome_recorded_at_utc"]!=r["outcome_recorded_at_utc"]
+                or q["due_utc"]!=r["due_utc"]
+                or q["target_id"]!=r["target_id"]
+            ):
+                raise ValueError("24h challenger canonical outcome authority mismatch")
     return rows
 
 
@@ -249,7 +372,6 @@ def score_candidate(candidate_rows,baseline,anchors,y):
 
 
 def paired_advantage_ci(loss_a,loss_b,anchors):
-    # positive means candidate A has lower Brier loss than B
     gain=np.asarray(loss_b)-np.asarray(loss_a)
     return block_ci_gain(
         gain,anchors,
@@ -258,8 +380,11 @@ def paired_advantage_ci(loss_a,loss_b,anchors):
     )
 
 
-def score(rows,head,start_utc,cutoff_utc,runtime):
+def score(rows,head,start_utc,cutoff_utc,runtime=None):
     start=parse_utc(start_utc); cutoff=parse_utc(cutoff_utc)
+    if cutoff<=start:
+        raise ValueError("cutoff must be after start")
+    runtime=authoritative_runtime(runtime)
     by,grid=validate_rows(rows,head,start,cutoff)
     outcome=canonical_outcome_rows(by,grid,head)
     anchors=[x["_anchor"] for x in outcome]
@@ -285,6 +410,7 @@ def score(rows,head,start_utc,cutoff_utc,runtime):
         "head":head,
         "start_utc":start.isoformat(),
         "cutoff_utc":cutoff.isoformat(),
+        "target_id":CANONICAL_TARGET_ID,
         "expected_due_windows":len(grid),
         "calendar_days":calendar_days,
         "decision_minima_met":bool(minima_met),
@@ -340,15 +466,10 @@ def main(argv=None):
     p.add_argument("--head",required=True,choices=("1h","4h","24h"))
     p.add_argument("--start-utc",required=True)
     p.add_argument("--cutoff-utc",required=True)
-    p.add_argument(
-        "--runtime",
-        default=str(HERE/"build/evaluation_runtime.json"),
-    )
     args=p.parse_args(argv)
-    runtime=json.loads(Path(args.runtime).read_text())
     result=score(
         load_rows(args.events_jsonl),
-        args.head,args.start_utc,args.cutoff_utc,runtime,
+        args.head,args.start_utc,args.cutoff_utc,
     )
     print(json.dumps(result,indent=2,sort_keys=True))
 

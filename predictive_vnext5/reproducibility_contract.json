@@ -1,6 +1,6 @@
 {
-  "schema": "btc-predictive-vnext5r4-binary-pinned-reproducibility-contract-v5",
-  "status": "NO_RETRAIN_PRODUCTION_NUMERICAL_PROVENANCE_SUCCESSOR",
+  "schema": "btc-predictive-vnext5r41-binary-pinned-reproducibility-contract-v6",
+  "status": "NO_RETRAIN_ACCEPTANCE_FINALIZATION_SUCCESSOR",
   "platform": {
     "system": "Linux",
     "machine": "x86_64"
@@ -80,17 +80,17 @@
     "observed_effect": "base/GBDT predictions nearly or exactly match; calibrator fitting amplifies tiny numerical differences; therefore retraining is not the freeze authority"
   },
   "evaluator_successor": {
-    "parent_r3_source_sha": "d20ac6c5e5e7e34690c8abcdd889df249aa18bc4",
-    "scope": "R3-01/R3-02/R3-03/R3-04 boundary and production-readiness remediation only",
+    "parent_r4_source_sha": "f57790f7d0491a6d5dc224d9bdfa215e62f791d4",
+    "scope": "acceptance evidence, consumer boundary, signer precheck and writer serialization only",
     "model_artifacts_inherited_exactly": true,
     "retraining_forbidden": true,
     "required_evidence": [
       "twin-runner exact-byte freeze assembly",
-      "strict signed-event semantic attack regression",
-      "complete execution dependency attestation regression",
-      "real OIDC/Rekor signed market-data numerical E2E for 1h",
-      "real OIDC/Rekor signed market-data numerical E2E for 4h",
-      "real OIDC/Rekor signed market-data numerical E2E for 24h with both challengers"
+      "real OIDC/Rekor signed market-data numerical E2E for 1h/4h/24h",
+      "real OIDC/Rekor signed A5 semantic-negative E2E",
+      "252-window full-grid A5 event-schema rejection",
+      "consumer stale-tip fail-closed regression",
+      "production signer drift fail-before-publication regression"
     ]
   }
 }

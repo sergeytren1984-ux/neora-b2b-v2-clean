@@ -1,4 +1,4 @@
-"""Real-market signed engineering E2E for vNext5R4.1.
+"""Real-market signed engineering E2E for vNext5R4.2.
 
 Uses the frozen production numerical emitter with actual Binance closed candles
 and exact immutable model binaries.  It signs a historical completed market
@@ -27,7 +27,7 @@ from predictive_vnext5.verified_evidence import verify_evidence_snapshot
 UTC=timezone.utc
 ROOT=Path(__file__).resolve().parents[1]
 REPO="sergeytren1984-ux/neora-b2b-v2-clean"
-WORKFLOW=".github/workflows/btc-predictive-vnext5r41-evidence.yml"
+WORKFLOW=".github/workflows/btc-predictive-vnext5r42-evidence.yml"
 
 
 def cmd(*args,check=True,cwd=None):
@@ -54,7 +54,7 @@ def source_hash(source_sha,path):
 
 def make_event(seq,previous,obj):
     return {
-        "schema":"btc-predictive-vnext5r41-evidence-event-v1",
+        "schema":"btc-predictive-vnext5r42-evidence-event-v1",
         "sequence":seq,
         "previous_hash":previous,
         "workflow_commit":os.environ["GITHUB_SHA"],
@@ -82,7 +82,7 @@ def write_sign_event(branch,events_dir,event,attachments=()):
     sign(path,bundle)
     commit=push_paths(
         branch,
-        f"vNext5R4.1 {event['head']} market replay #{event['sequence']} {event['type']}",
+        f"vNext5R4.2 {event['head']} market replay #{event['sequence']} {event['type']}",
         path,bundle,*attachments,
     )
     return path,commit
@@ -97,7 +97,7 @@ def main():
     source_ref=os.environ["GITHUB_REF"]
     trigger=os.environ.get("GITHUB_EVENT_NAME","push")
     run_id=os.environ.get("GITHUB_RUN_ID","local")
-    branch=f"btc-predictive-vnext5r41-market-e2e-{run_id}-{head}-attempt-{os.environ.get('GITHUB_RUN_ATTEMPT','1')}"
+    branch=f"btc-predictive-vnext5r42-market-e2e-{run_id}-{head}-attempt-{os.environ.get('GITHUB_RUN_ATTEMPT','1')}"
 
     cmd("git","config","user.name","btc-vnext5r4-e2e[bot]")
     cmd("git","config","user.email","btc-vnext5r4-e2e[bot]@users.noreply.github.com")
@@ -114,7 +114,7 @@ def main():
     raw_dir.mkdir(parents=True,exist_ok=True)
 
     protocol={
-        "schema":"btc-predictive-vnext5r41-market-replay-protocol-v1",
+        "schema":"btc-predictive-vnext5r42-market-replay-protocol-v1",
         "mode":"MARKET_REPLAY_E2E",
         "head":head,
         "events_dir":str(events_dir.relative_to(ROOT)),
@@ -126,7 +126,7 @@ def main():
     }
     protocol_path=ROOT/f"vnext5r4_market_e2e_{run_id}_{head}_protocol.json"
     protocol_path.write_bytes(canonical(protocol))
-    push_paths(branch,f"vNext5R4.1 {head} market replay protocol",protocol_path)
+    push_paths(branch,f"vNext5R4.2 {head} market replay protocol",protocol_path)
 
     execution=json.loads(
         (ROOT/"predictive_vnext5/execution_contract.json").read_text()
@@ -136,7 +136,7 @@ def main():
     artifact={c:MODEL_FILES[c][1] for c in cfg["candidates"]}
     start=(datetime.now(UTC)+timedelta(minutes=5)).replace(microsecond=0)
     manifest={
-        "schema":"btc-predictive-vnext5r41-market-replay-manifest-v1",
+        "schema":"btc-predictive-vnext5r42-market-replay-manifest-v1",
         "source_commit_sha":source_sha,
         "source_ref":source_ref,
         "workflow_trigger":trigger,
@@ -296,7 +296,7 @@ def main():
         raise RuntimeError("market replay unexpectedly admission eligible")
 
     result={
-        "status":"VNEXT5R41_REAL_MARKET_SIGNED_NUMERICAL_E2E_PASS",
+        "status":"VNEXT5R42_REAL_MARKET_SIGNED_NUMERICAL_E2E_PASS",
         "head":head,
         "source_sha":source_sha,
         "evidence_branch":branch,

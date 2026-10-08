@@ -1,6 +1,6 @@
 {
-  "schema": "btc-predictive-vnext5-prospective-protocol-v1",
-  "status": "FROZEN_PRESTART_START_UTC_NULL",
+  "schema": "btc-predictive-vnext5r1-prospective-protocol-v1",
+  "status": "REMEDIATED_FROZEN_PRESTART_START_UTC_NULL",
   "start_utc": null,
   "timezone_internal": "UTC",
   "reporting_timezone": "MSK",
@@ -61,7 +61,7 @@
     "multiclass Log Loss",
     "ECE10"
   ],
-  "primary_baseline": "due-causal rolling 90d canonical +/-1sigma baseline conditioned on frozen volatility bin",
+  "primary_baseline": "exact implementation defined by evaluation_supplement.json + evaluation_runtime.json",
   "secondary_metrics": [
     "DOWN/UP PR-AUC",
     "DOWN/UP ROC-AUC",
@@ -83,11 +83,21 @@
     "logloss_gain_must_be_positive": true,
     "block_ci_must_support_positive_brier_gain": true,
     "incomplete_due_grid_blocks_acceptance": true,
-    "no_backfill": true
+    "no_backfill": true,
+    "exact_evaluation_supplement_required": true,
+    "executable_scorer_required": true
   },
   "authority": {
     "prospective_skill_proven": false,
     "trading_authority": false,
     "no_model_change_after_start": true
+  },
+  "evaluation_binding": {
+    "supplement_path": "predictive_vnext5/evaluation_supplement.json",
+    "scorer_path": "predictive_vnext5/prospective_score.py",
+    "runtime_path": "predictive_vnext5/build/evaluation_runtime.json",
+    "exact_hashes_bound_in_freeze_manifest": true,
+    "scorer_is_only_admission_implementation": true,
+    "changes_after_start_forbidden": true
   }
 }

@@ -1,0 +1,76 @@
+name: BTC predictive vNext5 first-passage freeze
+
+on:
+  push:
+    branches:
+      - btc-predictive-vnext5-first-passage-freeze-20261008
+    paths:
+      - 'predictive_vnext5/**'
+      - '.github/workflows/btc-predictive-vnext5-freeze.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: btc-predictive-vnext5-first-passage-freeze
+  cancel-in-progress: true
+
+jobs:
+  freeze-first-passage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+
+      - name: Install frozen numerical dependencies
+        run: |
+          python -m pip install --disable-pip-version-check \
+            numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
+
+      - name: Rebuild fixed historical sources
+        run: |
+          python research_vnext/fetch_hourly.py
+          python research_vnext4r6/fetch_15m_r6.py
+
+      - name: Build frozen first-passage artifacts
+        env:
+          PYTHONPATH: .
+        run: |
+          python predictive_vnext5/freeze_first_passage.py | tee /tmp/vnext5-freeze.json
+          test -s predictive_vnext5/build/freeze_manifest.json
+
+      - name: Frozen artifact self-test
+        env:
+          PYTHONPATH: .
+        run: |
+          python predictive_vnext5/selftest.py
+
+      - name: Print package hashes
+        run: |
+          sha256sum \
+            predictive_vnext5/freeze_spec.json \
+            predictive_vnext5/prospective_protocol.json \
+            predictive_vnext5/predictor.py \
+            predictive_vnext5/freeze_first_passage.py \
+            predictive_vnext5/build/*.joblib \
+            predictive_vnext5/build/*.json
+
+      - name: Upload immutable pre-start package
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-vnext5-first-passage-freeze
+          path: |
+            predictive_vnext5/freeze_spec.json
+            predictive_vnext5/prospective_protocol.json
+            predictive_vnext5/predictor.py
+            predictive_vnext5/freeze_first_passage.py
+            predictive_vnext5/selftest.py
+            predictive_vnext5/build/**
+          if-no-files-found: error

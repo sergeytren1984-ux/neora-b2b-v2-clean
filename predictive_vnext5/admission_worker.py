@@ -1,4 +1,4 @@
-"""Immutable-source admission worker for vNext5R4.
+"""Immutable-source admission worker for vNext5R4.1.
 
 This module must execute from a detached checkout whose HEAD equals the signed
 source_commit_sha.  It performs cryptographic evidence replay, numerical
@@ -124,7 +124,7 @@ def run_worker(
     if observed!=evidence_tip:
         raise ValueError("remote evidence tip changed during admission")
 
-    decision["schema"]="btc-predictive-vnext5r4-verified-admission-v1"
+    decision["schema"]="btc-predictive-vnext5r41-verified-admission-v1"
     decision["governance"]={
         **verified.governance,
         "executed_source_checkout":source_head,

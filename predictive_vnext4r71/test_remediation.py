@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import ast
 import inspect
+import io
 import json
 import os
 import subprocess
@@ -11,6 +12,7 @@ import unittest
 from unittest.mock import patch
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from contextlib import redirect_stdout
 
 import numpy as np
 
@@ -41,6 +43,7 @@ from predictive_vnext4r71.tail_research import (
 from predictive_vnext4r7.episodes import stress_episode_skill_summary
 from predictive_vnext4r71 import worker
 from predictive_vnext4r71 import chain_liveness
+from predictive_vnext4r71 import activation
 
 UTC = timezone.utc
 
@@ -769,10 +772,14 @@ class DeploymentBundleTests(unittest.TestCase):
         finally:
             worker.EVIDENCE_ROOT=old_root
 
-    def test_all_protocols_require_all_five_production_workflows(self):
+    def test_all_protocols_require_all_six_production_workflows(self):
         root=Path(__file__).resolve().parents[1]
         expected=list(worker.PRODUCTION_WORKFLOWS)
-        self.assertEqual(len(expected),5)
+        self.assertEqual(len(expected),6)
+        self.assertIn(
+            ".github/workflows/btc-predictive-vnext4r76-activation.yml",
+            expected,
+        )
         for head in ("1h","4h","24h"):
             p=json.loads(
                 (root/f"predictive_vnext4r71/protocol_{head}.json").read_text()
@@ -803,6 +810,182 @@ class WorkerIntegrationTests(unittest.TestCase):
         self.assertGreaterEqual(calls.count("maybe_checkpoint"),2)
         self.assertIn("forecast",calls)
         self.assertIn("outcomes",calls)
+
+
+
+class R76AuditFindingRegressionTests(unittest.TestCase):
+    def _activation_report(self):
+        return {
+            "head":"1h",
+            "admission_ready":True,
+            "trading_authority":True,
+            "governance":{
+                "decision_binding":{
+                    "semantics":"SNAPSHOT_AS_OF_EXACT_EVIDENCE_SHA",
+                    "evidence_branch":"evidence",
+                    "evidence_sha":"a"*40,
+                }
+            },
+        }
+
+    def _activation_env(self):
+        return {
+            "GITHUB_ACTIONS":"true",
+            "GITHUB_EVENT_NAME":"workflow_dispatch",
+            "GITHUB_SHA":"1"*40,
+            "BTC_VNEXT4R71_SOURCE_SHA":"1"*40,
+            "BTC_VNEXT4R76_LEASE_PROVIDER":"github-actions-concurrency",
+            "BTC_VNEXT4R76_LEASE_GROUP":
+                "btc-predictive-vnext4r71-1h-unified-chain",
+            "BTC_VNEXT4R76_ACTIVATION_WORKFLOW":
+                ".github/workflows/btc-predictive-vnext4r76-activation.yml",
+        }
+
+    def test_activation_side_effect_requires_exclusive_provider_lease(self):
+        called=[]
+        with patch.dict(os.environ,{},clear=True):
+            with self.assertRaisesRegex(
+                RuntimeError,"GitHub Actions provider lease"
+            ):
+                activation.consume_under_exclusive_lease(
+                    repo_root=".",
+                    report=self._activation_report(),
+                    head="1h",
+                    side_effect=lambda: called.append(True),
+                )
+        self.assertEqual(called,[])
+
+    def test_stale_snapshot_rejected_before_activation_side_effect(self):
+        called=[]
+        with (
+            patch.dict(os.environ,self._activation_env(),clear=True),
+            patch.object(
+                activation,
+                "assert_snapshot_decision_current",
+                side_effect=ValueError(
+                    "admission snapshot decision is stale: evidence tip changed"
+                ),
+            ),
+        ):
+            with self.assertRaisesRegex(ValueError,"snapshot decision is stale"):
+                activation.consume_under_exclusive_lease(
+                    repo_root=".",
+                    report=self._activation_report(),
+                    head="1h",
+                    side_effect=lambda: called.append(True),
+                )
+        self.assertEqual(called,[])
+
+    def test_fresh_snapshot_executes_once_under_exclusive_lease(self):
+        called=[]
+        with (
+            patch.dict(os.environ,self._activation_env(),clear=True),
+            patch.object(
+                activation,
+                "assert_snapshot_decision_current",
+                side_effect=["a"*40,"a"*40],
+            ),
+        ):
+            out=activation.consume_under_exclusive_lease(
+                repo_root=".",
+                report=self._activation_report(),
+                head="1h",
+                side_effect=lambda: called.append(True) or "ok",
+            )
+        self.assertEqual(called,[True])
+        self.assertEqual(
+            out["status"],"SIDE_EFFECT_EXECUTED_UNDER_EXCLUSIVE_LEASE"
+        )
+
+    def test_outcome_fetch_failure_is_structured_and_never_fake(self):
+        due=(datetime.now(UTC)-timedelta(minutes=1)).isoformat()
+        forecast={
+            "type":"FORECAST_ISSUED",
+            "slot":"20261008T000000Z",
+            "due_utc":due,
+            "anchor_utc":"2026-10-08T00:00:00+00:00",
+            "lower_price":1.0,
+            "upper_price":2.0,
+            "idempotency_key":"forecast:20261008T000000Z",
+        }
+        buf=io.StringIO()
+        published=[]
+        with (
+            patch.object(worker,"verify_signed_freeze",return_value=[(forecast,None)]),
+            patch.object(
+                worker,"fetch_outcome_rows",
+                side_effect=RuntimeError("INJECTED_OUTCOME_FETCH_FAILURE"),
+            ),
+            patch.object(worker,"publish",side_effect=lambda *a,**k: published.append(a)),
+            redirect_stdout(buf),
+        ):
+            worker.outcomes(
+                {"raw":"raw","events":"events","head":"1h"},
+                "1h",
+            )
+        text=buf.getvalue()
+        self.assertIn("R76_OUTCOME_RETRY_ERROR",text)
+        self.assertIn("INJECTED_OUTCOME_FETCH_FAILURE",text)
+        self.assertIn('"fake_outcome_written":false',text)
+        self.assertEqual(published,[])
+
+    def test_handoff_telemetry_reports_provider_gap_without_zero_lag_claim(self):
+        runs=[
+            {
+                "id":1,
+                "status":"completed",
+                "created_at":"2026-10-08T00:00:00Z",
+                "run_started_at":"2026-10-08T00:00:10Z",
+                "updated_at":"2026-10-08T04:00:00Z",
+            },
+            {
+                "id":2,
+                "status":"in_progress",
+                "created_at":"2026-10-08T03:59:00Z",
+                "run_started_at":"2026-10-08T04:00:07Z",
+                "updated_at":"2026-10-08T04:00:07Z",
+            },
+        ]
+        out=chain_liveness.handoff_telemetry(
+            runs,2,datetime(2026,10,8,4,0,20,tzinfo=UTC)
+        )
+        self.assertEqual(out["provider_handoff_seconds"],7.0)
+        self.assertEqual(out["queue_wait_seconds"],67.0)
+        self.assertFalse(out["zero_restart_lag_claimed"])
+
+    def test_liveness_reservation_groups_are_shared_between_self_and_watchdog(self):
+        root=Path(__file__).resolve().parents[1]
+        watchdog=(root/".github/workflows/btc-predictive-vnext4r71-watchdog.yml").read_text()
+        for head in ("1h","4h","24h"):
+            workflow=f"btc-predictive-vnext4r71-{head}.yml"
+            text=(root/".github/workflows"/workflow).read_text()
+            group=f"btc-predictive-vnext4r76-liveness-{workflow}"
+            self.assertIn("successor-reservation:",text)
+            self.assertIn(group,text)
+            self.assertNotIn("Ensure successor before long session",text)
+        self.assertIn(
+            "btc-predictive-vnext4r76-liveness-${{ matrix.workflow }}",
+            watchdog,
+        )
+
+    def test_protocols_bind_activation_lease_policy(self):
+        root=Path(__file__).resolve().parents[1]
+        for head in ("1h","4h","24h"):
+            p=json.loads(
+                (root/f"predictive_vnext4r71/protocol_{head}.json").read_text()
+            )
+            ap=p["activation_policy"]
+            self.assertFalse(ap["trading_activation_enabled"])
+            self.assertTrue(ap["side_effects_forbidden_without_exclusive_lease"])
+            self.assertEqual(ap["lease_provider"],"github-actions-concurrency")
+            self.assertEqual(
+                ap["concurrency_group"],
+                f"btc-predictive-vnext4r71-{head}-unified-chain",
+            )
+            self.assertEqual(
+                p["admission_entrypoint"]["consumer_validation_entrypoint"],
+                "predictive_vnext4r71.activation.consume_under_exclusive_lease",
+            )
 
 
 if __name__=="__main__":

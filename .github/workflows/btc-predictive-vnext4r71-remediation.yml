@@ -186,7 +186,7 @@ jobs:
       - name: Real OIDC/Rekor checkpoint and full-admission replay
         env:
           PYTHONPATH: .
-          R71_E2E_BRANCH: btc-predictive-vnext4r75-e2e-${{ github.run_id }}
+          R71_E2E_BRANCH: btc-predictive-vnext4r75-e2e-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           R71_EXPECTED_TRIGGER: ${{ github.event_name }}
         run: PYTHONPATH=. python predictive_vnext4r71/e2e_checkpoint.py
 
@@ -218,6 +218,6 @@ jobs:
         env:
           PYTHONPATH: .
           R71_EXPECTED_TRIGGER: ${{ github.event_name }}
-          R75_NEGATIVE_E2E_BRANCH: btc-predictive-vnext4r75-negative-e2e-${{ github.run_id }}
+          R75_NEGATIVE_E2E_BRANCH: btc-predictive-vnext4r75-negative-e2e-${{ github.run_id }}-attempt-${{ github.run_attempt }}
         run: PYTHONPATH=. python predictive_vnext4r71/e2e_negative_admission.py
 

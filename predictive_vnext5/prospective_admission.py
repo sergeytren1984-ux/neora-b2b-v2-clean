@@ -1,60 +1,74 @@
-"""Sole prospective admission entrypoint for vNext5R3 first-passage.
+"""Sole prospective admission launcher for vNext5R4.
 
-Input authority is an exact fetched remote evidence branch.  Arbitrary JSONL
-forecast/outcome rows are not accepted.  The function verifies an immutable
-snapshot cryptographically, derives canonical rows from signed events, then
-invokes the frozen numerical scorer.
+The launcher itself performs no scoring and imports no evaluator/model modules.
+It fetches an exact evidence tip, discovers the claimed source SHA, creates two
+detached worktrees, and executes admission_worker.py from the claimed source
+checkout under Python isolated mode.  The worker cryptographically verifies that
+the claimed source SHA is the signed source authority before any decision can
+return.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
-from predictive_vnext5.verified_evidence import verify_evidence_snapshot
-from predictive_vnext5.prospective_score import score
+HEX40=re.compile(r"^[0-9a-f]{40}$")
 
 
-def _git(root:Path,*args,text=True):
+def _git(root:Path,*args):
     return subprocess.run(
         ["git","-C",str(root),*args],
-        check=True,capture_output=True,text=text,timeout=180
-    ).stdout
+        check=True,capture_output=True,text=True,timeout=180
+    ).stdout.strip()
 
 
 def _fetch_remote_tip(root:Path,branch:str)->str:
-    if not isinstance(branch,str) or not branch:
-        raise ValueError("evidence branch missing")
     subprocess.run(
         ["git","-C",str(root),"fetch","origin",branch],
         check=True,capture_output=True,timeout=180
     )
-    return _git(root,"rev-parse","origin/"+branch).strip()
+    return _git(root,"rev-parse","origin/"+branch)
 
 
-def _snapshot(root:Path,tip:str)->Path:
-    parent=Path(tempfile.mkdtemp(prefix="vnext5-admission-"))
-    snap=parent/"worktree"
+def _worktree(root:Path,commit:str,prefix:str)->Path:
+    parent=Path(tempfile.mkdtemp(prefix=prefix))
+    path=parent/"worktree"
     try:
         subprocess.run(
-            ["git","-C",str(root),"worktree","add","--detach",str(snap),tip],
+            ["git","-C",str(root),"worktree","add","--detach",str(path),commit],
             check=True,capture_output=True,timeout=180
         )
     except Exception:
         shutil.rmtree(parent,ignore_errors=True)
         raise
-    return snap
+    return path
 
 
-def _remove_snapshot(root:Path,snap:Path):
+def _remove(root:Path,path:Path):
     subprocess.run(
-        ["git","-C",str(root),"worktree","remove","--force",str(snap)],
+        ["git","-C",str(root),"worktree","remove","--force",str(path)],
         check=False,capture_output=True,timeout=180
     )
-    shutil.rmtree(snap.parent,ignore_errors=True)
+    shutil.rmtree(path.parent,ignore_errors=True)
+
+
+def _claimed_source(evidence_root:Path,protocol_path:str)->str:
+    protocol=json.loads((evidence_root/protocol_path).read_text())
+    events_dir=protocol.get("events_dir")
+    if not isinstance(events_dir,str):
+        raise ValueError("protocol events_dir missing")
+    event_path=evidence_root/events_dir/"00000001.json"
+    event=json.loads(event_path.read_text())
+    source=str(event.get("source_commit_sha","")).lower()
+    if not HEX40.fullmatch(source):
+        raise ValueError("schedule does not claim a valid source commit")
+    return source
 
 
 def run_verified_admission(
@@ -64,62 +78,44 @@ def run_verified_admission(
     evidence_branch:str,
     protocol_path:str,
     cutoff_utc:str,
+    model_root:str,
     allow_e2e_short_horizon:bool=False,
 ):
-    if head not in {"1h","4h","24h"}:
-        raise ValueError("invalid head")
     root=Path(repo_root).resolve()
-    initial_tip=_fetch_remote_tip(root,evidence_branch)
-    snap=_snapshot(root,initial_tip)
+    tip=_fetch_remote_tip(root,evidence_branch)
+    evidence=_worktree(root,tip,"vnext5r4-evidence-")
+    source=None
     try:
-        protocol_file=snap/protocol_path
-        protocol=json.loads(protocol_file.read_text())
-        if protocol.get("head")!=head:
-            raise ValueError("protocol/head mismatch")
-        events_dir=protocol.get("events_dir")
-        if not isinstance(events_dir,str) or not events_dir:
-            raise ValueError("protocol events_dir missing")
-
-        verified=verify_evidence_snapshot(
-            root=snap,
-            protocol_path=protocol_path,
-            events_dir=events_dir,
-            current_tip=initial_tip,
-            expected_branch=evidence_branch,
-            allow_e2e_short_horizon=allow_e2e_short_horizon,
+        source_sha=_claimed_source(evidence,protocol_path)
+        source=_worktree(root,source_sha,"vnext5r4-source-")
+        code=(
+            "import sys;"
+            f"sys.path.insert(0,{str(source)!r});"
+            "from predictive_vnext5.admission_worker import main;"
+            "main(sys.argv[1:])"
         )
-        runtime=json.loads(
-            (snap/"predictive_vnext5/frozen_evaluation_runtime.json").read_text()
+        argv=[
+            sys.executable,"-I","-c",code,
+            "--repo-root",str(root),
+            "--source-root",str(source),
+            "--evidence-root",str(evidence),
+            "--evidence-tip",tip,
+            "--evidence-branch",evidence_branch,
+            "--protocol-path",protocol_path,
+            "--head",head,
+            "--cutoff-utc",cutoff_utc,
+            "--model-root",str(Path(model_root).resolve()),
+        ]
+        if allow_e2e_short_horizon:
+            argv.append("--allow-e2e-short-horizon")
+        proc=subprocess.run(
+            argv,check=True,capture_output=True,text=True,timeout=900
         )
-        decision=score(
-            list(verified.rows),
-            head,
-            verified.start_utc,
-            cutoff_utc,
-            runtime,
-        )
-
-        observed=_fetch_remote_tip(root,evidence_branch)
-        if observed!=initial_tip:
-            raise ValueError("remote evidence tip changed during admission")
-
-        decision["schema"]="btc-predictive-vnext5r3-verified-admission-v1"
-        decision["governance"]={
-            **verified.governance,
-            "private_detached_snapshot":True,
-            "remote_tip_revalidated_after_scoring":True,
-            "decision_semantics":"SNAPSHOT_AS_OF_EXACT_EVIDENCE_SHA",
-            "evidence_branch":verified.evidence_branch,
-            "evidence_tip":verified.evidence_tip,
-            "verified_source_commit_sha":verified.source_commit_sha,
-            "canonical_rows_derived_only_from_verified_journal":True,
-            "standalone_jsonl_admission_forbidden":True,
-        }
-        decision["prospective_skill_proven"]=False
-        decision["trading_authority"]=False
-        return decision
+        return json.loads(proc.stdout)
     finally:
-        _remove_snapshot(root,snap)
+        if source is not None:
+            _remove(root,source)
+        _remove(root,evidence)
 
 
 def main(argv=None):
@@ -128,6 +124,7 @@ def main(argv=None):
     p.add_argument("--evidence-branch",required=True)
     p.add_argument("--protocol-path",required=True)
     p.add_argument("--cutoff-utc",required=True)
+    p.add_argument("--model-root",required=True)
     p.add_argument("--repo-root",default=".")
     args=p.parse_args(argv)
     result=run_verified_admission(
@@ -136,6 +133,7 @@ def main(argv=None):
         evidence_branch=args.evidence_branch,
         protocol_path=args.protocol_path,
         cutoff_utc=args.cutoff_utc,
+        model_root=args.model_root,
     )
     print(json.dumps(result,indent=2,sort_keys=True))
 

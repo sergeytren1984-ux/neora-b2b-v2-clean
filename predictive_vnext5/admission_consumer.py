@@ -45,28 +45,40 @@ def _utc(value):
     return dt.astimezone(UTC)
 
 
-def _validate_authenticated_decision(
-    decision:dict,
+def consume_verified_admission(
     *,
-    expected_head:str,
-    expected_cutoff_utc:str,
+    repo_root:str,
     approved_source_sha:str,
-    expected_evidence_branch:str,
+    head:str,
+    evidence_branch:str,
+    protocol_path:str,
+    cutoff_utc:str,
+    model_root:str,
 ):
+    """Run authoritative verification and consume only that in-memory result."""
+    decision=run_verified_admission(
+        repo_root=repo_root,
+        approved_source_sha=approved_source_sha,
+        head=head,
+        evidence_branch=evidence_branch,
+        protocol_path=protocol_path,
+        cutoff_utc=cutoff_utc,
+        model_root=model_root,
+    )
+    governance=decision.get("governance")
     if type(decision) is not dict or decision.get("schema")!=DECISION_SCHEMA:
         raise ValueError("authenticated admission decision schema mismatch")
-    if decision.get("head")!=expected_head:
+    if decision.get("head")!=head:
         raise ValueError("decision head mismatch")
-    if _utc(decision.get("cutoff_utc"))!=_utc(expected_cutoff_utc):
+    if _utc(decision.get("cutoff_utc"))!=_utc(cutoff_utc):
         raise ValueError("decision cutoff mismatch")
     if decision.get("trading_authority") is not False:
         raise ValueError("trading authority must remain false")
     if decision.get("prospective_skill_proven") is not False:
         raise ValueError("consumer cannot promote skill authority")
-
-    governance=decision.get("governance")
     if type(governance) is not dict:
         raise ValueError("verified admission governance missing")
+
     required_true=(
         "full_cryptographic_replay",
         "all_event_signatures_verified",
@@ -98,7 +110,7 @@ def _validate_authenticated_decision(
     tip=str(governance.get("evidence_tip","")).lower()
     source=str(governance.get("verified_source_commit_sha","")).lower()
     trusted=str(governance.get("trusted_approved_source_sha","")).lower()
-    if branch!=expected_evidence_branch:
+    if branch!=evidence_branch:
         raise ValueError("consumer evidence branch mismatch")
     if not HEX40.fullmatch(tip):
         raise ValueError("invalid decision evidence tip")
@@ -106,36 +118,6 @@ def _validate_authenticated_decision(
         raise ValueError("consumer verified source mismatch")
     if trusted!=str(approved_source_sha).lower():
         raise ValueError("consumer trusted source mismatch")
-    return governance
-
-
-def consume_verified_admission(
-    *,
-    repo_root:str,
-    approved_source_sha:str,
-    head:str,
-    evidence_branch:str,
-    protocol_path:str,
-    cutoff_utc:str,
-    model_root:str,
-):
-    """Run authoritative verification and consume only that in-memory result."""
-    decision=run_verified_admission(
-        repo_root=repo_root,
-        approved_source_sha=approved_source_sha,
-        head=head,
-        evidence_branch=evidence_branch,
-        protocol_path=protocol_path,
-        cutoff_utc=cutoff_utc,
-        model_root=model_root,
-    )
-    governance=_validate_authenticated_decision(
-        decision,
-        expected_head=head,
-        expected_cutoff_utc=cutoff_utc,
-        approved_source_sha=approved_source_sha,
-        expected_evidence_branch=evidence_branch,
-    )
 
     root=Path(repo_root).resolve()
     current=_remote_tip(root,evidence_branch)

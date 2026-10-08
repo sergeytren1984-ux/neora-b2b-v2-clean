@@ -1,4 +1,4 @@
-"""Production signed journal worker for vNext5R4.1.
+"""Production signed journal worker for vNext5R4.2.
 
 Actions:
 - register: create signed pre-start protocol/schedule/freeze for one head;
@@ -30,7 +30,7 @@ from predictive_vnext5.verified_evidence import verify_evidence_snapshot
 UTC=timezone.utc
 ROOT=Path(__file__).resolve().parents[1]
 REPO="sergeytren1984-ux/neora-b2b-v2-clean"
-WORKFLOW=".github/workflows/btc-predictive-vnext5r41-evidence.yml"
+WORKFLOW=".github/workflows/btc-predictive-vnext5r42-evidence.yml"
 
 
 def cmd(root:Path,*args,check=True):
@@ -111,7 +111,7 @@ def _events(events_dir):
 def _make_event(events_dir,obj):
     prior=_events(events_dir)
     return {
-        "schema":"btc-predictive-vnext5r41-evidence-event-v1",
+        "schema":"btc-predictive-vnext5r42-evidence-event-v1",
         "sequence":len(prior)+1,
         "previous_hash":digest(canonical(prior[-1])) if prior else None,
         "workflow_commit":os.environ["GITHUB_SHA"],
@@ -157,7 +157,7 @@ def _phase_valid(head,start):
 
 def _protocol(head,template,events_dir):
     return {
-        "schema":"btc-predictive-vnext5r41-production-protocol-v1",
+        "schema":"btc-predictive-vnext5r42-production-protocol-v1",
         "mode":"PROSPECTIVE",
         "head":head,
         "events_dir":events_dir,
@@ -181,7 +181,7 @@ def _manifest(head,branch,protocol_bytes,source_sha,source_ref,trigger,template)
         for c in template["heads"][head]["candidates"]
     }
     return {
-        "schema":"btc-predictive-vnext5r41-production-manifest-v1",
+        "schema":"btc-predictive-vnext5r42-production-manifest-v1",
         "source_commit_sha":source_sha,
         "source_ref":source_ref,
         "workflow_trigger":trigger,

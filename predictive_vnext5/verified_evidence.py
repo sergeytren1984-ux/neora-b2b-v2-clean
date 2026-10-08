@@ -417,12 +417,13 @@ def verify_evidence_snapshot(
     for key in ("candidates","artifact_sha256"):
         if cfg.get(key)!=frozen_head.get(key):
             raise ValueError("protocol head "+key+" differs from frozen template")
-    if mode=="PROSPECTIVE":
+    if mode in ("PROSPECTIVE","MARKET_REPLAY_E2E"):
         for key in ("horizon_minutes","forecast_deadline_minutes"):
             if cfg.get(key)!=frozen_head.get(key):
                 raise ValueError("protocol "+key+" differs from frozen template")
         if "horizon_seconds" in cfg or "forecast_deadline_seconds" in cfg:
-            raise ValueError("production protocol cannot override duration units")
+            raise ValueError("protocol cannot override frozen duration units")
+    if mode=="PROSPECTIVE":
         expected_events=template["journal"]["events_dir_template"].format(head=head)
         if protocol.get("events_dir")!=expected_events:
             raise ValueError("production events_dir differs from frozen template")

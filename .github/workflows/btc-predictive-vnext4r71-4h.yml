@@ -33,7 +33,41 @@ jobs:
             "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/workflows/btc-predictive-vnext4r71-4h.yml/dispatches" \
             -d '{"ref":"main"}'
 
+  successor-reservation:
+    if: github.event_name == 'workflow_dispatch' && vars.BTC_VNEXT4R71_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: btc-predictive-vnext4r76-liveness-btc-predictive-vnext4r71-4h.yml
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Build immutable liveness runtime
+        env:
+          R71_SOURCE_SHA: ${{ vars.BTC_VNEXT4R71_SOURCE_SHA }}
+        run: |
+          [[ "$R71_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          rm -rf /tmp/vnext4r71-runtime
+          mkdir -p /tmp/vnext4r71-runtime
+          git archive "$R71_SOURCE_SHA" | tar -x -C /tmp/vnext4r71-runtime
+
+      - name: Idempotent successor reservation
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -I /tmp/vnext4r71-runtime/predictive_vnext4r71/chain_liveness.py \
+            --repo "$GITHUB_REPOSITORY" \
+            --workflow "btc-predictive-vnext4r71-4h.yml" \
+            --ref main \
+            --current-run-id "$GITHUB_RUN_ID"
+
   unified-session:
+    needs: successor-reservation
     if: github.event_name == 'workflow_dispatch' && vars.BTC_VNEXT4R71_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 350
@@ -94,6 +128,16 @@ jobs:
           BTC_VNEXT4R71_START_UTC: ${{ vars.BTC_VNEXT4R71_START_UTC }}
         run: python -I /tmp/vnext4r71-runtime/predictive_vnext4r71/scheduler.py
 
+      - name: Measure successor handoff and cold-start lag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -I /tmp/vnext4r71-runtime/predictive_vnext4r71/chain_liveness.py \
+            --repo "$GITHUB_REPOSITORY" \
+            --workflow "btc-predictive-vnext4r71-4h.yml" \
+            --current-run-id "$GITHUB_RUN_ID" \
+            --telemetry-only
+
       - name: Pre-start signed registration and freeze
         env:
           BTC_VNEXT4R71_HEAD: 4h
@@ -115,17 +159,6 @@ jobs:
           else:
               print("R71_POSTSTART_SKIP_REGISTRATION_STEP")
           PY
-
-      - name: Ensure successor before long session
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          python -I /tmp/vnext4r71-runtime/predictive_vnext4r71/chain_liveness.py \
-            --repo "$GITHUB_REPOSITORY" \
-            --workflow "btc-predictive-vnext4r71-4h.yml" \
-            --ref main \
-            --current-run-id "$GITHUB_RUN_ID"
 
       - name: Run unified forecast and due-outcome session
         env:

@@ -1,0 +1,85 @@
+{
+  "schema": "btc-predictive-vnext5r3-evidence-protocol-template-v1",
+  "status": "PRESTART_TEMPLATE_NO_REGISTERED_START",
+  "repository": "sergeytren1984-ux/neora-b2b-v2-clean",
+  "event_schema": "btc-predictive-vnext5r3-evidence-event-v1",
+  "workflow_path": ".github/workflows/btc-predictive-vnext5r3-provenance-e2e.yml",
+  "registration": {
+    "start_utc": null,
+    "evidence_branch": null,
+    "source_ref": null,
+    "source_commit_sha": null,
+    "values_must_come_from_signed_schedule_and_freeze": true
+  },
+  "heads": {
+    "1h": {
+      "horizon_minutes": 60,
+      "forecast_deadline_minutes": 14,
+      "candidates": [
+        "1h"
+      ],
+      "artifact_sha256": {
+        "1h": "9c24cb79f59a6a0b09e0f2980521e071c02cf749e4d14f88713b096fa569ed83"
+      }
+    },
+    "4h": {
+      "horizon_minutes": 240,
+      "forecast_deadline_minutes": 14,
+      "candidates": [
+        "4h"
+      ],
+      "artifact_sha256": {
+        "4h": "1076407df238eb827ba36b7d69075802940dc84d1954f89943d76db93e542535"
+      }
+    },
+    "24h": {
+      "horizon_minutes": 1440,
+      "forecast_deadline_minutes": 45,
+      "candidates": [
+        "24h_classifier",
+        "24h_competing_risks"
+      ],
+      "artifact_sha256": {
+        "24h_classifier": "1d024c9df3386b4a27ecd0aedb95eacf2fa6bf083ff119ace93dd5303f96c1ac",
+        "24h_competing_risks": "a842001ff27500457dc2cece889c63111a6430fa29cf22633b9d7d5626539f0d"
+      }
+    }
+  },
+  "canonical_target": {
+    "query_type": "CANONICAL",
+    "target_id": "CANONICAL_SIGMA_1_1_V1",
+    "lower_sigma": 1,
+    "upper_sigma": 1
+  },
+  "journal": {
+    "authority_event_types": [
+      "SCHEDULE_REGISTERED",
+      "CONFIG_FROZEN_PRESTART"
+    ],
+    "live_event_types": [
+      "FORECAST_ISSUED",
+      "DELIVERY_CONFIRMED",
+      "OUTCOME_RECORDED",
+      "SLOT_MISSED"
+    ],
+    "raw_prefix_template": "predictive_vnext5_{head}_raw/",
+    "exact_remote_tip_snapshot_required": true,
+    "full_signature_rekor_replay_required": true,
+    "raw_first_addition_commit_equals_event_publication_commit": true,
+    "forecast_delivery_receipt_required": true,
+    "source_workflow_content_bound_to_signed_manifest": true
+  },
+  "row_derivation": {
+    "forecast_issued_at_utc": "max(FORECAST_ISSUED Rekor integrated time, DELIVERY_CONFIRMED Rekor integrated time)",
+    "outcome_recorded_at_utc": "OUTCOME_RECORDED Rekor integrated time",
+    "prediction_raw": "signed FORECAST_ISSUED predictions[candidate_id]",
+    "volatility": "signed FORECAST_ISSUED volatility",
+    "outcome_class": "signed OUTCOME_RECORDED outcome_class mapped to frozen raw class order",
+    "arbitrary_jsonl_input_forbidden": true
+  },
+  "authority": {
+    "start_utc": null,
+    "prospective_skill_proven": false,
+    "trading_authority": false
+  }
+}

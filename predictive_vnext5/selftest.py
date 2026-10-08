@@ -47,7 +47,10 @@ def main():
             check(hazard_raw_probability(h24,base,0.5,2.0)),
     }
 
-    for bad in ((0.1,1.0),(1.0,3.1),(0.25,3.0)):
+    for good in ((0.3,3.0),(0.25,2.5),(3.0,0.3)):
+        validate_sigma_domain(*good)
+
+    for bad in ((0.1,1.0),(1.0,3.1),(0.25,3.0),(3.0,0.25)):
         try:
             validate_sigma_domain(*bad)
         except ValueError:
@@ -55,8 +58,28 @@ def main():
         else:
             raise AssertionError(f"out-of-domain pair accepted: {bad}")
 
+    for invalid in (
+        [1.2,-0.2,0.0,0.0],
+        [float("nan"),0.0,0.0,0.0],
+        [float("inf"),0.0,0.0,0.0],
+        [0.2,0.2,0.2,0.2],
+    ):
+        try:
+            display_three_state(invalid)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"invalid probability accepted: {invalid}")
+
+    runtime=json.loads((BUILD/"evaluation_runtime.json").read_text())
+    assert set(runtime["heads"])=={"1h","4h","24h"}
+    for head,row in runtime["heads"].items():
+        assert len(row["volatility_bin_edges"])==2
+        assert set(row["frozen_prior_counts_by_bin"])=={"0","1","2"}
+        assert sum(row["frozen_global_prior_counts"])==row["canonical_training_n"]
+
     print(json.dumps({
-        "status":"VNEXT5_FROZEN_ARTIFACT_SELFTEST_PASS",
+        "status":"VNEXT5R1_FROZEN_ARTIFACT_SELFTEST_PASS",
         "results":results,
         "prospective_skill_proven":False,
         "trading_authority":False,

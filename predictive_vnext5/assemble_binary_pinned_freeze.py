@@ -1,4 +1,4 @@
-"""Assemble remediated vNext5R1 freeze from exact parent model binaries.
+"""Assemble remediated vNext5R2 freeze from exact parent model binaries.
 
 No training occurs here. The four numerical model binaries are inherited
 byte-for-byte from the parent freeze artifact and verified against frozen SHA256
@@ -85,7 +85,7 @@ def assert_environment():
         })
     stable.sort(key=lambda x:json.dumps(x,sort_keys=True))
     return {
-        "schema":"btc-predictive-vnext5r1-build-environment-v2",
+        "schema":"btc-predictive-vnext5r2-build-environment-v3",
         "platform":REPRO["platform"],
         "python":platform.python_version(),
         "packages":actual,
@@ -160,7 +160,7 @@ def build_evaluation_runtime():
     train,_=final_masks(zd,due,"24h")
     heads["24h"]=runtime_head("24h",zv,zpid,zy,train)
     return {
-        "schema":"btc-predictive-vnext5r1-evaluation-runtime-v2",
+        "schema":"btc-predictive-vnext5r2-evaluation-runtime-v3",
         "supplement_sha256":sha(HERE/"evaluation_supplement.json"),
         "source_sha256":{"15m":sha15,"1h":sha1},
         "heads":heads,
@@ -264,8 +264,8 @@ def main(argv=None):
         raise RuntimeError("copied model binaries changed")
 
     manifest={
-        "schema":"btc-predictive-vnext5r1-binary-pinned-freeze-manifest-v2",
-        "status":"REMEDIATED_PRESTART_BINARY_PINNED_PACKAGE",
+        "schema":"btc-predictive-vnext5r2-binary-pinned-freeze-manifest-v3",
+        "status":"F4_REMEDIATED_PRESTART_BINARY_PINNED_PACKAGE",
         "model_authority":{
             "mode":"INHERITED_IMMUTABLE_PARENT_BINARY",
             "parent_source_sha":
@@ -299,7 +299,16 @@ def main(argv=None):
         "evaluation_supplement_sha256":
             sha(HERE/"evaluation_supplement.json"),
         "prospective_scorer_sha256":sha(HERE/"prospective_score.py"),
+        "f4_adversarial_regression_sha256":
+            sha(HERE/"f4_adversarial_regression.py"),
         "predictor_sha256":sha(HERE/"predictor.py"),
+        "evaluation_authority":{
+            "runtime_override_allowed":False,
+            "primary_query_type":"CANONICAL",
+            "primary_target_id":"CANONICAL_SIGMA_1_1_V1",
+            "strict_row_schema":True,
+            "as_of_cutoff_semantics":True,
+        },
         "historical_model_selection_change":False,
         "predictive_model_change":False,
         "start_utc":None,

@@ -17,6 +17,11 @@ from pathlib import Path
 from predictive_vnext4r7.integrity import canonical, digest, git_bytes, parse_utc
 from predictive_vnext4r71.crypto import make_blob_verifier
 from predictive_vnext4r71.integrity import safe_repo_relative_path
+from predictive_vnext5.production_emitter import (
+    canonical as producer_canonical,
+    recompute_forecast_from_raw,
+    recompute_outcome_from_raw,
+)
 
 UTC=timezone.utc
 HEX40=re.compile(r"^[0-9a-f]{40}$")
@@ -162,18 +167,54 @@ def _load_events(events_dir:Path):
     return events,files
 
 
-def _verify_source_manifest(root:Path,manifest:dict,source_sha:str):
+def _verify_source_manifest(
+    root:Path,manifest:dict,source_sha:str,source_checkout:Path
+):
     if manifest.get("source_commit_sha")!=source_sha:
         raise ValueError("signed manifest source mismatch")
     paths=manifest.get("paths_sha256")
     if not isinstance(paths,dict) or not paths:
         raise ValueError("signed manifest static paths missing")
+
+    source_checkout=Path(source_checkout).resolve()
+    actual_head=_git(source_checkout,"rev-parse","HEAD").strip()
+    if actual_head!=source_sha:
+        raise ValueError("executed source checkout is not signed source commit")
+
+    contract_path="predictive_vnext5/execution_contract.json"
+    if contract_path not in paths:
+        raise ValueError("execution contract absent from signed manifest")
+    contract_bytes=git_bytes(root,source_sha,contract_path)
+    contract=json.loads(contract_bytes)
+    required=contract.get("required_source_paths")
+    if not isinstance(required,list) or not required:
+        raise ValueError("execution contract required paths missing")
+    if len(required)!=len(set(required)):
+        raise ValueError("execution contract contains duplicate paths")
+    missing=sorted(set(required)-set(paths))
+    if missing:
+        raise ValueError(
+            "signed manifest missing mandatory execution paths: "+",".join(missing)
+        )
+
     for path,want in paths.items():
         if not isinstance(path,str) or not isinstance(want,str) or len(want)!=64:
             raise ValueError("invalid static path binding")
-        got=digest(git_bytes(root,source_sha,path))
+        committed=git_bytes(root,source_sha,path)
+        got=digest(committed)
         if got!=want:
             raise ValueError("static source path hash mismatch: "+path)
+
+    for path in required:
+        committed=git_bytes(root,source_sha,path)
+        local=(source_checkout/path)
+        if not local.is_file():
+            raise ValueError("executed mandatory source path missing: "+path)
+        if local.read_bytes()!=committed:
+            raise ValueError("executed source bytes differ from signed source: "+path)
+        if digest(local.read_bytes())!=paths[path]:
+            raise ValueError("executed source hash differs from signed manifest: "+path)
+    return contract
 
 
 def _verify_raw_publication(
@@ -244,6 +285,9 @@ def verify_evidence_snapshot(
     current_tip:str,
     expected_branch:str,
     allow_e2e_short_horizon:bool=False,
+    source_checkout:Path|None=None,
+    model_root:Path|None=None,
+    require_numerical_replay:bool=True,
 )->VerifiedEvidence:
     root=Path(root).resolve()
     if not HEX40.fullmatch(str(current_tip)):
@@ -337,7 +381,11 @@ def verify_evidence_snapshot(
         raise ValueError("signed manifest model artifact binding mismatch")
     if manifest.get("trading_authority") is not False:
         raise ValueError("signed manifest trading authority drift")
-    _verify_source_manifest(root,manifest,source_sha)
+    if source_checkout is None:
+        raise ValueError("verified source checkout required")
+    execution_contract=_verify_source_manifest(
+        root,manifest,source_sha,Path(source_checkout)
+    )
 
     template_path="predictive_vnext5/evidence_protocol_template.json"
     if template_path not in manifest.get("paths_sha256",{}):
@@ -405,6 +453,9 @@ def verify_evidence_snapshot(
     if rekor[schedule["sequence"]]>=start or rekor[freeze["sequence"]]>=start:
         raise ValueError("schedule/freeze not in Rekor before start")
 
+    if require_numerical_replay and model_root is None:
+        raise ValueError("model authority required for numerical replay")
+
     forecasts={}
     receipts={}
     outcomes={}
@@ -445,6 +496,41 @@ def verify_evidence_snapshot(
             event_commit=_verify_raw_publication(
                 root,current_tip,event,path,raw_prefix
             )
+            if require_numerical_replay:
+                raw_local,_=safe_repo_relative_path(root,event["raw_path"])
+                raw_bytes=raw_local.read_bytes()
+                raw_doc=json.loads(raw_bytes)
+                if raw_bytes!=producer_canonical(raw_doc):
+                    raise ValueError("forecast raw is not canonical producer bytes")
+                recomputed=recompute_forecast_from_raw(
+                    head,raw_doc,Path(model_root)
+                )
+                for key in (
+                    "anchor_utc","due_utc","query_type","target_id",
+                    "artifact_sha256","feature_sha256",
+                ):
+                    if event.get(key)!=recomputed.get(key):
+                        raise ValueError("forecast numerical provenance mismatch: "+key)
+                for key in (
+                    "lower_sigma","upper_sigma","volatility","reference_price",
+                    "lower_price","upper_price",
+                ):
+                    if not math.isclose(
+                        float(event.get(key)),float(recomputed.get(key)),
+                        rel_tol=0.0,abs_tol=1e-12,
+                    ):
+                        raise ValueError("forecast numerical provenance mismatch: "+key)
+                if set(event["predictions"])!=set(recomputed["predictions"]):
+                    raise ValueError("forecast candidate set differs from recomputation")
+                for candidate in recomputed["predictions"]:
+                    got=_prediction_vector(event["predictions"][candidate])
+                    want=_prediction_vector(recomputed["predictions"][candidate])
+                    if any(abs(a-b)>1e-12 for a,b in zip(got,want)):
+                        raise ValueError(
+                            "forecast probability differs from model replay: "+candidate
+                        )
+                if event.get("producer_mode")!="PRODUCTION":
+                    raise ValueError("production admission requires production producer mode")
             forecasts[slot]=(event,path,event_commit)
         elif et=="DELIVERY_CONFIRMED":
             if slot in receipts:
@@ -465,6 +551,29 @@ def verify_evidence_snapshot(
             if event.get("outcome_class") not in RAW_CLASS_TO_ID:
                 raise ValueError("invalid signed outcome class")
             _verify_raw_publication(root,current_tip,event,path,raw_prefix)
+            if require_numerical_replay:
+                raw_local,_=safe_repo_relative_path(root,event["raw_path"])
+                raw_bytes=raw_local.read_bytes()
+                raw_doc=json.loads(raw_bytes)
+                if raw_bytes!=producer_canonical(raw_doc):
+                    raise ValueError("outcome raw is not canonical producer bytes")
+                recomputed=recompute_outcome_from_raw(
+                    head,raw_doc,event["lower_price"],event["upper_price"]
+                )
+                for key in (
+                    "anchor_utc","due_utc","query_type","target_id",
+                    "outcome_class","first_touch_time_utc",
+                ):
+                    if event.get(key)!=recomputed.get(key):
+                        raise ValueError("outcome numerical provenance mismatch: "+key)
+                for key in ("lower_sigma","upper_sigma","lower_price","upper_price"):
+                    if not math.isclose(
+                        float(event.get(key)),float(recomputed.get(key)),
+                        rel_tol=0.0,abs_tol=1e-12,
+                    ):
+                        raise ValueError("outcome numerical provenance mismatch: "+key)
+                if event.get("producer_mode")!="PRODUCTION":
+                    raise ValueError("production admission requires production producer mode")
             outcomes[slot]=(event,path)
         elif et=="SLOT_MISSED":
             continue
@@ -537,6 +646,9 @@ def verify_evidence_snapshot(
         "event_hash_chain_verified":True,
         "workflow_content_binding_verified":True,
         "static_source_manifest_verified":True,
+        "execution_contract_verified":True,
+        "executed_source_bytes_verified":True,
+        "numerical_provenance_replayed":bool(require_numerical_replay),
         "raw_hashes_verified":True,
         "raw_remote_publication_verified":True,
         "forecast_delivery_receipt_verified":True,

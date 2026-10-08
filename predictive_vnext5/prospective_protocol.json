@@ -139,6 +139,7 @@
     "full_dependency_hash_coverage_required": true,
     "remote_tip_revalidated_after_scoring": true,
     "decision_semantics": "SNAPSHOT_AS_OF_EXACT_EVIDENCE_SHA",
-    "changes_after_start_forbidden": true
+    "changes_after_start_forbidden": true,
+    "strict_canonical_schema_required": true
   }
 }

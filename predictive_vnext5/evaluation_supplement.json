@@ -1,6 +1,6 @@
 {
-  "schema": "btc-predictive-vnext5r4-evaluation-supplement-v4",
-  "status": "FROZEN_PRESTART_NUMERICAL_PROVENANCE_BOUND",
+  "schema": "btc-predictive-vnext5r42-evaluation-supplement-v5",
+  "status": "FROZEN_PRESTART_TRUST_AND_TARGET_BOUND",
   "scope": "canonical +/-1sigma prospective admission only",
   "raw_class_order": [
     "LOWER_FIRST",
@@ -261,6 +261,10 @@
     "upstream_numerical_replay_required": true,
     "signed_event_extra_fields_rejected_before_derivation": true,
     "production_predictions_recomputed_from_market_raw": true,
-    "production_outcomes_recomputed_from_forward_market_raw": true
+    "production_outcomes_recomputed_from_forward_market_raw": true,
+    "trusted_source_sha_from_outside_journal_required": true,
+    "consumer_arbitrary_decision_input_forbidden": true,
+    "outcome_barrier_authority": "verified forecast same-slot barriers",
+    "outcome_joint_target_tamper_rejected": true
   }
 }

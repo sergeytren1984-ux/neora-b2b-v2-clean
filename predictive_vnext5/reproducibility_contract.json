@@ -1,6 +1,6 @@
 {
-  "schema": "btc-predictive-vnext5r1-reproducibility-contract-v1",
-  "status": "FROZEN_BEFORE_BUILD",
+  "schema": "btc-predictive-vnext5r1-binary-pinned-reproducibility-contract-v2",
+  "status": "FROZEN_BINARY_PINNED_NO_RETRAIN",
   "platform": {
     "system": "Linux",
     "machine": "x86_64"
@@ -36,13 +36,45 @@
       "head_4h_classifier.joblib",
       "head_24h_classifier.joblib",
       "head_24h_competing_risks.joblib",
-      "freeze_manifest.json",
       "selftest_vectors.json",
       "evaluation_runtime.json",
-      "build_environment.json"
+      "build_environment.json",
+      "model_behavior_fingerprint.json",
+      "freeze_manifest.json"
     ],
     "final_package_published_only_after_match": true
   },
   "predictive_model_change": false,
-  "historical_model_selection_change": false
+  "historical_model_selection_change": false,
+  "model_authority": {
+    "mode": "INHERITED_IMMUTABLE_PARENT_BINARY",
+    "retraining_for_freeze_forbidden": true,
+    "reason": "independent pinned-environment rebuilds produced slightly different calibrated estimator states; freeze must preserve one exact numerical model",
+    "parent": {
+      "source_sha": "e2ccec5e5e9b4bd56de1af804af7313dd2b00c27",
+      "workflow_run_id": 37746080651,
+      "artifact_id": 11535947469,
+      "artifact_name": "btc-vnext5-first-passage-freeze",
+      "artifact_zip_digest": "sha256:7e1cc589e0bb31e5bfd6f72c90153023d7ef76f3c5168f6a40b96a6ea4bf6218",
+      "inner_sha256": {
+        "head_1h_classifier.joblib": "9c24cb79f59a6a0b09e0f2980521e071c02cf749e4d14f88713b096fa569ed83",
+        "head_4h_classifier.joblib": "1076407df238eb827ba36b7d69075802940dc84d1954f89943d76db93e542535",
+        "head_24h_classifier.joblib": "1d024c9df3386b4a27ecd0aedb95eacf2fa6bf083ff119ace93dd5303f96c1ac",
+        "head_24h_competing_risks.joblib": "a842001ff27500457dc2cece889c63111a6430fa29cf22633b9d7d5626539f0d",
+        "selftest_vectors.json": "ecfdd2049dd9890df23597be37cbae31f12b5fd1beffc52b72bb732799ffc48e",
+        "freeze_manifest.json": "fabadfb4f2c5a6741d84d78ad6fac40823b9138d19f3670cb1d89b6821bd3bfc"
+      }
+    }
+  },
+  "investigation": {
+    "twin_retrain_run_id": 37753595782,
+    "conclusion": "TRAINED_ESTIMATOR_STATE_NOT_BYTE_DETERMINISTIC_ACROSS_INDEPENDENT_RUNNERS",
+    "stable_items": [
+      "source logical SHA",
+      "evaluation_runtime",
+      "selftest_vectors",
+      "build environment fingerprint"
+    ],
+    "observed_effect": "base/GBDT predictions nearly or exactly match; calibrator fitting amplifies tiny numerical differences; therefore retraining is not the freeze authority"
+  }
 }

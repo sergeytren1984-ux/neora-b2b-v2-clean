@@ -1,6 +1,6 @@
 {
-  "schema": "btc-predictive-vnext5r2-binary-pinned-reproducibility-contract-v3",
-  "status": "FROZEN_BINARY_PINNED_NO_RETRAIN_F4_EVALUATOR_SUCCESSOR",
+  "schema": "btc-predictive-vnext5r3-binary-pinned-reproducibility-contract-v4",
+  "status": "FROZEN_BINARY_PINNED_NO_RETRAIN_PROVENANCE_SUCCESSOR",
   "platform": {
     "system": "Linux",
     "machine": "x86_64"
@@ -80,14 +80,13 @@
     "observed_effect": "base/GBDT predictions nearly or exactly match; calibrator fitting amplifies tiny numerical differences; therefore retraining is not the freeze authority"
   },
   "evaluator_successor": {
-    "parent_r1_source_sha": "d9ce158a87c5e594b127ecb52d0ce6354de5e22c",
-    "findings": [
-      "R1-F4a",
-      "R1-F4b",
-      "R1-F4c",
-      "R1-F4d"
-    ],
+    "parent_r2_source_sha": "267bc3d4975d44967950a0473b54c7b475c306ed",
+    "scope": "provenance/admission boundary only",
     "model_artifacts_inherited_exactly": true,
-    "retraining_forbidden": true
+    "retraining_forbidden": true,
+    "required_evidence": [
+      "twin-runner exact-byte assembly",
+      "real OIDC/Rekor signed provenance E2E"
+    ]
   }
 }

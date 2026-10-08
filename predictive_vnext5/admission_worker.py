@@ -1,4 +1,4 @@
-"""Immutable-source admission worker for vNext5R4.1.
+"""Immutable-source admission worker for vNext5R4.2.
 
 This module must execute from a detached checkout whose HEAD equals the signed
 source_commit_sha.  It performs cryptographic evidence replay, numerical
@@ -71,6 +71,7 @@ def run_worker(
     *,
     repo_root:str,
     source_root:str,
+    approved_source_sha:str,
     evidence_root:str,
     evidence_tip:str,
     evidence_branch:str,
@@ -88,6 +89,8 @@ def run_worker(
     source_head=_git(source,"rev-parse","HEAD")
     if source_head!=_git(source,"rev-parse","HEAD^{commit}"):
         raise ValueError("source checkout is not an exact commit")
+    if source_head!=str(approved_source_sha).lower():
+        raise ValueError("worker checkout differs from externally approved source")
     contract=_assert_runtime_contract(source)
 
     protocol=json.loads((evidence/protocol_path).read_text())
@@ -107,7 +110,7 @@ def run_worker(
         require_numerical_replay=not allow_e2e_short_horizon,
     )
     if verified.source_commit_sha!=source_head:
-        raise ValueError("executed source checkout differs from signed source")
+        raise ValueError("signed source differs from externally approved source")
 
     runtime=json.loads(
         (source/"predictive_vnext5/frozen_evaluation_runtime.json").read_text()
@@ -124,10 +127,13 @@ def run_worker(
     if observed!=evidence_tip:
         raise ValueError("remote evidence tip changed during admission")
 
-    decision["schema"]="btc-predictive-vnext5r41-verified-admission-v1"
+    decision["schema"]="btc-predictive-vnext5r42-verified-admission-v1"
     decision["governance"]={
         **verified.governance,
         "executed_source_checkout":source_head,
+        "trusted_approved_source_sha":source_head,
+        "trusted_source_bootstrap_verified":True,
+        "outcome_barriers_bound_to_forecast":True,
         "execution_contract_schema":contract["schema"],
         "private_detached_evidence_snapshot":True,
         "private_detached_source_snapshot":True,
@@ -149,6 +155,7 @@ def main(argv=None):
     p=argparse.ArgumentParser()
     p.add_argument("--repo-root",required=True)
     p.add_argument("--source-root",required=True)
+    p.add_argument("--approved-source-sha",required=True)
     p.add_argument("--evidence-root",required=True)
     p.add_argument("--evidence-tip",required=True)
     p.add_argument("--evidence-branch",required=True)
@@ -161,6 +168,7 @@ def main(argv=None):
     out=run_worker(
         repo_root=args.repo_root,
         source_root=args.source_root,
+        approved_source_sha=args.approved_source_sha,
         evidence_root=args.evidence_root,
         evidence_tip=args.evidence_tip,
         evidence_branch=args.evidence_branch,

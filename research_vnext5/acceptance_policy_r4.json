@@ -1,0 +1,52 @@
+{
+  "schema": "btc-predictive-vnext5r4-acceptance-policy-v1",
+  "status": "FROZEN_BEFORE_R4_RESULT",
+  "scope": "final historical 24h calibration research only",
+  "parent_r3_source_sha": "5254de289bccc656d8e9464fd3f4cdeee61bf38b",
+  "no_target_changes": true,
+  "no_feature_changes": true,
+  "no_baseline_changes": true,
+  "no_gate_relaxation": true,
+  "no_engineering_changes": true,
+  "overall_zone_gate": {
+    "min_folds": 4,
+    "min_wins": 4,
+    "min_positive_ci_folds": 3,
+    "min_mean_brier_gain": 0.007,
+    "max_mean_ece10": 0.05,
+    "max_ece10_degradation_vs_baseline": 0.015,
+    "max_ambiguous_fraction": 0.015
+  },
+  "canonical_1sigma_gate": {
+    "min_folds": 4,
+    "min_wins": 4,
+    "min_positive_ci_folds": 3,
+    "min_mean_brier_gain": 0.005,
+    "max_mean_ece10": 0.05,
+    "max_ece10_degradation_vs_baseline": 0.015,
+    "max_ambiguous_fraction": 0.015
+  },
+  "meta_calibration_C": [
+    0.01,
+    0.03,
+    0.05,
+    0.1
+  ],
+  "neutral_shrink_alpha": [
+    0.1,
+    0.2,
+    0.3,
+    0.4
+  ],
+  "calibration_prior_shrink_alpha": [
+    0.1,
+    0.2,
+    0.3,
+    0.4
+  ],
+  "selection_rule": "among passing candidates minimize overall+canonical mean Brier, then canonical ECE",
+  "historical_selection_stops_after_this_iteration": true,
+  "next_valid_model_selection_evidence": "clean prospective epoch",
+  "trading_authority": false,
+  "prospective_skill_proven": false
+}

@@ -28,6 +28,9 @@ jobs:
     if: vars.BTC_VNEXT4R71_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    concurrency:
+      group: btc-predictive-vnext4r76-liveness-${{ matrix.workflow }}
+      cancel-in-progress: false
     strategy:
       fail-fast: false
       matrix:

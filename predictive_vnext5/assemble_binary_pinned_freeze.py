@@ -1,4 +1,4 @@
-"""Assemble remediated vNext5R4.1 acceptance-finalization freeze from exact parent model binaries.
+"""Assemble remediated vNext5R4.2 trust-and-target-binding freeze from exact parent model binaries.
 
 No training occurs here. The four numerical model binaries are inherited
 byte-for-byte from the parent freeze artifact and verified against frozen SHA256
@@ -85,7 +85,7 @@ def assert_environment():
         })
     stable.sort(key=lambda x:json.dumps(x,sort_keys=True))
     return {
-        "schema":"btc-predictive-vnext5r41-build-environment-v6",
+        "schema":"btc-predictive-vnext5r42-build-environment-v7",
         "platform":REPRO["platform"],
         "python":platform.python_version(),
         "packages":actual,
@@ -264,8 +264,8 @@ def main(argv=None):
         raise RuntimeError("copied model binaries changed")
 
     manifest={
-        "schema":"btc-predictive-vnext5r41-acceptance-finalization-freeze-manifest-v6",
-        "status":"ACCEPTANCE_FINALIZATION_PRESTART_BINARY_PINNED_PACKAGE",
+        "schema":"btc-predictive-vnext5r42-trust-target-freeze-manifest-v7",
+        "status":"TRUST_TARGET_REMEDIATED_PRESTART_BINARY_PINNED_PACKAGE",
         "model_authority":{
             "mode":"INHERITED_IMMUTABLE_PARENT_BINARY",
             "parent_source_sha":
@@ -311,12 +311,16 @@ def main(argv=None):
         "market_replay_e2e_sha256":sha(HERE/"market_replay_e2e.py"),
         "signed_semantic_negative_e2e_sha256":
             sha(HERE/"signed_semantic_negative_e2e.py"),
+        "signed_outcome_negative_e2e_sha256":
+            sha(HERE/"signed_outcome_negative_e2e.py"),
+        "trust_bootstrap_regression_sha256":
+            sha(HERE/"trust_bootstrap_regression.py"),
         "frozen_source_runtime_sha256":
             sha(HERE/"frozen_evaluation_runtime.json"),
         "f4_adversarial_regression_sha256":
             sha(HERE/"f4_adversarial_regression.py"),
         "evidence_workflow_sha256":
-            sha(ROOT/".github/workflows/btc-predictive-vnext5r41-evidence.yml"),
+            sha(ROOT/".github/workflows/btc-predictive-vnext5r42-evidence.yml"),
         "predictor_sha256":sha(HERE/"predictor.py"),
         "evaluation_authority":{
             "sole_admission_entrypoint":
@@ -325,6 +329,12 @@ def main(argv=None):
                 "predictive_vnext5/admission_worker.py",
             "consumer_guard":
                 "predictive_vnext5/admission_consumer.py",
+            "trusted_source_bootstrap":
+                "external approved source SHA + launcher checkout equality before journal verification",
+            "journal_source_selects_code":False,
+            "consumer_accepts_arbitrary_decision":False,
+            "outcome_barrier_authority":
+                "verified forecast same-slot barriers",
             "evidence_verifier":
                 "predictive_vnext5/verified_evidence.py",
             "calculator_only":

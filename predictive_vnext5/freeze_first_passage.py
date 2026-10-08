@@ -1,9 +1,10 @@
-"""Build the immutable vNext5 first-passage pre-start model package.
+"""Historical vNext5 final-fit recipe retained for audit provenance.
 
-Historical folds have already been seen.  This script therefore makes no
-historical skill claim.  It performs the final pre-start fit exactly once under
-the frozen specification; only a future clean prospective epoch may select or
-reject these candidates.
+R1 remediation established that repeated training is not byte-deterministic
+across independent runners.  This script is therefore NON-AUTHORITATIVE for the
+remediated freeze and MUST NOT be used to create the R1 model authority.
+R1 model bytes are inherited unchanged by assemble_binary_pinned_freeze.py.
+The recipe remains tracked only so auditors can reproduce the investigation.
 """
 from __future__ import annotations
 import hashlib

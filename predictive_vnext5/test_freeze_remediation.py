@@ -186,16 +186,32 @@ class FreezeBindingTests(unittest.TestCase):
             self.assertEqual(actual,parent[name])
             self.assertEqual(row["sha256"],parent[name])
 
-    def test_protocol_binds_one_executable_scorer(self):
+    def test_protocol_binds_sole_verified_admission_entrypoint(self):
         root=self.root()
         p=json.loads(
             (root/"predictive_vnext5/prospective_protocol.json").read_text()
         )
         b=p["evaluation_binding"]
-        self.assertTrue(b["scorer_is_only_admission_implementation"])
+        self.assertEqual(
+            b["sole_admission_entrypoint"],
+            "predictive_vnext5/prospective_admission.py",
+        )
+        self.assertEqual(
+            b["evidence_verifier_path"],
+            "predictive_vnext5/verified_evidence.py",
+        )
+        self.assertEqual(
+            b["calculator_path"],
+            "predictive_vnext5/prospective_score.py",
+        )
+        self.assertTrue(b["arbitrary_jsonl_admission_forbidden"])
         self.assertTrue(b["changes_after_start_forbidden"])
         self.assertTrue(b["runtime_override_forbidden"])
-        self.assertTrue(b["strict_row_schema_required"])
+        self.assertTrue(b["strict_canonical_schema_required"])
+        self.assertTrue(b["full_signature_rekor_replay_required"])
+        self.assertTrue(b["raw_remote_publication_required"])
+        self.assertTrue(b["delivery_receipt_binding_required"])
+        self.assertEqual(b["row_time_authority"],"REKOR_INTEGRATED_TIME")
         self.assertEqual(b["primary_query_type"],"CANONICAL")
         self.assertEqual(b["primary_target_id"],"CANONICAL_SIGMA_1_1_V1")
 
@@ -211,12 +227,52 @@ class FreezeBindingTests(unittest.TestCase):
                 root/"predictive_vnext5/prospective_protocol.json",
             "prospective_scorer_sha256":
                 root/"predictive_vnext5/prospective_score.py",
+            "prospective_admission_sha256":
+                root/"predictive_vnext5/prospective_admission.py",
+            "verified_evidence_sha256":
+                root/"predictive_vnext5/verified_evidence.py",
+            "evidence_protocol_template_sha256":
+                root/"predictive_vnext5/evidence_protocol_template.json",
+            "frozen_source_runtime_sha256":
+                root/"predictive_vnext5/frozen_evaluation_runtime.json",
         }
         for key,path in expected.items():
             self.assertEqual(
                 m[key],hashlib.sha256(path.read_bytes()).hexdigest()
             )
         score.authoritative_runtime()
+
+    def test_packaged_runtime_is_exact_source_runtime(self):
+        root=self.root()
+        source=(root/"predictive_vnext5/frozen_evaluation_runtime.json").read_bytes()
+        packaged=(root/"predictive_vnext5/build/evaluation_runtime.json").read_bytes()
+        self.assertEqual(source,packaged)
+
+    def test_evidence_template_preserves_model_authority(self):
+        root=self.root()
+        t=json.loads(
+            (root/"predictive_vnext5/evidence_protocol_template.json").read_text()
+        )
+        contract=json.loads(
+            (root/"predictive_vnext5/reproducibility_contract.json").read_text()
+        )
+        parent=contract["model_authority"]["parent"]["inner_sha256"]
+        self.assertEqual(
+            t["heads"]["1h"]["artifact_sha256"]["1h"],
+            parent["head_1h_classifier.joblib"],
+        )
+        self.assertEqual(
+            t["heads"]["4h"]["artifact_sha256"]["4h"],
+            parent["head_4h_classifier.joblib"],
+        )
+        self.assertEqual(
+            t["heads"]["24h"]["artifact_sha256"]["24h_classifier"],
+            parent["head_24h_classifier.joblib"],
+        )
+        self.assertEqual(
+            t["heads"]["24h"]["artifact_sha256"]["24h_competing_risks"],
+            parent["head_24h_competing_risks.joblib"],
+        )
 
 
 if __name__=="__main__":

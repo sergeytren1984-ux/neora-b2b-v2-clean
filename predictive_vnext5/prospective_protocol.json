@@ -1,0 +1,93 @@
+{
+  "schema": "btc-predictive-vnext5-prospective-protocol-v1",
+  "status": "FROZEN_PRESTART_START_UTC_NULL",
+  "start_utc": null,
+  "timezone_internal": "UTC",
+  "reporting_timezone": "MSK",
+  "anchors": {
+    "1h": "every UTC hour at minute 00",
+    "4h": "UTC hours 00,04,08,12,16,20",
+    "24h": "00:00 UTC daily"
+  },
+  "outputs": {
+    "canonical": "raw 4-state plus mapped DOWN/RANGE/UP for +/-1 sigma",
+    "custom_zone": "direct frozen-model query only when zone is inside frozen sigma domain",
+    "custom_zone_statistical_authority": "diagnostic decision support only unless zone pair was pre-registered before epoch"
+  },
+  "checkpoints": {
+    "1h": {
+      "telemetry_due_counts": [
+        50,
+        150,
+        300,
+        500
+      ],
+      "model_change_allowed_at_telemetry_checkpoint": false,
+      "decision_eligible_not_before": {
+        "calendar_days": 42,
+        "fixed_phase_nonoverlap_windows": 500
+      }
+    },
+    "4h": {
+      "telemetry_due_counts": [
+        20,
+        50,
+        100,
+        150
+      ],
+      "model_change_allowed_at_telemetry_checkpoint": false,
+      "decision_eligible_not_before": {
+        "calendar_days": 42,
+        "fixed_phase_nonoverlap_windows": 150
+      }
+    },
+    "24h": {
+      "telemetry_due_counts": [
+        10,
+        20,
+        30,
+        45
+      ],
+      "model_change_allowed_at_telemetry_checkpoint": false,
+      "challenger_selection_allowed_before_final_checkpoint": false,
+      "decision_eligible_not_before": {
+        "calendar_days": 60,
+        "fixed_phase_nonoverlap_windows": 45
+      }
+    }
+  },
+  "primary_metrics": [
+    "multiclass Brier",
+    "multiclass Log Loss",
+    "ECE10"
+  ],
+  "primary_baseline": "due-causal rolling 90d canonical +/-1sigma baseline conditioned on frozen volatility bin",
+  "secondary_metrics": [
+    "DOWN/UP PR-AUC",
+    "DOWN/UP ROC-AUC",
+    "stress-bin Brier/LogLoss gain"
+  ],
+  "challenger_rules_24h": {
+    "candidates": [
+      "24h_classifier",
+      "24h_competing_risks"
+    ],
+    "no_historical_winner": true,
+    "no_blending_or_weight_changes_during_epoch": true,
+    "winner_rule_after_final_checkpoint": "must pass frozen gates and beat the other challenger on Brier without violating calibration gate"
+  },
+  "final_skill_gate": {
+    "calibration_max_ece10": 0.05,
+    "calibration_max_ece10_degradation_vs_baseline": 0.015,
+    "brier_gain_must_be_positive": true,
+    "logloss_gain_must_be_positive": true,
+    "block_ci_must_support_positive_brier_gain": true,
+    "incomplete_due_grid_blocks_acceptance": true,
+    "no_backfill": true
+  },
+  "authority": {
+    "prospective_skill_proven": false,
+    "trading_authority": false,
+    "no_model_change_after_start": true
+  }
+}

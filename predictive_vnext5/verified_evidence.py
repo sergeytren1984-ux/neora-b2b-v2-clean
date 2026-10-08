@@ -27,6 +27,61 @@ RAW_CLASS_TO_ID={
     "AMBIGUOUS_SAME_BAR":3,
 }
 
+COMMON_EVENT_FIELDS={
+    "schema","sequence","previous_hash","workflow_commit","published_at_utc",
+    "type","idempotency_key","head","trading_authority",
+}
+EVENT_FIELDS={
+    "SCHEDULE_REGISTERED": COMMON_EVENT_FIELDS | {
+        "start_utc","evidence_branch","source_ref","workflow_trigger",
+        "source_commit_sha","protocol_sha256",
+    },
+    "CONFIG_FROZEN_PRESTART": COMMON_EVENT_FIELDS | {
+        "start_utc","evidence_branch","source_ref","workflow_trigger",
+        "source_commit_sha","manifest_sha256","manifest",
+    },
+    "FORECAST_ISSUED": COMMON_EVENT_FIELDS | {
+        "slot","anchor_utc","due_utc","query_type","target_id",
+        "lower_sigma","upper_sigma","predictions","artifact_sha256",
+        "volatility","reference_price","lower_price","upper_price",
+        "feature_sha256","raw_path","raw_sha256","producer_mode",
+    },
+    "DELIVERY_CONFIRMED": COMMON_EVENT_FIELDS | {
+        "slot","target_sequence","target_event_hash","remote_commit_sha",
+    },
+    "OUTCOME_RECORDED": COMMON_EVENT_FIELDS | {
+        "slot","anchor_utc","due_utc","query_type","target_id",
+        "lower_sigma","upper_sigma","outcome_class","first_touch_time_utc",
+        "lower_price","upper_price","raw_path","raw_sha256","producer_mode",
+    },
+    "SLOT_MISSED": COMMON_EVENT_FIELDS | {
+        "slot","reason","deadline_utc",
+    },
+}
+EVENT_REQUIRED={k:set(v) for k,v in EVENT_FIELDS.items()}
+
+
+def _validate_exact_event_schema(event:dict):
+    if type(event) is not dict:
+        raise ValueError("evidence event must be an object")
+    et=event.get("type")
+    allowed=EVENT_FIELDS.get(et)
+    if allowed is None:
+        raise ValueError("unsupported evidence event type: "+str(et))
+    keys=set(event)
+    missing=EVENT_REQUIRED[et]-keys
+    extra=keys-allowed
+    if missing:
+        raise ValueError(
+            "signed event missing required fields: "+",".join(sorted(missing))
+        )
+    if extra:
+        raise ValueError(
+            "signed event contains forbidden fields: "+",".join(sorted(extra))
+        )
+    if event.get("schema")!="btc-predictive-vnext5r4-evidence-event-v1":
+        raise ValueError("unexpected evidence event schema")
+
 
 @dataclass(frozen=True)
 class VerifiedEvidence:
@@ -92,8 +147,7 @@ def _load_events(events_dir:Path):
         event=json.loads(raw)
         if raw!=canonical(event):
             raise ValueError("non-canonical event bytes")
-        if event.get("schema")!="btc-predictive-vnext5r3-evidence-event-v1":
-            raise ValueError("unexpected evidence event schema")
+        _validate_exact_event_schema(event)
         if type(event.get("sequence")) is not int or event["sequence"]!=i:
             raise ValueError("event sequence gap")
         if event.get("previous_hash")!=previous:
@@ -152,6 +206,8 @@ def _verify_raw_publication(
 
 
 def _target_fields(event:dict):
+    # Event schema has already rejected all non-canonical annotations before
+    # any field-dropping row derivation can occur.
     if event.get("query_type")!="CANONICAL":
         raise ValueError("non-canonical evidence cannot enter primary admission")
     if event.get("target_id")!="CANONICAL_SIGMA_1_1_V1":

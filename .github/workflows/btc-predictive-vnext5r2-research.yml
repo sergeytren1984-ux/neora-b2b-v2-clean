@@ -1,0 +1,56 @@
+name: BTC predictive vNext5R2 predictive research
+
+on:
+  push:
+    branches:
+      - btc-predictive-vnext5r2-predictive-research-20261008
+    paths:
+      - 'research_vnext5/**'
+      - '.github/workflows/btc-predictive-vnext5r2-research.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: btc-predictive-vnext5r2-predictive-research
+  cancel-in-progress: true
+
+jobs:
+  predictive-research-r2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Install numerical dependencies
+        run: |
+          python -m pip install --disable-pip-version-check \
+            numpy==2.2.6 scikit-learn==1.7.2 joblib==1.5.2
+      - name: Rebuild timestamp-safe historical BTC sources
+        run: |
+          python research_vnext/fetch_hourly.py
+          python research_vnext4r6/fetch_15m_r6.py
+      - name: Run stronger predictive research R2
+        env:
+          PYTHONPATH: .
+        run: |
+          python research_vnext5/predictive_research_r2.py | tee /tmp/vnext5r2-acceptance.json
+          test -s research_vnext5/predictive_research_r2_result.json
+      - name: Show compact decision
+        run: |
+          python - <<'PY'
+          import json
+          x=json.load(open("research_vnext5/predictive_research_r2_result.json"))
+          print(json.dumps(x["acceptance"],indent=2,sort_keys=True))
+          PY
+      - name: Upload predictive research R2 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-vnext5r2-predictive-research
+          path: research_vnext5/predictive_research_r2_result.json
+          if-no-files-found: error

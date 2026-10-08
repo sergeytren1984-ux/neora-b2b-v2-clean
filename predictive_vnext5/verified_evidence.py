@@ -1,4 +1,4 @@
-"""Cryptographic evidence replay and canonical-row derivation for vNext5R3.
+"""Cryptographic evidence replay and canonical-row derivation for vNext5R4.2.
 
 This module is the provenance boundary between the signed Git/Rekor journal and
 the numerical prospective scorer.  It accepts no caller-supplied forecast rows.
@@ -468,6 +468,7 @@ def verify_evidence_snapshot(
         raise ValueError("model authority required for numerical replay")
 
     forecasts={}
+    forecast_authority={}
     receipts={}
     outcomes={}
     raw_prefix=f"predictive_vnext5_{head}_raw/"
@@ -548,6 +549,20 @@ def verify_evidence_snapshot(
                 )
                 if event.get("producer_mode")!=expected_mode:
                     raise ValueError("producer mode differs from protocol mode")
+            # Store the independently recomputed forecast target as the only
+            # barrier authority for the corresponding outcome.
+            forecast_authority[slot]=(
+                recomputed if require_numerical_replay else {
+                    "anchor_utc":event["anchor_utc"],
+                    "due_utc":event["due_utc"],
+                    "query_type":event["query_type"],
+                    "target_id":event["target_id"],
+                    "lower_sigma":event["lower_sigma"],
+                    "upper_sigma":event["upper_sigma"],
+                    "lower_price":event["lower_price"],
+                    "upper_price":event["upper_price"],
+                }
+            )
             forecasts[slot]=(event,path,event_commit)
         elif et=="DELIVERY_CONFIRMED":
             if slot in receipts:
@@ -557,6 +572,25 @@ def verify_evidence_snapshot(
             if slot in outcomes:
                 raise ValueError("duplicate outcome slot")
             _target_fields(event)
+            forecast_pair=forecasts.get(slot)
+            authority=forecast_authority.get(slot)
+            if forecast_pair is None or authority is None:
+                raise ValueError("outcome has no prior verified forecast authority")
+            forecast_event=forecast_pair[0]
+            for key in (
+                "anchor_utc","due_utc","query_type","target_id",
+                "lower_sigma","upper_sigma",
+            ):
+                if event.get(key)!=forecast_event.get(key):
+                    raise ValueError("outcome/forecast authority mismatch: "+key)
+            for key in ("lower_price","upper_price"):
+                if not math.isclose(
+                    float(event.get(key)),float(authority.get(key)),
+                    rel_tol=0.0,abs_tol=1e-12,
+                ):
+                    raise ValueError(
+                        "outcome barrier differs from verified forecast: "+key
+                    )
             anchor=parse_utc(event.get("anchor_utc"))
             due=parse_utc(event.get("due_utc"))
             if due!=anchor+horizon:
@@ -576,7 +610,10 @@ def verify_evidence_snapshot(
                 if raw_bytes!=producer_canonical(raw_doc):
                     raise ValueError("outcome raw is not canonical producer bytes")
                 recomputed=recompute_outcome_from_raw(
-                    head,raw_doc,event["lower_price"],event["upper_price"]
+                    head,
+                    raw_doc,
+                    float(authority["lower_price"]),
+                    float(authority["upper_price"]),
                 )
                 for key in (
                     "anchor_utc","due_utc","query_type","target_id",
@@ -636,6 +673,12 @@ def verify_evidence_snapshot(
         for key in ("query_type","target_id","lower_sigma","upper_sigma"):
             if outcome.get(key)!=forecast.get(key):
                 raise ValueError("outcome/forecast target mismatch")
+        for key in ("lower_price","upper_price"):
+            if not math.isclose(
+                float(outcome.get(key)),float(forecast.get(key)),
+                rel_tol=0.0,abs_tol=1e-12,
+            ):
+                raise ValueError("outcome barrier differs from forecast: "+key)
 
         issued=max(
             rekor[forecast["sequence"]],
@@ -663,7 +706,7 @@ def verify_evidence_snapshot(
             })
 
     governance={
-        "schema":"btc-predictive-vnext5r41-evidence-governance-v1",
+        "schema":"btc-predictive-vnext5r42-evidence-governance-v1",
         "full_cryptographic_replay":True,
         "all_event_signatures_verified":True,
         "all_rekor_inclusion_proofs_verified":True,

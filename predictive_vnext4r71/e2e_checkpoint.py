@@ -1,4 +1,4 @@
-"""GitHub Actions E2E: real Sigstore events -> remote branch -> R7.5 checkpoint.
+"""GitHub Actions E2E: real Sigstore events -> remote branch -> R7.6 checkpoint.
 
 Successful audit branches are intentionally retained for independent read-only
 replay. This test uses real OIDC/Rekor signatures and remote git publication
@@ -484,7 +484,7 @@ def main():
     if binding["semantics"]!="SNAPSHOT_AS_OF_EXACT_EVIDENCE_SHA":
         raise RuntimeError("decision snapshot semantics missing")
     if binding["absolute_latest_tip_atomicity_claimed"] is not False:
-        raise RuntimeError("R7.5 must not claim impossible latest-tip atomicity")
+        raise RuntimeError("R7.6 must not claim impossible latest-tip atomicity")
 
     # Reproduce the independent audit's local read/restore class without any
     # verifier/scorer substitution. Dirty caller-visible policy and evidence
@@ -607,7 +607,7 @@ def main():
             "created_at_utc":datetime.now(UTC).isoformat(),
         }))
         race_state["advanced_tip"]=push_paths(
-            "R7.5 advance remote tip during admission scoring",
+            "R7.6 advance remote tip during admission scoring",
             race_marker,
         )
         return out
@@ -668,7 +668,7 @@ def main():
     audit_path.write_bytes(canonical(audit))
     sign(audit_path,audit_bundle)
     preserved_tip=push_paths(
-        "R7.5 preserve signed positive E2E audit artifact",
+        "R7.6 preserve signed positive E2E audit artifact",
         audit_path,audit_bundle,
     )
     audit["preserved_tip"]=preserved_tip

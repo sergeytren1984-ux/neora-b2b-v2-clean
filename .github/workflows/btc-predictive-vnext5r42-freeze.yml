@@ -1,13 +1,13 @@
-name: BTC predictive vNext5R4.2 trust-target freeze
+name: BTC predictive vNext5R4.3 trust-target freeze
 
 on:
   push:
     branches:
-      - btc-predictive-vnext5r42-trust-barrier-remediation-20261008
+      - btc-predictive-vnext5r43-trust-barrier-remediation-20261008
     paths:
       - 'predictive_vnext5/**'
-      - '.github/workflows/btc-predictive-vnext5r42-evidence.yml'
-      - '.github/workflows/btc-predictive-vnext5r42-freeze.yml'
+      - '.github/workflows/btc-predictive-vnext5r43-evidence.yml'
+      - '.github/workflows/btc-predictive-vnext5r43-freeze.yml'
   workflow_dispatch:
 
 permissions:
@@ -15,7 +15,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: btc-predictive-vnext5r42-trust-target-freeze
+  group: btc-predictive-vnext5r43-trust-target-freeze
   cancel-in-progress: true
 
 env:
@@ -77,16 +77,18 @@ jobs:
             predictive_vnext5/market_replay_e2e.py \
             predictive_vnext5/signed_semantic_negative_e2e.py \
             predictive_vnext5/signed_outcome_negative_e2e.py \
-            predictive_vnext5/trust_bootstrap_regression.py
+            predictive_vnext5/trust_bootstrap_regression.py \
+            predictive_vnext5/production_start_regression.py
           python predictive_vnext5/selftest.py
           python -m unittest predictive_vnext5.test_freeze_remediation -v
           python predictive_vnext5/f4_adversarial_regression.py
           python predictive_vnext5/trust_bootstrap_regression.py
+          python predictive_vnext5/production_start_regression.py
 
       - name: Upload independent assembly
         uses: actions/upload-artifact@v4
         with:
-          name: vnext5r42-assembly-${{ matrix.builder }}
+          name: vnext5r43-assembly-${{ matrix.builder }}
           path: predictive_vnext5/build/**
           if-no-files-found: error
           retention-days: 90
@@ -113,12 +115,12 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: vnext5r42-assembly-a
+          name: vnext5r43-assembly-a
           path: /tmp/build-a
 
       - uses: actions/download-artifact@v4
         with:
-          name: vnext5r42-assembly-b
+          name: vnext5r43-assembly-b
           path: /tmp/build-b
 
       - name: Exact-byte compare independent assemblies
@@ -145,6 +147,7 @@ jobs:
           python -m unittest predictive_vnext5.test_freeze_remediation -v
           python predictive_vnext5/f4_adversarial_regression.py
           python predictive_vnext5/trust_bootstrap_regression.py
+          python predictive_vnext5/production_start_regression.py
           python - <<'PY'
           import json,pathlib
           root=pathlib.Path(".")
@@ -181,19 +184,20 @@ jobs:
             predictive_vnext5/signed_semantic_negative_e2e.py \
             predictive_vnext5/signed_outcome_negative_e2e.py \
             predictive_vnext5/trust_bootstrap_regression.py \
+            predictive_vnext5/production_start_regression.py \
             predictive_vnext5/frozen_evaluation_runtime.json \
             predictive_vnext5/f4_adversarial_regression.py \
             predictive_vnext5/freeze_spec.json \
             predictive_vnext5/predictor.py \
             predictive_vnext5/assemble_binary_pinned_freeze.py \
-            .github/workflows/btc-predictive-vnext5r42-evidence.yml \
-            .github/workflows/btc-predictive-vnext5r42-freeze.yml \
+            .github/workflows/btc-predictive-vnext5r43-evidence.yml \
+            .github/workflows/btc-predictive-vnext5r43-freeze.yml \
             predictive_vnext5/build/*
 
       - name: Upload authoritative R4.2 freeze
         uses: actions/upload-artifact@v4
         with:
-          name: btc-vnext5r42-first-passage-freeze
+          name: btc-vnext5r43-first-passage-freeze
           path: |
             predictive_vnext5/reproducibility_contract.json
             predictive_vnext5/evaluation_supplement.json
@@ -219,8 +223,8 @@ jobs:
             predictive_vnext5/selftest.py
             predictive_vnext5/test_freeze_remediation.py
             predictive_vnext5/compare_freeze_builds.py
-            .github/workflows/btc-predictive-vnext5r42-evidence.yml
-            .github/workflows/btc-predictive-vnext5r42-freeze.yml
+            .github/workflows/btc-predictive-vnext5r43-evidence.yml
+            .github/workflows/btc-predictive-vnext5r43-freeze.yml
             predictive_vnext5/build/**
           if-no-files-found: error
           retention-days: 90

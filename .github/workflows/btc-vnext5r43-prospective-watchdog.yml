@@ -1,0 +1,60 @@
+name: BTC vNext5R4.3 prospective clock watchdog
+
+on:
+  schedule:
+    - cron: '11,41 * * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      CLOCK_WORKFLOW: btc-vnext5r42-prospective-cycle.yml
+    steps:
+      - name: Ensure one prospective clock is alive
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,urllib.request
+          repo=os.environ["GH_REPO"]
+          token=os.environ["GH_TOKEN"]
+          workflow=os.environ["CLOCK_WORKFLOW"]
+          headers={
+              "Authorization":f"Bearer {token}",
+              "Accept":"application/vnd.github+json",
+              "X-GitHub-Api-Version":"2022-11-28",
+          }
+          active=[]
+          for status in ("in_progress","queued"):
+              req=urllib.request.Request(
+                  f"https://api.github.com/repos/{repo}/actions/workflows/{workflow}/runs?status={status}&per_page=20",
+                  headers=headers,
+              )
+              with urllib.request.urlopen(req,timeout=30) as res:
+                  doc=json.load(res)
+              active.extend(doc.get("workflow_runs",[]))
+          if active:
+              print("CLOCK_HEALTHY",[(r["id"],r["status"]) for r in active])
+              raise SystemExit(0)
+          payload=json.dumps({
+              "ref":"main",
+              "inputs":{"dry_run":"false","one_shot":"false"},
+          }).encode()
+          req=urllib.request.Request(
+              f"https://api.github.com/repos/{repo}/actions/workflows/{workflow}/dispatches",
+              data=payload,method="POST",
+              headers={**headers,"Content-Type":"application/json"},
+          )
+          with urllib.request.urlopen(req,timeout=30) as res:
+              if res.status!=204:
+                  raise RuntimeError(f"watchdog dispatch HTTP {res.status}")
+          print("CLOCK_RECOVERY_DISPATCHED")
+          PY

@@ -3,11 +3,11 @@ name: BTC predictive vNext5R4.3 trust-target freeze
 on:
   push:
     branches:
-      - btc-predictive-vnext5r43-trust-barrier-remediation-20261008
+      - btc-predictive-vnext5r43-production-start-remediation-20261009
     paths:
       - 'predictive_vnext5/**'
-      - '.github/workflows/btc-predictive-vnext5r43-evidence.yml'
-      - '.github/workflows/btc-predictive-vnext5r43-freeze.yml'
+      - '.github/workflows/btc-predictive-vnext5r42-evidence.yml'
+      - '.github/workflows/btc-predictive-vnext5r42-freeze.yml'
   workflow_dispatch:
 
 permissions:
@@ -190,11 +190,11 @@ jobs:
             predictive_vnext5/freeze_spec.json \
             predictive_vnext5/predictor.py \
             predictive_vnext5/assemble_binary_pinned_freeze.py \
-            .github/workflows/btc-predictive-vnext5r43-evidence.yml \
-            .github/workflows/btc-predictive-vnext5r43-freeze.yml \
+            .github/workflows/btc-predictive-vnext5r42-evidence.yml \
+            .github/workflows/btc-predictive-vnext5r42-freeze.yml \
             predictive_vnext5/build/*
 
-      - name: Upload authoritative R4.2 freeze
+      - name: Upload authoritative R4.3 freeze
         uses: actions/upload-artifact@v4
         with:
           name: btc-vnext5r43-first-passage-freeze
@@ -215,6 +215,7 @@ jobs:
             predictive_vnext5/signed_semantic_negative_e2e.py
             predictive_vnext5/signed_outcome_negative_e2e.py
             predictive_vnext5/trust_bootstrap_regression.py
+            predictive_vnext5/production_start_regression.py
             predictive_vnext5/frozen_evaluation_runtime.json
             predictive_vnext5/f4_adversarial_regression.py
             predictive_vnext5/freeze_spec.json
@@ -223,8 +224,8 @@ jobs:
             predictive_vnext5/selftest.py
             predictive_vnext5/test_freeze_remediation.py
             predictive_vnext5/compare_freeze_builds.py
-            .github/workflows/btc-predictive-vnext5r43-evidence.yml
-            .github/workflows/btc-predictive-vnext5r43-freeze.yml
+            .github/workflows/btc-predictive-vnext5r42-evidence.yml
+            .github/workflows/btc-predictive-vnext5r42-freeze.yml
             predictive_vnext5/build/**
           if-no-files-found: error
           retention-days: 90

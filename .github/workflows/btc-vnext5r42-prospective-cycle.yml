@@ -1,77 +1,142 @@
-name: BTC vNext5R4.2 prospective cycle
+name: BTC vNext5R4.3 prospective clock
 
 on:
-  schedule:
-    - cron: '3,8,20 * * * *'
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Check dispatch plan without starting production actions'
+        description: 'Do not dispatch production actions'
         type: boolean
         required: false
-        default: true
+        default: false
+      one_shot:
+        description: 'Validate clock plan once and exit'
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
   actions: write
 
 concurrency:
-  group: btc-vnext5r42-cycle
+  group: btc-vnext5r43-prospective-clock
   cancel-in-progress: false
 
 jobs:
-  dispatch:
+  clock:
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 350
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
       DRY_RUN: ${{ inputs.dry_run || 'false' }}
+      ONE_SHOT: ${{ inputs.one_shot || 'false' }}
+      START_UTC: '2026-10-10T00:00:00+00:00'
+      APPROVED_REF: btc-predictive-vnext5r43-production-start-remediation-20261009
+      EVIDENCE_WORKFLOW: btc-predictive-vnext5r42-evidence.yml
+      EVIDENCE_PREFIX: btc-vnext5r43-prospective-20261010-
+      CLOCK_WORKFLOW: btc-vnext5r42-prospective-cycle.yml
     steps:
-      - name: Dispatch pinned prospective forecast/outcome jobs
+      - name: Run prospective production clock
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import datetime, json, os, urllib.request
-          now=datetime.datetime.now(datetime.timezone.utc)
-          start=datetime.datetime(2026,10,9,0,0,tzinfo=datetime.timezone.utc)
-          approved_ref="btc-predictive-vnext5r42-trust-barrier-remediation-20261008"
-          workflow="btc-predictive-vnext5r42-evidence.yml"
+          import datetime as dt
+          import json
+          import os
+          import time
+          import urllib.request
+
+          UTC=dt.timezone.utc
           repo=os.environ["GH_REPO"]
-          dry_run=os.environ.get("DRY_RUN","false").lower()=="true"
-          if now<start:
-              print("PRESTART: no production dispatch",now.isoformat())
-              raise SystemExit(0)
-          minute=now.minute
-          hour=now.hour
-          if minute<=13:
-              action="forecast"
-              heads=["1h"]
-              if hour%4==0: heads.append("4h")
-              if hour==0: heads.append("24h")
-          elif 15<=minute<=45:
-              action="outcome"
-              heads=["1h","4h","24h"]
-          else:
-              print("Outside dispatch interval",now.isoformat())
-              raise SystemExit(0)
-          # Non-hourly anchor heads are dispatched only on their UTC phase.
-          # Outcome jobs inspect all due forecasts and are safe to retry.
-          for head in heads:
-              inputs=dict(action=action,head=head,
-                  evidence_branch=f"btc-vnext5r42-prospective-20261009-{head}")
-              print("dispatch",head,action,now.isoformat(), "dry_run",dry_run,flush=True)
-              if dry_run: continue
-              payload=json.dumps(dict(ref=approved_ref,inputs=inputs)).encode()
+          token=os.environ["GH_TOKEN"]
+          approved_ref=os.environ["APPROVED_REF"]
+          evidence_workflow=os.environ["EVIDENCE_WORKFLOW"]
+          prefix=os.environ["EVIDENCE_PREFIX"]
+          clock_workflow=os.environ["CLOCK_WORKFLOW"]
+          start=dt.datetime.fromisoformat(os.environ["START_UTC"])
+          dry=os.environ["DRY_RUN"].lower()=="true"
+          one=os.environ["ONE_SHOT"].lower()=="true"
+
+          def api_dispatch(workflow, ref, inputs):
+              payload=json.dumps({"ref":ref,"inputs":inputs}).encode()
               req=urllib.request.Request(
                   f"https://api.github.com/repos/{repo}/actions/workflows/{workflow}/dispatches",
-                  data=payload,method="POST",
-                  headers={"Authorization":f"Bearer {os.environ['GH_TOKEN']}",
-                           "Accept":"application/vnd.github+json",
-                           "X-GitHub-Api-Version":"2022-11-28",
-                           "Content-Type":"application/json"})
-              with urllib.request.urlopen(req,timeout=25) as res:
-                  if res.status!=204: raise RuntimeError(f"dispatch HTTP {res.status}")
-              print("DISPATCH_ACCEPTED",head,action,flush=True)
+                  data=payload, method="POST",
+                  headers={
+                      "Authorization":f"Bearer {token}",
+                      "Accept":"application/vnd.github+json",
+                      "X-GitHub-Api-Version":"2022-11-28",
+                      "Content-Type":"application/json",
+                  },
+              )
+              with urllib.request.urlopen(req,timeout=30) as res:
+                  if res.status!=204:
+                      raise RuntimeError(f"dispatch HTTP {res.status}")
+
+          def dispatch_action(action,head,now):
+              inputs={
+                  "action":action,
+                  "head":head,
+                  "evidence_branch":prefix+head,
+                  "start_utc":"",
+              }
+              print("DISPATCH_PLAN",now.isoformat(),action,head,inputs["evidence_branch"],flush=True)
+              if not dry:
+                  api_dispatch(evidence_workflow,approved_ref,inputs)
+                  print("DISPATCH_ACCEPTED",action,head,flush=True)
+
+          def next_event(now):
+              base=now.replace(minute=0,second=0,microsecond=0)
+              candidates=[]
+              for h in range(0,8):
+                  anchor=base+dt.timedelta(hours=h)
+                  candidates.append((anchor+dt.timedelta(minutes=2),"forecast",anchor))
+                  candidates.append((anchor+dt.timedelta(minutes=25),"outcome",anchor))
+              return min(x for x in candidates if x[0]>now)
+
+          if one:
+              now=dt.datetime.now(UTC)
+              when,kind,anchor=next_event(now)
+              print("CLOCK_ONE_SHOT_PASS",json.dumps({
+                  "now":now.isoformat(),
+                  "next_event":when.isoformat(),
+                  "kind":kind,
+                  "anchor":anchor.isoformat(),
+                  "start":start.isoformat(),
+                  "dry_run":dry,
+              },sort_keys=True))
+              raise SystemExit(0)
+
+          stop=dt.datetime.now(UTC)+dt.timedelta(hours=5,minutes=20)
+          print("CLOCK_STARTED",dt.datetime.now(UTC).isoformat(),"stop",stop.isoformat(),flush=True)
+
+          while True:
+              now=dt.datetime.now(UTC)
+              when,kind,anchor=next_event(now-dt.timedelta(seconds=2))
+              if when>=stop:
+                  break
+              sleep=max(0,(when-now).total_seconds())
+              if sleep:
+                  time.sleep(sleep)
+              now=dt.datetime.now(UTC)
+              if now<start:
+                  print("PRESTART_EVENT_SKIPPED",kind,anchor.isoformat(),now.isoformat(),flush=True)
+                  continue
+              if kind=="forecast":
+                  heads=["1h"]
+                  if anchor.hour%4==0:
+                      heads.append("4h")
+                  if anchor.hour==0:
+                      heads.append("24h")
+              else:
+                  heads=["1h","4h","24h"]
+              for head in heads:
+                  dispatch_action(kind,head,now)
+
+          print("CLOCK_HANDOFF",dt.datetime.now(UTC).isoformat(),flush=True)
+          if not dry:
+              api_dispatch(clock_workflow,"main",{"dry_run":"false","one_shot":"false"})
+              print("CLOCK_SUCCESSOR_ACCEPTED",flush=True)
           PY

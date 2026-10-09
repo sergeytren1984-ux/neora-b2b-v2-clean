@@ -350,10 +350,8 @@ class ConsumerBoundaryTests(unittest.TestCase):
     def test_production_signer_drift_rejected_before_publication(self):
         verified=SimpleNamespace(
             source_commit_sha="d"*40,
-            governance={
-                "source_ref":"refs/heads/frozen",
-                "workflow_trigger":"workflow_dispatch",
-            },
+            source_ref="refs/heads/frozen",
+            workflow_trigger="workflow_dispatch",
         )
         good={
             "GITHUB_SHA":"d"*40,
@@ -365,6 +363,10 @@ class ConsumerBoundaryTests(unittest.TestCase):
         bad={**good,"GITHUB_REF":"refs/heads/wrong"}
         with patch.dict("os.environ",bad,clear=False):
             with self.assertRaisesRegex(RuntimeError,"ref"):
+                journal._assert_current_signer_matches_registration(verified)
+        bad_trigger={**good,"GITHUB_EVENT_NAME":"schedule"}
+        with patch.dict("os.environ",bad_trigger,clear=False):
+            with self.assertRaisesRegex(RuntimeError,"trigger"):
                 journal._assert_current_signer_matches_registration(verified)
 
 

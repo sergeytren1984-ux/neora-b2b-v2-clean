@@ -112,14 +112,19 @@ jobs:
           stop=dt.datetime.now(UTC)+dt.timedelta(hours=5,minutes=20)
           print("CLOCK_STARTED",dt.datetime.now(UTC).isoformat(),"stop",stop.isoformat(),flush=True)
 
+          processed=set()
           while True:
               now=dt.datetime.now(UTC)
-              when,kind,anchor=next_event(now-dt.timedelta(seconds=2))
+              when,kind,anchor=next_event(now)
               if when>=stop:
                   break
               sleep=max(0,(when-now).total_seconds())
               if sleep:
                   time.sleep(sleep)
+              key=(when.isoformat(),kind)
+              if key in processed:
+                  continue
+              processed.add(key)
               now=dt.datetime.now(UTC)
               if now<start:
                   print("PRESTART_EVENT_SKIPPED",kind,anchor.isoformat(),now.isoformat(),flush=True)

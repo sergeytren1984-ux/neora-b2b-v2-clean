@@ -3,11 +3,11 @@ name: BTC predictive vNext5R4.3 signed evidence authority
 on:
   push:
     branches:
-      - btc-predictive-vnext5r43-trust-barrier-remediation-20261008
+      - btc-predictive-vnext5r43-production-start-remediation-20261009
     paths:
       - 'predictive_vnext5/**'
-      - '.github/workflows/btc-predictive-vnext5r43-evidence.yml'
-      - '.github/workflows/btc-predictive-vnext5r43-freeze.yml'
+      - '.github/workflows/btc-predictive-vnext5r42-evidence.yml'
+      - '.github/workflows/btc-predictive-vnext5r42-freeze.yml'
   workflow_dispatch:
     inputs:
       action:

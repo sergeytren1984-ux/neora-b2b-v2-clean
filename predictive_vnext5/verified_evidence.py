@@ -97,6 +97,8 @@ class VerifiedEvidence:
     evidence_branch: str
     evidence_tip: str
     source_commit_sha: str
+    source_ref: str
+    workflow_trigger: str
 
 
 def _git(root:Path,*args,text=True):
@@ -722,6 +724,7 @@ def verify_evidence_snapshot(
         "exact_evidence_tip_bound":current_tip,
         "source_commit_sha":source_sha,
         "source_ref":source_ref,
+        "workflow_trigger":trigger,
         "protocol_sha256":digest(protocol_bytes),
         "signed_manifest_sha256":digest(canonical(manifest)),
         "verified_event_count":len(events),
@@ -739,4 +742,6 @@ def verify_evidence_snapshot(
         evidence_branch=expected_branch,
         evidence_tip=current_tip,
         source_commit_sha=source_sha,
+        source_ref=source_ref,
+        workflow_trigger=trigger,
     )

@@ -4,7 +4,7 @@ Uses identical rows, 24-hour embargo, fixed model hyperparameters and the same
 validation Platt calibration. Futures OI is lagged at least 5m after the vendor
 observation timestamp, preventing synchronous point-in-time leakage.
 """
-import datetime as dt,urllib.request,urllib.parse,urllib.error,time,json,gzip,hashlib,pathlib,math,argparse
+import datetime as dt,urllib.request,urllib.parse,urllib.error,time,json,gzip,hashlib,pathlib,math,argparse,bisect
 import numpy as np
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
@@ -62,19 +62,34 @@ def get_funding():
     return out
 
 def aligned_derivatives(times,idx,um,cm,funding):
+    """USDT-M required; COIN-M optional with <=15m causal as-of lag and age flag."""
     results=[];mask=[]
-    fund_ts=sorted(funding)
+    fund_ts=sorted(funding);cm_ts=sorted(cm)
     for j,i in enumerate(idx):
-        # The latest admissible OI stamp must precede decision timestamp by 5 minutes.
-        observed=int(times[i]) # closed bar anchor - 5min
+        # Market input must have existed at least 5 minutes before this decision.
+        observed=int(times[i]) # candle closes at observed + STEP
         lookback=(observed,observed-3*STEP,observed-12*STEP)
-        if not all(t in um and t in cm for t in lookback):continue
-        fts=[t for t in fund_ts if t<=observed]
-        if not fts or observed-fts[-1]>9*3600*1000:continue
-        def oi_features(series):
-            a,b,c=(series[t] for t in lookback)
+        if not all(t in um for t in lookback):continue
+        pos=bisect.bisect_right(fund_ts,observed)-1
+        if pos<0 or observed-fund_ts[pos]>9*3600*1000:continue
+        def oi_features(vals):
+            a,b,c=vals
             return [math.log(a/b),math.log(a/c),math.log(a)]
-        x=oi_features(um)+oi_features(cm)+[funding[fts[-1]]]
+        # Missing OPTIONAL COIN-M observations must not exclude a fast impulse.
+        cm_values=[];stale=[]
+        for t in lookback:
+            k=bisect.bisect_right(cm_ts,t)-1
+            if k<0 or t-cm_ts[k]>3*STEP:
+                cm_values=[];stale=[];break
+            cm_values.append(cm[cm_ts[k]])
+            stale.append(t-cm_ts[k])
+        if len(cm_values)==3:
+            cmfeat=oi_features(cm_values)
+            age=float(stale[0]/(3*STEP));missing=0.0
+        else:
+            cmfeat=[0.0,0.0,0.0]
+            age=1.0;missing=1.0
+        x=oi_features([um[t] for t in lookback])+cmfeat+[funding[fund_ts[pos]],age,missing]
         if not np.all(np.isfinite(x)):raise ValueError("non-finite derivatives")
         mask.append(j);results.append(x)
     return np.asarray(mask,dtype=int),np.asarray(results,dtype=float)
@@ -123,6 +138,8 @@ def audit(spot_rows,output,futures_raw):
             "collection_provenance":external["collector"],
             "point_in_time_publication_proven":False,
             "minimum_feature_lag_seconds":300,
+            "optional_coinm_max_age_minutes":15,
+            "missing_coinm_never_eliminates_required_usdtm_row":True,
             "sample_counts":{"training":len(tr),"validation":len(va),"test":len(te)},
             "metrics":{},"episode":{}}
     trained={}
@@ -151,6 +168,8 @@ def audit(spot_rows,output,futures_raw):
         one["oi_usdtm_15m_change_pct"]=100*(math.exp(deriv[j,0])-1)
         one["oi_coinm_15m_change_pct"]=100*(math.exp(deriv[j,3])-1)
         one["funding"]=float(deriv[j,6])
+        one["coinm_staleness_ratio"]=float(deriv[j,7])
+        one["coinm_missing_flag"]=bool(deriv[j,8])
         report["episode"][hhmm]=one
     output.mkdir(parents=True,exist_ok=True)
     evidence={"um":um,"cm":cm,"funding":funding}

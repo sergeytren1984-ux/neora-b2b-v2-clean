@@ -131,8 +131,8 @@ def collect():
         if name not in state["raw_optional"]:continue
         try:
             value=compute(state["raw_optional"][name])
-            if name=="book_okx" and recorded-value["vendor_timestamp_ms"]>60_000:
-                raise ValueError("stale order book")
+            if name=="book_okx" and not (0<=recorded-value["vendor_timestamp_ms"]<=60_000):
+                raise ValueError("future or stale order book")
             observation["oi" if name=="oi_okx" else "book"]=value
         except Exception as e:
             state["optional_status"][name]={"state":"UNAVAILABLE_OR_STALE","reason":type(e).__name__}

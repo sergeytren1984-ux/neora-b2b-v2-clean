@@ -1,0 +1,53 @@
+name: BTC v7 research 15m point-in-time dispatch
+
+on:
+  schedule:
+    - cron: '4,19,34,49 * * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: btc-v7-research-dispatcher
+  cancel-in-progress: false
+
+jobs:
+  dispatch-one:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPOSITORY: ${{ github.repository }}
+    steps:
+      - name: Fire one no-backfill, GitHub-only research snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime as dt,json,os,urllib.request,urllib.parse
+          now=dt.datetime.now(dt.timezone.utc)
+          repo=os.environ["GH_REPOSITORY"]
+          branch="btc-predictive-vnext7-demand-price-otc-20261011"
+          wf="btc-v7-shadow-snapshot.yml"
+          api=f"https://api.github.com/repos/{repo}/actions/workflows/{wf}"
+          h={"Authorization":"Bearer "+os.environ["GH_TOKEN"],
+             "Accept":"application/vnd.github+json",
+             "X-GitHub-Api-Version":"2022-11-28",
+             "User-Agent":"btc-v7-github-only-research"}
+          for status in ("queued","in_progress"):
+              q=urllib.parse.urlencode({"branch":branch,"status":status,"per_page":15})
+              req=urllib.request.Request(api+"/runs?"+q,headers=h)
+              with urllib.request.urlopen(req,timeout=12) as f:d=json.load(f)
+              if d.get("workflow_runs"):
+                  print("V7_ALREADY_QUEUED_OR_RUNNING",status,now.isoformat(),flush=True)
+                  raise SystemExit(0)
+          data=json.dumps({"ref":branch}).encode()
+          req=urllib.request.Request(api+"/dispatches",data=data,
+                headers={**h,"Content-Type":"application/json"},method="POST")
+          with urllib.request.urlopen(req,timeout=15) as f:
+              if f.status!=204:raise RuntimeError("unexpected dispatch status "+str(f.status))
+          print("V7_SHADOW_DISPATCH_ACCEPTED",now.isoformat(),
+                "NOT_PROOF_OF_ACTUAL_SNAPSHOT_UNTIL_SIGNED_ARTIFACT",flush=True)
+          PY

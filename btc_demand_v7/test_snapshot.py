@@ -16,7 +16,7 @@ def test():
         else:raise AssertionError("stale/gapped candle accepted")
     s=spot_state(rows,anchor)
     assert s["15m_taker_buy_fraction"]==.6
-    data={"code":"0","data":[[str(anchor-900000+i*300000),str(3000000000*(1+.001*i)),"0"] for i in range(17)]}
+    data={"code":"0","data":[[str(anchor-5400000+i*300000),str(3000000000*(1+.001*i)),"0"] for i in range(19)]}
     # some values timestamp after cutoff are ignored
     state=open_interest_state(data,anchor)
     assert state["age_seconds"]==0

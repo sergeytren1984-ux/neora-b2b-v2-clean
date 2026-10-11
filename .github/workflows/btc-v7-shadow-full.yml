@@ -40,9 +40,9 @@ jobs:
             joblib==1.5.2 threadpoolctl==3.6.0
       - uses: actions/download-artifact@v4
         with:
-          name: btc-v7-research-only-9998379a68a446a8bc32d6ca8af009e59f8ebc8d
+          name: btc-v7-research-only-3d08e5a767f1848a9e10d6bea1ef939c2b77238a
           path: /tmp/btc-v7-frozen
-          run-id: 38169560095
+          run-id: 38169934478
           github-token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
       - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
@@ -61,8 +61,12 @@ jobs:
             --bundle audit.sigstore.json \
             --certificate-identity "$VERIFIED_TRAIN_IDENTITY" \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          cosign verify-blob spot_paired_validation_errors.json \
+            --bundle spot_paired_validation_errors.sigstore.json \
+            --certificate-identity "$VERIFIED_TRAIN_IDENTITY" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
           python -m json.tool spot_paired_validation_errors.json >/dev/null
-          echo VERIFIED_SOURCE_PIN_38169560095
+          echo VERIFIED_SOURCE_PIN_38169934478
       - name: Validate shadow release contracts
         run: |
           python -m py_compile btc_demand_v7/infer_live.py btc_demand_v7/live_snapshot.py

@@ -307,6 +307,23 @@ def _registration(root,head,branch,model_root):
     return protocol_rel,v
 
 
+def _prewarmed_anchor(head,now,target_anchor_utc=None):
+    anchor=nearest_closed_anchor(head,now)
+    if not target_anchor_utc:
+        return anchor
+    target=datetime.fromisoformat(target_anchor_utc.replace("Z","+00:00"))
+    if target.tzinfo is None or target.utcoffset()!=timedelta(0):
+        raise ValueError("prewarmed target must have an explicit UTC timezone")
+    target=target.astimezone(UTC)
+    if not _phase_valid(head,target):
+        raise ValueError("prewarmed target is off frozen phase")
+    if target>now:
+        raise RuntimeError("prewarmed target has not yet started")
+    if target!=anchor:
+        raise RuntimeError("prewarmed forecast attempted a different anchor")
+    return target
+
+
 def forecast(head,branch,model_root,target_anchor_utc=None):
     if os.environ.get("GITHUB_EVENT_NAME")!="workflow_dispatch":
         raise RuntimeError("production forecast requires workflow_dispatch")
@@ -315,19 +332,7 @@ def forecast(head,branch,model_root,target_anchor_utc=None):
         protocol_rel,v=_registration(root,head,branch,model_root)
         start=datetime.fromisoformat(v.start_utc)
         now=datetime.now(UTC)
-        anchor=nearest_closed_anchor(head,now)
-        if target_anchor_utc:
-            target=datetime.fromisoformat(target_anchor_utc.replace("Z","+00:00"))
-            if target.tzinfo is None or target.utcoffset()!=timedelta(0):
-                raise ValueError("prewarmed target must have an explicit UTC timezone")
-            target=target.astimezone(UTC)
-            if not _phase_valid(head,target):
-                raise ValueError("prewarmed target is off frozen phase")
-            if target>now:
-                raise RuntimeError("prewarmed target has not yet started")
-            if target!=anchor:
-                raise RuntimeError("prewarmed forecast attempted a different anchor")
-            anchor=target
+        anchor=_prewarmed_anchor(head,now,target_anchor_utc)
         if anchor<start:
             return {"status":"PRESTART_NO_FORECAST","head":head}
         deadline=anchor+timedelta(

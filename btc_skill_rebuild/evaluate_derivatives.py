@@ -151,7 +151,8 @@ def audit(spot_rows,output):
     evidence={"um":um,"cm":cm,"funding":funding}
     raw=json.dumps(evidence,sort_keys=True,separators=(",",":")).encode()
     report["raw_derivatives_sha256"]=hashlib.sha256(raw).hexdigest()
-    with gzip.open(output/"raw_derivatives.json.gz","wb",mtime=0) as f:f.write(raw)
+    with (output/"raw_derivatives.json.gz").open("wb") as f:
+        with gzip.GzipFile(fileobj=f,mode="wb",mtime=0) as z:z.write(raw)
     (output/"incremental_report.json").write_text(json.dumps(report,ensure_ascii=False,indent=2,sort_keys=True)+"\n")
     print("BTC_VNEXT6_INCREMENTAL_OI_REPORT",json.dumps(report,ensure_ascii=False,sort_keys=True),flush=True)
     return report

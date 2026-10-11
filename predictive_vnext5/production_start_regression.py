@@ -8,10 +8,11 @@ matches all three values.
 from __future__ import annotations
 
 import os
+from datetime import datetime, timezone, timedelta
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from predictive_vnext5.production_journal import _assert_current_signer_matches_registration
+from predictive_vnext5.production_journal import _assert_current_signer_matches_registration, _prewarmed_anchor
 from predictive_vnext5.verified_evidence import VerifiedEvidence
 
 SHA="4678c5529fa3c23e7d9f91c0a7eab7e03424ada7"
@@ -57,7 +58,25 @@ def main():
         verified,{**good,"GITHUB_SHA":"0"*40},
         "SHA differs",
     )
-    print("VNEXT5R43_PRODUCTION_START_BINDING_REGRESSION_PASS")
+    now=datetime(2026,10,12,0,1,tzinfo=timezone.utc)
+    target="2026-10-12T00:00:00Z"
+    assert _prewarmed_anchor("1h",now,target)==datetime(2026,10,12,0,0,tzinfo=timezone.utc)
+    for bad in ("2026-10-12T01:00:00Z","2026-10-11T23:00:00Z","2026-10-12T00:01:00Z","2026-10-12T00:00:00+03:00","2026-10-12T00:00:00"):
+        try:
+            _prewarmed_anchor("1h",now,bad)
+        except (ValueError,RuntimeError):
+            pass
+        else:
+            raise AssertionError("prewarmed anchor drift accepted: "+bad)
+    # A slot issued after its deadline may never shift to the next anchor.
+    late=now+timedelta(hours=1)
+    try:
+        _prewarmed_anchor("1h",late,target)
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("stale reserved target drifted into a later slot")
+    print("VNEXT5R44_EXACT_ANCHOR_PREWARM_REGRESSION_PASS")
 
 
 if __name__=="__main__":

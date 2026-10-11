@@ -40,7 +40,7 @@ jobs:
       - name: Reject syntactically invalid source and test index invariants
         run: |
           python -m py_compile btc_skill_rebuild/evaluate.py
-          python btc_skill_rebuild/test_audit.py
+          python -m btc_skill_rebuild.test_audit
       - name: Fetch closed 5m market data and evaluate chronologically
         run: |
           python btc_skill_rebuild/evaluate.py --out /tmp/btc-vnext6-audit

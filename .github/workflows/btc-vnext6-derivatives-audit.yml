@@ -5,6 +5,7 @@ on:
     branches: [btc-predictive-vnext6-skill-rebuild-20261011]
     paths:
       - btc_skill_rebuild/evaluate_derivatives.py
+      - btc_skill_rebuild/raw/oi_funding_20260914_20261011.json.gz
       - .github/workflows/btc-vnext6-derivatives-audit.yml
   workflow_dispatch: {}
 
@@ -62,6 +63,7 @@ jobs:
         run: |
           python -m btc_skill_rebuild.evaluate_derivatives \
             --spot-raw /tmp/spot-rnd-audit/raw_5m_closed_klines.json.gz \
+            --futures-raw btc_skill_rebuild/raw/oi_funding_20260914_20261011.json.gz \
             --out /tmp/derivatives-rnd-audit
       - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
         with:

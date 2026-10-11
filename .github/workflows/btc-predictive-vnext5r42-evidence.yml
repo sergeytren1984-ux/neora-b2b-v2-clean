@@ -1,9 +1,9 @@
-name: BTC predictive vNext5R4.3 signed evidence authority
+name: BTC predictive vNext5R4.4 signed evidence and prewarm authority
 
 on:
   push:
     branches:
-      - btc-predictive-vnext5r43-production-start-remediation-20261009
+      - btc-predictive-vnext5r44-hourly-prewarm-20261011
     paths:
       - 'predictive_vnext5/**'
       - '.github/workflows/btc-predictive-vnext5r42-evidence.yml'
@@ -34,6 +34,10 @@ on:
         description: 'Future UTC phase for register only'
         required: false
         type: string
+      target_anchor_utc:
+        description: 'Exact next UTC hour reserved for a prewarmed 1h forecast; empty for standard actions'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -41,7 +45,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: btc-predictive-vnext5r43-signed-evidence-${{ inputs.head || 'all' }}
+  group: btc-predictive-vnext5r44-signed-evidence-${{ inputs.head || 'all' }}
   cancel-in-progress: false
 
 env:
@@ -254,6 +258,32 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           run-id: 37746080651
+      - name: Prewarm runner and await exactly the pre-registered anchor
+        if: inputs.action == 'forecast' && inputs.target_anchor_utc != ''
+        env:
+          VNEXT5_TARGET_ANCHOR_UTC: ${{ inputs.target_anchor_utc }}
+          VNEXT5_HEAD: ${{ inputs.head }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime as dt,os,time
+          raw=os.environ["VNEXT5_TARGET_ANCHOR_UTC"]
+          target=dt.datetime.fromisoformat(raw.replace("Z","+00:00"))
+          if target.utcoffset()!=dt.timedelta(0) or target.minute or target.second or target.microsecond:
+              raise ValueError("prewarm requires exact full UTC anchor")
+          if os.environ["VNEXT5_HEAD"]!="1h":
+              raise ValueError("prewarm only enabled for hour horizon")
+          now=dt.datetime.now(dt.timezone.utc)
+          wake=target+dt.timedelta(seconds=45)
+          duration=(wake-now).total_seconds()
+          if duration>3300:
+              raise ValueError("target too far in the future")
+          print("PREWARM_READY",now.isoformat(),"TARGET",target.isoformat(),"WAIT_SECONDS",round(max(0,duration)),flush=True)
+          if duration>0:
+              time.sleep(duration)
+          print("PREWARM_RELEASED",dt.datetime.now(dt.timezone.utc).isoformat(),flush=True)
+          PY
       - name: Execute frozen production journal action
         env:
           PYTHONPATH: .
@@ -261,6 +291,7 @@ jobs:
           VNEXT5_HEAD: ${{ inputs.head }}
           VNEXT5_EVIDENCE_BRANCH: ${{ inputs.evidence_branch }}
           VNEXT5_START_UTC: ${{ inputs.start_utc }}
+          VNEXT5_TARGET_ANCHOR_UTC: ${{ inputs.target_anchor_utc }}
           VNEXT5_MODEL_ROOT: /tmp/vnext5-model-authority
         run: |
           test -n "$VNEXT5_EVIDENCE_BRANCH"

@@ -1,9 +1,9 @@
-name: BTC predictive vNext5R4.3 trust-target freeze
+name: BTC predictive vNext5R4.4 1h prewarm freeze
 
 on:
   push:
     branches:
-      - btc-predictive-vnext5r43-production-start-remediation-20261009
+      - btc-predictive-vnext5r44-hourly-prewarm-20261011
     paths:
       - 'predictive_vnext5/**'
       - '.github/workflows/btc-predictive-vnext5r42-evidence.yml'
@@ -88,7 +88,7 @@ jobs:
       - name: Upload independent assembly
         uses: actions/upload-artifact@v4
         with:
-          name: vnext5r43-assembly-${{ matrix.builder }}
+          name: vnext5r44-assembly-${{ matrix.builder }}
           path: predictive_vnext5/build/**
           if-no-files-found: error
           retention-days: 90
@@ -115,12 +115,12 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: vnext5r43-assembly-a
+          name: vnext5r44-assembly-a
           path: /tmp/build-a
 
       - uses: actions/download-artifact@v4
         with:
-          name: vnext5r43-assembly-b
+          name: vnext5r44-assembly-b
           path: /tmp/build-b
 
       - name: Exact-byte compare independent assemblies
@@ -197,7 +197,7 @@ jobs:
       - name: Upload authoritative R4.3 freeze
         uses: actions/upload-artifact@v4
         with:
-          name: btc-vnext5r43-first-passage-freeze
+          name: btc-vnext5r44-first-passage-freeze
           path: |
             predictive_vnext5/reproducibility_contract.json
             predictive_vnext5/evaluation_supplement.json

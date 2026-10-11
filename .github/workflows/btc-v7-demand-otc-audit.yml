@@ -90,6 +90,7 @@ jobs:
           cosign sign-blob --yes --bundle /tmp/btc-v7-audit/audit.sigstore.json /tmp/btc-v7-audit/audit.json
           cosign sign-blob --yes --bundle /tmp/btc-v7-audit/candidate.sigstore.json /tmp/btc-v7-audit/candidate.joblib
           cosign sign-blob --yes --bundle /tmp/btc-v7-audit/paired_validation_errors.sigstore.json /tmp/btc-v7-audit/paired_validation_errors.json
+          cosign sign-blob --yes --bundle /tmp/btc-v7-audit/spot_paired_validation_errors.sigstore.json /tmp/btc-v7-audit/spot_paired_validation_errors.json
       - uses: actions/upload-artifact@v4
         with:
           name: btc-v7-research-only-${{ github.sha }}

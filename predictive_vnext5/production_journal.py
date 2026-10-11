@@ -307,7 +307,7 @@ def _registration(root,head,branch,model_root):
     return protocol_rel,v
 
 
-def forecast(head,branch,model_root):
+def forecast(head,branch,model_root,target_anchor_utc=None):
     if os.environ.get("GITHUB_EVENT_NAME")!="workflow_dispatch":
         raise RuntimeError("production forecast requires workflow_dispatch")
     root=_create_or_open_evidence_worktree(branch,os.environ["GITHUB_SHA"])
@@ -316,6 +316,18 @@ def forecast(head,branch,model_root):
         start=datetime.fromisoformat(v.start_utc)
         now=datetime.now(UTC)
         anchor=nearest_closed_anchor(head,now)
+        if target_anchor_utc:
+            target=datetime.fromisoformat(target_anchor_utc.replace("Z","+00:00"))
+            if target.tzinfo is None or target.utcoffset()!=timedelta(0):
+                raise ValueError("prewarmed target must have an explicit UTC timezone")
+            target=target.astimezone(UTC)
+            if not _phase_valid(head,target):
+                raise ValueError("prewarmed target is off frozen phase")
+            if target>now:
+                raise RuntimeError("prewarmed target has not yet started")
+            if target!=anchor:
+                raise RuntimeError("prewarmed forecast attempted a different anchor")
+            anchor=target
         if anchor<start:
             return {"status":"PRESTART_NO_FORECAST","head":head}
         deadline=anchor+timedelta(
@@ -475,7 +487,7 @@ def main():
         start=datetime.fromisoformat(raw.replace("Z","+00:00")).astimezone(UTC)
         out=register(head,branch,start,model_root)
     elif action=="forecast":
-        out=forecast(head,branch,model_root)
+        out=forecast(head,branch,model_root,os.environ.get("VNEXT5_TARGET_ANCHOR_UTC"))
     elif action=="outcome":
         out=outcome(head,branch,model_root)
     else:

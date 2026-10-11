@@ -93,7 +93,7 @@ def features(times, a):
     z=np.log(close)
     out=[]; idx=[]
     first=576 # 48h of pre-anchor closed data
-    for i in range(first,len(times)-EMBARGO_BARS):
+    for i in range(first,len(times)):
         f=[]
         for bars in (1,3,6,12,48,144):
             f.append(float(z[i]-z[i-bars]))
@@ -137,12 +137,19 @@ def build_targets(times,a,idx):
     result={}
     for name,h in PRICE_HEADS.items():
         steps=np.asarray([future_morning_bars(times[i]) for i in idx],dtype=int) if h is None else np.full(len(idx),h,dtype=int)
-        result["price_"+name]=np.log(close[idx+steps]/close[idx])
+        y=np.full(len(idx),np.nan)
+        ok=(idx+steps<len(close))
+        y[ok]=np.log(close[idx[ok]+steps[ok]]/close[idx[ok]])
+        result["price_"+name]=y
     for name,(h,move) in EVENTS.items():
-        peak=np.asarray([np.max(high[i+1:i+h+1])/close[i]-1 for i in idx])
-        trough=np.asarray([np.min(low[i+1:i+h+1])/close[i]-1 for i in idx])
-        result["large_up_"+name]=(peak>=move).astype(int)
-        result["large_down_"+name]=(trough<=-move).astype(int)
+        up=np.full(len(idx),np.nan)
+        down=np.full(len(idx),np.nan)
+        for j,i in enumerate(idx):
+            if i+h>=len(close): continue
+            up[j]=float(np.max(high[i+1:i+h+1])/close[i]-1>=move)
+            down[j]=float(np.min(low[i+1:i+h+1])/close[i]-1<=-move)
+        result["large_up_"+name]=up
+        result["large_down_"+name]=down
     return result
 
 def splits(times,idx):
@@ -207,17 +214,18 @@ def audit(rows,outdir:pathlib.Path):
     for target in PRICE_HEADS:
         name="price_"+target
         y=labels[name]
+        tr_h=tr[np.isfinite(y[tr])];va_h=va[np.isfinite(y[va])];te_h=te[np.isfinite(y[te])]
         model=HistGradientBoostingRegressor(
             loss="squared_error",learning_rate=0.035,max_iter=135,
             max_leaf_nodes=12,min_samples_leaf=105,l2_regularization=7.0,
             random_state=SEED)
-        model.fit(x[tr],y[tr])
-        # Validation-only shrinkage to prevent overfit; choose from a fixed 5-point grid.
-        vpred=model.predict(x[va]);v_actual=c[va]*np.exp(y[va])
-        shrink=min((0,0.25,0.5,0.75,1),key=lambda g:float(np.mean(np.abs(c[va]*np.exp(g*vpred)-v_actual))))
-        tp=model.predict(x[te])*shrink
-        actual=c[te]*np.exp(y[te]);pred=c[te]*np.exp(tp)
-        metrics=regression_metrics(actual,pred,c[te])
+        model.fit(x[tr_h],y[tr_h])
+        # Validation-only shrinkage; choose from a fixed 5-point grid.
+        vpred=model.predict(x[va_h]);v_actual=c[va_h]*np.exp(y[va_h])
+        shrink=min((0,0.25,0.5,0.75,1),key=lambda g:float(np.mean(np.abs(c[va_h]*np.exp(g*vpred)-v_actual))))
+        tp=model.predict(x[te_h])*shrink
+        actual=c[te_h]*np.exp(y[te_h]);pred=c[te_h]*np.exp(tp)
+        metrics=regression_metrics(actual,pred,c[te_h])
         metrics["validation_selected_shrinkage"]=shrink
         metrics["beats_persistence"]=metrics["model_mae_gain_usdt"]>0
         report["prices"][target]=metrics
@@ -226,26 +234,27 @@ def audit(rows,outdir:pathlib.Path):
         for side in ("up","down"):
             name=f"large_{side}_{target}"
             y=labels[name]
-            if np.sum(y[tr])<30 or np.sum(y[tr])==len(tr):
-                report["events"][name]={"status":"INSUFFICIENT_TRAINING_EVENTS","train_positives":int(np.sum(y[tr]))}
+            tr_h=tr[np.isfinite(y[tr])];va_h=va[np.isfinite(y[va])];te_h=te[np.isfinite(y[te])]
+            if np.sum(y[tr_h])<30 or np.sum(y[tr_h])==len(tr_h):
+                report["events"][name]={"status":"INSUFFICIENT_TRAINING_EVENTS","train_positives":int(np.sum(y[tr_h]))}
                 continue
             model=HistGradientBoostingClassifier(
                 learning_rate=0.035,max_iter=130,max_leaf_nodes=10,
                 min_samples_leaf=120,l2_regularization=10.0,
                 random_state=SEED)
-            model.fit(x[tr],y[tr])
-            raw_va=np.clip(model.predict_proba(x[va])[:,1],1e-5,1-1e-5)
-            raw_te=np.clip(model.predict_proba(x[te])[:,1],1e-5,1-1e-5)
+            model.fit(x[tr_h],y[tr_h])
+            raw_va=np.clip(model.predict_proba(x[va_h])[:,1],1e-5,1-1e-5)
+            raw_te=np.clip(model.predict_proba(x[te_h])[:,1],1e-5,1-1e-5)
             # Calibration uses validation labels only; fixed regularization and no test tuning.
             calibration=LogisticRegression(C=0.25,random_state=SEED)
-            calibration.fit(np.log(raw_va/(1-raw_va)).reshape(-1,1),y[va])
+            calibration.fit(np.log(raw_va/(1-raw_va)).reshape(-1,1),y[va_h])
             pv=calibration.predict_proba(np.log(raw_va/(1-raw_va)).reshape(-1,1))[:,1]
             pt=calibration.predict_proba(np.log(raw_te/(1-raw_te)).reshape(-1,1))[:,1]
-            d=classification_metrics(y[te],pt)
+            d=classification_metrics(y[te_h],pt)
             # Rank top <= 2 hourly-sampled alerts/day on validation, no test tuning.
-            val_hour=(times[idx[va]]%(3600*1000))==(55*60*1000) # close at UTC hour (bar begins :55)
-            test_hour=(times[idx[te]]%(3600*1000))==(55*60*1000)
-            vh=pv[val_hour]; th=pt[test_hour]; yh=y[te][test_hour]
+            val_hour=(times[idx[va_h]]%(3600*1000))==(55*60*1000) # close at UTC hour (bar begins :55)
+            test_hour=(times[idx[te_h]]%(3600*1000))==(55*60*1000)
+            vh=pv[val_hour]; th=pt[test_hour]; yh=y[te_h][test_hour]
             limit=float(np.quantile(vh,1-2/24)) if len(vh)>0 else 1.0
             alarm=th>=limit
             d.update({"validation_alert_threshold":limit,
@@ -272,7 +281,7 @@ def audit(rows,outdir:pathlib.Path):
                 m,cal=models[name]
                 p=float(np.clip(m.predict_proba(x[j:j+1])[0,1],1e-5,1-1e-5))
                 event[name+"_prob"]=float(cal.predict_proba([[math.log(p/(1-p))]])[0,1])
-                event[name+"_observed"]=int(labels[name][j])
+                event[name+"_observed"]=int(labels[name][j]) if np.isfinite(labels[name][j]) else None
                 event[name+"_alert_threshold"]=report["events"][name]["validation_alert_threshold"]
         report["episode_2026_10_11"][hhmm]=event
     raw=json.dumps(rows,separators=(",",":")).encode()

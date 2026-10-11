@@ -4,7 +4,9 @@ on:
   push:
     branches: [btc-predictive-vnext7-demand-price-otc-20261011]
     paths:
-      - btc_demand_v7/**
+      - btc_demand_v7/train.py
+      - btc_demand_v7/otc_decision.py
+      - btc_demand_v7/test_regressions.py
       - .github/workflows/btc-v7-demand-otc-audit.yml
   workflow_dispatch: {}
 

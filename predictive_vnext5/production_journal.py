@@ -355,7 +355,9 @@ def forecast(head,branch,model_root,target_anchor_utc=None):
                 "trading_authority":False,
             })
             _publish(root,branch,events_dir,missed)
-            return {"status":"SLOT_MISSED","head":head,"slot":slot}
+            raise RuntimeError(
+                "NO_TIMELY_FORECAST: signed SLOT_MISSED preserved for "+head+" "+slot
+            )
 
         raw,values=fetch_forecast_raw(head,anchor,model_root)
         rawdir=root/f"predictive_vnext5_{head}_raw"/slot[:8]

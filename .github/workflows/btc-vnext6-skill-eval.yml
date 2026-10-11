@@ -4,7 +4,8 @@ on:
   push:
     branches: [btc-predictive-vnext6-skill-rebuild-20261011]
     paths:
-      - btc_skill_rebuild/**
+      - btc_skill_rebuild/evaluate.py
+      - btc_skill_rebuild/test_audit.py
       - .github/workflows/btc-vnext6-skill-eval.yml
   workflow_dispatch: {}
 

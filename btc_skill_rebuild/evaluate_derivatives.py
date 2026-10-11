@@ -94,13 +94,16 @@ def fit_eval(x,y,tr,va,te):
     stats=classification_metrics(y[te],prob)
     return {"stats":stats,"model":model,"cal":cal}
 
-def audit(spot_rows,output):
+def audit(spot_rows,output,futures_raw):
     times,a=build_arrays(spot_rows)
     idx,base=features(times,a)
     labels=build_targets(times,a,idx)
-    um=get_oi(BASE_FAPI,"/futures/data/openInterestHist",{"symbol":"BTCUSDT"})
-    cm=get_oi(BASE_DAPI,"/futures/data/openInterestHist",{"pair":"BTCUSD","contractType":"PERPETUAL"})
-    funding=get_funding()
+    with gzip.open(futures_raw,"rt") as f:external=json.load(f)
+    if external.get("schema")!="btc-vnext6-historical-futures-mac-collector-v1":
+        raise ValueError("unexpected historical futures raw provenance")
+    um={int(k):float(v) for k,v in external["um"].items()}
+    cm={int(k):float(v) for k,v in external["cm"].items()}
+    funding={int(k):float(v) for k,v in external["funding"].items()}
     ix,deriv=aligned_derivatives(times,idx,um,cm,funding)
     anchor=times[idx[ix]]+STEP
     va_ms=int(VAL_START.timestamp()*1000)
@@ -117,6 +120,8 @@ def audit(spot_rows,output):
             "source_um":"Binance USD-M 5m OI sumOpenInterestValue",
             "source_cm":"Binance COIN-M perpetual 5m OI sumOpenInterestValue",
             "source_funding":"Binance USD-M fundingRate settlement history",
+            "collection_provenance":external["collector"],
+            "point_in_time_publication_proven":False,
             "minimum_feature_lag_seconds":300,
             "sample_counts":{"training":len(tr),"validation":len(va),"test":len(te)},
             "metrics":{},"episode":{}}
@@ -158,8 +163,8 @@ def audit(spot_rows,output):
     return report
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument("--spot-raw",required=True);p.add_argument("--out",required=True)
+    p=argparse.ArgumentParser();p.add_argument("--spot-raw",required=True);p.add_argument("--out",required=True);p.add_argument("--futures-raw",required=True)
     a=p.parse_args()
     with gzip.open(a.spot_raw,"rt") as f:rows=json.load(f)
-    audit(rows,pathlib.Path(a.out))
+    audit(rows,pathlib.Path(a.out),a.futures_raw)
 if __name__=="__main__":main()

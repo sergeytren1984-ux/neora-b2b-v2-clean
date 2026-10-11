@@ -1,4 +1,4 @@
-name: BTC vNext5R4.3 prospective clock
+name: BTC prospective clock R4.3 + R4.4 reserved 1h
 
 on:
   workflow_dispatch:
@@ -36,6 +36,9 @@ jobs:
       EVIDENCE_WORKFLOW: btc-predictive-vnext5r42-evidence.yml
       EVIDENCE_PREFIX: btc-vnext5r43-prospective-20261010-
       CLOCK_WORKFLOW: btc-vnext5r42-prospective-cycle.yml
+      H1_START_UTC: '2026-10-12T00:00:00+00:00'
+      H1_APPROVED_REF: btc-predictive-vnext5r44-hourly-prewarm-20261011
+      H1_EVIDENCE_BRANCH: btc-vnext5r44-prospective-20261012-1h
     steps:
       - name: Run prospective production clock
         shell: bash
@@ -56,6 +59,9 @@ jobs:
           prefix=os.environ["EVIDENCE_PREFIX"]
           clock_workflow=os.environ["CLOCK_WORKFLOW"]
           start=dt.datetime.fromisoformat(os.environ["START_UTC"])
+          h1_start=dt.datetime.fromisoformat(os.environ["H1_START_UTC"])
+          h1_approved_ref=os.environ["H1_APPROVED_REF"]
+          h1_evidence_branch=os.environ["H1_EVIDENCE_BRANCH"]
           dry=os.environ["DRY_RUN"].lower()=="true"
           one=os.environ["ONE_SHOT"].lower()=="true"
 
@@ -75,16 +81,25 @@ jobs:
                   if res.status!=204:
                       raise RuntimeError(f"dispatch HTTP {res.status}")
 
-          def dispatch_action(action,head,now):
+          def dispatch_action(action,head,now,target_anchor=None):
+              use_r44=(head=="1h" and
+                       (target_anchor is not None and target_anchor>=h1_start or
+                        target_anchor is None and now>=h1_start))
+              branch=h1_evidence_branch if use_r44 else prefix+head
+              ref=h1_approved_ref if use_r44 else approved_ref
               inputs={
                   "action":action,
                   "head":head,
-                  "evidence_branch":prefix+head,
+                  "evidence_branch":branch,
                   "start_utc":"",
               }
-              print("DISPATCH_PLAN",now.isoformat(),action,head,inputs["evidence_branch"],flush=True)
+              if use_r44 and action=="forecast":
+                  if target_anchor is None:
+                      raise RuntimeError("R4.4 reserved forecast requires exact target anchor")
+                  inputs["target_anchor_utc"]=target_anchor.isoformat()
+              print("DISPATCH_PLAN",now.isoformat(),action,head,branch,"ref",ref,"target",target_anchor,flush=True)
               if not dry:
-                  api_dispatch(evidence_workflow,approved_ref,inputs)
+                  api_dispatch(evidence_workflow,ref,inputs)
                   print("DISPATCH_ACCEPTED",action,head,flush=True)
 
           def next_event(now):
@@ -94,6 +109,7 @@ jobs:
                   anchor=base+dt.timedelta(hours=h)
                   candidates.append((anchor+dt.timedelta(minutes=2),"forecast",anchor))
                   candidates.append((anchor+dt.timedelta(minutes=25),"outcome",anchor))
+                  candidates.append((anchor+dt.timedelta(minutes=31),"prewarm",anchor+dt.timedelta(hours=1)))
               return min(x for x in candidates if x[0]>now)
 
           if one:
@@ -129,8 +145,14 @@ jobs:
               if now<start:
                   print("PRESTART_EVENT_SKIPPED",kind,anchor.isoformat(),now.isoformat(),flush=True)
                   continue
+              if kind=="prewarm":
+                  if anchor>=h1_start:
+                      dispatch_action("forecast","1h",now,target_anchor=anchor)
+                  else:
+                      print("PREWARM_BEFORE_R44_START_SKIPPED",anchor.isoformat(),flush=True)
+                  continue
               if kind=="forecast":
-                  heads=["1h"]
+                  heads=["1h"] if anchor<h1_start else []
                   if anchor.hour%4==0:
                       heads.append("4h")
                   if anchor.hour==0:

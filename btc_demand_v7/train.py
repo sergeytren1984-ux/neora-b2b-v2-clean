@@ -144,8 +144,10 @@ def run(spot_raw,minute_raw,futures_raw,outdir):
     minute_indices=np.asarray([i for i,_ in matched],dtype=int)
     deriv_indices=np.asarray([j for _,j in matched],dtype=int)
     close=a[idx[full_indices],3]
-    x=np.hstack([base[full_indices],m_feat[minute_indices],d_feat[deriv_indices]])
-    if not np.all(np.isfinite(x)):raise ValueError("invalid feature data")
+    x_spot=np.hstack([base[full_indices],m_feat[minute_indices]])
+    x=np.hstack([x_spot,d_feat[deriv_indices]])
+    if not np.all(np.isfinite(x)) or not np.all(np.isfinite(x_spot)):
+        raise ValueError("invalid feature data")
     anchors=times[idx[full_indices]]+STEP
     labels=label_arrays(times,a,idx[full_indices])
     tr,va,te=splits(anchors)
@@ -160,9 +162,23 @@ def run(spot_raw,minute_raw,futures_raw,outdir):
         fit,d=train_alert(x,labels[event],anchors,tr,va,te)
         alert_fits[event]=fit
         alert_scores[event]=d
+    # A separate deployable spot+1m numerical variant preserves exact source
+    # parity on GitHub when Binance Futures endpoints return HTTP 451.
+    # OKX positioning is reported separately, NEVER inserted into Binance OI slots.
+    spot_price_fits={};spot_price_scores={};spot_alert_fits={};spot_alert_scores={}
+    for horizon in PRICE_TARGETS:
+        m,shrink,score,_,_=train_price(x_spot,labels[horizon],close,tr,va,te)
+        spot_price_fits[horizon]=(m,shrink)
+        spot_price_scores[horizon]=score
+    for event in EVENT_TARGETS:
+        fit,score=train_alert(x_spot,labels[event],anchors,tr,va,te)
+        spot_alert_fits[event]=fit
+        spot_alert_scores[event]=score
     # paired residuals require a common validation anchor across 6 horizons:
     val_all=va[np.all(np.column_stack([np.isfinite(labels[h][va]) for h in PRICE_TARGETS]),axis=1)]
     paired={h:(labels[h][val_all] - price_fits[h][1]*price_fits[h][0].predict(x[val_all])).tolist()
+            for h in PRICE_TARGETS}
+    spot_paired={h:(labels[h][val_all] - spot_price_fits[h][1]*spot_price_fits[h][0].predict(x_spot[val_all])).tolist()
             for h in PRICE_TARGETS}
     episode={}
     for hm in ("15:30","15:45","16:00"):
@@ -196,18 +212,29 @@ def run(spot_raw,minute_raw,futures_raw,outdir):
         "holdout_start_utc":TEST_START.isoformat(),
         "embargo_hours":24,"train_n":len(tr),"valid_n":len(va),"test_n":len(te),
         "features_count":int(x.shape[1]),
+        "spot_live_feature_count":int(x_spot.shape[1]),
         "price_metrics":metrics,"event_metrics":alert_scores,
+        "spot_1m_only_deployable_shadow":{"price_metrics":spot_price_scores,"event_metrics":spot_alert_scores,
+             "trading_authority":False,"source":"closed Binance spot 5m+1m ONLY"},
         "otc_holdout":otc_realized_backtest(times,idx[full_indices],a[:,3],te,labels),
         "oct11_incident_diagnostic_only":episode,
     }
     outdir=pathlib.Path(outdir);outdir.mkdir(parents=True,exist_ok=True)
     (outdir/"audit.json").write_text(json.dumps(report,ensure_ascii=False,sort_keys=True,indent=2)+"\n")
     dump({"price_models":price_fits,"alert_models":alert_fits,
-          "features_count":int(x.shape[1]),"schema":"btc-v7-candidate-not-production"},
+          "features_count":int(x.shape[1]),
+          "spot_live_price_models":spot_price_fits,
+          "spot_live_alert_models":spot_alert_fits,
+          "spot_live_feature_count":int(x_spot.shape[1]),
+          "schema":"btc-v7-candidate-not-production",
+          "trading_authority":False,
+          "numeric_oi_input_authorized_on_github":False},
           outdir/"candidate.joblib",compress=3)
     (outdir/"paired_validation_errors.json").write_text(json.dumps(paired,sort_keys=True)+"\n")
+    (outdir/"spot_paired_validation_errors.json").write_text(json.dumps(spot_paired,sort_keys=True)+"\n")
     print("BTC_V7_AUDIT_RESULT",json.dumps({
         "price_mae_gain":{k:round(v["model_mae_gain_usdt"],3) for k,v in metrics.items()},
+        "spot_live_mae_gain":{k:round(v["model_mae_gain_usdt"],3) for k,v in spot_price_scores.items()},
         "event":{k:{"brier":v.get("brier"),"baseline_brier":v.get("baseline_brier"),
                     "pr_auc":v.get("pr_auc"),"precision":v.get("alert_precision"),
                     "alarms_per_day":v.get("alerts_per_day")} for k,v in alert_scores.items()},

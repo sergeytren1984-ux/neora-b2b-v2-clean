@@ -11,6 +11,8 @@ on:
       - btc_demand_v7/otc_execution.py
       - btc_demand_v7/test_event_semantics.py
       - btc_demand_v7/test_otc_execution.py
+      - btc_demand_v7/demand_change.py
+      - btc_demand_v7/test_demand_change.py
       - .github/workflows/btc-v7r2-prospective.yml
   workflow_dispatch:
     inputs:
@@ -72,6 +74,7 @@ jobs:
           python -m btc_demand_v7.test_prospective
           python -m btc_demand_v7.test_event_semantics
           python -m btc_demand_v7.test_otc_execution
+          python -m btc_demand_v7.test_demand_change
           python -m btc_demand_v7.test_regressions
           python -m btc_demand_v7.test_snapshot
       - name: Download one already frozen, signed, unproven research model

@@ -14,7 +14,7 @@ import subprocess,tempfile,urllib.parse,urllib.request,concurrent.futures,time
 from btc_demand_v7.shadow_contract_v3 import (
     grid,accept_slot,slot_id,digest,canonical,
     future_anchor,future_due,HORIZONS,status_grid,
-    BRANCH,EVIDENCE,R2_EVIDENCE,SOURCE_R2_SHA,SOURCE_R2_GRID_SHA,SCHEDULER_BLOB_SHA)
+    BRANCH,EVIDENCE,SCHEDULER_BLOB_SHA)
 from btc_demand_v7.demand_change_v2 import (
     advance,state_zero,source_hash,BASELINE_COUNT)
 from btc_demand_v7.event_semantics import first_passage
@@ -25,7 +25,6 @@ from btc_demand_v7.release_guard import certificate_source_sha
 REPO="sergeytren1984-ux/neora-b2b-v2-clean"
 ISSUER="https://token.actions.githubusercontent.com"
 SELF_ID=f"https://github.com/{REPO}/.github/workflows/btc-v7r3-signed-demand-shadow.yml@refs/heads/{BRANCH}"
-R2_ID=f"https://github.com/{REPO}/.github/workflows/btc-v7r2-prospective.yml@refs/heads/btc-v7r2-prospective-contour-20261012"
 
 def utcnow():return dt.datetime.now(dt.timezone.utc)
 
@@ -82,18 +81,6 @@ def publish(ledger,message):
             if retry==3:raise
             time.sleep(2**retry)
 
-def source_r2(r2_root):
-    p=r2_root/"schedule.json"
-    assert p.exists()
-    registered=json.loads(p.read_text())
-    if registered["model_source_sha"]!=SOURCE_R2_SHA or digest(registered)!=SOURCE_R2_GRID_SHA:
-        raise RuntimeError("R2 upstream epoch not frozen at authorized source")
-    verify(p,R2_ID,SOURCE_R2_SHA)
-    freeze=r2_root/"frozen_config.json"
-    verify(freeze,R2_ID,SOURCE_R2_SHA)
-    if json.loads(freeze.read_text())["grid_sha256"]!=SOURCE_R2_GRID_SHA:
-        raise RuntimeError("R2 prospective freeze inconsistency")
-    return registered
 
 def scheduler_blob_sha():
     return run("gh","api",
@@ -123,7 +110,7 @@ def register(args):
         publish(ledger,"Freeze v7R3 stateful source, future decision deadlines and source lineage")
     print("BTC_V7R3_REGISTERED",json.dumps({
         "model_sha":reg["model_source_sha"],
-        "upstream_r2_sha":SOURCE_R2_SHA,
+        "direct_market_source":"Binance BTCUSDT spot1m/5m plus OKX OI/book; independent R4",
         "grid_sha":digest(reg),"slots":len(reg["due_slots"]),
         "first_due":reg["due_slots"][0]["anchor_utc"]},sort_keys=True))
 

@@ -56,6 +56,23 @@ jobs:
       - name: Signed public spot/OI/book input proof
         run: |
           cosign sign-blob --yes --bundle /tmp/v7r4-smoke/snapshot.sigstore.json /tmp/v7r4-smoke/snapshot.json
+      - name: Independently verify live raw Sigstore identity and transparency proof
+        run: |
+          cosign verify-blob /tmp/v7r4-smoke/snapshot.json \
+            --bundle /tmp/v7r4-smoke/snapshot.sigstore.json \
+            --certificate-identity "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-v7r4-source-smoke.yml@refs/heads/btc-v7r4-hardening-20261012" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          python - <<'PY'
+          import json,pathlib
+          from btc_demand_v7.release_guard import certificate_source_sha
+          bundle=pathlib.Path("/tmp/v7r4-smoke/snapshot.sigstore.json")
+          value=json.loads(bundle.read_text())
+          assert value["verificationMaterial"]["tlogEntries"]
+          assert any(x.get("inclusionProof") for x in value["verificationMaterial"]["tlogEntries"])
+          import os
+          assert certificate_source_sha(str(bundle))==os.environ["GITHUB_SHA"]
+          print("LIVE_DIRECT_SOURCE_COSIGN_REKOR_EXACT_SHA_VERIFIED")
+          PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: btc-v7r4-direct-live-smoke-${{ github.sha }}

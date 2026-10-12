@@ -7,7 +7,19 @@ def test():
     rows=[]
     for i in range(210):
         ts=t+i*period
-        rows.append([ts,"83000","83100","82950","83050","10",ts+period-1,"",200,"6"])
+        rows.append([ts,"83000","83100","82950","83050","10",ts+period-1,"830500",200,"6","498300","0"])
+    # New attacks: malformed 5m trades and individual book lot must fail.
+    import copy
+    poisoned=copy.deepcopy(rows)
+    poisoned[88][8]="NaN"
+    try:strict_closed(poisoned,period,t+210*period,200)
+    except ValueError:pass
+    else:raise AssertionError("NaN trade count accepted")
+    poisoned=copy.deepcopy(rows)
+    poisoned[88][8]="2.5"
+    try:strict_closed(poisoned,period,t+210*period,200)
+    except ValueError:pass
+    else:raise AssertionError("noninteger trade count accepted")
     anchor=t+210*period
     assert len(strict_closed(rows,period,anchor,200))==210
     for bad in (rows[:-1],rows[:200]+rows[201:]):
@@ -20,11 +32,22 @@ def test():
     # some values timestamp after cutoff are ignored
     state=open_interest_state(data,anchor)
     assert state["age_seconds"]==0
+    oi_gap={"code":"0","data":[r for r in data["data"] if int(r[0])!=anchor-900000]}
+    try:open_interest_state(oi_gap,anchor)
+    except ValueError:pass
+    else:raise AssertionError("30m OI substituted for exact 15m reference")
     try:open_interest_state(data,anchor+3600000)
     except ValueError:pass
     else:raise AssertionError("stale OI accepted")
     book={"code":"0","data":[{"ts":str(anchor),"bids":[["83000","50"]],"asks":[["83005","30"]]}]}
     assert liquidity_state(book)["top10_size_imbalance"]==.25
+    for bad_lots in ("-10","NaN"):
+        invalid_book={"code":"0","data":[{"ts":str(anchor),
+            "bids":[["83000",bad_lots],["82999","20"]],
+            "asks":[["83005","30"]]}]}
+        try:liquidity_state(invalid_book)
+        except ValueError:pass
+        else:raise AssertionError("invalid individual book lot accepted")
     book["data"][0]["asks"][0][0]="82999"
     try:liquidity_state(book)
     except ValueError:pass

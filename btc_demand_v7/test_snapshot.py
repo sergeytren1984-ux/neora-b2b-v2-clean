@@ -1,6 +1,6 @@
 from __future__ import annotations
 import datetime as dt
-from btc_demand_v7.live_snapshot import strict_closed,open_interest_state,liquidity_state,spot_state
+from btc_demand_v7.live_snapshot import strict_closed,open_interest_state,liquidity_state,spot_state,funding_state
 
 def test():
     period=60000;t=1800000000000
@@ -29,5 +29,25 @@ def test():
     try:liquidity_state(book)
     except ValueError:pass
     else:raise AssertionError("crossed book accepted")
+    event_ts=anchor
+    funding={"code":"0","data":[{"instId":"BTC-USDT-SWAP",
+             "ts":str(event_ts),"fundingTime":str(event_ts+8*3600*1000),
+             "fundingRate":"0.0001"}]}
+    assert funding_state(funding,anchor-1000,anchor+1000)["value"]==.0001
+    for change in ("wrong_symbol","future_time","stale_time","nan"):
+        import copy
+        bad=copy.deepcopy(funding)
+        e=bad["data"][0]
+        if change=="wrong_symbol":e["instId"]="ETH-USDT-SWAP"
+        if change=="future_time":e["ts"]=str(anchor+90000)
+        if change=="stale_time":e["ts"]=str(anchor-240000)
+        if change=="nan":e["fundingRate"]="NaN"
+        try:funding_state(bad,anchor-1000,anchor+1000)
+        except ValueError:pass
+        else:raise AssertionError("invalid funding observation accepted: "+change)
+    # Realistic book timestamp arrives after request_start but before response:
+    fresh=liquidity_state({"code":"0","data":[{"ts":str(anchor+565),
+        "bids":[["83000","50"]],"asks":[["83005","30"]]}]})
+    assert anchor+1000-fresh["vendor_timestamp_ms"]==435
     print("BTC_V7_POINT_IN_TIME_REQUIRED_OPTIONAL_NEGATIVE_TESTS_PASS")
 if __name__=="__main__":test()

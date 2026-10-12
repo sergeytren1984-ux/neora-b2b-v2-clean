@@ -20,8 +20,8 @@ def main():
         {"slot_id":"s6","direction":"UP_FIRST","touch_open_utc":iso(origin+timedelta(minutes=301))},
     ]
     ep=episodes_from_verified_barriers(observed)
-    assert len(ep)==3,ep
-    assert ep[0]["member_windows"]==3
+    assert len(ep)==2,ep
+    assert ep[0]["member_windows"]==4
     assert ep[1]["side"]=="DOWN_FIRST"
     eligible=[
         {"slot_id":"a1","side":"UP_FIRST","eligible":True,
@@ -30,7 +30,7 @@ def main():
          "public_delivery_utc":iso(origin+timedelta(minutes=10))},
     ]
     scored=report("1h",observed,eligible,full_due_count=42,missing_or_late_count=5)
-    assert scored["n_verified_nonoverlapping_episodes"]==3
+    assert scored["n_verified_nonoverlapping_episodes"]==2
     assert scored["n_verified_public_alerts"]==2
     assert scored["partial_coverage"] is True
     assert scored["prospective_skill_proven"] is False
@@ -42,6 +42,23 @@ def main():
     must_reject(lambda:report("1h",observed,eligible+eligible[:1],
                                full_due_count=42,missing_or_late_count=5))
     must_reject(lambda:episodes_from_verified_barriers(observed+observed[:1]))
+    # Overlapping first-touch windows 230 and 210 minutes apart form ONE
+    # independent pressure episode. Comparing to its first touch falsely
+    # splits the 440-minute third observation into a second episode.
+    chain=[{"slot_id":f"chain{n}","direction":"UP_FIRST",
+            "touch_open_utc":iso(origin+timedelta(minutes=t))}
+           for n,t in enumerate((0,230,440,720))]
+    clustered=episodes_from_verified_barriers(chain)
+    assert len(clustered)==2,clustered
+    assert clustered[0]["member_windows"]==3,clustered
+    assert clustered[0]["last_member_touch_utc"]==iso(origin+timedelta(minutes=440))
+    # One signed slot cannot claim both a winning UP and DOWN first touch.
+    must_reject(lambda:episodes_from_verified_barriers([
+        {"slot_id":"contradiction","direction":"UP_FIRST","touch_open_utc":iso(origin)},
+        {"slot_id":"contradiction","direction":"DOWN_FIRST","touch_open_utc":iso(origin+timedelta(minutes=1))}]))
+    must_reject(lambda:episodes_from_verified_barriers(chain,gap_minutes=0))
+    must_reject(lambda:report("1h",observed,eligible,full_due_count=4,missing_or_late_count=5))
+
     no_alert=report("4h",observed,[],full_due_count=10,missing_or_late_count=0)
     assert no_alert["conservative_lead_minutes"]["30"]["observed_alert_precision"] is None
     assert no_alert["conservative_lead_minutes"]["30"]["observed_episode_recall"]==0

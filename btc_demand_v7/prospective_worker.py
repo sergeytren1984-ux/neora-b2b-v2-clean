@@ -12,6 +12,7 @@ from btc_demand_v7.prospective_core import (
 from btc_demand_v7.release_guard import check as check_release,certificate_source_sha
 from btc_demand_v7.event_semantics import first_passage,BARRIERS
 from btc_demand_v7.demand_change import estimate as estimate_demand
+from btc_demand_v7.skill_metrics import prospective_skill
 
 REPO="sergeytren1984-ux/neora-b2b-v2-clean"
 SOURCE_BRANCH="btc-v7r2-prospective-contour-20261012"
@@ -68,6 +69,9 @@ def register(args):
     grid=registered_grid(args.start_utc,days=args.days,
         source_sha=os.environ["GITHUB_SHA"],created_at=timestamp,
         source_ref="refs/heads/"+SOURCE_BRANCH)
+    priors_raw=pathlib.Path("btc_demand_v7/frozen_train_priors.json").read_bytes()
+    if hashlib.sha256(priors_raw).hexdigest()!=grid["frozen_train_priors_sha256"]:
+        raise RuntimeError("TRAIN-only prior digest changed")
     with tempfile.TemporaryDirectory() as temp:
         repo=pathlib.Path(temp)/"repository";fetch_repo(repo,create=True)
         root=repo/"btc_v7r2_evidence"
@@ -196,6 +200,10 @@ def tick(args):
             raise RuntimeError("frozen registration integrity failure")
         if grid["model_source_sha"]!=os.environ["GITHUB_SHA"] or grid["model_source_ref"]!="refs/heads/"+SOURCE_BRANCH:
             raise RuntimeError("workflow source changed after freeze")
+        priors_raw=pathlib.Path("btc_demand_v7/frozen_train_priors.json").read_bytes()
+        if hashlib.sha256(priors_raw).hexdigest()!=grid["frozen_train_priors_sha256"]:
+            raise RuntimeError("untrusted change in TRAIN-only baseline prior")
+        priors=json.loads(priors_raw)
         current=now()
         slot=current.replace(minute=(current.minute//15)*15,second=0,microsecond=0)
         start=when(grid["start_utc"]);end=start+dt.timedelta(days=grid["days"])
@@ -250,6 +258,7 @@ def tick(args):
         resolved=[json.loads(x.read_text()) for x in (root/"slots").glob("*/outcome_*.json")] if (root/"slots").exists() else []
         barrier_events=[json.loads(x.read_text()) for x in (root/"slots").glob("*/barrier_*.json")] if (root/"slots").exists() else []
         scored=score_fixed_grid(grid,events,resolved,timestamp,barrier_events)
+        scored["independent_skill"]=prospective_skill(grid,events,resolved,barrier_events,priors)
         scored["github_run_id"]=os.environ["GITHUB_RUN_ID"]
         scored["model_source_sha"]=grid["model_source_sha"]
         signed(root/"scorecards",os.environ["GITHUB_RUN_ID"]+".json",scored)

@@ -110,11 +110,18 @@ def markup_robust_direction(spot_at_60,spot_at_120,*,
         return "BUY_NOW_ROBUSTLY_CHEAPER"
     return "NOT_ROBUST_TO_OTC_MARKUP"
 
-def independent_day_economic_evidence(outcomes:Sequence[dict],minimum_days=20):
-    if not outcomes:
+def independent_day_economic_evidence(outcomes:Sequence[dict],minimum_days=20,
+                                       expected_slot_ids:Sequence[str]|None=None):
+    # A full prospectively frozen opportunity grid is mandatory even for
+    # conditional quote score. A cherry-picked set of successful slots cannot
+    # be promoted by masquerading as 20 complete, independent UTC days.
+    if not outcomes and expected_slot_ids is None:
         return {"calendar_days":0,"resolved":0,"missing":0,
                 "conditional_quote_lower95_positive":False,
                 "verified_positive_economic_edge":False,"trading_authority":False}
+    registered=None if expected_slot_ids is None else set(expected_slot_ids)
+    if registered is not None and len(registered)!=len(expected_slot_ids):
+        raise ValueError("duplicated registered slot in fixed UTC due grid")
     days={}
     seen=set()
     missing=0
@@ -134,6 +141,10 @@ def independent_day_economic_evidence(outcomes:Sequence[dict],minimum_days=20):
         if not isfinite(delta):
             raise ValueError("nonfinite OTC difference")
         days.setdefault(day,[]).append(delta)
+    if registered is not None and not seen<=registered:
+        raise ValueError("outcomes outside predeclared opportunity grid")
+    missing_from_grid=(len(registered-seen) if registered is not None else 0)
+    missing+=missing_from_grid
     blocks=[mean(v) for _,v in sorted(days.items())]
     lower=(mean(blocks)-1.96*stdev(blocks)/sqrt(len(blocks))
            if len(blocks)>1 else None)
@@ -142,8 +153,10 @@ def independent_day_economic_evidence(outcomes:Sequence[dict],minimum_days=20):
             "mean_daily_incremental_btc_vs_buy_now":mean(blocks) if blocks else None,
             "descriptive_lower95_btc":lower,
             "claimed_operator_quotes_complete":claimed_operator_only and missing==0,
+            "predeclared_opportunity_grid_supplied":registered is not None,
+            "missing_entire_future_slots_from_grid":missing_from_grid,
             "conditional_quote_lower95_positive":bool(
-                len(blocks)>=minimum_days and missing==0 and
+                registered is not None and len(blocks)>=minimum_days and missing==0 and
                 claimed_operator_only and lower is not None and lower>0),
             # Dict inputs do NOT cryptographically authenticate operator receipts.
             # Even firm dual quotes are not two executed counterfactual orders.

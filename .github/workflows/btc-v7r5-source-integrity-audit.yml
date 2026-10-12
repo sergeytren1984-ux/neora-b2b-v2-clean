@@ -1,0 +1,87 @@
+name: BTC v7R5 independently rederive signed live Binance and OKX factor values
+
+on:
+  push:
+    branches: [btc-v7r5-live-cadence-reliability-20261012]
+    paths:
+      - btc_demand_v7/source_integrity_v5.py
+      - btc_demand_v7/test_source_integrity_v5.py
+      - .github/workflows/btc-v7r5-source-integrity-audit.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+
+jobs:
+  genuine-source-numerical-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PYTHONHASHSEED: '0'
+      BTC_V7R5_SIGNED_RAW_SNAPSHOT: /tmp/v7r5-real-market/snapshot.json
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - name: Python source numerical replay compiles
+        run: |
+          python -m py_compile btc_demand_v7/source_integrity_v5.py btc_demand_v7/test_source_integrity_v5.py
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: btc-v7r4-direct-live-smoke-ef2c5a705ace21e72f23793bef5b10a307867f3d
+          path: /tmp/v7r5-real-market
+          run-id: 38221774899
+          repository: ${{ github.repository }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: Verify original live market snapshot signature, source SHA and Rekor proof
+        run: |
+          set -euo pipefail
+          cosign verify-blob /tmp/v7r5-real-market/snapshot.json \
+            --bundle /tmp/v7r5-real-market/snapshot.sigstore.json \
+            --certificate-identity "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-v7r4-source-smoke.yml@refs/heads/btc-v7r4-hardening-20261012" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          python - <<'PY'
+          import json
+          from btc_demand_v7.release_guard import certificate_source_sha
+          path="/tmp/v7r5-real-market/snapshot.sigstore.json"
+          if certificate_source_sha(path)!="ef2c5a705ace21e72f23793bef5b10a307867f3d":
+              raise RuntimeError("tampered signed original market producer SHA")
+          bundle=json.load(open(path))
+          if not any(item.get("inclusionProof") for item in bundle["verificationMaterial"]["tlogEntries"]):
+              raise RuntimeError("missing Rekor inclusion proof")
+          print("BTC_V7R5_INDEPENDENT_SIGSTORE_OKX_BINANCE_SOURCE_VERIFIED")
+          PY
+      - name: Independently recompute authentic source values and reject ten fact mutations
+        run: |
+          python -m btc_demand_v7.test_source_integrity_v5
+      - name: Sign independent replay PASS or FAIL output, not model skill
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import datetime,json,os,pathlib
+          d={"schema":"btc-v7r5-numerical-raw-source-correspondence-v1",
+             "source_run":"38221774899",
+             "producer_sha":"ef2c5a705ace21e72f23793bef5b10a307867f3d",
+             "replayer_sha":os.environ["GITHUB_SHA"],
+             "all_tamper_attacks_rejected":True,
+             "verified_before_numeric_replay":True,
+             "trade_authority":False,"forecast_skill_proven":False}
+          pathlib.Path("/tmp/btc-v7r5-raw-numerical-verification.json").write_text(
+              json.dumps(d,sort_keys=True,separators=(",",":"))+"\n")
+          PY
+          cosign sign-blob --yes \
+            --bundle /tmp/btc-v7r5-raw-numerical-verification.sigstore.json \
+            /tmp/btc-v7r5-raw-numerical-verification.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: btc-v7r5-raw-factor-replay-${{ github.sha }}
+          path: /tmp/btc-v7r5-raw-numerical-verification*
+          if-no-files-found: error

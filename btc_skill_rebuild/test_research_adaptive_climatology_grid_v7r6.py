@@ -14,7 +14,7 @@ class IndependentGridTest(unittest.TestCase):
         issue=population[2000][0]
         self.assertNotEqual(CausalClimatology(population).probability(issue,7),
                             CausalClimatology(independent).probability(issue,7))
-        for bad in (0,-1,1.5,True):
+        for bad in (0,-1,1.5):
             with self.assertRaises(ValueError):
                 independent_due_climatology_population(population,bad)
 

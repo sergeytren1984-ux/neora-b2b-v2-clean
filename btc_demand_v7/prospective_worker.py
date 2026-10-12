@@ -10,6 +10,7 @@ from btc_demand_v7.prospective_core import (
  score_fixed_grid,sha256,canonical,when
 )
 from btc_demand_v7.release_guard import check as check_release,certificate_source_sha
+from btc_demand_v7.event_semantics import first_passage,BARRIERS
 
 REPO="sergeytren1984-ux/neora-b2b-v2-clean"
 SOURCE_BRANCH="btc-v7r2-prospective-contour-20261012"
@@ -88,7 +89,10 @@ def raw_closes(pending,ts):
     """Retrieve closed 1m vendor bars. Payload kept for signed audit."""
     if not pending:return {},[]
     last_closed=(int(ts.timestamp()*1000)//60000)*60000
-    first_target=min(int(x[2].timestamp()*1000) for x in pending)
+    first_target=min(
+        int(when(x[0]["slot_utc"]).timestamp()*1000)
+        if x[1].startswith("barrier_") else int(x[2].timestamp()*1000)
+        for x in pending)
     by={}
     cursor=last_closed-1
     for page in range(5):
@@ -106,7 +110,14 @@ def raw_closes(pending,ts):
             if t<=last_closed and int(row[0])+60000==t:by[t]=row
         cursor=int(rows[0][0])-1
         if cursor<first_target:break
-    targets={int(x[2].timestamp()*1000) for x in pending}
+    targets=set()
+    for f,head,due,path in pending:
+        end=int(due.timestamp()*1000)
+        if head.startswith("barrier_"):
+            start=int(when(f["slot_utc"]).timestamp()*1000)
+            targets.update(range(start+60000,end+60000,60000))
+        else:
+            targets.add(end)
     return by,[by[t] for t in sorted(targets) if t in by]
 
 def outcomes(root,grid,ts):
@@ -121,6 +132,11 @@ def outcomes(root,grid,ts):
             due=when(f["heads"][head]["target_utc"])
             if path.exists() or ts<due+dt.timedelta(minutes=2):continue
             pending.append((f,head,due,path))
+        for horizon,(minutes,fraction) in BARRIERS.items():
+            path=fpath.parent/("barrier_"+horizon+".json")
+            due=when(f["slot_utc"])+dt.timedelta(minutes=minutes)
+            if path.exists() or ts<due+dt.timedelta(minutes=2):continue
+            pending.append((f,"barrier_"+horizon,due,path))
     if not pending:return 0
     bars,selected=raw_closes(pending,ts)
     if not selected:return 0
@@ -133,16 +149,38 @@ def outcomes(root,grid,ts):
     verified=set()
     for f,head,due,path in pending:
         target=int(due.timestamp()*1000)
-        if target not in bars:continue
-        row=bars[target];o,hi,lo,c=map(float,[row[1],row[2],row[3],row[4]])
-        if not(0<lo<=min(o,c)<=max(o,c)<=hi):
-            raise RuntimeError("invalid vendor future OHLC")
         fpath=path.parent/"forecast.json"
-        if fpath not in verified:
-            verify(fpath,grid["model_source_sha"]);verified.add(fpath)
-        signed(path.parent,path.name,price_outcome(
-            grid,f,head,ts,c,raw_sha=digest))
-        completed+=1
+        if head.startswith("barrier_"):
+            horizon=head.removeprefix("barrier_")
+            minutes,threshold=BARRIERS[horizon]
+            start=int(when(f["slot_utc"]).timestamp()*1000)
+            stamps=range(start+60000,start+(minutes+1)*60000,60000)
+            if not all(t in bars for t in stamps):
+                continue
+            if fpath not in verified:
+                verify(fpath,grid["model_source_sha"]);verified.add(fpath)
+            result=first_passage(f["slot_utc"],f["spot_reference"],
+                                 [bars[t] for t in stamps],horizon)
+            event={"schema":"btc-v7r2-barrier-outcome-v1",
+                   "kind":"BARRIER_OUTCOME_RECORDED" if ts<=due+dt.timedelta(minutes=30)
+                          else "BARRIER_OUTCOME_LATE",
+                   "slot_id":f["slot_id"],"period":horizon,
+                   "due_utc":due.isoformat(),"recorded_utc":ts.isoformat(),
+                   "raw_market_sha256":digest,"forecast_sha256":sha256(f),
+                   "frozen_grid_sha256":sha256(grid),
+                   "result":result,"trading_authority":False}
+            signed(path.parent,path.name,event)
+            completed+=1
+        else:
+            if target not in bars:continue
+            row=bars[target];o,hi,lo,c=map(float,[row[1],row[2],row[3],row[4]])
+            if not(0<lo<=min(o,c)<=max(o,c)<=hi):
+                raise RuntimeError("invalid vendor future OHLC")
+            if fpath not in verified:
+                verify(fpath,grid["model_source_sha"]);verified.add(fpath)
+            signed(path.parent,path.name,price_outcome(
+                grid,f,head,ts,c,raw_sha=digest))
+            completed+=1
     return completed
 
 def tick(args):

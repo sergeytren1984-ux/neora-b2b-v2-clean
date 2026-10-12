@@ -1,0 +1,44 @@
+name: BTC v7R5 frozen signed due-grid watchdog and predeadline rescue
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+    - cron: '0,15,30,45 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - btc_v7r5_watchdog.py
+      - test_btc_v7r5_watchdog.py
+      - .github/workflows/btc-v7r5-watchdog.yml
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: btc-v7r5-readonly-due-watchdog
+  cancel-in-progress: false
+
+jobs:
+  audit-and-conditional-rescue:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - name: Assert immutable grid timing, and no fake signed completion
+        run: |
+          python3 -m py_compile btc_v7r5_watchdog.py
+          python3 -m test_btc_v7r5_watchdog
+      - name: Verify real signed evidence and rescue missing call ONLY before frozen deadline
+        run: |
+          python3 -m btc_v7r5_watchdog

@@ -97,38 +97,66 @@ def future_due(issued,horizon):
     if horizon not in HORIZONS:raise ValueError("unsupported event horizon")
     return future_anchor(issued)+timedelta(minutes=HORIZONS[horizon])
 
-def status_grid(reg,event_items,as_of):
+def status_grid(reg,event_items,as_of,deliveries=()):
+    """Frozen grid is sole denominator; signed DELIVERY, not claim, is clock."""
     now=when(as_of)
     observed={}
     for item in event_items:
         key=item["slot_id"]
         if key in observed:raise ValueError("duplicate signed state")
         observed[key]=item
-    scheduled={i["slot_id"]:i for i in reg["due_slots"]}
-    if not set(observed).issubset(scheduled):
+    known={i["slot_id"]:i for i in reg["due_slots"]}
+    if not set(observed).issubset(known):
         raise ValueError("unregistered extra evidence")
-    due=0;correct=0;missed=0;no_source=0;warming=0;invalid=0;alert=0
+    by_delivery={}
+    for item in deliveries:
+        key=item["slot_id"]
+        if key in by_delivery or key not in known:
+            raise ValueError("duplicate or unregistered delivery receipt")
+        by_delivery[key]=item
+    due=correct=missed=no_source=warming=invalid=alert=late_delivery=unconfirmed=0
+    by_day={}
     for item in reg["due_slots"]:
         if now<when(item["decision_window_close_utc"]):continue
         due+=1
         row=observed.get(item["slot_id"])
-        if row is None or row.get("status")=="MISSED_DEADLINE":missed+=1;continue
-        if row.get("status")=="MISSING_R2_SIGNED_INPUT":
+        if row is None or row.get("status")=="MISSED_DEADLINE":
+            missed+=1;continue
+        if row.get("status") in ("MISSING_R2_SIGNED_INPUT","WAITING_R2_SIGNED_SNAPSHOT"):
             no_source+=1;continue
         if row.get("status") in ("INSUFFICIENT_ASOF_HISTORY","NO_OPTIONAL_OI_BOOK",
                                  "STATEFUL_CHAIN_DISCONTINUITY"):
             warming+=1;continue
-        if row.get("status")=="SIGNED_STATE_PUBLISHED":
-            correct+=1
-            if row.get("diagnostic",{}).get("alert"):alert+=1
-        else:invalid+=1
-    return {"schema":"btc-v7r3-registered-slot-coverage-v1",
+        if row.get("status")!="SIGNED_STATE_PUBLISHED":
+            invalid+=1;continue
+        issued=when(row["issued_at_utc"])
+        if not when(item["decision_window_open_utc"])<=issued<=when(item["decision_window_close_utc"]):
+            late_delivery+=1;continue
+        delivery=by_delivery.get(item["slot_id"])
+        if delivery is None:
+            unconfirmed+=1;continue
+        if delivery.get("source_signal_sha256")!=digest(row):
+            raise ValueError("delivery receipt not tied to immutable signal")
+        publication=when(delivery["public_delivery_utc"])
+        if publication<issued or publication>when(item["decision_window_close_utc"]):
+            late_delivery+=1;continue
+        correct+=1
+        if row.get("diagnostic",{}).get("alert"):
+            alert+=1
+            day=publication.date().isoformat()
+            by_day[day]=by_day.get(day,0)+1
+    return {"schema":"btc-v7r3-registered-slot-coverage-v2",
             "as_of_utc":now.isoformat(),"grid_sha256":digest(reg),
             "due":due,"on_time_signed_model_state":correct,
             "missing_slots":missed,"missing_r2_source":no_source,
             "warming_or_missing_factors":warming,"invalid":invalid,
+            "late_public_deliveries":late_delivery,
+            "delivery_unconfirmed":unconfirmed,
             "signed_pre_move_alerts":alert,
+            "public_alerts_per_utc_day":by_day,
+            "global_daily_budget_violated":any(n>reg["max_raw_alerts_per_utc_day"] for n in by_day.values()),
             "admission_ready":False,"trading_authority":False}
+
 
 def early_lead_report(warnings_with_outcomes):
     levels={k:{"correct_earlier":0,"false_alert":0} for k in MIN_LEAD_LEVELS}

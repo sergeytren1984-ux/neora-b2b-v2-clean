@@ -42,7 +42,7 @@ def test():
                     "row":[1,"83000","83001","82999","83000","1",2]}
         first=base+dt.timedelta(minutes=15*32)
         received=first+dt.timedelta(minutes=10,seconds=15)
-        with patch.object(worker,"verify",lambda *x:None),patch.object(worker,"write",mock_signed),patch.object(worker,"last_close_before_issuance",mock_close),patch.object(worker,"utcnow",lambda:received),patch.object(worker,"market_collect",mock_direct_collect),patch.object(worker,"historic_snapshots",mock_prior_signed_history):
+        with patch.object(worker,"verify",lambda *x:None),patch.object(worker,"write",mock_signed),patch.object(worker,"last_close_before_issuance",mock_close),patch.object(worker,"utcnow",lambda:received),patch.object(worker,"market_collect",mock_direct_collect),patch.object(worker,"rederive",lambda _:{"pressure_factor_ready":True}),patch.object(worker,"historic_snapshots",mock_prior_signed_history):
             status=worker.current_slot_signal(root,reg,received)
         assert status=="SIGNED_STATE_PUBLISHED",status
         firstevent=json.loads((root/"slots"/slot_id(first)/"signal.json").read_text())
@@ -52,7 +52,7 @@ def test():
         assert firstevent["reference_spot"]==83000.
         received=first+dt.timedelta(minutes=25,seconds=15)
         second=first+dt.timedelta(minutes=15)
-        with patch.object(worker,"verify",lambda *x:None),patch.object(worker,"write",mock_signed),patch.object(worker,"last_close_before_issuance",mock_close),patch.object(worker,"utcnow",lambda:received),patch.object(worker,"market_collect",mock_direct_collect),patch.object(worker,"historic_snapshots",mock_prior_signed_history):
+        with patch.object(worker,"verify",lambda *x:None),patch.object(worker,"write",mock_signed),patch.object(worker,"last_close_before_issuance",mock_close),patch.object(worker,"utcnow",lambda:received),patch.object(worker,"market_collect",mock_direct_collect),patch.object(worker,"rederive",lambda _:{"pressure_factor_ready":True}),patch.object(worker,"historic_snapshots",mock_prior_signed_history):
             status=worker.current_slot_signal(root,reg,received)
         assert status=="SIGNED_STATE_PUBLISHED",status
         nextstate=json.loads((root/"slots"/slot_id(second)/"signal.json").read_text())
@@ -69,7 +69,7 @@ def test():
         def moved_close():
             result=mock_close()
             return {**result,"spot":84000.}
-        with patch.object(worker,"verify",lambda *x:None),patch.object(worker,"write",mock_signed),patch.object(worker,"last_close_before_issuance",moved_close),patch.object(worker,"utcnow",lambda:received),patch.object(worker,"market_collect",mock_direct_collect),patch.object(worker,"historic_snapshots",mock_prior_signed_history):
+        with patch.object(worker,"verify",lambda *x:None),patch.object(worker,"write",mock_signed),patch.object(worker,"last_close_before_issuance",moved_close),patch.object(worker,"utcnow",lambda:received),patch.object(worker,"market_collect",mock_direct_collect),patch.object(worker,"rederive",lambda _:{"pressure_factor_ready":True}),patch.object(worker,"historic_snapshots",mock_prior_signed_history):
             third_status=worker.current_slot_signal(root,reg,received)
         assert third_status=="SIGNED_STATE_PUBLISHED"
         third_event=json.loads((root/"slots"/slot_id(third)/"signal.json").read_text())

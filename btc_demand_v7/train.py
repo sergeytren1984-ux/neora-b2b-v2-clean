@@ -199,7 +199,7 @@ def run(spot_raw,minute_raw,futures_raw,outdir):
                             "observed":float(labels[ev][j]) if np.isfinite(labels[ev][j]) else None}
         episode[hm]={"anchor_utc":now.isoformat(),"reference_price":float(close[j]),
                      "prices":prices,"alerts":event_prob,
-                     "otc_sensitivity":compare(now,prices,paired_errors=paired)}
+                     "otc_sensitivity":compare(now,prices,prediction_anchor=now,paired_errors=paired)}
     report={
         "schema":"btc-demand-price-otc-v7-chronological-evaluation-v1",
         "status":"EXPERIMENTAL_REJECT_UNLESS_PROSPECTIVE_PROVEN",

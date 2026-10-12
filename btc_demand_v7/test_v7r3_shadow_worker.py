@@ -76,18 +76,23 @@ def test():
         # Actual future outcomes are computed only from complete CLOSED
         # minute bars collected post-due; never use source-time inference.
         recorded={}
-        start=when(firstevent["exact_future_first_full_minute_utc"])
+        completed=when(firstevent["issued_at_utc"])+dt.timedelta(seconds=25)
+        ref_end=int(completed.timestamp()*1000)//60000*60000
+        recorded[ref_end]=[ref_end-60000,"83000","83001","82999","83000","1",ref_end-1]
+        start=worker.future_anchor(completed)
         for i in range(1,300):
             end=start+dt.timedelta(minutes=i)
             ms=int(end.timestamp()*1000)
             recorded[ms]=[ms-60000,"83000",str(84000 if i==20 else 83100),"82900","83030","1",ms-1]
         def closed_bars(pending,now):return recorded
         at=first+dt.timedelta(hours=4,minutes=55)
-        with patch.object(worker,"verify",lambda *x:None),patch.object(worker,"write",mock_signed),patch.object(worker,"get_future_raw",closed_bars):
+        with patch.object(worker,"verify",lambda *x:None),patch.object(worker,"write",mock_signed),patch.object(worker,"get_future_raw",closed_bars),patch.object(worker,"verified_delivery_time",lambda *x:completed):
             n=worker.resolve_outcomes(root,at)
         assert n>=2,n
         outcomes=list((root/"slots"/slot_id(first)).glob("outcome_*.json"))
         assert any(json.loads(p.read_text())["barrier_result"]["direction"]=="UP_FIRST" for p in outcomes)
+        assert all(json.loads(p.read_text())["public_delivery_utc"]==completed.isoformat() for p in outcomes)
+        assert all(json.loads(p.read_text())["reference_price_after_delivery_not_model_feature"] is True for p in outcomes)
         scored=worker.score(reg,root,at+dt.timedelta(hours=1))
         assert scored["forward_outcomes"]["1h"]["due"]>=1
         assert scored["coverage"]["missing_slots"]>0

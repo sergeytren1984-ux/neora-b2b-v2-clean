@@ -11,6 +11,8 @@ on:
       - btc_demand_v7/test_demand_change_v2.py
       - btc_demand_v7/test_shadow_contract_v3.py
       - btc_demand_v7/test_v7r4_adversarial.py
+      - btc_demand_v7/episode_quality_v4.py
+      - btc_demand_v7/test_episode_quality_v4.py
       - btc_demand_v7/prospective_core.py
       - btc_demand_v7/live_snapshot.py
       - btc_demand_v7/infer_live.py
@@ -74,6 +76,7 @@ jobs:
           python -m btc_demand_v7.test_v7r3_shadow_worker
           python -m btc_demand_v7.test_event_semantics
           python -m btc_demand_v7.test_v7r4_adversarial
+          python -m btc_demand_v7.test_episode_quality_v4
           python -m btc_demand_v7.test_snapshot
           python -m btc_demand_v7.test_prospective
           python -m btc_demand_v7.test_otc_execution

@@ -143,7 +143,7 @@ def rederive(snapshot):
         "anchor_utc":anchor.isoformat(),
         "retrieved_at_utc":retrieved.isoformat(),
         "spot_reference_price":fresh["reference_spot"],
-        "contemporary_3m_taker_buy_fraction":computed["recent3_taker_buy_fraction"] if False else micro["recent3_taker_buy_fraction"],
+        "contemporary_3m_taker_buy_fraction":micro["recent3_taker_buy_fraction"],
         "oi_available":observed["oi_okx"] is not None,
         "book_available":observed["book_okx"] is not None,
         "funding_available":observed["funding_okx"] is not None,

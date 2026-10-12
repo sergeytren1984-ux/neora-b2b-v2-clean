@@ -69,9 +69,14 @@ def issue(snapshot,model,paired,audit,now=None):
         fit,cal,threshold=bundle
         raw=float(np.clip(fit.predict_proba(x)[0,1],1e-6,1-1e-6))
         prob=float(cal.predict_proba([[math.log(raw/(1-raw))]])[0,1])
+        scores=audit["spot_1m_only_deployable_shadow"]["event_metrics"].get(label,{})
+        valid=(scores.get("passes_both") is True and
+               (scores.get("alert_precision") or 0)>0 and
+               (scores.get("recall_of_hourly_positive_windows") or 0)>0)
         alert[label]={"estimate":prob,"historical_validation_threshold":float(threshold),
-                      "watch":bool(prob>=threshold),
-                      "status":"EXPERIMENTAL_NOT_CALIBRATED_FOR_TRADING"}
+                      "watch":bool(prob>=threshold) if valid else False,
+                      "raw_threshold_crossed":bool(prob>=threshold),
+                      "status":"EXPERIMENTAL_NOT_CALIBRATED_FOR_TRADING" if valid else "NOT_VALIDATED_NO_ACTIONABLE_WARNING"}
     # All action calculations use quote time, not the 5m anchor time.
     decision=compare(issued,preds,prediction_anchor=anchor,paired_errors=paired,demonstrated_price_skill=False)
     return {
@@ -93,7 +98,7 @@ def issue(snapshot,model,paired,audit,now=None):
         "otc_comparison":decision,
         "operator_quote_is_executable":False,
         "no_auto_trade":True,
-        "model_skill_status":"NOT_PROVEN",
+        "model_skill_status":"NOT_PROVEN_BASELINE_ONLY",
     }
 
 def main():

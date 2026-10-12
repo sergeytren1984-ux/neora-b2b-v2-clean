@@ -95,11 +95,12 @@ def alert_score(sample,model,shrink,val):
     strengths=sorted(max(predict(model,x,shrink)[:2]) for _,x,_ in val)
     val_days=len({dt.datetime.fromtimestamp(ts/1000,UTC).date() for ts,_,_ in val})
     target=max(1,len(val)/val_days)
-    threshold=strengths[int((1-min(1.,1/target))*(len(strengths)-1))]
+    threshold=(strengths[int((1-min(1.,1/target))*(len(strengths)-1))]
+               if strengths[-1]-strengths[0]>1e-12 else None)
     seen=set();issued=hits=opposite=0
     for t,x,y in sample:
         pp=predict(model,x,shrink)
-        if max(pp[:2])<threshold:continue
+        if threshold is None or max(pp[:2])<=threshold:continue
         day=dt.datetime.fromtimestamp(t/1000,UTC).date().isoformat()
         if day in seen:continue
         seen.add(day);issued+=1

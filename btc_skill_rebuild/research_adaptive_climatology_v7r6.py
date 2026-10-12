@@ -3,7 +3,9 @@
 A 1h/4h/24h 3-way endpoint model is only useful if it beats a plausible
 NO-SKILL competitor. In addition to its own frozen TRAIN prior, compare
 against trailing 7d or 14d class frequencies (with Laplace smoothing).
-All reference labels must be MATURE strictly BEFORE current issue time;\nrolling class rates use only horizon-spaced UTC due slots, not overlapping\n15m endpoint labels.
+All reference labels must be MATURE strictly BEFORE current issue time;
+rolling class rates use only horizon-spaced UTC due slots, not overlapping
+15m endpoint labels.
 Which baseline is used is selected ONLY from the prior validation set.
 No frozen production modification. Already-seen historical replay !=
 prospective forecast evidence.
@@ -162,14 +164,17 @@ def evaluate(raw):
     return {'schema':'btc-v7r6-three-horizon-causal-adaptive-climatology-benchmark-v1',
       'all_forward_blocks_already_known_historical':True,
       'competing_baselines':'frozen train prior or prior 7/14 calendar-day matured rolling class frequencies',
-      'source_asof_maturity_enforced':True,\n      'same_timestamp_maturity_excluded':True,\n      'rolling_climatology_uses_nonoverlapping_horizon_UTC_grid':True,
+      'source_asof_maturity_enforced':True,
+      'same_timestamp_maturity_excluded':True,
+      'rolling_climatology_uses_nonoverlapping_horizon_UTC_grid':True,
       'no_production_changes':True,'trading_authority':False,'horizons':results}
 
 def run(raw_path,out):
     with gzip.open(raw_path,'rt') as f:raw=json.load(f)
     result=evaluate(raw)
     result['raw_gzip_sha256']=hashlib.sha256(pathlib.Path(raw_path).read_bytes()).hexdigest()
-    pathlib.Path(out).write_text(json.dumps(result,sort_keys=True,indent=2,allow_nan=False)+'\n')
+    pathlib.Path(out).write_text(json.dumps(result,sort_keys=True,indent=2,allow_nan=False)+'
+')
     for h,r in result['horizons'].items():
         print('ADAPTIVE_REFERENCE_SUMMARY',h,r['weeks_winning_over_selected_matured_baseline'],
               'wins of',r['complete_forward_weeks'],'fully mature weeks',flush=True)

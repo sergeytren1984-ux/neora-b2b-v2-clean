@@ -20,9 +20,16 @@ def episodes_from_verified_barriers(verified_events, *,gap_minutes=GAP_MINUTES):
     if not isinstance(gap_minutes,int) or gap_minutes<=0:
         raise ValueError("cluster gap must be positive whole minutes")
     inputs=[]
+    seen_slots=set()
     for e in verified_events:
+        sid=e["slot_id"]
+        if sid in seen_slots:
+            raise ValueError("duplicate verified slot, even when first touch absent")
+        seen_slots.add(sid)
         side=e["direction"]
         if side in ("NEITHER","AMBIGUOUS_SAME_MINUTE"):
+            if e.get("touch_open_utc") is not None:
+                raise ValueError("no valid first-touch time for neither/ambiguous outcome")
             continue
         if side not in ("UP_FIRST","DOWN_FIRST"):
             raise ValueError("unknown verified barrier direction")
@@ -32,18 +39,17 @@ def episodes_from_verified_barriers(verified_events, *,gap_minutes=GAP_MINUTES):
         inputs.append((touch,side,e["slot_id"]))
     inputs.sort()
     items=[]
-    seen=set()
     for touch,side,sid in inputs:
-        if sid in seen:raise ValueError("duplicate signed slot, including conflicting directions")
-        seen.add(sid)
         last=next((x for x in reversed(items) if x["side"]==side),None)
         if last is not None and touch-when(last["last_member_touch_utc"])<timedelta(minutes=gap_minutes):
             last["member_windows"]+=1
             last["last_member_touch_utc"]=touch.isoformat()
+            last["members"].append({"slot_id":sid,"touch_open_utc":touch.isoformat()})
             continue
         items.append({"side":side,"first_touch_utc":touch.isoformat(),
                       "last_member_touch_utc":touch.isoformat(),
-                      "member_windows":1})
+                      "member_windows":1,
+                      "members":[{"slot_id":sid,"touch_open_utc":touch.isoformat()}]})
     return sorted(items,key=lambda x:x["first_touch_utc"])
 
 def report(horizon, verified_outcomes, verified_alerts, *,full_due_count,
@@ -52,9 +58,10 @@ def report(horizon, verified_outcomes, verified_alerts, *,full_due_count,
     minutes={"1h":60,"4h":240}[horizon]
     if (not isinstance(full_due_count,int) or not isinstance(missing_or_late_count,int)
         or full_due_count<0 or not 0<=missing_or_late_count<=full_due_count
-        or len(verified_outcomes)>full_due_count):
-        raise ValueError("invalid fixed-grid denominators")
+        or len(verified_outcomes)+missing_or_late_count!=full_due_count):
+        raise ValueError("full mature grid mismatch: every resolved NEITHER also counts")
     episodes=episodes_from_verified_barriers(verified_outcomes)
+    outcome_index={e["slot_id"]:e for e in verified_outcomes}
     unique_alerts={}
     for a in verified_alerts:
         sid=a["slot_id"]
@@ -64,22 +71,25 @@ def report(horizon, verified_outcomes, verified_alerts, *,full_due_count,
     alerts=list(unique_alerts.values())
     by_lead={}
     for cutoff in LEAD_THRESHOLDS:
-        matched_episodes=0
-        for event in episodes:
-            time=when(event["first_touch_utc"])
-            candidates=[a for a in alerts
-                if a.get("eligible") is True
-                and a["side"]==event["side"]
-                and cutoff<=(time-when(a["public_delivery_utc"])).total_seconds()/60<=minutes]
-            if candidates:matched_episodes+=1
-        matched_alerts=0
+        # An event is a cluster of overlapping forecasts, but an alert may
+        # ONLY match the verified first touch of its OWN frozen slot. A nearby
+        # same-side event with a different price barrier is not evidence.
+        matched_slots=set()
         for alert in alerts:
+            if alert.get("eligible") is not True:
+                continue
+            result=outcome_index.get(alert["slot_id"])
+            if result is None or result["direction"]!=alert["side"]:
+                continue
+            if result["direction"] not in ("UP_FIRST","DOWN_FIRST"):
+                continue
             issued=when(alert["public_delivery_utc"])
-            if alert.get("eligible") is not True:continue
-            if any(e["side"]==alert["side"] and
-                   cutoff<=(when(e["first_touch_utc"])-issued).total_seconds()/60<=minutes
-                   for e in episodes):
-                matched_alerts+=1
+            lead=(when(result["touch_open_utc"])-issued).total_seconds()/60
+            if cutoff<=lead<=minutes:
+                matched_slots.add(alert["slot_id"])
+        matched_alerts=len(matched_slots)
+        matched_episodes=sum(any(m["slot_id"] in matched_slots
+                                 for m in ep["members"]) for ep in episodes)
         by_lead[str(cutoff)]={
             "verified_distinct_episodes_matched":matched_episodes,
             "verified_alerts_matched":matched_alerts,
@@ -91,6 +101,10 @@ def report(horizon, verified_outcomes, verified_alerts, *,full_due_count,
             "horizon":horizon,
             "n_verified_nonoverlapping_episodes":len(episodes),
             "n_verified_public_alerts":len(alerts),
+            "n_verified_resolved_including_neither":len(verified_outcomes),
+            "n_dedicated_unmatched_due":missing_or_late_count,
+            "alert_matching":"exact_forecast_slot_id_only_no_cross_window_credit",
+            "otc_60min_lead_unattainable_within_1h_event_horizon":horizon=="1h",
             "n_frozen_grid_due":int(full_due_count),
             "n_missing_or_late":int(missing_or_late_count),
             "partial_coverage":bool(missing_or_late_count),
@@ -100,3 +114,5 @@ def report(horizon, verified_outcomes, verified_alerts, *,full_due_count,
             "conservative_lead_minutes":by_lead,
             "prospective_skill_proven":False,
             "trading_authority":False}
+
+[executed on device: MacBook-Air-Sergey.local (ec25f5e8-4047-48da-b895-a85c27d563ae)]

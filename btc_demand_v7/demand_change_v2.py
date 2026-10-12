@@ -22,6 +22,7 @@ from statistics import median
 import hashlib
 import json
 import math
+from btc_demand_v7.live_snapshot import strict_closed
 
 UTC = timezone.utc
 SCHEMA = "btc-v7r3-causal-pressure-state-v1"
@@ -68,18 +69,44 @@ def feature(snapshot):
         if begin > end or end > int(at.timestamp()*1000):
             raise ValueError("future HTTP observation response time")
     oi = obs["oi"];book = obs["book"]
+    micro=obs.get("microflow")
+    bars=snapshot.get("microflow_rows")
+    if not isinstance(micro,dict) or not isinstance(bars,list):
+        return at,None,"MISSING_CURRENT_3M_TAKER_FLOW"
+    timestamp_close=int(micro["vendor_close_ms"])
+    timestamp_received=int(micro["response_received_ms"])
+    if not(int(micro["request_started_ms"])<=timestamp_received
+           and timestamp_close<=timestamp_received<=int(at.timestamp()*1000)
+           and timestamp_received-timestamp_close<=120000):
+        raise ValueError("out-of-time microflow receipt")
+    last=strict_closed(bars,60000,timestamp_close,6)
+    if len(last)!=6 or len(last)!=len(bars):
+        raise ValueError("noncanonical microflow raw 1m grid")
+    v3=sum(float(row[5]) for row in last[-3:])
+    vprev=sum(float(row[5]) for row in last[:3])
+    if v3<=0 or vprev<=0:
+        raise ValueError("no 3m/previous3m trade volume")
+    micro_buy=sum(float(row[9]) for row in last[-3:])/v3
+    micro_ratio=v3/vprev
+    if (not math.isclose(micro_buy,float(micro["recent3_taker_buy_fraction"]),rel_tol=1e-11,abs_tol=1e-9)
+        or not math.isclose(micro_ratio,float(micro["recent3_volume_vs_prior3"]),rel_tol=1e-11,abs_tol=1e-9)
+        or not math.isclose(float(micro["price_last_closed_1m"]),float(last[-1][4]),rel_tol=0,abs_tol=1e-8)):
+        raise ValueError("forged signed contemporary microflow observation")
     raw = (
         float(obs["15m_taker_buy_fraction"]),
+        micro_buy,
         float(book["top10_size_imbalance"]),
         float(obs["15m_volume_vs_previous_1h_quarter"]),
+        micro_ratio,
         float(oi["oi_change_15m_pct"]),
         float(book["spread_bps"]),
         float(obs["15m_price_change_pct"]),
     )
     if not all(math.isfinite(v) for v in raw):
         return at, None, "NONFINITE_FACTOR"
-    taker,book_imb,vol_ratio,oi_pct,spread_bps,price_pct = raw
-    if not (0<=taker<=1 and -1<=book_imb<=1 and vol_ratio>0
+    taker,micro_taker,book_imb,vol_ratio,micro_vol_ratio,oi_pct,spread_bps,price_pct = raw
+    if not (0<=taker<=1 and 0<=micro_taker<=1 and -1<=book_imb<=1
+            and vol_ratio>0 and micro_vol_ratio>0
             and spread_bps>=0 and spread_bps<300):
         return at, None, "OUT_OF_RANGE_FACTOR"
     oi_ts = int(oi["vendor_observation_ms"]);book_ts = int(book["vendor_timestamp_ms"])
@@ -89,7 +116,9 @@ def feature(snapshot):
         return at, None, "STALE_OR_FUTURE_OPTIONAL_FACTOR"
     # Buying/selling pressure and intensity are separate. Positive OI can be
     # new longs or new shorts; it never carries directional sign itself.
-    vector = (2*taker-1, book_imb, math.log(vol_ratio), oi_pct, spread_bps)
+    vector = (2*taker-1, 2*micro_taker-1, book_imb,
+              math.log(vol_ratio), math.log(micro_vol_ratio),
+              oi_pct, spread_bps)
     return at, vector, ("ALREADY_MOVED" if abs(price_pct) >= MAX_ADMISSIBLE_PRICE_MOVE_PCT else "PRE_MOVE")
 
 def zscore(history, value):
@@ -176,9 +205,12 @@ def advance(state, history, observation, *,issued_utc=None,
     if state["last_receipt_utc"] is not None and timestamp(state["last_receipt_utc"])!=previous_time[-1]:
         raise ValueError("state receipt does not match signed history")
     zs=[zscore([h[j] for h in prior_features],cur[j]) for j in range(len(cur))]
-    flow_z,book_z,volume_z,oi_z,spread_z=zs
-    directional = 0.7*flow_z + 0.7*book_z
-    participation = min(1.5, 0.30*max(0,volume_z)+0.15*max(0,oi_z))
+    flow_z,micro_z,book_z,volume_z,micro_volume_z,oi_z,spread_z=zs
+    # Contemporary 3m buy pressure is available BEFORE the forecast, and
+    # leads the older full 15m candle in detecting demand transitions.
+    directional = 0.30*flow_z + 0.85*micro_z + 0.65*book_z
+    participation = min(1.5, 0.20*max(0,volume_z)
+                       +0.25*max(0,micro_volume_z)+0.15*max(0,oi_z))
     # This is *signed* interaction, not raw direction of OI growth.
     pressure=directional + math.copysign(participation, directional) if directional else 0.0
     # Penalize both directions for abnormally wide, adverse execution spreads.
@@ -230,8 +262,10 @@ def advance(state, history, observation, *,issued_utc=None,
         "previous_snapshot_sha256":state["last_snapshot_sha256"],
         "previous_state_sequence":state["sequence"],
         "state_sequence":next_state["sequence"],
-        "z_taker":flow_z, "z_book":book_z, "z_volume":volume_z,
-        "z_oi":oi_z, "z_spread":spread_z,
+        "z_taker_15m":flow_z,"z_current_taker_3m":micro_z,
+        "z_book":book_z,"z_volume_15m":volume_z,
+        "z_micro_volume_3m":micro_volume_z,
+        "z_oi":oi_z,"z_spread":spread_z,
         "pressure":pressure,"up_cusum":up,"down_cusum":down,
         "status":status,"warning_side":side if eligible else None,
         "watch":max(up,down)>=WATCH_LEVEL,

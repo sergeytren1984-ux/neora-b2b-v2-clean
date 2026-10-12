@@ -175,8 +175,7 @@ def run(raw_path,out):
     with gzip.open(raw_path,'rt') as f:raw=json.load(f)
     result=evaluate(raw)
     result['raw_gzip_sha256']=hashlib.sha256(pathlib.Path(raw_path).read_bytes()).hexdigest()
-    pathlib.Path(out).write_text(json.dumps(result,sort_keys=True,indent=2,allow_nan=False)+'
-')
+    pathlib.Path(out).write_text(json.dumps(result,sort_keys=True,indent=2,allow_nan=False)+'\n')
     for h,r in result['horizons'].items():
         print('ADAPTIVE_REFERENCE_SUMMARY',h,r['weeks_winning_over_selected_matured_baseline'],
               'wins of',r['complete_forward_weeks'],'fully mature weeks',flush=True)

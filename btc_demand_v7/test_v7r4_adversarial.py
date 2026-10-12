@@ -159,8 +159,9 @@ def warmup_to_first_live_pressure():
     # then second event must retain the prior CUSUM.
     from btc_demand_v7.test_demand_change_v2 import snap
     from btc_demand_v7.demand_change_v2 import state_zero
-    reg=grid(START,START-timedelta(hours=4),"a"*40,days=1)
-    first=START+timedelta(minutes=32*15)
+    initial=datetime(2026,10,14,tzinfo=UTC)
+    reg=grid(initial,initial-timedelta(hours=4),"a"*40,days=1)
+    first=initial+timedelta(minutes=32*15)
     sample=snap(32,direction=1)
     def signed(root,name,obj):
         p=pathlib.Path(root)/name;p.parent.mkdir(parents=True,exist_ok=True)

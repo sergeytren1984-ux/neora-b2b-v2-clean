@@ -1,0 +1,99 @@
+name: BTC v7R6 freeze causal paired-pressure shadow before future epoch
+
+on:
+  push:
+    branches: [btc-v7r6-paired-shadow-research-20261012]
+    paths:
+      - .github/workflows/btc-v7r6-paired-shadow-freeze.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  freeze-paired-research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - name: Reject relative-pressure inversion and cross-slot false wins
+        run: |
+          python -m py_compile btc_demand_v7/demand_change_v2.py btc_demand_v7/episode_quality_v4.py btc_demand_v7/v7r3_shadow_worker.py
+          python -m btc_demand_v7.test_demand_change_v2
+          python -m btc_demand_v7.test_episode_quality_v4
+          python -m btc_demand_v7.test_public_daily_budget_v5
+      - name: Register immutable research-only paired trial BEFORE any future observation
+        run: |
+          python - <<'PY'
+          import datetime as dt,hashlib,json,os,pathlib
+          now=dt.datetime.now(dt.timezone.utc)
+          start=dt.datetime(2026,10,13,0,0,tzinfo=dt.timezone.utc)
+          if now>=start:
+              raise RuntimeError("prestart registration impossible after future epoch begins")
+          files=("btc_demand_v7/demand_change_v2.py",
+                 "btc_demand_v7/episode_quality_v4.py",
+                 "btc_demand_v7/v7r3_shadow_worker.py")
+          manifest={
+            "schema":"btc-v7r6-before-outcomes-paired-shadow-commit-v1",
+            "registered_at_utc":now.isoformat(),
+            "research_source_sha":os.environ["GITHUB_SHA"],
+            "github_run_id":os.environ["GITHUB_RUN_ID"],
+            "baseline_registered_v7r5_source_sha":"d6acb83d45ea484d2f2c88b725faedf3de97775d",
+            "source_epoch_start_utc":start.isoformat(),
+            "source_epoch_end_utc":"2026-10-20T00:00:00+00:00",
+            "paired_policies":["frozen R5 pressure without absolute-side veto",
+                               "same stateful pressure with >=2/3 absolute-flow consensus"],
+            "replay_inputs":"identical independently verified as-of signed Binance/OKX snapshots",
+            "replay_not_realtime_public_warning":True,
+            "same_slot_first_barrier_outcome_required":True,
+            "full_due_grid_misses_in_denominator":True,
+            "no_60m_early_warning_claim_on_1h_first_touch":True,
+            "minimum_independent_day_blocks_for_claim":20,
+            "otc_economics":"only signed precommitted OTC proxy can be evaluated; real operator fills not observed",
+            "actual_4h_OTC_profitability_unverified":True,
+            "price_heads_1h_4h_24h_skill_unverified":True,
+            "no_model_promotions_without_independent_untouched_prospective_evidence":True,
+            "file_sha256":{p:hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in files},
+            "trading_authority":False
+          }
+          p=pathlib.Path("/tmp/btc-v7r6-paired-shadow-prestart.json")
+          p.write_text(json.dumps(manifest,sort_keys=True,separators=(",",":"),allow_nan=False)+"\n")
+          print("BTC_V7R6_CAUSAL_PAIRED_SHADOW_PRESTART",manifest["research_source_sha"],now.isoformat())
+          PY
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: Sign research contract without stored keys
+        run: |
+          cosign sign-blob --yes --bundle /tmp/btc-v7r6-paired-shadow-prestart.sigstore.json /tmp/btc-v7r6-paired-shadow-prestart.json
+      - name: Independently verify GitHub OIDC identity, Rekor inclusion and pre-event SHA
+        run: |
+          cosign verify-blob /tmp/btc-v7r6-paired-shadow-prestart.json \
+            --bundle /tmp/btc-v7r6-paired-shadow-prestart.sigstore.json \
+            --certificate-identity "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-v7r6-paired-shadow-freeze.yml@refs/heads/btc-v7r6-paired-shadow-research-20261012" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          python - <<'PY'
+          import json,os,datetime as dt
+          x=json.load(open("/tmp/btc-v7r6-paired-shadow-prestart.json"))
+          b=json.load(open("/tmp/btc-v7r6-paired-shadow-prestart.sigstore.json"))
+          assert x["research_source_sha"]==os.environ["GITHUB_SHA"]
+          assert dt.datetime.fromisoformat(x["registered_at_utc"]) < dt.datetime.fromisoformat(x["source_epoch_start_utc"])
+          assert any(y.get("inclusionProof") for y in b["verificationMaterial"]["tlogEntries"])
+          assert x["trading_authority"] is False
+          print("BTC_V7R6_REKOR_PRESTART_PROVEN_RESEARCH_ONLY",x["research_source_sha"])
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: btc-v7r6-prestart-paired-shadow-${{ github.sha }}
+          path: |
+            /tmp/btc-v7r6-paired-shadow-prestart.json
+            /tmp/btc-v7r6-paired-shadow-prestart.sigstore.json
+          if-no-files-found: error
+          retention-days: 90

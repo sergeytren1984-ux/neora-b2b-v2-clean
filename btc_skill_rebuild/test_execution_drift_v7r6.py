@@ -1,8 +1,22 @@
 """Numerical regression invariants for causal execution-horizon experiments."""
 import unittest,math
 from btc_skill_rebuild.research_execution_drift_v7r6 import (
-    fit_ridge,predict,solve,SHRINK,HEADS)
+    fit_ridge,predict,solve,SHRINK,HEADS,examples,STEP)
 class PriceMath(unittest.TestCase):
+    def test_one_hour_matures_inside_last_day_not_dropped_as_24h(self):
+        n=12010
+        rows=[]
+        for i in range(n):
+            at=i*STEP
+            rows.append([at,'83000','83001','82999','83000','10',at+STEP-1,'0','50','5','0','0'])
+        result=examples(rows)
+        # Former one-size-fits-all 24h feature cutoff silently excluded 287
+        # usable 1h/4h input anchors, biasing test coverage.
+        self.assertEqual(result[-1][0],n-2)
+        self.assertTrue(any(i==n-13 for i,*_ in result))
+        self.assertTrue(any(i==n-49 for i,*_ in result))
+        self.assertFalse(any(i==n for i,*_ in result))
+
     def test_normal_equation_recovery_and_regularization(self):
         a=[[3.,1.],[1.,2.]];b=[7.,5.]
         solution=solve(a,b)

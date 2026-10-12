@@ -18,6 +18,7 @@ from btc_demand_v7.shadow_contract_v3 import (
 from btc_demand_v7.demand_change_v2 import (
     advance,state_zero,source_hash,BASELINE_COUNT)
 from btc_demand_v7.event_semantics import first_passage
+from btc_demand_v7.episode_quality_v4 import report as independent_episode_report
 from btc_demand_v7.prospective_core import when
 from btc_demand_v7.live_snapshot import collect as market_collect, strict_closed, spot_state
 from btc_demand_v7.release_guard import certificate_source_sha
@@ -517,7 +518,10 @@ def score(reg,root,at):
     if coverage["global_daily_budget_violated"]:
         raise RuntimeError("more than one signed public alert in a UTC day")
     metrics={}
+    independent_episodes={}
     for horizon,minutes in HORIZONS.items():
+        verified_barriers=[]
+        verified_alerts=[]
         count={"due":0,"resolved":0,"missing":0,"late":0,
                "no_valid_forecast":0,"warning_count":0,
                "wrong_side":0,"no_touch":0,
@@ -629,7 +633,15 @@ def score(reg,root,at):
                 raise ValueError("status kind inconsistent with actual completion")
             count["resolved"]+=1
             if recomputed["direction"]=="NEITHER":count["no_touch"]+=1
+            if recomputed["direction"] in ("UP_FIRST","DOWN_FIRST"):
+                verified_barriers.append({
+                    "slot_id":sid,
+                    "touch_open_utc":(when(touch)-dt.timedelta(minutes=1)).isoformat(),
+                    "direction":recomputed["direction"]})
             if warning:
+                verified_alerts.append({
+                    "slot_id":sid,"public_delivery_utc":dtime.isoformat(),
+                    "side":warning_side,"eligible":truly_early})
                 count["warning_count"]+=1
                 if warning_side!=recomputed["direction"]:count["wrong_side"]+=1
                 for threshold in (10,30,60):
@@ -639,11 +651,16 @@ def score(reg,root,at):
                     else:
                         count["false_or_insufficient_lead"][threshold]+=1
         metrics[horizon]=count
+        independent_episodes[horizon]=independent_episode_report(
+            horizon,verified_barriers,verified_alerts,
+            full_due_count=count["due"],
+            missing_or_late_count=count["missing"]+count["late"])
     return {
         "schema":"btc-v7r4-strict-full-grid-signed-recomputed-quality-v1",
         "registered_grid_sha256":digest(reg),
         "coverage":coverage,
         "forward_outcomes":metrics,
+        "independent_move_episodes":independent_episodes,
         "score_verification":"each signed outcome and raw rechecked, all first passage/lead/due recalculated",
         "missing_forecast_does_not_reduce_outcome_denominator":True,
         "skill_verified":False,"admission_ready":False,

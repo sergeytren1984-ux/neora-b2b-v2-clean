@@ -1,4 +1,4 @@
-name: BTC v7R3 prewarmed prospective early-pressure clock
+name: BTC v7R3 corrected as-of latency prospective clock
 
 on:
   workflow_dispatch: {}
@@ -33,7 +33,7 @@ jobs:
           START=dt.datetime(2026,10,13,tzinfo=UTC)
           END=dt.datetime(2026,10,20,tzinfo=UTC)
           DRAIN_END=END+dt.timedelta(hours=5)
-          REF="btc-v7r3-demand-stateful-challenger-20261012"
+          REF="btc-v7r3-asof-latency-remediation-20261012"
           WORKFLOW="btc-v7r3-signed-demand-shadow.yml"
           CLOCK="btc-v7r3-forward-clock.yml"
           now=lambda:dt.datetime.now(UTC)

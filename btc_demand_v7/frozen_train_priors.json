@@ -1,0 +1,54 @@
+{
+  "event_priors": {
+    "1h": {
+      "count": {
+        "AMBIGUOUS_SAME_MINUTE": 0,
+        "DOWN_FIRST": 19,
+        "NEITHER": 289,
+        "UP_FIRST": 26
+      },
+      "n_independent_train_windows": 334,
+      "n_raw_incomplete": 0,
+      "n_unambiguous": 334,
+      "p_down_first_train": 0.05688622754491018,
+      "p_neither_train": 0.8652694610778443,
+      "p_up_first_train": 0.07784431137724551
+    },
+    "30m": {
+      "count": {
+        "AMBIGUOUS_SAME_MINUTE": 0,
+        "DOWN_FIRST": 57,
+        "NEITHER": 561,
+        "UP_FIRST": 52
+      },
+      "n_independent_train_windows": 670,
+      "n_raw_incomplete": 0,
+      "n_unambiguous": 670,
+      "p_down_first_train": 0.08507462686567165,
+      "p_neither_train": 0.8373134328358209,
+      "p_up_first_train": 0.07761194029850746
+    },
+    "4h": {
+      "count": {
+        "AMBIGUOUS_SAME_MINUTE": 0,
+        "DOWN_FIRST": 8,
+        "NEITHER": 66,
+        "UP_FIRST": 8
+      },
+      "n_independent_train_windows": 82,
+      "n_raw_incomplete": 0,
+      "n_unambiguous": 82,
+      "p_down_first_train": 0.0975609756097561,
+      "p_neither_train": 0.8048780487804879,
+      "p_up_first_train": 0.0975609756097561
+    }
+  },
+  "fixed_phases_not_overlapping": true,
+  "preregister_no_test_prevalence": true,
+  "schema": "btc-v7r2-frozen-first-touch-train-priors",
+  "source_binance_1m": "closed 1m klines",
+  "source_signed_research_run": 38167948896,
+  "trading_authority": false,
+  "train_target_end_before_utc": "2026-09-28T00:00:00+00:00",
+  "treat_ambiguous_as_separate_label": true
+}

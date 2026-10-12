@@ -1,0 +1,88 @@
+name: BTC v7R5 signed 1m incident flow retrospective ablation
+
+on:
+  push:
+    branches: [btc-v7r5-execution-aligned-price-research-20261012]
+    paths:
+      - btc_demand_v7/incident_flow_replay_v5.py
+      - btc_demand_v7/test_incident_flow_replay_v5.py
+      - .github/workflows/btc-v7r5-minute-incident-audit.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+
+concurrency:
+  group: btc-v7r5-minute-incidental-replay-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  no-hindsight-math-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - name: Prove future price cannot influence the order-flow signal
+        run: |
+          python -m py_compile btc_demand_v7/incident_flow_replay_v5.py
+          python -m btc_demand_v7.test_incident_flow_replay_v5
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: btc-vnext6-minute-comparison-f1cead14844d900b23d39d46b5a620bd1a14b2fa
+          path: /tmp/signed-minute-source
+          run-id: 38167948896
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: Verify signed 40015 Binance BTCUSDT 1m bars, Rekor and frozen producer SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          cosign verify-blob /tmp/signed-minute-source/raw_minute_klines.json.gz \
+            --bundle /tmp/signed-minute-source/raw_minute_klines.sigstore.json \
+            --certificate-identity "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-vnext6-micro-audit.yml@refs/heads/btc-predictive-vnext6-skill-rebuild-20261011" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          python - <<'PY'
+          import json,gzip,hashlib,pathlib
+          from btc_demand_v7.release_guard import certificate_source_sha
+          folder=pathlib.Path("/tmp/signed-minute-source")
+          original=folder/"raw_minute_klines.json.gz"
+          bundle=folder/"raw_minute_klines.sigstore.json"
+          if certificate_source_sha(str(bundle))!="f1cead14844d900b23d39d46b5a620bd1a14b2fa":
+              raise RuntimeError("wrong signed historical 1m producer")
+          with gzip.open(original,"rb") as src: raw=src.read()
+          j=json.loads((folder/"micro_audit.json").read_text())
+          if hashlib.sha256(raw).hexdigest()!=j["raw_1m_sha256"]:
+              raise RuntimeError("historical 1m source hash differs from signed audit")
+          if not any(x.get("inclusionProof") for x in json.loads(bundle.read_text())["verificationMaterial"]["tlogEntries"]):
+              raise RuntimeError("no transparency inclusion proof")
+          print("BTC_V7R5_FROZEN_HISTORICAL_MINUTE_RAW_SIGNATURE_VERIFIED")
+          PY
+      - name: Replay and count false alerts with one UTC global daily budget
+        run: |
+          python -m btc_demand_v7.incident_flow_replay_v5 \
+            --signed-minutes /tmp/signed-minute-source/raw_minute_klines.json.gz \
+            --out /tmp/v7r5-flow-incident.json
+      - name: Sign even negative research verdict
+        run: |
+          set -euo pipefail
+          cosign sign-blob --yes \
+            --bundle /tmp/v7r5-flow-incident.sigstore.json \
+            /tmp/v7r5-flow-incident.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: btc-v7r5-signed-minute-incident-${{ github.sha }}
+          path: /tmp/v7r5-flow-incident*
+          retention-days: 90
+          if-no-files-found: error

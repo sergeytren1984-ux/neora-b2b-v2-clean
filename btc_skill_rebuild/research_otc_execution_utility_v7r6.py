@@ -111,7 +111,7 @@ def markup_robust_direction(spot_at_60,spot_at_120,*,
     return "NOT_ROBUST_TO_OTC_MARKUP"
 
 def independent_day_economic_evidence(outcomes:Sequence[dict],minimum_days=20,
-                                       expected_slot_ids:Sequence[str]|None=None):
+                                       expected_slot_ids:Optional[Sequence[str]]=None):
     # A full prospectively frozen opportunity grid is mandatory even for
     # conditional quote score. A cherry-picked set of successful slots cannot
     # be promoted by masquerading as 20 complete, independent UTC days.

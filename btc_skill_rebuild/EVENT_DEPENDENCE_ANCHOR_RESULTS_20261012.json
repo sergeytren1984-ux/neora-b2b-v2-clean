@@ -1,0 +1,42 @@
+{
+  "horizons": {
+    "1h": {
+      "all_predefined_historical_15min_due": 2664,
+      "anchor_episode_window_ms": 3600000,
+      "anchored_counts_are_not_proof_of_stochastic_independence": true,
+      "both_sides_anchored_windows_containing_UP_and_DOWN": 18,
+      "both_sides_first_touch_anchored_nonoverlapping_windows": 107,
+      "directional_labels_in_overlapping_due": 331,
+      "global_unique_first_touch_time_direction_pairs": 198,
+      "no_event_treated_as_independent_merely_by_separate_forecast_slot": true,
+      "original_chains_spanning_more_than_one_horizon": 6,
+      "original_longest_single_link_chain_minutes": 100,
+      "original_same_side_single_link_chained_episodes": 115,
+      "retrospective_labels_already_seen": true,
+      "same_side_first_touch_anchored_episodes": 121,
+      "trading_authority": false
+    },
+    "4h": {
+      "all_predefined_historical_15min_due": 2652,
+      "anchor_episode_window_ms": 14400000,
+      "anchored_counts_are_not_proof_of_stochastic_independence": true,
+      "both_sides_anchored_windows_containing_UP_and_DOWN": 9,
+      "both_sides_first_touch_anchored_nonoverlapping_windows": 50,
+      "directional_labels_in_overlapping_due": 496,
+      "global_unique_first_touch_time_direction_pairs": 169,
+      "no_event_treated_as_independent_merely_by_separate_forecast_slot": true,
+      "original_chains_spanning_more_than_one_horizon": 5,
+      "original_longest_single_link_chain_minutes": 520,
+      "original_same_side_single_link_chained_episodes": 52,
+      "retrospective_labels_already_seen": true,
+      "same_side_first_touch_anchored_episodes": 57,
+      "trading_authority": false
+    }
+  },
+  "not_new_prospective_observations": true,
+  "research_only_no_new_signal": true,
+  "same_historical_5m_labels_as_original_v7r6": true,
+  "schema": "btc-v7r6-event-dependence-anchor-sensitivity-v1",
+  "source_gzip_sha256": "b590c60a8224bb15ac78fd28361954cd7e21825cb29a1aaa6758c801efe4fe7b",
+  "trading_authority": false
+}

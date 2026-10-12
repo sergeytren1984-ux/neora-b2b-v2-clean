@@ -8,7 +8,8 @@ import hashlib,json,pathlib,tempfile
 from unittest.mock import patch
 from btc_demand_v7.test_demand_change_v2 import snap
 from btc_demand_v7 import v7r3_shadow_worker as worker
-from btc_demand_v7.shadow_contract_v3 import grid,canonical,slot_id,source_hash
+from btc_demand_v7.shadow_contract_v3 import grid,canonical,slot_id
+from btc_demand_v7.demand_change_v2 import source_hash
 from btc_demand_v7.prospective_core import when
 
 UTC=dt.timezone.utc

@@ -1,0 +1,96 @@
+name: BTC v7R5 one signed execution-price research audit (no deployment)
+
+on:
+  push:
+    branches: [btc-v7r5-execution-aligned-price-research-20261012]
+    paths:
+      - btc_demand_v7/execution_price_v5.py
+      - btc_demand_v7/test_execution_price_v5.py
+      - .github/workflows/btc-v7r5-execution-price-audit.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+
+concurrency:
+  group: btc-v7r5-single-price-research-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fixed-historical-diagnostic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - name: Fixed research-only numerical dependencies
+        run: |
+          python -m pip install --disable-pip-version-check \
+            numpy==2.2.6 scipy==1.16.3 scikit-learn==1.7.2 \
+            joblib==1.5.2 threadpoolctl==3.6.0
+      - name: Adversarial price labels and embargo tests
+        run: |
+          python -m py_compile btc_demand_v7/execution_price_v5.py
+          python -m btc_demand_v7.test_execution_price_v5
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: btc-vnext6-causal-skill-audit-81beeaf6d8c4d55452e28439b84fdf7af708f690
+          path: /tmp/signed-causal-spot
+          run-id: 38166535215
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: Verify real original 65-day raw BTC spot Cosign Rekor and producer SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          cosign verify-blob /tmp/signed-causal-spot/raw_5m_closed_klines.json.gz \
+            --bundle /tmp/signed-causal-spot/raw_5m_closed_klines.sigstore.json \
+            --certificate-identity "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-vnext6-skill-eval.yml@refs/heads/btc-predictive-vnext6-skill-rebuild-20261011" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          python - <<'PY'
+          import gzip,hashlib,json,pathlib
+          from btc_demand_v7.release_guard import certificate_source_sha
+          base=pathlib.Path("/tmp/signed-causal-spot")
+          signed=base/"raw_5m_closed_klines.sigstore.json"
+          if certificate_source_sha(str(signed))!="81beeaf6d8c4d55452e28439b84fdf7af708f690":
+              raise RuntimeError("frozen raw source producer SHA differs")
+          old=json.loads((base/"research_result.json").read_text())
+          with gzip.open(base/"raw_5m_closed_klines.json.gz","rb") as fh:raw=fh.read()
+          if hashlib.sha256(raw).hexdigest()!=old["raw_sha256"]:
+              raise RuntimeError("immutable verified underlying spot SHA mismatch")
+          evidence=json.loads(signed.read_text())
+          if not any(x.get("inclusionProof") for x in evidence["verificationMaterial"]["tlogEntries"]):
+              raise RuntimeError("no transparency proof")
+          print("BTC_V7R5_ORIGINAL_RAW_SIGNED_SOURCE_VERIFIED")
+          PY
+      - name: Score one precommitted conditional future price method and OTC proxy
+        run: |
+          python -m btc_demand_v7.execution_price_v5 \
+            --signed-spot-raw /tmp/signed-causal-spot/raw_5m_closed_klines.json.gz \
+            --out /tmp/v7r5-execution-price-result.json
+      - name: Sign negative OR positive experimental score with GitHub OIDC and Rekor
+        run: |
+          set -euo pipefail
+          cosign sign-blob --yes \
+            --bundle /tmp/v7r5-execution-price-result.sigstore.json \
+            /tmp/v7r5-execution-price-result.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: btc-v7r5-one-price-diagnostic-${{ github.sha }}
+          path: /tmp/v7r5-execution-price-result*
+          retention-days: 90
+          if-no-files-found: error

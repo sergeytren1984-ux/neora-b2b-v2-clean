@@ -178,7 +178,9 @@ def advance(state, history, observation, *,issued_utc=None):
           "DOWN" if down>=ALERT_LEVEL and down>up else None)
     cooldown=False
     if side and state["last_alert_utc"] is not None:
-        cooldown=at-timestamp(state["last_alert_utc"])<timedelta(minutes=COOLDOWN_MINUTES)
+        previous_alert=timestamp(state["last_alert_utc"])
+        cooldown=(at-previous_alert<timedelta(minutes=COOLDOWN_MINUTES)
+                  or at.date()==previous_alert.date())  # fixed <=1 alert per UTC day
     raw_alert=bool(side and not cooldown)
     # If the price already moved, this is not an advance warning.
     eligible = raw_alert and readiness=="PRE_MOVE"

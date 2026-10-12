@@ -2,7 +2,7 @@
 import copy,datetime as dt
 from btc_demand_v7.otc_prospective_policy_v5 import (
     MODEL_SHA,BUDGET,commitment,compare_pair,precommitted_action,simulated_execution)
-from btc_demand_v7.shadow_contract_v3 import digest
+from btc_demand_v7.otc_prospective_policy_v5 import digest
 
 UTC=dt.timezone.utc
 start=dt.datetime(2026,10,14,12,0,tzinfo=UTC)

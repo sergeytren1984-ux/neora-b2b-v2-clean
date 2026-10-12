@@ -43,22 +43,22 @@ def require_error(callback,why):
 
 def test():
     baseline=[snap(i) for i in range(BASELINE_COUNT)]
-    assert replay(baseline)[0]["sequence"]==0
+    assert replay(baseline)[0]["sequence"]==BASELINE_COUNT
     # Two pressure runs with identical 15m prices. Pressure must accumulate.
     sequence=baseline+[snap(BASELINE_COUNT+j,direction=1) for j in range(8)]
     state,events=replay(sequence)
-    valid=[x for x in events if x.get("state_sequence")]
+    valid=events[BASELINE_COUNT:]
     assert len(valid)==8
     assert valid[1]["up_cusum"]>valid[0]["up_cusum"]
     assert any(x["alert"] and x["warning_side"]=="UP" for x in valid)
     assert all(x["calibrated_probability"] is False and x["trading_authority"] is False for x in valid)
-    assert state["sequence"]==8
+    assert state["sequence"]==BASELINE_COUNT+8
     assert sum(x["alert"] for x in valid)<=1  # 3h cooldown
     assert state["last_snapshot_sha256"]==source_hash(sequence[-1])
     # Symmetric down pressure, no need for price to fall first.
     negative=baseline+[snap(BASELINE_COUNT+j,direction=-1) for j in range(8)]
     nstate,negative_events=replay(negative)
-    down=[x for x in negative_events if x.get("state_sequence")]
+    down=negative_events[BASELINE_COUNT:]
     assert any(x["alert"] and x["warning_side"]=="DOWN" for x in down)
     assert down[1]["down_cusum"]>down[0]["down_cusum"]
     # Signal after the price has already moved cannot count as an early warning.
@@ -70,6 +70,16 @@ def test():
     _,missing_events=replay(missing)
     assert missing_events[-1]["status"]=="MISSING_OI_OR_BOOK"
     assert not missing_events[-1]["alert"]
+    assert replay(missing)[0]["sequence"]==BASELINE_COUNT+1
+    # Missing observations must RESET accumulated pressure and require
+    # 32 clean new readings; never interpret missing OI/book as zero.
+    reset_base=baseline+[snap(BASELINE_COUNT,valid=False)]
+    rebuilt=reset_base+[snap(BASELINE_COUNT+i) for i in range(1,35)]
+    st,recovery=replay(rebuilt)
+    assert all(not e["alert"] for e in recovery[BASELINE_COUNT:BASELINE_COUNT+32])
+    assert any(e["status"]=="CLEAN_BASELINE_REBUILD_REQUIRED"
+               for e in recovery[BASELINE_COUNT+1:BASELINE_COUNT+32])
+    assert st["sequence"]==len(rebuilt)
     # Mutate future optional snapshot receipt; no hindsight permitted.
     future=snap(BASELINE_COUNT,direction=1)
     future["observation"]["book"]["vendor_timestamp_ms"] += 100_000

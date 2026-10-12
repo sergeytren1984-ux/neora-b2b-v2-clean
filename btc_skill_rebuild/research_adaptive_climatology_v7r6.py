@@ -48,9 +48,11 @@ class CausalClimatology:
     def probability(self,issue,days):
         if days not in (7,14):raise ValueError('unregistered lookback')
         lo=bisect.bisect_left(self.issued,issue-days*DAY)
-        hi=bisect.bisect_left(self.mature,issue)
+        # If all rows issued within the window are still immature,
+        # hi can precede lo. This is an EMPTY matured window, not a
+        # negative class count. Never admit any older-than-window row.
+        hi=max(lo,bisect.bisect_left(self.mature,issue))
         n=hi-lo
-        if n<0:raise ValueError('negative matured denominator')
         counts=[self.prefix[k][hi]-self.prefix[k][lo] for k in range(3)]
         if n!=sum(counts):raise ValueError('historical label maturity mismatch')
         return [(c+1)/(n+3) for c in counts]

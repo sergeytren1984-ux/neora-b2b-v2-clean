@@ -75,7 +75,11 @@ def publish(ledger,message):
     # paths concurrently. Never force push and never overwrite evidence.
     for retry in range(4):
         try:
-            run("git","pull","--quiet","--rebase","origin",EVIDENCE,cwd=ledger)
+            # Initial prospective registration creates the evidence branch.
+            # The first push MUST NOT attempt to pull a nonexistent ref.
+            remote=run("git","ls-remote","--heads","origin",EVIDENCE,cwd=ledger)
+            if remote:
+                run("git","pull","--quiet","--rebase","origin",EVIDENCE,cwd=ledger)
             run("git","push","--quiet","origin","HEAD:refs/heads/"+EVIDENCE,cwd=ledger)
             return
         except RuntimeError:

@@ -3,7 +3,7 @@
 A 1h/4h/24h 3-way endpoint model is only useful if it beats a plausible
 NO-SKILL competitor. In addition to its own frozen TRAIN prior, compare
 against trailing 7d or 14d class frequencies (with Laplace smoothing).
-All reference labels must be MATURE at the precise current issue time.
+All reference labels must be MATURE strictly BEFORE current issue time;\nrolling class rates use only horizon-spaced UTC due slots, not overlapping\n15m endpoint labels.
 Which baseline is used is selected ONLY from the prior validation set.
 No frozen production modification. Already-seen historical replay !=
 prospective forecast evidence.
@@ -46,12 +46,28 @@ class CausalClimatology:
     def probability(self,issue,days):
         if days not in (7,14):raise ValueError('unregistered lookback')
         lo=bisect.bisect_left(self.issued,issue-days*DAY)
-        hi=bisect.bisect_right(self.mature,issue)
+        hi=bisect.bisect_left(self.mature,issue)
         n=hi-lo
         if n<0:raise ValueError('negative matured denominator')
         counts=[self.prefix[k][hi]-self.prefix[k][lo] for k in range(3)]
         if n!=sum(counts):raise ValueError('historical label maturity mismatch')
         return [(c+1)/(n+3) for c in counts]
+
+def independent_due_climatology_population(population,horizon_steps):
+    """Estimate rolling class frequencies on SAME nonoverlapping due grid.
+
+    A 24h horizon sampled at 15m has up to 96 strongly overlapping
+    labels per day, but only one independent 24h endpoint.  Treating
+    96 labels as independent gives an unjustifiably concentrated prior.
+    Only issue times on the predetermined UTC horizon grid may enter
+    the causal 7/14d climatology; every label still needs strict
+    maturity BEFORE the query timestamp.
+    """
+    if not isinstance(horizon_steps,int) or horizon_steps<=0:
+        raise ValueError('invalid independent horizon step')
+    grid=horizon_steps*STEP
+    return [r for r in population if r[0]%grid==0]
+
 
 def baseline_probability(name,issue,model,climatology):
     if name=='frozen_training_prior':return model[3]
@@ -93,7 +109,7 @@ def evaluate(raw):
             maturity=int(raw[i+n][0])+STEP
             y=endpoint_class(close[i],float(raw[i+n][4]),threshold)
             population.append((t,maturity,x,y))
-        climate=CausalClimatology(population)
+        climate=CausalClimatology(independent_due_climatology_population(population,n))
         weekly=[]
         for fold in FOLDS:
             start=int(fold.timestamp()*1000);end=start+7*DAY
@@ -146,7 +162,7 @@ def evaluate(raw):
     return {'schema':'btc-v7r6-three-horizon-causal-adaptive-climatology-benchmark-v1',
       'all_forward_blocks_already_known_historical':True,
       'competing_baselines':'frozen train prior or prior 7/14 calendar-day matured rolling class frequencies',
-      'source_asof_maturity_enforced':True,
+      'source_asof_maturity_enforced':True,\n      'same_timestamp_maturity_excluded':True,\n      'rolling_climatology_uses_nonoverlapping_horizon_UTC_grid':True,
       'no_production_changes':True,'trading_authority':False,'horizons':results}
 
 def run(raw_path,out):

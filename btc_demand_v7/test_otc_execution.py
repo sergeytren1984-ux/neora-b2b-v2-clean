@@ -18,7 +18,9 @@ def test():
     try:actual_quote("BUY_NOW",{**quote,"filled_at_utc":(now-dt.timedelta(seconds=1)).isoformat()})
     except ValueError:pass
     else:raise AssertionError("fill before request accepted")
-    a={x:{"market_spot_at_execution":83000.,"operator_markup_per_btc":350.,
+    a={x:{"market_spot_at_execution":83000.,
+           "reference_spot_at_request":83000.,
+           "operator_markup_per_btc":350.,
            "fill_fraction":1.0,"actual_delay_minutes":60.}
        for x in ("BUY_NOW","WAIT_1H","WAIT_4H","WAIT_TILL_08_MSK")}
     a["WAIT_1H"]={**a["WAIT_1H"],"market_spot_at_execution":82500.}
@@ -29,8 +31,25 @@ def test():
     assert report["scenarios"][0]["actions"]["WAIT_1H"]["acquired_btc"]>0
     r=joint_proxy([{**scenarios[0],"operator_threshold_usdt":300.}])
     assert r["scenarios"][0]["actions"]["WAIT_1H"]["status"]=="REJECTED_BY_OPERATOR_GUARD"
+    assert r["scenarios"][0]["actions"]["WAIT_1H"]["unspent_usdt"]==147600.
     try:joint_proxy([{**scenarios[0],"actions":{**a,"WAIT_1H":{**a["WAIT_1H"],"operator_markup_per_btc":float("nan")}}}])
     except ValueError:pass
     else:raise AssertionError("invalid premium accepted")
-    print("BTC_V7R2_REAL_OTC_REJECTION_PARTIAL_STRESS_TEST_PASS")
+    assert joint_proxy(scenarios)["scenarios"][0]["equal_cash_spend_comparison"] is True
+    from copy import deepcopy
+    bad=deepcopy(quote);bad["filled_btc"]=100.;bad["total_paid_usdt"]=1.
+    try:actual_quote("BUY_NOW",bad)
+    except ValueError:pass
+    else:raise AssertionError("fabricated 100 BTC for 1 USDT fill accepted")
+    bad=deepcopy(quote);bad.update(accepted=False,filled_btc=0,
+        total_paid_usdt=147600.,filled_at_utc=None)
+    try:actual_quote("BUY_NOW",bad)
+    except ValueError:pass
+    else:raise AssertionError("money removed on rejected operator quote")
+    badscenario=deepcopy(scenarios)
+    del badscenario[0]["actions"]["WAIT_1H"]["reference_spot_at_request"]
+    try:joint_proxy(badscenario)
+    except ValueError:pass
+    else:raise AssertionError("wait action reuses old buy-now reference")
+    print("BTC_V7R4_REAL_OTC_QUOTE_REJECTION_RESIDUAL_CASH_ATTACKS_PASS")
 if __name__=="__main__":test()

@@ -1,10 +1,13 @@
-name: BTC v7 signed demand price OTC live shadow
+name: BTC v7R1 remediated research shadow
 
 on:
   push:
-    branches: [btc-predictive-vnext7-demand-price-otc-20261011]
+    branches: [btc-v7r1-independent-audit-remediation-20261012]
     paths:
       - btc_demand_v7/infer_live.py
+      - btc_demand_v7/live_snapshot.py
+      - btc_demand_v7/otc_decision.py
+      - btc_demand_v7/release_guard.py
       - .github/workflows/btc-v7-shadow-full.yml
   workflow_dispatch: {}
 
@@ -38,7 +41,7 @@ jobs:
           python -m pip install --disable-pip-version-check \
             numpy==2.2.6 scikit-learn==1.7.2 scipy==1.16.3 \
             joblib==1.5.2 threadpoolctl==3.6.0
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           name: btc-v7-research-only-3d08e5a767f1848a9e10d6bea1ef939c2b77238a
           path: /tmp/btc-v7-frozen
@@ -66,6 +69,7 @@ jobs:
             --certificate-identity "$VERIFIED_TRAIN_IDENTITY" \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com
           python -m json.tool spot_paired_validation_errors.json >/dev/null
+          python -m btc_demand_v7.release_guard /tmp/btc-v7-frozen btc_demand_v7/trusted_release.json
           echo VERIFIED_SOURCE_PIN_38169934478
       - name: Validate shadow release contracts
         run: |
@@ -82,6 +86,7 @@ jobs:
             --candidate /tmp/btc-v7-frozen/candidate.joblib \
             --paired /tmp/btc-v7-frozen/spot_paired_validation_errors.json \
             --audit /tmp/btc-v7-frozen/audit.json \
+            --trusted-release btc_demand_v7/trusted_release.json \
             --output /tmp/btc-v7-shadow/live_forecast.json
       - name: Sign exact raw, observation, and live inference (OIDC/Rekor)
         run: |
@@ -89,7 +94,9 @@ jobs:
           cosign sign-blob --yes --bundle /tmp/btc-v7-shadow/snapshot.sigstore.json /tmp/btc-v7-shadow/snapshot.json
           cosign sign-blob --yes --bundle /tmp/btc-v7-shadow/observation.sigstore.json /tmp/btc-v7-shadow/observation.json
           cosign sign-blob --yes --bundle /tmp/btc-v7-shadow/live_forecast.sigstore.json /tmp/btc-v7-shadow/live_forecast.json
-      - uses: actions/upload-artifact@v4
+          cp btc_demand_v7/trusted_release.json /tmp/btc-v7-shadow/trusted_release.json
+          cosign sign-blob --yes --bundle /tmp/btc-v7-shadow/trusted_release.sigstore.json /tmp/btc-v7-shadow/trusted_release.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: btc-v7-full-shadow-${{ github.run_id }}
           path: /tmp/btc-v7-shadow/

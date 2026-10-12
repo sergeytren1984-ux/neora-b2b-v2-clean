@@ -219,18 +219,52 @@ def current_slot_signal(root,reg,ts):
     # NOT permission to reset the same-day alert budget or CUSUM.
     first_eligible=when(reg["start_utc"])+dt.timedelta(minutes=15*BASELINE_COUNT)
     previous_state=available_previous_state(root,slot)
+    recovery=None
     if previous_state is None and slot!=first_eligible:
-        write(path.parent,path.name,{
-            "schema":"btc-v7r3-signed-pressure-event-v1",
-            "slot_id":slot_id(slot),"anchor_utc":slot.isoformat(),
-            "status":"STATEFUL_CHAIN_DISCONTINUITY",
-            "published_utc":utcnow().isoformat(),
-            "zero_reset_not_allowed":True,"trading_authority":False})
-        return "STATEFUL_CHAIN_DISCONTINUITY"
+        # No silent reset after a missing state. Only a NEW fully signed
+        # 32-slot raw period can start an explicitly labeled recovery segment.
+        # Carry global last-alert information from the last genuine state.
+        last_good=None
+        for pp in reversed(sorted((root/"slots").glob("*/signal.json"))):
+            if pp==path or pp.parent.name>=slot_id(slot):continue
+            prior=json.loads(pp.read_text())
+            if prior.get("status")=="SIGNED_STATE_PUBLISHED":
+                verify(pp,SELF_ID,os.environ["GITHUB_SHA"])
+                last_good=prior
+                break
+        last_good_anchor=when(last_good["anchor_utc"]) if last_good else first_eligible
+        gap_steps=int((slot-last_good_anchor).total_seconds()//(15*60))
+        clean_after_gap=(gap_steps>BASELINE_COUNT and
+                         all(when(x["retrieved_at_utc"])>last_good_anchor
+                             for x in history))
+        if not clean_after_gap:
+            write(path.parent,path.name,{
+                "schema":"btc-v7r3-signed-pressure-event-v1",
+                "slot_id":slot_id(slot),"anchor_utc":slot.isoformat(),
+                "status":"STATEFUL_CHAIN_DISCONTINUITY",
+                "published_utc":utcnow().isoformat(),
+                "zero_reset_not_allowed":True,"trading_authority":False})
+            return "STATEFUL_CHAIN_DISCONTINUITY"
+        previous_state=state_zero()
+        if last_good is not None:
+            prior_state=last_good["state"]
+            if not isinstance(prior_state,dict) or prior_state.get("sequence",0)<1:
+                raise RuntimeError("invalid last signed state for recovery")
+            previous_state["sequence"]=int(prior_state["sequence"])+gap_steps-1
+            previous_state["last_alert_utc"]=prior_state.get("last_alert_utc")
+            previous_state["last_alert_side"]=prior_state.get("last_alert_side")
+        recovery={
+            "schema":"btc-v7r4-signed-clean-baseline-recovery-v1",
+            "last_good_anchor_utc":last_good_anchor.isoformat(),
+            "missing_prior_state":True,
+            "full_new_signed_baseline":True,
+            "cusum_reset_disclosed":True,
+            "prior_global_alert_retained":bool(previous_state["last_alert_utc"]),
+            "trading_authority":False}
     if slot==first_eligible and previous_state is not None:
         raise RuntimeError("untrusted state before frozen warmup completed")
     state=state_zero() if previous_state is None else previous_state
-    if previous_state is not None:
+    if previous_state is not None and recovery is None:
         previous_record=root/"slots"/slot_id(slot-dt.timedelta(minutes=15))/"signal.json"
         prior=json.loads(previous_record.read_text())
         if prior.get("status")!="SIGNED_STATE_PUBLISHED":
@@ -254,11 +288,15 @@ def current_slot_signal(root,reg,ts):
     state,diagnostic=advance(
         state,history,snapshot,issued_utc=issued,
         live_change_since_anchor_pct=unobserved_move_pct)
+    if recovery is not None:
+        diagnostic["recovering_from_signed_discontinuity"]=True
+        diagnostic["not_a_clean_continuous_state_chain"]=True
     # A missed predecessor with nonzero CUSUM is rejected by the raw hash
     # chain, rather than silently rebuilding a favorable history.
     event={"schema":"btc-v7r3-signed-pressure-event-v1",
            "slot_id":slot_id(slot),"anchor_utc":slot.isoformat(),
            "status":"SIGNED_STATE_PUBLISHED",
+           "recovery":recovery,
            "issued_at_utc":issued.isoformat(),
            "github_run_id":os.environ.get("GITHUB_RUN_ID","SYNTHETIC_TEST"),
            "github_run_attempt":int(os.environ.get("GITHUB_RUN_ATTEMPT","1")),

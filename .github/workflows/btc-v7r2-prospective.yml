@@ -1,0 +1,30 @@
+name: BTC v7R2 prospective source-branch dispatch entry
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "register or tick on authorized source branch only"
+        required: true
+        type: choice
+        options: [register, tick]
+      start_utc:
+        description: "future aligned UTC start"
+        required: false
+        type: string
+      days:
+        required: false
+        default: "7"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  no-default-execution:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Refuse execution of fallback main workflow
+        run: |
+          echo "The signed prospective implementation must be dispatched with --ref btc-v7r2-prospective-contour-20261012" >&2
+          exit 1

@@ -13,6 +13,9 @@ on:
       - btc_demand_v7/test_otc_execution.py
       - btc_demand_v7/demand_change.py
       - btc_demand_v7/test_demand_change.py
+      - btc_demand_v7/skill_metrics.py
+      - btc_demand_v7/test_skill_metrics.py
+      - btc_demand_v7/frozen_train_priors.json
       - .github/workflows/btc-v7r2-prospective.yml
   workflow_dispatch:
     inputs:
@@ -75,8 +78,38 @@ jobs:
           python -m btc_demand_v7.test_event_semantics
           python -m btc_demand_v7.test_otc_execution
           python -m btc_demand_v7.test_demand_change
+          python -m btc_demand_v7.test_skill_metrics
           python -m btc_demand_v7.test_regressions
           python -m btc_demand_v7.test_snapshot
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        if: github.event_name == 'workflow_dispatch' && inputs.action == 'register'
+        with:
+          name: btc-vnext6-minute-comparison-f1cead14844d900b23d39d46b5a620bd1a14b2fa
+          path: /tmp/btc-r2-train-prior-raw
+          run-id: 38167948896
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+      - name: Check signed 1m TRAIN source and reproducible frozen baseline prior
+        if: github.event_name == 'workflow_dispatch' && inputs.action == 'register'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cosign verify-blob /tmp/btc-r2-train-prior-raw/raw_minute_klines.json.gz \
+            --bundle /tmp/btc-r2-train-prior-raw/raw_minute_klines.sigstore.json \
+            --certificate-identity https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-vnext6-micro-audit.yml@refs/heads/btc-predictive-vnext6-skill-rebuild-20261011 \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          python - <<'PY'
+          from btc_demand_v7.release_guard import certificate_source_sha
+          b="/tmp/btc-r2-train-prior-raw/raw_minute_klines.sigstore.json"
+          if certificate_source_sha(b)!="f1cead14844d900b23d39d46b5a620bd1a14b2fa":
+              raise RuntimeError("wrong train input signer source SHA")
+          print("SIGNED_TRAIN_SOURCE_IDENTITY_AND_SHA_VERIFIED")
+          PY
+          python -m btc_demand_v7.freeze_train_prior \
+            --raw /tmp/btc-r2-train-prior-raw/raw_minute_klines.json.gz \
+            --out /tmp/frozen_prior_recomputed.json
+          cmp /tmp/frozen_prior_recomputed.json btc_demand_v7/frozen_train_priors.json
+          echo TRAIN_ONLY_PRIORS_REPRODUCED_BYTE_IDENTICAL
       - name: Download one already frozen, signed, unproven research model
         if: github.event_name == 'workflow_dispatch' && inputs.action == 'tick'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093

@@ -56,10 +56,13 @@ def scenario(tamper=None):
         put(root,"registration.json",reg)
         put(root,"frozen_config.json",{
             "model_source_sha":SOURCE,"grid_sha256":digest(reg)})
+        # Apply the malicious mutation BEFORE writing the fake source
+        # bytes, otherwise only the in-memory object changes and the test
+        # does not actually exercise the independent on-disk replayer.
+        if tamper:tamper(event,live,root)
         for sample in observations:
             p=ts if sample is live else dt.datetime.fromisoformat(sample["anchor_utc"])
             put(root/"slots"/slot_id(p),"snapshot.json",sample)
-        if tamper:tamper(event,live,root)
         put(root/"slots"/slot_id(ts),"signal.json",event)
         with (patch.object(v,"verify_signed",lambda *_:None),
               patch.object(v,"rederive",lambda _:{"pressure_factor_ready":True}),

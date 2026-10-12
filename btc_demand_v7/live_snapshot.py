@@ -29,8 +29,17 @@ def strict_closed(rows,interval_ms,anchor_ms,min_history):
     prev=None
     for r in usable:
         op,hi,lo,cl,volume,taker=map(float,[r[1],r[2],r[3],r[4],r[5],r[9]])
-        if not (0<lo<=min(op,cl)<=max(op,cl)<=hi and 0<=taker<=volume):
-            raise ValueError("invalid spot OHLCV/taker")
+        # Reject NaN/Inf and noninteger trade count before ANY numerical
+        # feature builder or model imputation can conceal the corruption.
+        nums=[op,hi,lo,cl,volume,taker]+[float(r[i]) for i in (7,8,10,11)]
+        count=float(r[8])
+        if (not all(math.isfinite(x) for x in nums)
+            or count<0 or not count.is_integer()
+            or not (0<lo<=min(op,cl)<=max(op,cl)<=hi
+                    and 0<=taker<=volume
+                    and 0<=float(r[10])<=float(r[7])
+                    and float(r[7])>=0)):
+            raise ValueError("nonfinite/count/invalid spot OHLCV/taker")
         if int(r[6])+1!=int(r[0])+interval_ms:raise ValueError("unclosed candle")
         if prev is not None and int(r[0])-prev!=interval_ms:raise ValueError("spot candle gap")
         prev=int(r[0])
@@ -48,7 +57,10 @@ def open_interest_state(data,cutoff):
     now_t,now_v=entries[-1]
     previous_15=[x for x in entries if x[0]<=now_t-15*60*1000]
     previous_60=[x for x in entries if x[0]<=now_t-60*60*1000]
-    if not previous_15:raise ValueError("missing OI 15m reference")
+    if not previous_15 or abs(previous_15[-1][0]-(now_t-15*60*1000))>60_000:
+        raise ValueError("missing exact 15m OI reference (no 30m substitute)")
+    if previous_60 and abs(previous_60[-1][0]-(now_t-60*60*1000))>60_000:
+        previous_60=[]
     return {
         "source":"OKX rubik BTC aggregated contracts open interest USD",
         "vendor_observation_ms":now_t,
@@ -66,9 +78,18 @@ def liquidity_state(data):
     if not bids or not asks:raise ValueError("empty depth")
     bid_price=float(bids[0][0]);ask_price=float(asks[0][0])
     if bid_price<=0 or ask_price<=bid_price:raise ValueError("crossed order book")
+    for level_list,descending in ((bids,True),(asks,False)):
+        for i,level in enumerate(level_list):
+            price,size=float(level[0]),float(level[1])
+            if not (math.isfinite(price) and math.isfinite(size) and price>0 and size>=0):
+                raise ValueError("negative/nonfinite individual depth lot")
+            if i and ((descending and float(level_list[i-1][0])<price)
+                      or (not descending and float(level_list[i-1][0])>price)):
+                raise ValueError("unsorted depth levels")
     bs=sum(float(x[1]) for x in bids)
     ab=sum(float(x[1]) for x in asks)
-    if bs<0 or ab<0 or bs+ab==0:raise ValueError("invalid book quantities")
+    if not (math.isfinite(bs+ab) and bs+ab>0):
+        raise ValueError("invalid book quantities")
     return {"source":"OKX BTC-USDT-SWAP top 10 depth, raw contract size units",
             "vendor_timestamp_ms":int(b["ts"]),
             "spread_bps":10000*(ask_price-bid_price)/((bid_price+ask_price)/2),

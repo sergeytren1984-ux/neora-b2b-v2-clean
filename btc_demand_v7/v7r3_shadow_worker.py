@@ -441,50 +441,162 @@ def resolve_outcomes(root,now):
     return completed
 
 def score(reg,root,at):
-    events=[json.loads(p.read_text()) for p in (root/"slots").glob("*/signal.json")] if (root/"slots").exists() else []
-    coverage=status_grid(reg,events,at)
-    event_index={e["slot_id"]:e for e in events}
+    """Score ONLY signed, independently revalidated future evidence.
+
+    Denominators depend on the immutable registered grid, NEVER on whether
+    any forecast or outcome JSON happens to exist. This runs on the lower
+    priority outcome worker, not in the forecast critical path.
+    """
+    current=when(at)
+    slots_dir=root/"slots"
+    signal_paths=list(slots_dir.glob("*/signal.json")) if slots_dir.exists() else []
+    delivery_paths=list(slots_dir.glob("*/delivery.json")) if slots_dir.exists() else []
+    # Verify signed input bytes before trusting any scorecard numerical fields.
+    signed_inputs=signal_paths+delivery_paths
+    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as pool:
+        list(pool.map(lambda path: verify(path,SELF_ID,os.environ["GITHUB_SHA"]),signed_inputs))
+    events=[json.loads(p.read_text()) for p in signal_paths]
+    deliveries=[json.loads(p.read_text()) for p in delivery_paths]
+    index={e["slot_id"]:e for e in events}
+    delivery_index={d["slot_id"]:d for d in deliveries}
+    if len(index)!=len(events) or len(delivery_index)!=len(deliveries):
+        raise ValueError("duplicate signed signal or delivery")
+    coverage=status_grid(reg,events,current,deliveries)
+    if coverage["global_daily_budget_violated"]:
+        raise RuntimeError("more than one signed public alert in a UTC day")
     metrics={}
-    for h in HORIZONS:
-        due=0;resolved=0;late=0;missing=0;alerts=0;true_by_lead={m:0 for m in (10,30,60)}
-        false_by_lead={m:0 for m in (10,30,60)}
-        for s in reg["due_slots"]:
-            e=event_index.get(s["slot_id"])
-            if not e or e.get("status")!="SIGNED_STATE_PUBLISHED":continue
-            output=root/"slots"/s["slot_id"]/("outcome_"+h+".json")
-            # The true target is measured from verified public delivery,
-            # not the original model compute timestamp.
-            if output.is_file():
-                target=when(json.loads(output.read_text())["due_utc"])
+    for horizon,minutes in HORIZONS.items():
+        count={"due":0,"resolved":0,"missing":0,"late":0,
+               "no_valid_forecast":0,"warning_count":0,
+               "wrong_side":0,"no_touch":0,
+               "true_warning_at_least_minutes":{k:0 for k in (10,30,60)},
+               "false_or_insufficient_lead":{k:0 for k in (10,30,60)}}
+        for slot in reg["due_slots"]:
+            sid=slot["slot_id"]
+            anchor=when(slot["anchor_utc"])
+            event=index.get(sid)
+            delivery=delivery_index.get(sid)
+            # The frozen latest issuance bound controls a missing due.
+            # Outcome-provided due_utc has ZERO authority over eligibility.
+            latest=anchor+dt.timedelta(minutes=13+minutes)
+            if event is not None and delivery is not None:
+                if delivery.get("source_signal_sha256")!=digest(event):
+                    raise ValueError("delivery receipt not bound to event")
+                published=when(delivery["public_delivery_utc"])
+                due=future_due(published,horizon)
+                if due>latest+dt.timedelta(minutes=1):
+                    # A late signal is invalid, but it cannot erase due
+                    # evidence by inventing arbitrary future target dates.
+                    due=latest
             else:
-                # Missing future outcomes count once the *latest* 13m
-                # issuance deadline plus horizon plus 35m grace passes.
-                target=when(e["anchor_utc"])+dt.timedelta(minutes=13+HORIZONS[h])
-            if at<target+dt.timedelta(minutes=35):continue
-            due+=1
-            if not output.is_file():missing+=1;continue
-            result=json.loads(output.read_text())
-            if result.get("source_signal_sha256")!=digest(e):
-                raise RuntimeError("outcome does not bind to signed warning")
-            if result.get("kind")!="OUTCOME_RECORDED":
-                late+=1;continue
-            resolved+=1
-            if result.get("warning_issued"):
-                alerts+=1
-                for k in true_by_lead:
-                    lead=result.get("warning_lead_minutes")
-                    if result.get("early_warning_eligible") is True and lead is not None and lead>=k:
-                        true_by_lead[k]+=1
+                due=latest
+            if current<due+dt.timedelta(minutes=35):
+                continue
+            count["due"]+=1
+            if (event is None or event.get("status")!="SIGNED_STATE_PUBLISHED"
+                or delivery is None):
+                count["no_valid_forecast"]+=1
+                count["missing"]+=1
+                continue
+            dtime=when(delivery["public_delivery_utc"])
+            if (not when(slot["decision_window_open_utc"])<=when(event["issued_at_utc"])<=when(slot["decision_window_close_utc"])
+                or dtime>when(slot["decision_window_close_utc"])
+                or dtime<when(event["issued_at_utc"])):
+                count["no_valid_forecast"]+=1
+                count["missing"]+=1
+                continue
+            location=slots_dir/sid
+            opath=location/("outcome_"+horizon+".json")
+            rawpath=location/("raw_"+horizon+".json")
+            if not opath.exists() or not rawpath.exists():
+                count["missing"]+=1
+                continue
+            verify(opath,SELF_ID,os.environ["GITHUB_SHA"])
+            verify(rawpath,SELF_ID,os.environ["GITHUB_SHA"])
+            outcome=json.loads(opath.read_text())
+            raw=json.loads(rawpath.read_text())
+            if (outcome.get("source_signal_sha256")!=digest(event)
+                or outcome.get("source_raw_sha256")!=digest(raw)
+                or outcome.get("source_github_run_id")!=event.get("github_run_id")
+                or outcome.get("horizon")!=horizon
+                or outcome.get("slot_id")!=sid
+                or raw.get("schema")!="btc-v7r3-closed-1m-forward-source-v2"
+                or raw.get("symbol")!="BTCUSDT"):
+                raise ValueError("unsigned/substituted result or orphaned source")
+            if (when(outcome["due_utc"])!=due
+                or when(outcome["public_delivery_utc"])!=dtime
+                or when(raw["actual_publication_utc"])!=dtime):
+                raise ValueError("mutable outcome maturity/date")
+            refms=int(dtime.timestamp()*1000)//60000*60000
+            rr=raw["reference_row"]
+            if (int(rr[0])+60000!=refms or int(rr[6])+1!=refms
+                or when(raw["reference_minute_close_utc"])!=dt.datetime.fromtimestamp(refms/1000,dt.timezone.utc)):
+                raise ValueError("wrong reference spot-minute at GitHub public delivery")
+            ref=float(rr[4])
+            if not (math.isfinite(ref) and ref>0
+                    and math.isclose(ref,float(outcome["reference_spot_at_public_delivery"]),rel_tol=0,abs_tol=1e-8)):
+                raise ValueError("reference close differs from outcome claim")
+            anchor_time=future_anchor(dtime)
+            if when(raw["first_complete_minute_anchor_utc"])!=anchor_time:
+                raise ValueError("forward minute starts before publication")
+            recomputed=first_passage(anchor_time,ref,raw["rows"],horizon)
+            if digest(recomputed)!=digest(outcome["barrier_result"]):
+                raise ValueError("barrier direction/first-touch cannot be reproduced")
+            touch=recomputed["first_barrier_touch_utc"]
+            lower=((when(touch)-dt.timedelta(minutes=1)-dtime).total_seconds()/60
+                   if touch else None)
+            upper=((when(touch)-dtime).total_seconds()/60 if touch else None)
+            warning=bool(event["diagnostic"].get("alert"))
+            side=event["diagnostic"].get("warning_side")
+            mapped={"UP":"UP_FIRST","DOWN":"DOWN_FIRST",None:None}
+            if side not in mapped:raise ValueError("unknown signed pressure side")
+            warning_side=mapped[side]
+            market_gap=100*(ref/float(event["reference_spot"])-1)
+            truly_early=(not event["diagnostic"].get("price_already_moved",True)
+                          and abs(market_gap)<.30
+                          and dtime<=when(slot["decision_window_close_utc"]))
+            claimed_lead=(lower if warning_side==recomputed["direction"] else None)
+            observed_lead=outcome.get("warning_lead_minutes")
+            if (outcome.get("warning_issued") is not warning
+                or outcome.get("warning_side")!=warning_side
+                or outcome.get("actual_first_touch_side")!=recomputed["direction"]
+                or outcome.get("early_warning_eligible") is not truly_early
+                or outcome.get("already_moved_before_publication") is not (abs(market_gap)>=.30)
+                or abs(float(outcome["price_move_between_compute_and_publication_pct"])-market_gap)>1e-9
+                or (observed_lead is None)!=(claimed_lead is None)
+                or (claimed_lead is not None and abs(float(observed_lead)-claimed_lead)>1e-7)
+                or (lower is not None and abs(float(outcome["warning_lead_lower_minutes"])-lower)>1e-7)
+                or (upper is not None and abs(float(outcome["warning_lead_upper_minutes"])-upper)>1e-7)):
+                raise ValueError("invented label, success, intra-minute lead, or postcompute-veto")
+            recorded=when(outcome["recorded_at_utc"])
+            if recorded<due:raise ValueError("outcome recorded before maturity")
+            if recorded>due+dt.timedelta(minutes=35):
+                count["late"]+=1
+                continue
+            if outcome.get("kind")!="OUTCOME_RECORDED":
+                raise ValueError("status kind inconsistent with actual completion")
+            count["resolved"]+=1
+            if recomputed["direction"]=="NEITHER":count["no_touch"]+=1
+            if warning:
+                count["warning_count"]+=1
+                if warning_side!=recomputed["direction"]:count["wrong_side"]+=1
+                for threshold in (10,30,60):
+                    if (truly_early and warning_side==recomputed["direction"]
+                        and lower is not None and lower>=threshold):
+                        count["true_warning_at_least_minutes"][threshold]+=1
                     else:
-                        false_by_lead[k]+=1
-        metrics[h]={"due":due,"resolved":resolved,"missing":missing,"late":late,
-                    "warning_count":alerts,"true_warning_at_least_minutes":true_by_lead,
-                    "false_or_insufficient_lead":false_by_lead}
-    return {"schema":"btc-v7r3-prospective-stateful-quality-grid-v1",
-            "registered_grid_sha256":digest(reg),
-            "coverage":coverage,"forward_outcomes":metrics,
-            "skill_verified":False,"admission_ready":False,
-            "trading_authority":False}
+                        count["false_or_insufficient_lead"][threshold]+=1
+        metrics[horizon]=count
+    return {
+        "schema":"btc-v7r4-strict-full-grid-signed-recomputed-quality-v1",
+        "registered_grid_sha256":digest(reg),
+        "coverage":coverage,
+        "forward_outcomes":metrics,
+        "score_verification":"each signed outcome and raw rechecked, all first passage/lead/due recalculated",
+        "missing_forecast_does_not_reduce_outcome_denominator":True,
+        "skill_verified":False,"admission_ready":False,
+        "trading_authority":False}
+
 
 def tick(args):
     with tempfile.TemporaryDirectory() as temp:

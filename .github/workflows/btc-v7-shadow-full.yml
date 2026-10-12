@@ -69,6 +69,7 @@ jobs:
             --certificate-identity "$VERIFIED_TRAIN_IDENTITY" \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com
           python -m json.tool spot_paired_validation_errors.json >/dev/null
+          cd "$GITHUB_WORKSPACE"
           python -m btc_demand_v7.release_guard /tmp/btc-v7-frozen btc_demand_v7/trusted_release.json
           echo VERIFIED_SOURCE_PIN_38169934478
       - name: Validate shadow release contracts

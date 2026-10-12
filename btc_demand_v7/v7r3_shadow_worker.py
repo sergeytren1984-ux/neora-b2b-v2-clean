@@ -19,6 +19,7 @@ from btc_demand_v7.demand_change_v2 import (
     advance,state_zero,source_hash,BASELINE_COUNT)
 from btc_demand_v7.event_semantics import first_passage
 from btc_demand_v7.prospective_core import when
+from btc_demand_v7.live_snapshot import collect as market_collect, strict_closed, spot_state
 from btc_demand_v7.release_guard import certificate_source_sha
 
 REPO="sergeytren1984-ux/neora-b2b-v2-clean"
@@ -98,9 +99,8 @@ def register(args):
     start=when(args.start_utc)
     timestamp=utcnow()
     with tempfile.TemporaryDirectory() as temp:
-        tmp=pathlib.Path(temp);r2=tmp/"r2";ledger=tmp/"ledger"
-        clone(r2,R2_EVIDENCE)
-        source_r2(r2/"btc_v7r2_evidence")
+        tmp=pathlib.Path(temp);ledger=tmp/"ledger"
+        # No R2 forecast/outcome worker on the critical collection path.
         reg=grid(start,timestamp,os.environ["GITHUB_SHA"],days=args.days)
         clone(ledger,EVIDENCE,create=True)
         root=ledger/"btc_v7r3_evidence"
@@ -110,9 +110,8 @@ def register(args):
             "registered_at_utc":timestamp.isoformat(),
             "model_source_sha":os.environ["GITHUB_SHA"],
             "grid_sha256":digest(reg),
-            "r2_source_sha":SOURCE_R2_SHA,
-            "r2_grid_sha256":SOURCE_R2_GRID_SHA,
-            "signed_upstream_r2":True,
+            "spot_and_derivatives_input":"signed direct Binance/OKX point-in-time as-of",
+            "signed_upstream_r2":False,
             "trading_authority":False,"prospective_skill_proven":False})
         publish(ledger,"Freeze v7R3 stateful source, future decision deadlines and source lineage")
     print("BTC_V7R3_REGISTERED",json.dumps({
@@ -147,33 +146,33 @@ def last_close_before_issuance():
             "minute_close_utc":dt.datetime.fromtimestamp(cutoff/1000,dt.timezone.utc).isoformat(),
             "received_at_utc":acquired.isoformat(),"spot":c}
 
-def validated_snapshot(r2root,slot,expected_r2):
-    directory=r2root/"slots"/slot_id(slot)
-    snapshot_file=directory/"snapshot.json"
-    forecast_file=directory/"forecast.json"
-    if not(snapshot_file.is_file() and forecast_file.is_file()):
-        return None
-    verify(snapshot_file,R2_ID,SOURCE_R2_SHA)
-    verify(forecast_file,R2_ID,SOURCE_R2_SHA)
-    snapshot_bytes=snapshot_file.read_bytes()
-    snap=json.loads(snapshot_bytes)
-    forecast=json.loads(forecast_file.read_text())
-    if forecast["kind"]!="FORECAST_ISSUED" or when(forecast["slot_utc"])!=slot:
-        raise RuntimeError("R2 signed source has wrong slot/status")
-    if when(snap["anchor_utc"])!=slot or forecast["snapshot_sha256"]!=hashlib.sha256(snapshot_bytes).hexdigest():
-        raise RuntimeError("R2 snapshot digest does not match its signed forecast")
-    if forecast["frozen_grid_sha256"]!=SOURCE_R2_GRID_SHA:
-        raise RuntimeError("R2 snapshot from wrong registered epoch")
-    return snap
+def validated_snapshot(root,slot,unused=None):
+    """Only accept previously signed R4 direct raw from exact due anchor."""
+    path=root/"slots"/slot_id(slot)/"snapshot.json"
+    if not path.is_file():return None
+    verify(path,SELF_ID,os.environ["GITHUB_SHA"])
+    snapshot=json.loads(path.read_text())
+    if when(snapshot["anchor_utc"])!=slot:
+        raise RuntimeError("wrong signed self-collected candle anchor")
+    anchor_ms=int(slot.timestamp()*1000)
+    one=strict_closed(snapshot["one_min_rows"],60000,anchor_ms,200)
+    five=strict_closed(snapshot["five_min_rows"],300000,anchor_ms,600)
+    if len(one)!=len(snapshot["one_min_rows"]) or len(five)!=len(snapshot["five_min_rows"]):
+        raise RuntimeError("signed source includes future/unclosed candle")
+    derived=spot_state(one,anchor_ms)
+    for k,expected in derived.items():
+        actual=float(snapshot["observation"][k])
+        if not(math.isfinite(actual) and math.isclose(actual,expected,rel_tol=1e-11,abs_tol=1e-8)):
+            raise RuntimeError("signed source spot features differ from actual 1m raw")
+    return snapshot
 
-def historic_snapshots(r2root,slot):
-    # Verify distinct source snapshots/forecasts in parallel; serial 64+
-    # Cosign verifications can exhaust a five-minute issuance window.
+def historic_snapshots(root,slot):
     anchors=[slot-dt.timedelta(minutes=15*i)
              for i in reversed(range(1,BASELINE_COUNT+1))]
     with concurrent.futures.ThreadPoolExecutor(max_workers=12) as pool:
-        history=list(pool.map(lambda anchor:validated_snapshot(r2root,anchor,None),anchors))
+        history=list(pool.map(lambda anchor:validated_snapshot(root,anchor),anchors))
     return None if any(x is None for x in history) else history
+
 
 def available_previous_state(root,slot):
     previous=slot-dt.timedelta(minutes=15)
@@ -183,7 +182,7 @@ def available_previous_state(root,slot):
     prior=json.loads(path.read_text())
     return prior.get("state")
 
-def current_slot_signal(root,r2root,reg,ts):
+def current_slot_signal(root,reg,ts):
     slot=ts.replace(minute=ts.minute//15*15,second=0,microsecond=0)
     if not(when(reg["start_utc"])<=slot<when(reg["end_utc"])):
         return "OUTSIDE_FUTURE_EPOCH"
@@ -199,11 +198,13 @@ def current_slot_signal(root,r2root,reg,ts):
             "status":"MISSED_DEADLINE","published_utc":ts.isoformat(),
             "trading_authority":False})
         return due
-    snapshot=validated_snapshot(r2root,slot,None)
-    if snapshot is None:
-        # Try again before deadline. Absent final evidence is still a missing slot.
-        return "WAITING_R2_SIGNED_SNAPSHOT"
-    history=historic_snapshots(r2root,slot)
+    # Fetch fresh direct market observations IN THIS SOURCE JOB. Waiting
+    # for an R2 outcome backlog cannot prevent a time-critical signal.
+    snapshot=market_collect(anchor_ms=int(slot.timestamp()*1000))
+    if when(snapshot["anchor_utc"])!=slot:
+        raise RuntimeError("collector shifted preregistered anchor")
+    write(path.parent,"snapshot.json",snapshot)
+    history=historic_snapshots(root,slot)
     if history is None:
         write(path.parent,path.name,{
             "schema":"btc-v7r3-signed-pressure-event-v1",
@@ -609,8 +610,8 @@ def score(reg,root,at):
 
 def tick(args):
     with tempfile.TemporaryDirectory() as temp:
-        tmp=pathlib.Path(temp);ledger=tmp/"ledger";r2=tmp/"r2"
-        clone(ledger,EVIDENCE);clone(r2,R2_EVIDENCE)
+        tmp=pathlib.Path(temp);ledger=tmp/"ledger"
+        clone(ledger,EVIDENCE)
         root=ledger/"btc_v7r3_evidence"
         frozen_file=root/"registration.json"
         reg=json.loads(frozen_file.read_text())
@@ -621,10 +622,9 @@ def tick(args):
             raise RuntimeError("R3 freeze tampered")
         if reg["model_source_sha"]!=os.environ["GITHUB_SHA"]:
             raise RuntimeError("source drift invalidates this prospective epoch")
-        source_r2(r2/"btc_v7r2_evidence")
         ts=utcnow()
         if args.action=="forecast":
-            status=current_slot_signal(root,r2/"btc_v7r2_evidence",reg,ts)
+            status=current_slot_signal(root,reg,ts)
             outcomes=0
             # Do NOT wait for 672-slot audit/cosign replay in critical path.
             # A no-op due to missing R2 source is not a successful forecast.

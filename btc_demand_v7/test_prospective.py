@@ -55,7 +55,7 @@ def test():
     assert s["due_forecast_slots"]==8
     assert s["issued_on_time"]==1
     assert s["missing_forecasts"]==7
-    assert s["heads"]["1h"]["n"]==1 and s["heads"]["1h"]["mae_gain_usdt"]==100.
+    assert s["heads"]["1h"]["settled"]==1 and s["heads"]["1h"]["mae_gain_usdt"]==100.
     assert not s["admission_ready"]
     assert s["missing_slots_block_admission"]
     err(lambda:score_fixed_grid(g,[f,f],[o],start+dt.timedelta(hours=2)),"duplicate forecast")

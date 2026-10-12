@@ -121,26 +121,37 @@ def collect():
     five=json_get(SOURCE_SPOT,{"symbol":"BTCUSDT","interval":"5m","endTime":anchor_ms-1,"limit":1000})
     one=strict_closed(one,60000,anchor_ms,200)
     five=strict_closed(five,300000,anchor_ms,600)
-    recorded=int(time.time()*1000)
+    spot_recorded=int(time.time()*1000)
     state={"schema":"btc-v7-live-shadow-snapshot-v1",
            "anchor_utc":dt.datetime.fromtimestamp(anchor_ms/1000,UTC).isoformat(),
-           "retrieved_at_utc":dt.datetime.fromtimestamp(recorded/1000,UTC).isoformat(),
+           "retrieved_at_utc":None,
+           "spot_received_utc":dt.datetime.fromtimestamp(spot_recorded/1000,UTC).isoformat(),
            "source_policy":{"spot_1m":"REQUIRED","spot_5m":"REQUIRED",
                             "oi_okx":"OPTIONAL","funding_okx":"OPTIONAL","book_okx":"OPTIONAL"},
            "symbol":"BTCUSDT","raw_source":"Binance data-api closed 1m/5m",
            "no_backfill":True,"one_min_rows":one,"five_min_rows":five,
-           "raw_optional":{},"optional_status":{}}
+           "raw_optional":{},"optional_status":{},"optional_receipts":{}}
     for name,url,query in (
         ("oi_okx",SOURCE_OI,{"ccy":"BTC","period":"5m"}),
         ("funding_okx",SOURCE_FUNDING,{"instId":"BTC-USDT-SWAP"}),
         ("book_okx",SOURCE_BOOK,{"instId":"BTC-USDT-SWAP","sz":20}),
     ):
+        request_start=int(time.time()*1000)
         try:
             data=json_get(url,query)
+            response_end=int(time.time()*1000)
             state["raw_optional"][name]=data
             state["optional_status"][name]={"state":"AVAILABLE","source":url}
         except Exception as exc:
+            response_end=int(time.time()*1000)
             state["optional_status"][name]={"state":"UNAVAILABLE","reason":type(exc).__name__}
+        state["optional_receipts"][name]={
+            "request_started_ms":request_start,
+            "response_received_ms":response_end,
+            "url":url,"query":query,
+        }
+    recorded=int(time.time()*1000)
+    state["retrieved_at_utc"]=dt.datetime.fromtimestamp(recorded/1000,UTC).isoformat()
     observation=spot_state(one,anchor_ms)
     observation["oi"]=None;observation["book"]=None;observation["funding"]=None
     for name,compute in (("oi_okx",lambda d:open_interest_state(d,recorded)),

@@ -172,11 +172,8 @@ def eval_archive(path,out):
         })
     n_correct=sum(a["correct_with_at_least_60m_lead"] for a in alerts)
     days=sorted(set(ix[i][:10] for i in te))
-    incidence={d:int(np.any((y[te]==1)|(y[te]==2))) for d in days
-               for te_mask in [np.asarray([ix[i][:10]==d for i in te])]}
-    # Correct day recall uses same-day labels, not overlap count.
-    # Daily events definition requires a separate episode denominator;
-    # do NOT interpret it as event-level recall.
+    # Overlapping 3m rows never become independent event-level recall.
+    # Only per-day count and alert correctness are descriptive here.
     day_hit={day:bool(any(a["day_utc"]==day and a["correct_with_at_least_60m_lead"]
                           for a in alerts)) for day in days}
     detail={

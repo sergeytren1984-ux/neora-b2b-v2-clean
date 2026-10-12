@@ -12,10 +12,10 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: "register future epoch or run one signed tick"
+        description: "register, forecast or resolve outcomes in separate signed job"
         required: true
         type: choice
-        options: [register,tick]
+        options: [register,forecast,outcome]
       start_utc:
         description: "future, 15m aligned, UTC (only for register)"
         required: false
@@ -69,7 +69,11 @@ jobs:
           python -m btc_demand_v7.v7r3_shadow_worker register \
             --start-utc "${{ inputs.start_utc }}" \
             --days "${{ inputs.days }}"
-      - name: Verify frozen signer, read only signed pre-event R2 and write time-bounded R3 warning
-        if: github.event_name == 'workflow_dispatch' && inputs.action == 'tick'
+      - name: Emit one current pre-move signed warning before its exact deadline
+        if: github.event_name == 'workflow_dispatch' && inputs.action == 'forecast'
         run: |
-          python -m btc_demand_v7.v7r3_shadow_worker tick
+          python -m btc_demand_v7.v7r3_shadow_worker forecast
+      - name: Resolve only matured independent future outcomes after the warning job completed
+        if: github.event_name == 'workflow_dispatch' && inputs.action == 'outcome'
+        run: |
+          python -m btc_demand_v7.v7r3_shadow_worker outcome

@@ -1,106 +1,18 @@
-name: BTC v7R4 direct-market prewarmed prospective clock
+name: RETIRED BTC v7R4 clock (immutable research evidence preserved)
 
+# Superseded before first prospective due by registered corrected source:
+# btc-v7r5-live-cadence-reliability-20261012
+# Frozen R4 ledger remains unchanged. New future runs use the distinct
+# btc-v7r5-forward-clock.yml and separate signed evidence branch.
 on:
   workflow_dispatch: {}
-  schedule:
-    - cron: '1,16,31,46 * * * *'
 
 permissions:
   contents: read
-  actions: write
-
-concurrency:
-  group: btc-v7r4-single-long-lived-clock
-  cancel-in-progress: false
 
 jobs:
-  signed-shadow-clock:
+  retired:
+    if: ${{ false }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 345
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      GH_REPOSITORY: ${{ github.repository }}
     steps:
-      - name: Run separated pre-event pressure and matured-outcome jobs by exact 15m schedule
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import datetime as dt,json,os,time,urllib.request
-          UTC=dt.timezone.utc
-          REPO=os.environ["GH_REPOSITORY"]
-          TOKEN=os.environ["GH_TOKEN"]
-          START=dt.datetime(2026,10,13,tzinfo=UTC)
-          END=dt.datetime(2026,10,20,tzinfo=UTC)
-          DRAIN_END=END+dt.timedelta(hours=5)
-          REF="btc-v7r4-hardening-20261012"
-          WORKFLOW="btc-v7r3-signed-demand-shadow.yml"
-          CLOCK="btc-v7r3-forward-clock.yml"
-          now=lambda:dt.datetime.now(UTC)
-          stop=now()+dt.timedelta(hours=5,minutes=12)
-          headers={"Authorization":"Bearer "+TOKEN,
-                   "Accept":"application/vnd.github+json",
-                   "Content-Type":"application/json",
-                   "X-GitHub-Api-Version":"2022-11-28",
-                   "User-Agent":"btc-v7r3-signed-research-clock"}
-          def send(workflow,ref,payload=None):
-              body=json.dumps({"ref":ref,"inputs":payload or {}}).encode()
-              req=urllib.request.Request(
-                  f"https://api.github.com/repos/{REPO}/actions/workflows/{workflow}/dispatches",
-                  headers=headers,data=body,method="POST")
-              for trial in range(3):
-                  try:
-                      with urllib.request.urlopen(req,timeout=20) as res:
-                          if res.status!=204:raise RuntimeError("unexpected GitHub dispatch status")
-                      return
-                  except Exception:
-                      if trial==2:raise
-                      time.sleep(2*(trial+1))
-          print("R4_PREWARMED_CLOCK_ACTIVE",now().isoformat(),flush=True)
-          processed=set()
-          try:
-            while now()<stop:
-                t=now()
-                if t>=DRAIN_END:break
-                if t<START:
-                    time.sleep(min(30,max(1,(START-t).total_seconds())))
-                    continue
-                n=max(0,int((t-START).total_seconds()//900))
-                candidate=[]
-                for idx in (n-1,n,n+1):
-                    if idx<0:continue
-                    origin=START+dt.timedelta(minutes=15*idx)
-                    if origin>=DRAIN_END:continue
-                    if origin<END:
-                        candidate.append((origin+dt.timedelta(minutes=3),"forecast",idx))
-                    candidate.append((origin+dt.timedelta(minutes=14),"outcome",idx))
-                candidate.sort()
-                matched=False
-                for due,action,index in candidate:
-                    key=(action,index)
-                    if key in processed or t<due or t>due+dt.timedelta(minutes=2):
-                        continue
-                    if action=="forecast" and not(START<=START+dt.timedelta(minutes=15*index)<END):
-                        continue
-                    processed.add(key)
-                    try:
-                        send(WORKFLOW,REF,{"action":action,"days":"7"})
-                        print("SIGNED_R4_DISPATCH_ACCEPTED",action,
-                              "due",due.isoformat(),"sent",now().isoformat(),flush=True)
-                    except Exception as exc:
-                        print("SIGNED_R4_DISPATCH_FAILED",action,type(exc).__name__,str(exc)[:160],flush=True)
-                        raise
-                    matched=True
-                    time.sleep(4)
-                    break
-                if not matched:
-                    time.sleep(8)
-          finally:
-            # Queue a successor on EVERY exit path, including dispatch errors.
-            # GitHub cron is a separate fail-safe if both network calls fail.
-            if now()<DRAIN_END:
-              send(CLOCK,"main")
-              print("SIGNED_R4_CLOCK_SUCCESSOR_ACCEPTED",now().isoformat(),flush=True)
-            else:
-              print("SIGNED_R4_CLOCK_DRAIN_COMPLETE",now().isoformat(),flush=True)
-          PY
+      - run: echo "Old R4 clock intentionally disabled; no backfill, no forecast, no trading"

@@ -1,9 +1,18 @@
 """Invariant checks for the existing v7R6 24h three-way endpoint mathematics."""
 from __future__ import annotations
 import datetime as dt,math,unittest
-from btc_skill_rebuild.research_endpoint_24h_v7r6 import target,fit,predict,evaluate,STEPS,STEP,LIMIT
+from btc_skill_rebuild.research_endpoint_24h_v7r6 import target,fit,predict,evaluate,alert_score,STEPS,STEP,LIMIT
 
 class End24hMath(unittest.TestCase):
+    def test_flat_three_way_prior_never_creates_daily_false_alert(self):
+        t=int(dt.datetime(2026,9,29,tzinfo=dt.timezone.utc).timestamp()*1000)
+        model=([0.],[1.],[[0.,0.],[0.,0.],[0.,0.]],[.3,.3,.4])
+        validation=[(t+i*900000,(0.,),2) for i in range(96)]
+        alerts=alert_score(validation,model,0.,validation)
+        self.assertEqual(alerts['historical_unpublished_alerts'],0)
+        self.assertEqual(alerts['correct_direction_endpoint'],0)
+        self.assertIsNone(alerts['threshold_selected_on_past_validation'])
+
     def test_three_mutually_exclusive_endpoint_outcomes(self):
         self.assertEqual(STEPS*STEP//60000,1440)
         self.assertEqual(target(83000.,83000.*1.019),2)

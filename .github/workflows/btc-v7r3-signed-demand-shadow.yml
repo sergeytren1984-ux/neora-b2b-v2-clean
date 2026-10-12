@@ -1,0 +1,75 @@
+name: BTC v7R3 signed early-demand prospective shadow (no trading)
+
+on:
+  push:
+    branches: [btc-v7r3-demand-stateful-challenger-20261012]
+    paths:
+      - btc_demand_v7/v7r3_shadow_worker.py
+      - btc_demand_v7/shadow_contract_v3.py
+      - btc_demand_v7/demand_change_v2.py
+      - btc_demand_v7/test_v7r3_shadow_worker.py
+      - .github/workflows/btc-v7r3-signed-demand-shadow.yml
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "register future epoch or run one signed tick"
+        required: true
+        type: choice
+        options: [register,tick]
+      start_utc:
+        description: "future, 15m aligned, UTC (only for register)"
+        required: false
+        type: string
+      days:
+        description: "fixed consecutive days, >=1 <=14"
+        required: false
+        default: "7"
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+  id-token: write
+
+concurrency:
+  group: btc-v7r3-prospective-evidence-write
+  cancel-in-progress: false
+
+jobs:
+  signed-research-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPOSITORY: ${{ github.repository }}
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: true
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: Reject prior-state resets, future prices and unscheduled warnings
+        run: |
+          python -m py_compile \
+            btc_demand_v7/demand_change_v2.py \
+            btc_demand_v7/shadow_contract_v3.py \
+            btc_demand_v7/v7r3_shadow_worker.py
+          python -m btc_demand_v7.test_demand_change_v2
+          python -m btc_demand_v7.test_shadow_contract_v3
+          python -m btc_demand_v7.test_v7r3_shadow_worker
+      - name: Verify and sign future-epoch registration before first target
+        if: github.event_name == 'workflow_dispatch' && inputs.action == 'register'
+        run: |
+          python -m btc_demand_v7.v7r3_shadow_worker register \
+            --start-utc "${{ inputs.start_utc }}" \
+            --days "${{ inputs.days }}"
+      - name: Verify frozen signer, read only signed pre-event R2 and write time-bounded R3 warning
+        if: github.event_name == 'workflow_dispatch' && inputs.action == 'tick'
+        run: |
+          python -m btc_demand_v7.v7r3_shadow_worker tick

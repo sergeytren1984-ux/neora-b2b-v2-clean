@@ -10,7 +10,7 @@ Modes:
 """
 from __future__ import annotations
 import argparse, datetime as dt, hashlib, json, math, os, pathlib
-import subprocess,tempfile,urllib.parse,urllib.request
+import subprocess,tempfile,urllib.parse,urllib.request,concurrent.futures
 from btc_demand_v7.shadow_contract_v3 import (
     grid,accept_slot,slot_id,digest,canonical,
     future_anchor,future_due,HORIZONS,status_grid,
@@ -158,13 +158,13 @@ def validated_snapshot(r2root,slot,expected_r2):
     return snap
 
 def historic_snapshots(r2root,slot):
-    history=[]
-    for i in reversed(range(1,BASELINE_COUNT+1)):
-        anchor=slot-dt.timedelta(minutes=15*i)
-        snap=validated_snapshot(r2root,anchor,None)
-        if snap is None:return None
-        history.append(snap)
-    return history
+    # Verify distinct source snapshots/forecasts in parallel; serial 64+
+    # Cosign verifications can exhaust a five-minute issuance window.
+    anchors=[slot-dt.timedelta(minutes=15*i)
+             for i in reversed(range(1,BASELINE_COUNT+1))]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=12) as pool:
+        history=list(pool.map(lambda anchor:validated_snapshot(r2root,anchor,None),anchors))
+    return None if any(x is None for x in history) else history
 
 def available_previous_state(root,slot):
     previous=slot-dt.timedelta(minutes=15)
@@ -202,13 +202,33 @@ def current_slot_signal(root,r2root,reg,ts):
             "status":"INSUFFICIENT_ASOF_HISTORY","published_utc":utcnow().isoformat(),
             "state":state_zero(),"trading_authority":False})
         return "INSUFFICIENT_ASOF_HISTORY"
+    # Exactly ONE clean initialization, after the first 32 signed slots.
+    # Any later missing predecessor is a disqualifying continuity break,
+    # NOT permission to reset the same-day alert budget or CUSUM.
+    first_eligible=when(reg["start_utc"])+dt.timedelta(minutes=15*BASELINE_COUNT)
     previous_state=available_previous_state(root,slot)
-    if previous_state is None:
-        # The first full 32-observation warmup can start a new state,
-        # never invent alerts for missed predecessor slots.
-        state=state_zero()
-    else:
-        state=previous_state
+    if previous_state is None and slot!=first_eligible:
+        write(path.parent,path.name,{
+            "schema":"btc-v7r3-signed-pressure-event-v1",
+            "slot_id":slot_id(slot),"anchor_utc":slot.isoformat(),
+            "status":"STATEFUL_CHAIN_DISCONTINUITY",
+            "published_utc":utcnow().isoformat(),
+            "zero_reset_not_allowed":True,"trading_authority":False})
+        return "STATEFUL_CHAIN_DISCONTINUITY"
+    if slot==first_eligible and previous_state is not None:
+        raise RuntimeError("untrusted state before frozen warmup completed")
+    state=state_zero() if previous_state is None else previous_state
+    if previous_state is not None:
+        previous_record=root/"slots"/slot_id(slot-dt.timedelta(minutes=15))/"signal.json"
+        prior=json.loads(previous_record.read_text())
+        if prior.get("status")!="SIGNED_STATE_PUBLISHED":
+            raise RuntimeError("predecessor not a continuous signed model state")
+        if previous_state["sequence"]<1:
+            raise RuntimeError("improper signed state sequence")
+        if previous_state.get("last_alert_utc") is not None:
+            # The single alert/day policy stays bound to the signed state.
+            prior_alert=when(previous_state["last_alert_utc"])
+            if prior_alert>slot:raise RuntimeError("future last-alert state")
     reference=last_close_before_issuance()
     issued=utcnow()
     if accept_slot(reg,slot,issued)!="ON_TIME":

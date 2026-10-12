@@ -69,8 +69,10 @@ def bound_wait_utility(current_issued_utc: datetime,
             continue
         if t.date() in past:
             raise ValueError("duplicate opportunity on same UTC day")
-        if not t<=public<t+timedelta(minutes=60):
-            raise ValueError("forecast not published before first execution")
+        if (t.hour,t.minute,t.second,t.microsecond)!=(issued.hour,issued.minute,issued.second,issued.microsecond):
+            raise ValueError("historical opportunity not on fixed daily UTC issue clock")
+        if not t<=public<=t+timedelta(minutes=13):
+            raise ValueError("forecast was not published by the frozen 13-minute deadline")
         if matured<t+timedelta(minutes=120) or matured>=issued:
             raise ValueError("outcome unavailable at decision time")
         if sample.source not in ("historical_spot_proxy","claimed_operator_quotes"):

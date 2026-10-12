@@ -174,7 +174,15 @@ def available_previous_state(root,slot):
     if not path.exists():return None
     verify(path,SELF_ID,os.environ["GITHUB_SHA"])
     prior=json.loads(path.read_text())
-    return prior.get("state")
+    # Warmup records may contain a placeholder zero state for bookkeeping.
+    # It is NOT a valid prior directional state. Exactly at the 33rd reading
+    # the first legitimate CUSUM must initialize once with state_zero().
+    if prior.get("status")!="SIGNED_STATE_PUBLISHED":
+        return None
+    state=prior.get("state")
+    if not isinstance(state,dict):
+        raise RuntimeError("signed published event lacks its running state")
+    return state
 
 def current_slot_signal(root,reg,ts):
     slot=ts.replace(minute=ts.minute//15*15,second=0,microsecond=0)

@@ -16,7 +16,7 @@ BRANCH="btc-v7r4-hardening-20261012"
 EVIDENCE="btc-v7r4-direct-evidence-20261013"
 R2_EVIDENCE="btc-v7r2-prospective-evidence-20261013"
 CYCLE=timedelta(minutes=15)
-TICK_MIN=8
+TICK_MIN=3
 TICK_MAX=13
 EPISODE_GAP_MINUTES=240
 HORIZONS={"1h":60,"4h":240}

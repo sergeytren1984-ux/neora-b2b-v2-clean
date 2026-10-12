@@ -220,6 +220,8 @@ def current_slot_signal(root,r2root,reg,ts):
            "slot_id":slot_id(slot),"anchor_utc":slot.isoformat(),
            "status":"SIGNED_STATE_PUBLISHED",
            "issued_at_utc":issued.isoformat(),
+           "github_run_id":os.environ.get("GITHUB_RUN_ID","SYNTHETIC_TEST"),
+           "public_delivery_only_after_successful_GitHub_run":True,
            "snapshot_received_at_utc":snapshot["retrieved_at_utc"],
            "reference_spot":reference["spot"],
            "reference_1m_raw":reference,
@@ -253,42 +255,88 @@ def get_future_raw(pending,now):
             recorded[last]=r
     return recorded
 
+def verified_delivery_time(event):
+    """Use GitHub's completed_at, NOT the earlier model computation timestamp.
+
+    Run success proves that the signed evidence was pushed to GitHub before
+    completion; this conservative upper bound prevents phantom advance warning.
+    """
+    runid=event.get("github_run_id")
+    if not runid or not str(runid).isdigit():
+        raise RuntimeError("forecast lacks verifiable source GitHub run")
+    url=f"https://api.github.com/repos/{REPO}/actions/runs/{runid}"
+    headers={"Accept":"application/vnd.github+json",
+             "X-GitHub-Api-Version":"2022-11-28",
+             "User-Agent":"btc-v7r3-conservative-signed-delivery"}
+    token=os.environ.get("GH_TOKEN")
+    if token:headers["Authorization"]="Bearer "+token
+    request=urllib.request.Request(url,headers=headers)
+    with urllib.request.urlopen(request,timeout=20) as response:
+        data=json.load(response)
+    if data.get("status")!="completed":
+        return None
+    if data.get("conclusion")!="success":
+        raise RuntimeError("signal source GitHub run did not succeed")
+    if data.get("head_sha")!=event["model_source_sha"]:
+        raise RuntimeError("signal run source SHA differs from frozen model")
+    completed=when(data["updated_at"] if not data.get("completed_at") else data["completed_at"])
+    computed=when(event["issued_at_utc"])
+    if completed<computed:
+        raise RuntimeError("GitHub delivery completion before computed signal")
+    return completed
+
 def resolve_outcomes(root,now):
     pending=[]
     for p in (root/"slots").glob("*/signal.json") if (root/"slots").exists() else []:
         event=json.loads(p.read_text())
         if event.get("status")!="SIGNED_STATE_PUBLISHED":continue
+        delivery=verified_delivery_time(event)
+        if delivery is None:continue
         for horizon in HORIZONS:
-            due=when(event["target_utc"][horizon])
+            due=future_due(delivery,horizon)
             filename=p.parent/("outcome_"+horizon+".json")
             if filename.exists() or now<due+dt.timedelta(minutes=2):continue
-            # After 35m grace, never manufacture an on-time outcome.
-            pending.append((event,horizon,due,filename,p))
+            pending.append((event,horizon,due,filename,p,delivery))
     if not pending:return 0
     bars=get_future_raw(pending,now)
     completed=0
-    for event,horizon,due,path,eventpath in pending:
-        start=when(event["exact_future_first_full_minute_utc"])
+    for event,horizon,due,path,eventpath,delivery in pending:
+        start=future_anchor(delivery)
         target_times=[int((start+dt.timedelta(minutes=i)).timestamp()*1000)
                       for i in range(1,HORIZONS[horizon]+1)]
-        if not all(t in bars for t in target_times):
+        ref_end=int(delivery.timestamp()*1000)//60000*60000
+        if ref_end not in bars or not all(t in bars for t in target_times):
             continue
+        reference_bar=bars[ref_end]
+        # The public-completion reference is determined AFTER the run
+        # completed. It is never used to compute the earlier warning.
+        ref=float(reference_bar[4])
+        if not(math.isfinite(ref) and ref>0):
+            raise ValueError("invalid public-completion price reference")
         verify(eventpath,SELF_ID,os.environ["GITHUB_SHA"])
-        raw={"schema":"btc-v7r3-closed-1m-forward-source-v1",
+        raw={"schema":"btc-v7r3-closed-1m-forward-source-v2",
              "symbol":"BTCUSDT","requested_post_due_utc":now.isoformat(),
+             "actual_publication_utc":delivery.isoformat(),
+             "reference_minute_close_utc":dt.datetime.fromtimestamp(ref_end/1000,dt.timezone.utc).isoformat(),
+             "reference_row":reference_bar,
              "first_complete_minute_anchor_utc":start.isoformat(),
              "rows":[bars[t] for t in target_times]}
-        rawpath=write(path.parent,"raw_"+horizon+".json",raw)
-        result=first_passage(start,float(event["reference_spot"]),raw["rows"],horizon)
+        write(path.parent,"raw_"+horizon+".json",raw)
+        result=first_passage(start,ref,raw["rows"],horizon)
         warning_side=event["diagnostic"].get("warning_side")
         predicted=("UP_FIRST" if warning_side=="UP" else
                    "DOWN_FIRST" if warning_side=="DOWN" else None)
         touch=result["first_barrier_touch_utc"]
-        lead=((when(touch)-when(event["issued_at_utc"])).total_seconds()/60 if touch else None)
+        lead=((when(touch)-delivery).total_seconds()/60 if touch else None)
         write(path.parent,path.name,{
             "schema":"btc-v7r3-signed-pre-move-forward-outcome-v1",
             "slot_id":event["slot_id"],"horizon":horizon,
             "due_utc":due.isoformat(),"recorded_at_utc":now.isoformat(),
+            "public_delivery_utc":delivery.isoformat(),
+            "model_computed_at_utc":event["issued_at_utc"],
+            "source_github_run_id":event["github_run_id"],
+            "reference_spot_at_public_delivery":ref,
+            "reference_price_after_delivery_not_model_feature":True,
             "kind":"OUTCOME_RECORDED" if now<=due+dt.timedelta(minutes=35) else "OUTCOME_LATE",
             "source_raw_sha256":digest(raw),
             "source_signal_sha256":digest(event),
@@ -297,6 +345,7 @@ def resolve_outcomes(root,now):
             "warning_side":predicted,
             "actual_first_touch_side":result["direction"],
             "warning_lead_minutes":lead if predicted==result["direction"] else None,
+            "early_warning_eligible":(delivery<=when(event["anchor_utc"])+dt.timedelta(minutes=13)),
             "raw_independent_vendor_close_time_verified":True,
             "trading_authority":False})
         completed+=1
@@ -313,10 +362,17 @@ def score(reg,root,at):
         for s in reg["due_slots"]:
             e=event_index.get(s["slot_id"])
             if not e or e.get("status")!="SIGNED_STATE_PUBLISHED":continue
-            target=when(e["target_utc"][h])
+            output=root/"slots"/s["slot_id"]/("outcome_"+h+".json")
+            # The true target is measured from verified public delivery,
+            # not the original model compute timestamp.
+            if output.is_file():
+                target=when(json.loads(output.read_text())["due_utc"])
+            else:
+                # Missing future outcomes count once the *latest* 13m
+                # issuance deadline plus horizon plus 35m grace passes.
+                target=when(e["anchor_utc"])+dt.timedelta(minutes=13+HORIZONS[h])
             if at<target+dt.timedelta(minutes=35):continue
             due+=1
-            output=root/"slots"/s["slot_id"]/("outcome_"+h+".json")
             if not output.is_file():missing+=1;continue
             result=json.loads(output.read_text())
             if result.get("source_signal_sha256")!=digest(e):
@@ -328,7 +384,7 @@ def score(reg,root,at):
                 alerts+=1
                 for k in true_by_lead:
                     lead=result.get("warning_lead_minutes")
-                    if lead is not None and lead>=k:
+                    if result.get("early_warning_eligible") is True and lead is not None and lead>=k:
                         true_by_lead[k]+=1
                     else:
                         false_by_lead[k]+=1
@@ -357,8 +413,14 @@ def tick(args):
             raise RuntimeError("source drift invalidates this prospective epoch")
         source_r2(r2/"btc_v7r2_evidence")
         ts=utcnow()
-        status=current_slot_signal(root,r2/"btc_v7r2_evidence",reg,ts)
-        outcomes=resolve_outcomes(root,utcnow())
+        if args.action=="forecast":
+            status=current_slot_signal(root,r2/"btc_v7r2_evidence",reg,ts)
+            outcomes=0
+        elif args.action=="outcome":
+            status="OUTCOME_ONLY_NO_FORECAST_CRITICAL_PATH"
+            outcomes=resolve_outcomes(root,utcnow())
+        else:
+            raise ValueError("invalid work action")
         scored=score(reg,root,utcnow())
         scored["github_run_id"]=os.environ["GITHUB_RUN_ID"]
         write(root/"scorecards",os.environ["GITHUB_RUN_ID"]+".json",scored)
@@ -372,7 +434,7 @@ def tick(args):
 
 def main():
     p=argparse.ArgumentParser()
-    p.add_argument("action",choices=["register","tick"])
+    p.add_argument("action",choices=["register","forecast","outcome"])
     p.add_argument("--start-utc",default="")
     p.add_argument("--days",type=int,default=7)
     args=p.parse_args()

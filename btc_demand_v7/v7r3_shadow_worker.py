@@ -14,7 +14,7 @@ import subprocess,tempfile,urllib.parse,urllib.request,concurrent.futures,time
 from btc_demand_v7.shadow_contract_v3 import (
     grid,accept_slot,slot_id,digest,canonical,
     future_anchor,future_due,HORIZONS,status_grid,
-    BRANCH,EVIDENCE,R2_EVIDENCE,SOURCE_R2_SHA,SOURCE_R2_GRID_SHA)
+    BRANCH,EVIDENCE,R2_EVIDENCE,SOURCE_R2_SHA,SOURCE_R2_GRID_SHA,SCHEDULER_BLOB_SHA)
 from btc_demand_v7.demand_change_v2 import (
     advance,state_zero,source_hash,BASELINE_COUNT)
 from btc_demand_v7.event_semantics import first_passage
@@ -95,7 +95,14 @@ def source_r2(r2_root):
         raise RuntimeError("R2 prospective freeze inconsistency")
     return registered
 
+def scheduler_blob_sha():
+    return run("gh","api",
+        f"repos/{REPO}/contents/.github/workflows/btc-v7r3-forward-clock.yml?ref=main",
+        "--jq",".sha")
+
 def register(args):
+    if scheduler_blob_sha()!=SCHEDULER_BLOB_SHA:
+        raise RuntimeError("unregistered operational GitHub scheduler modification")
     start=when(args.start_utc)
     timestamp=utcnow()
     with tempfile.TemporaryDirectory() as temp:
@@ -624,6 +631,9 @@ def tick(args):
             raise RuntimeError("R3 freeze tampered")
         if reg["model_source_sha"]!=os.environ["GITHUB_SHA"]:
             raise RuntimeError("source drift invalidates this prospective epoch")
+        if (reg.get("github_prestart_scheduler_blob_sha")!=SCHEDULER_BLOB_SHA
+            or scheduler_blob_sha()!=SCHEDULER_BLOB_SHA):
+            raise RuntimeError("live operational scheduler diverged from frozen registration")
         ts=utcnow()
         if args.action=="forecast":
             status=current_slot_signal(root,reg,ts)

@@ -3,7 +3,7 @@ import datetime as dt,copy,json,pathlib,tempfile
 from unittest.mock import patch
 from btc_demand_v7.otc_signed_counterfactual_audit_v5 import run,MODEL_SHA,CURRENT_PRODUCER
 from btc_demand_v7.otc_prospective_policy_v5 import commitment,digest
-from btc_demand_v7.test_otc_prospective_policy_v5 import setup,source_minutes
+from btc_demand_v7.test_otc_prospective_policy_v5 import setup
 
 UTC=dt.timezone.utc
 START=dt.datetime(2026,10,13,tzinfo=UTC)

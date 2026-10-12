@@ -1,16 +1,16 @@
-name: BTC v7R3 corrected as-of latency prospective clock
+name: BTC v7R4 direct-market prewarmed prospective clock
 
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: '9 * * * *'
+    - cron: '1,16,31,46 * * * *'
 
 permissions:
   contents: read
   actions: write
 
 concurrency:
-  group: btc-v7r3-single-long-lived-clock
+  group: btc-v7r4-single-long-lived-clock
   cancel-in-progress: false
 
 jobs:
@@ -33,7 +33,7 @@ jobs:
           START=dt.datetime(2026,10,13,tzinfo=UTC)
           END=dt.datetime(2026,10,20,tzinfo=UTC)
           DRAIN_END=END+dt.timedelta(hours=5)
-          REF="btc-v7r3-asof-latency-remediation-20261012"
+          REF="btc-v7r4-hardening-20261012"
           WORKFLOW="btc-v7r3-signed-demand-shadow.yml"
           CLOCK="btc-v7r3-forward-clock.yml"
           now=lambda:dt.datetime.now(UTC)
@@ -56,47 +56,51 @@ jobs:
                   except Exception:
                       if trial==2:raise
                       time.sleep(2*(trial+1))
-          print("R3_PREWARMED_CLOCK_ACTIVE",now().isoformat(),flush=True)
+          print("R4_PREWARMED_CLOCK_ACTIVE",now().isoformat(),flush=True)
           processed=set()
-          while now()<stop:
-              t=now()
-              if t>=DRAIN_END:break
-              if t<START:
-                  time.sleep(min(30,max(1,(START-t).total_seconds())))
-                  continue
-              n=max(0,int((t-START).total_seconds()//900))
-              candidate=[]
-              for idx in (n-1,n,n+1):
-                  if idx<0:continue
-                  origin=START+dt.timedelta(minutes=15*idx)
-                  if origin>=DRAIN_END:continue
-                  if origin<END:
-                      candidate.append((origin+dt.timedelta(minutes=8),"forecast",idx))
-                  candidate.append((origin+dt.timedelta(minutes=14),"outcome",idx))
-              candidate.sort()
-              matched=False
-              for due,action,index in candidate:
-                  key=(action,index)
-                  if key in processed or t<due or t>due+dt.timedelta(minutes=2):
-                      continue
-                  if action=="forecast" and not(START<=START+dt.timedelta(minutes=15*index)<END):
-                      continue
-                  processed.add(key)
-                  try:
-                      send(WORKFLOW,REF,{"action":action,"days":"7"})
-                      print("SIGNED_R3_DISPATCH_ACCEPTED",action,
-                            "due",due.isoformat(),"sent",now().isoformat(),flush=True)
-                  except Exception as exc:
-                      print("SIGNED_R3_DISPATCH_FAILED",action,type(exc).__name__,str(exc)[:160],flush=True)
-                      raise
-                  matched=True
-                  time.sleep(4)
-                  break
-              if not matched:
-                  time.sleep(8)
-          if now()<DRAIN_END:
+          try:
+            while now()<stop:
+                t=now()
+                if t>=DRAIN_END:break
+                if t<START:
+                    time.sleep(min(30,max(1,(START-t).total_seconds())))
+                    continue
+                n=max(0,int((t-START).total_seconds()//900))
+                candidate=[]
+                for idx in (n-1,n,n+1):
+                    if idx<0:continue
+                    origin=START+dt.timedelta(minutes=15*idx)
+                    if origin>=DRAIN_END:continue
+                    if origin<END:
+                        candidate.append((origin+dt.timedelta(minutes=3),"forecast",idx))
+                    candidate.append((origin+dt.timedelta(minutes=14),"outcome",idx))
+                candidate.sort()
+                matched=False
+                for due,action,index in candidate:
+                    key=(action,index)
+                    if key in processed or t<due or t>due+dt.timedelta(minutes=2):
+                        continue
+                    if action=="forecast" and not(START<=START+dt.timedelta(minutes=15*index)<END):
+                        continue
+                    processed.add(key)
+                    try:
+                        send(WORKFLOW,REF,{"action":action,"days":"7"})
+                        print("SIGNED_R4_DISPATCH_ACCEPTED",action,
+                              "due",due.isoformat(),"sent",now().isoformat(),flush=True)
+                    except Exception as exc:
+                        print("SIGNED_R4_DISPATCH_FAILED",action,type(exc).__name__,str(exc)[:160],flush=True)
+                        raise
+                    matched=True
+                    time.sleep(4)
+                    break
+                if not matched:
+                    time.sleep(8)
+          finally:
+            # Queue a successor on EVERY exit path, including dispatch errors.
+            # GitHub cron is a separate fail-safe if both network calls fail.
+            if now()<DRAIN_END:
               send(CLOCK,"main")
-              print("SIGNED_R3_CLOCK_SUCCESSOR_ACCEPTED",now().isoformat(),flush=True)
-          else:
-              print("SIGNED_R3_CLOCK_DRAIN_COMPLETE",now().isoformat(),flush=True)
+              print("SIGNED_R4_CLOCK_SUCCESSOR_ACCEPTED",now().isoformat(),flush=True)
+            else:
+              print("SIGNED_R4_CLOCK_DRAIN_COMPLETE",now().isoformat(),flush=True)
           PY

@@ -145,8 +145,8 @@ def missing_state_resets_are_forbidden():
         def mock_signed(root,name,obj):
             p=pathlib.Path(root)/name;p.parent.mkdir(parents=True,exist_ok=True)
             p.write_bytes(canonical(obj));return p
-        with patch.object(w,"validated_snapshot",lambda *x:base),patch.object(w,"historic_snapshots",lambda *x:[base]*32),patch.object(w,"write",mock_signed):
-            result=w.current_slot_signal(root,r2,reg,current+timedelta(minutes=10))
+        with patch.object(w,"market_collect",lambda *x,**kw:base),patch.object(w,"historic_snapshots",lambda *x:[base]*32),patch.object(w,"write",mock_signed):
+            result=w.current_slot_signal(root,reg,current+timedelta(minutes=10))
         assert result=="STATEFUL_CHAIN_DISCONTINUITY"
         assert (folder/"signal.json").exists()
         assert json.loads((folder/"signal.json").read_text())["zero_reset_not_allowed"] is True

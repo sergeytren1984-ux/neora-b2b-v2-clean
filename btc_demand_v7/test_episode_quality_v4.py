@@ -92,5 +92,3 @@ def main():
     print("BTC_V7R4_VERIFIED_NONOVERLAPPING_EVENT_PRECISION_RECALL_AND_MINUTE_LEAD_TEST_PASS")
 
 if __name__=="__main__":main()
-
-[executed on device: MacBook-Air-Sergey.local (ec25f5e8-4047-48da-b895-a85c27d563ae)]

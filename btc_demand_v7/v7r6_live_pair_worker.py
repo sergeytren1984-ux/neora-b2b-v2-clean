@@ -15,12 +15,12 @@ from btc_demand_v7.prospective_core import when
 
 REPO="sergeytren1984-ux/neora-b2b-v2-clean"
 SRC_BRANCH="btc-v7r5-corrected-signed-evidence-20261013"
-OUT_BRANCH="btc-v7r6-live-signed-evidence-20261013"
+OUT_BRANCH="btc-v7r6-pinned-signed-evidence-20261013"
 R5_SHA="d6acb83d45ea484d2f2c88b725faedf3de97775d"
 R6_SHA="559faaa4895f8874bc7103b4f1d92f350a8d6403"
 ISSUER="https://token.actions.githubusercontent.com"
 R5_ID=f"https://github.com/{REPO}/.github/workflows/btc-v7r3-signed-demand-shadow.yml@refs/heads/btc-v7r5-live-cadence-reliability-20261012"
-R6_ID=f"https://github.com/{REPO}/.github/workflows/btc-v7r6-live-clock.yml@refs/heads/main"
+R6_ID=f"https://github.com/{REPO}/.github/workflows/btc-v7r6-pinned-live.yml@refs/heads/btc-v7r6-pinned-observer-20261012"
 START=dt.datetime(2026,10,13,tzinfo=dt.timezone.utc)
 END=dt.datetime(2026,10,20,tzinfo=dt.timezone.utc)
 RECEIPT_DEADLINE_MINUTES=13

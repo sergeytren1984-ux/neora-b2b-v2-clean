@@ -10,9 +10,9 @@ import hashlib,json,math
 from btc_demand_v7.prospective_core import when
 
 UTC=timezone.utc
-BRANCH="btc-v7r4-hardening-20261012"
-EVIDENCE="btc-v7r4-direct-evidence-20261013"
-SCHEDULER_BLOB_SHA="9e2e4f32bb60fc891c06bb7bf2086cef1e8cc27a"
+BRANCH="btc-v7r5-live-cadence-reliability-20261012"
+EVIDENCE="btc-v7r5-corrected-signed-evidence-20261013"
+SCHEDULER_BLOB_SHA="faaf3f59e3f0a09dacbbdce880bc5d1a53da090a"
 CYCLE=timedelta(minutes=15)
 TICK_MIN=3
 TICK_MAX=13
@@ -52,7 +52,7 @@ def grid(start,created,model_sha,days=7):
         "end_utc":(start+timedelta(days=days)).isoformat(),
         "model_source_sha":model_sha,"model_source_ref":"refs/heads/"+BRANCH,
         "github_prestart_scheduler_blob_sha":SCHEDULER_BLOB_SHA,
-        "github_prestart_scheduler_workflow":".github/workflows/btc-v7r3-forward-clock.yml",
+        "github_prestart_scheduler_workflow":".github/workflows/btc-v7r5-forward-clock.yml",
         "source_provenance":"self-collected and independently Cosign signed BTC 1m+5m/OKX observation",
         "upstream_r2_evidence_required":False,
         "due_slots":slots,"days":days,"cadence_minutes":15,
@@ -67,7 +67,7 @@ def grid(start,created,model_sha,days=7):
         "collector_policy":"DIRECT_SOURCE_NO_UPSTREAM_R2_QUEUING",
         "forecast_warning_definition":"verified public GitHub delivery time (NOT candle-open or computation time)",
         "price_latency_veto":"disable early warning if BTC moved >=0.30 pct since last signed closed spot anchor",
-        "revision_reason":"fix stale flow/book model signal after already realized 5-10m price impulse",
+        "revision_reason":"R5: fix valid 23-27m receipt jitter vs exact 15m anchor, public-day alert budget, raw OI/book/taker numerical replay before forecast",
         "price_reference_definition":"last completed 1m Binance spot as of actual publication",
         "outcomes":"UP_FIRST,DOWN_FIRST,NEITHER,AMBIGUOUS_SAME_MINUTE",
         "full_minute_after_publication_not_including_prior_part_of_minute":True,
@@ -75,6 +75,10 @@ def grid(start,created,model_sha,days=7):
         "minimum_lead_minutes_levels":MIN_LEAD_LEVELS,
         "max_raw_alerts_per_utc_day":1,
         "model_has_price_skill":False,
+        "same_directional_CUSUM_model_as_R4":True,
+        "no_retuning_thresholds_or_fitted_model_parameters":True,
+        "raw_source_numerical_replay_required_before_each_warning":True,
+        "public_UTC_day_alert_safety_window_minutes":1453,
         "trading_authority":False,"no_retroactive_alert":True,
         "no_automatic_otc_order":True,
     }

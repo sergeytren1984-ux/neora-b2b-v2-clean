@@ -86,7 +86,8 @@ def test():
         with patch.object(worker,"write",mock_signed):
             status=worker.current_slot_signal(root,r2,reg,received)
         assert status=="DUPLICATE_NO_MUTATION"
-        assessed=worker.score(reg,root,second+dt.timedelta(hours=1))
+        with patch.object(worker,"verify",lambda *x:None):
+            assessed=worker.score(reg,root,second+dt.timedelta(hours=1))
         assert assessed["coverage"]["missing_slots"]>0
         assert assessed["trading_authority"] is False
 
@@ -103,14 +104,15 @@ def test():
             recorded[ms]=[ms-60000,"83000",str(84000 if i==20 else 83100),"82900","83030","1",ms-1]
         def closed_bars(pending,now):return recorded
         at=first+dt.timedelta(hours=4,minutes=55)
-        with patch.object(worker,"verify",lambda *x:None),patch.object(worker,"write",mock_signed),patch.object(worker,"get_future_raw",closed_bars),patch.object(worker,"verified_delivery_time",lambda *x:completed):
+        with patch.object(worker,"verify",lambda *x:None),patch.object(worker,"write",mock_signed),patch.object(worker,"get_future_raw",closed_bars),patch.object(worker,"verified_delivery_time",lambda e:when(e["issued_at_utc"])+dt.timedelta(seconds=25)):
             n=worker.resolve_outcomes(root,at)
         assert n>=2,n
         outcomes=list((root/"slots"/slot_id(first)).glob("outcome_*.json"))
         assert any(json.loads(p.read_text())["barrier_result"]["direction"]=="UP_FIRST" for p in outcomes)
         assert all(json.loads(p.read_text())["public_delivery_utc"]==completed.isoformat() for p in outcomes)
         assert all(json.loads(p.read_text())["reference_price_after_delivery_not_model_feature"] is True for p in outcomes)
-        scored=worker.score(reg,root,at+dt.timedelta(hours=1))
+        with patch.object(worker,"verify",lambda *x:None):
+            scored=worker.score(reg,root,at+dt.timedelta(hours=1))
         assert scored["forward_outcomes"]["1h"]["due"]>=1
         assert scored["coverage"]["missing_slots"]>0
         print("BTC_V7R3_END_TO_END_SIGNED_JOURNAL_ALGORITHM_SYNTHETIC_PASS",

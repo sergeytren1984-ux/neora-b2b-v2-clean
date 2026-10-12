@@ -1,0 +1,47 @@
+name: BTC v7R5 automated prospective OTC future-outcome evaluator dispatcher
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '20 14 * * *'
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: btc-v7r5-precommitted-otc-daily-dispatch
+  cancel-in-progress: false
+
+jobs:
+  dispatch-frozen-otc-counterfactual-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPOSITORY: ${{ github.repository }}
+    steps:
+      - name: Dispatch separately frozen R5 signed-future OTC evaluator
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime as dt,json,os,urllib.request
+          now=dt.datetime.now(dt.timezone.utc)
+          first=dt.datetime(2026,10,13,tzinfo=dt.timezone.utc)
+          last=dt.datetime(2026,10,21,tzinfo=dt.timezone.utc)
+          if not first<=now<last:
+              print("BTC_R5_OTC_DISPATCH_OUTSIDE_REGISTERED_EPOCH",now.isoformat())
+              raise SystemExit(0)
+          repo=os.environ["GH_REPOSITORY"]
+          url=f"https://api.github.com/repos/{repo}/actions/workflows/btc-v7r5-otc-prospective-score.yml/dispatches"
+          req=urllib.request.Request(url,method="POST",
+              headers={"Authorization":"Bearer "+os.environ["GH_TOKEN"],
+                       "Accept":"application/vnd.github+json",
+                       "Content-Type":"application/json",
+                       "X-GitHub-Api-Version":"2022-11-28"},
+              data=json.dumps({"ref":"btc-v7r5-otc-independent-outcome-audit-20261012"}).encode())
+          with urllib.request.urlopen(req,timeout=22) as response:
+              if response.status!=204:
+                  raise RuntimeError("UTC OTC evaluator dispatch not accepted")
+          print("BTC_R5_FROZEN_OTC_SCORE_DISPATCHED",now.isoformat())
+          PY

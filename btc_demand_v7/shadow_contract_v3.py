@@ -12,8 +12,8 @@ from btc_demand_v7.prospective_core import when
 UTC=timezone.utc
 SOURCE_R2_SHA="39f61562803f3120bcda872b56f76a392989ed4e"
 SOURCE_R2_GRID_SHA="6c65642c24d2b093cdeaf707dfe0da5d5339f5988e8643dabbde497a5cc51c28"
-BRANCH="btc-v7r3-demand-stateful-challenger-20261012"
-EVIDENCE="btc-v7r3-signed-pressure-evidence-20261013"
+BRANCH="btc-v7r3-asof-latency-remediation-20261012"
+EVIDENCE="btc-v7r3-asof-evidence-20261013"
 R2_EVIDENCE="btc-v7r2-prospective-evidence-20261013"
 CYCLE=timedelta(minutes=15)
 TICK_MIN=8
@@ -58,7 +58,9 @@ def grid(start,created,model_sha,days=7):
         "max_issue_minutes_after_anchor":TICK_MAX,
         "source_required":["signed R2 forecast receipt","signed R2 raw spot 1m+5m",
                            "signed R2 current OKX OI","signed R2 current OKX top 10 book"],
-        "forecast_warning_definition":"actual model-publication-time (NOT candle-open)",
+        "forecast_warning_definition":"verified public GitHub delivery time (NOT candle-open or computation time)",
+        "price_latency_veto":"disable early warning if BTC moved >=0.30 pct since last signed closed spot anchor",
+        "revision_reason":"fix stale flow/book model signal after already realized 5-10m price impulse",
         "price_reference_definition":"last completed 1m Binance spot as of actual publication",
         "outcomes":"UP_FIRST,DOWN_FIRST,NEITHER,AMBIGUOUS_SAME_MINUTE",
         "full_minute_after_publication_not_including_prior_part_of_minute":True,

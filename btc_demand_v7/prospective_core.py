@@ -197,30 +197,62 @@ def score_fixed_grid(grid,forecast_events,outcome_events,now,barrier_events=()):
         if now<deadline:continue
         expected+=1
         f=slotted.get(slot["id"])
-        if f is None or f["kind"]=="SLOT_MISSED":missed+=1;continue
-        if f["kind"]=="FORECAST_EARLY":early+=1;continue
-        if f["kind"]!="FORECAST_ISSUED":
+        usable=False
+        if f is None or f["kind"]=="SLOT_MISSED":
+            missed+=1
+        elif f["kind"]=="FORECAST_EARLY":
+            early+=1
+        elif f["kind"]!="FORECAST_ISSUED":
             raise ValueError("unknown event kind")
-        actual_at=when(f["recorded_utc"])
-        if actual_at>deadline or actual_at<when(slot["slot_utc"]):
-            late+=1;continue
-        correct+=1;days.add(slot["id"][:8])
+        else:
+            actual_at=when(f["recorded_utc"])
+            if actual_at>deadline or actual_at<when(slot["slot_utc"]):
+                late+=1
+            else:
+                usable=True
+                correct+=1;days.add(slot["id"][:8])
+        # Frozen target grid defines denominator EVEN IF FORECAST IS ABSENT.
         for h in HORIZONS:
             due=when(slot["heads"][h]["target_utc"])
             if now<due+OUTCOME_GRACE:
                 unsettled+=1;continue
             v=head_scores[h];v["due_count"]+=1
+            if not usable:
+                missing+=1;v["missing"]+=1
+                continue
             o=outcomes.get((slot["id"],h))
             if o is None:
                 missing+=1;v["missing"]+=1;continue
             if o.get("forecast_sha256")!=sha256(f) or o.get("frozen_grid_sha256")!=sha256(grid):
                 raise ValueError("orphan or forged outcome")
-            if when(o["recorded_utc"])<due:raise ValueError("premature outcome")
-            if o["kind"]!="OUTCOME_RECORDED":
+            recorded=when(o["recorded_utc"])
+            if recorded<due:raise ValueError("premature outcome")
+            if when(o["target_utc"])!=due or o.get("reference_symbol")!="BTCUSDT":
+                raise ValueError("outcome target/instrument contradict frozen grid")
+            if recorded>due+OUTCOME_GRACE:
                 late_outcomes+=1;continue
+            if o["kind"]!="OUTCOME_RECORDED":
+                raise ValueError("outcome kind contradicts real timestamp")
+            # Never trust input-supplied MAE or gain. Recompute from
+            # the published forecast and the actual future spot.
+            actual=float(o["actual_spot"])
+            pred=float(f["heads"][h]["forecast_spot"])
+            persistence=float(f["heads"][h]["persistence_spot"])
+            numeric=(actual,pred,persistence,float(o["pred_spot"]),float(o["persistence_spot"]),
+                     float(o["absolute_error_usdt"]),float(o["persistence_absolute_error_usdt"]),
+                     float(o["signed_error_usdt"]))
+            if not all(math.isfinite(x) for x in numeric) or min(actual,pred,persistence)<=0:
+                raise ValueError("nonfinite or negative outcome data")
+            eps=max(1e-7,abs(pred)*1e-12)
+            if (abs(float(o["pred_spot"])-pred)>eps
+                or abs(float(o["persistence_spot"])-persistence)>eps
+                or abs(float(o["absolute_error_usdt"])-abs(pred-actual))>eps
+                or abs(float(o["persistence_absolute_error_usdt"])-abs(persistence-actual))>eps
+                or abs(float(o["signed_error_usdt"])-(pred-actual))>eps):
+                raise ValueError("fabricated precomputed errors or negative MAE")
             settled+=1;v["n"]+=1
-            v["sum_absolute_error"]+=float(o["absolute_error_usdt"])
-            v["sum_baseline_absolute_error"]+=float(o["persistence_absolute_error_usdt"])
+            v["sum_absolute_error"]+=abs(pred-actual)
+            v["sum_baseline_absolute_error"]+=abs(persistence-actual)
     # Symmetric first-passage outcomes on a separate 1m causal grid.
     # They are NOT interchangeable with old independent touch classifiers.
     from btc_demand_v7.event_semantics import BARRIERS,clustered_episodes,warning_lead_minutes,validate_alert_budget
@@ -231,11 +263,13 @@ def score_fixed_grid(grid,forecast_events,outcome_events,now,barrier_events=()):
     observed_events=[];alerts=[]
     for slot in grid["slots"]:
         f=slotted.get(slot["id"])
-        if f is None or f.get("kind")!="FORECAST_ISSUED":continue
         for h,(minutes,threshold) in BARRIERS.items():
             due=when(slot["slot_utc"])+timedelta(minutes=minutes)
             if now<due+OUTCOME_GRACE:continue
             v=barrier_summary[h];v["due"]+=1
+            if (f is None or f.get("kind")!="FORECAST_ISSUED"
+                or not when(slot["slot_utc"])<=when(f["recorded_utc"])<=when(slot["forecast_deadline_utc"])):
+                v["missing"]+=1;continue
             outcome=barriers.get((slot["id"],h))
             if outcome is None:
                 v["missing"]+=1;continue

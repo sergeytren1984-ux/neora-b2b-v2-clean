@@ -239,7 +239,8 @@ def tick(args):
         new_outcomes=outcomes(root,grid,timestamp)
         events=[json.loads(x.read_text()) for x in (root/"slots").glob("*/forecast.json")] if (root/"slots").exists() else []
         resolved=[json.loads(x.read_text()) for x in (root/"slots").glob("*/outcome_*.json")] if (root/"slots").exists() else []
-        scored=score_fixed_grid(grid,events,resolved,timestamp)
+        barrier_events=[json.loads(x.read_text()) for x in (root/"slots").glob("*/barrier_*.json")] if (root/"slots").exists() else []
+        scored=score_fixed_grid(grid,events,resolved,timestamp,barrier_events)
         scored["github_run_id"]=os.environ["GITHUB_RUN_ID"]
         scored["model_source_sha"]=grid["model_source_sha"]
         signed(root/"scorecards",os.environ["GITHUB_RUN_ID"]+".json",scored)

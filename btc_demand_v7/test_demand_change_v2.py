@@ -55,6 +55,20 @@ def test():
     assert state["sequence"]==BASELINE_COUNT+8
     assert sum(x["alert"] for x in valid)<=1  # 3h cooldown
     assert state["last_snapshot_sha256"]==source_hash(sequence[-1])
+    # If the market rose AFTER the 15m candle / signed book and BEFORE
+    # actual decision publication, calling it "early" is invalid.
+    from btc_demand_v7.demand_change_v2 import MAX_ADMISSIBLE_PRICE_MOVE_PCT
+    price_late_state,price_late=advance(
+        replay(baseline)[0],baseline,snap(BASELINE_COUNT,direction=1),
+        live_change_since_anchor_pct=1.2)
+    assert price_late["status"]=="LATE_PRESSURE_AFTER_PRICE_IMPULSE"
+    assert price_late["alert"] is False
+    assert price_late["after_anchor_move_veto_applied"] is True
+    assert price_late_state["up_cusum"]==0.
+    try:advance(replay(baseline)[0],baseline,snap(BASELINE_COUNT,direction=1),
+                live_change_since_anchor_pct=float("nan"))
+    except ValueError:pass
+    else:raise AssertionError("nonfinite publication gap accepted")
     # Symmetric down pressure, no need for price to fall first.
     negative=baseline+[snap(BASELINE_COUNT+j,direction=-1) for j in range(8)]
     nstate,negative_events=replay(negative)

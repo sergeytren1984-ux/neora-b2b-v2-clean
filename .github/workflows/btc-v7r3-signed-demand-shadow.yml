@@ -2,7 +2,7 @@ name: BTC v7R3 signed early-demand prospective shadow (no trading)
 
 on:
   push:
-    branches: [btc-v7r3-demand-stateful-challenger-20261012]
+    branches: [btc-v7r3-asof-latency-remediation-20261012]
     paths:
       - btc_demand_v7/v7r3_shadow_worker.py
       - btc_demand_v7/shadow_contract_v3.py

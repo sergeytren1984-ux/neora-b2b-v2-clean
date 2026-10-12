@@ -55,6 +55,8 @@ def issue(snapshot,model,paired,audit,now=None):
     if not len(m_idx) or idx[m_idx[-1]]!=len(times)-1:
         raise ValueError("latest 1m and 5m anchors do not match")
     x=np.hstack([base[m_idx[-1]],m_feat[-1]]).reshape(1,-1)
+    if not np.all(np.isfinite(x)):
+        raise ValueError("nonfinite spot features before model prediction")
     if x.shape[1]!=model.get("spot_live_feature_count"):
         raise ValueError("feature schema does not match signed spot model")
     price=float(a[-1,3])
@@ -110,14 +112,22 @@ def main():
     p.add_argument("--output",required=True)
     p.add_argument("--trusted-release",required=True)
     args=p.parse_args()
-    # Do not deserialize an unpinned or mixed joblib release.
-    release=check_release(pathlib.Path(args.candidate).parent,args.trusted_release)
+    # Before joblib.load (which is executable pickle!), bind EXACT loaded
+    # file and path to signed release. Same-directory alternate files are NOT
+    # authorized simply because a legitimate candidate.joblib also exists.
+    candidate=pathlib.Path(args.candidate).resolve(strict=True)
+    release_root=candidate.parent
+    if candidate.name!="candidate.joblib" or candidate!=release_root.joinpath("candidate.joblib").resolve(strict=True):
+        raise RuntimeError("untrusted alternative candidate filename")
+    release=check_release(release_root,args.trusted_release)
+    if hashlib.sha256(candidate.read_bytes()).hexdigest()!=release["model_sha256"]:
+        raise RuntimeError("actual deserialized joblib hash differs from signed manifest")
     for path,key in ((args.audit,"audit_sha256"),(args.paired,"paired_sha256")):
         actual=hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
         if release[key]!=actual:raise RuntimeError("forecast received mixed source: "+key)
     snapshot_raw=pathlib.Path(args.snapshot).read_bytes()
     snapshot=json.loads(snapshot_raw)
-    model=load(args.candidate)
+    model=load(candidate)
     errors=json.loads(pathlib.Path(args.paired).read_text())
     audit=json.loads(pathlib.Path(args.audit).read_text())
     result=issue(snapshot,model,errors,audit)

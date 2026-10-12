@@ -1,7 +1,7 @@
 """Reject matching a candidate to a different price/time/slot or future data."""
 import copy,unittest
 from datetime import timedelta
-from btc_demand_v7.v7r6_paired_forward_audit import one_pair,fixed_grid_score
+from btc_demand_v7.v7r6_paired_forward_audit import one_pair,fixed_grid_score,PINNED_RUNNER_SHA
 from btc_demand_v7.v7r6_live_pair_worker import START,R6_SHA,sha
 from btc_demand_v7.shadow_contract_v3 import future_anchor
 
@@ -14,11 +14,13 @@ class PairedAudit(unittest.TestCase):
         shadow={'schema':'btc-v7r6-paired-future-public-shadow-v1','kind':'R6_SIGNED_SHADOW',
             'slot_id':anchor.strftime('%Y%m%dT%H%MZ'),'anchor_utc':anchor.isoformat(),
             'decision_computed_utc':(anchor+timedelta(minutes=8)).isoformat(),
-            'research_model_sha':R6_SHA,'source_r5_snapshot_sha256':'snapshot-hash',
+            'research_model_sha':R6_SHA,'runner_sha':PINNED_RUNNER_SHA,
+            'source_r5_snapshot_sha256':'snapshot-hash',
             'baseline_r5_diagnostic':d,'challenger_diagnostic':c,
             'trading_authority':False}
         proof={'status':'VERIFIED_GITHUB_COMPLETED_JOB_AND_SIGNED_COMMIT',
-               'conclusion':'success','run_id':1234,'job_completed_utc':pub.isoformat(),
+               'conclusion':'success','run_id':1234,'job_source_sha':PINNED_RUNNER_SHA,
+               'job_completed_utc':pub.isoformat(),
                'signed_shadow_sha256':sha(shadow)}
         end=pub.replace(second=0,microsecond=0)
         open_time=end-timedelta(minutes=1)
@@ -67,6 +69,8 @@ class PairedAudit(unittest.TestCase):
         bad=copy.deepcopy(s);bad['challenger_diagnostic']['current_snapshot_sha256']='FUTURE';cases.append((bad,p,ref,rows,t))
         bad=copy.deepcopy(p);bad['signed_shadow_sha256']='FAKE';cases.append((s,bad,ref,rows,t))
         bad=copy.deepcopy(p);bad['status']='SELF_ASSERTED';cases.append((s,bad,ref,rows,t))
+        bad=copy.deepcopy(p);bad['job_source_sha']='MAIN_NOT_PINNED';cases.append((s,bad,ref,rows,t))
+        bad=copy.deepcopy(s);bad['runner_sha']='NOT_THE_PREREGISTERED_RUNNER';cases.append((bad,p,ref,rows,t))
         bad=copy.deepcopy(p);bad['job_completed_utc']=(START+timedelta(hours=8,minutes=14)).isoformat();cases.append((s,bad,ref,rows,t))
         bad=copy.deepcopy(ref);bad[0]-=60000;bad[6]-=60000;cases.append((s,p,bad,rows,t))
         bad=copy.deepcopy(rows);bad[0][6]+=60000;cases.append((s,p,ref,bad,t))

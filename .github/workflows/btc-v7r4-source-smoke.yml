@@ -1,0 +1,63 @@
+name: BTC v7R4 independent direct-source market smoke
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [btc-v7r4-hardening-20261012]
+    paths:
+      - .github/workflows/btc-v7r4-source-smoke.yml
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  live-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: Fetch actual Binance/OKX point-in-time signed-slot-shaped snapshot
+        run: |
+          mkdir -p /tmp/v7r4-smoke
+          python - <<'PY'
+          import time,json,datetime,pathlib
+          from btc_demand_v7.live_snapshot import collect
+          from btc_demand_v7.demand_change_v2 import feature
+          # Use the last full 5m anchor; not a preregistered forecast.
+          now_ms=int(time.time()*1000)
+          candidate=(now_ms//300000-1)*300000
+          raw=collect(anchor_ms=candidate)
+          _,factor,readiness=feature(raw)
+          out=pathlib.Path("/tmp/v7r4-smoke/snapshot.json")
+          out.write_text(json.dumps(raw,sort_keys=True,allow_nan=False,separators=(",",":"))+"\n")
+          print("DIRECT_MARKET_SMOKE",json.dumps({
+              "anchor":raw["anchor_utc"],
+              "receipt":raw["retrieved_at_utc"],
+              "spot":raw["observation"]["reference_spot"],
+              "oi":raw["observation"]["oi"] is not None,
+              "book":raw["observation"]["book"] is not None,
+              "funding":raw["observation"]["funding"] is not None,
+              "causal_feature_ready":factor is not None,
+              "readiness":readiness,
+              "statuses":raw["optional_status"],
+              "research_only":True,"trading_authority":False},sort_keys=True))
+          PY
+      - name: Signed public spot/OI/book input proof
+        run: |
+          cosign sign-blob --yes --bundle /tmp/v7r4-smoke/snapshot.sigstore.json /tmp/v7r4-smoke/snapshot.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: btc-v7r4-direct-live-smoke-${{ github.sha }}
+          path: /tmp/v7r4-smoke/
+          if-no-files-found: error

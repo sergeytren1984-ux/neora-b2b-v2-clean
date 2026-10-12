@@ -652,11 +652,14 @@ def score(reg,root,at):
                 raise ValueError("status kind inconsistent with actual completion")
             count["resolved"]+=1
             if recomputed["direction"]=="NEITHER":count["no_touch"]+=1
-            if recomputed["direction"] in ("UP_FIRST","DOWN_FIRST"):
-                verified_barriers.append({
-                    "slot_id":sid,
-                    "touch_open_utc":(when(touch)-dt.timedelta(minutes=1)).isoformat(),
-                    "direction":recomputed["direction"]})
+            # Pass EVERY valid matured outcome into the independent scorer.
+            # In particular, NEITHER and AMBIGUOUS are verified resolved
+            # windows, not evidence gaps to silently discard.
+            verified_barriers.append({
+                "slot_id":sid,
+                "touch_open_utc":((when(touch)-dt.timedelta(minutes=1)).isoformat()
+                                  if recomputed["direction"] in ("UP_FIRST","DOWN_FIRST") else None),
+                "direction":recomputed["direction"]})
             if warning:
                 verified_alerts.append({
                     "slot_id":sid,"public_delivery_utc":dtime.isoformat(),

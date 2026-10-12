@@ -213,7 +213,15 @@ def current_slot_signal(root,r2root,reg,ts):
     issued=utcnow()
     if accept_slot(reg,slot,issued)!="ON_TIME":
         raise RuntimeError("source validation exhausted decision window")
-    state,diagnostic=advance(state,history,snapshot,issued_utc=issued)
+    anchor_spot=float(snapshot["observation"]["reference_spot"])
+    actual_publication_spot=float(reference["spot"])
+    if not(math.isfinite(anchor_spot) and anchor_spot>0
+           and math.isfinite(actual_publication_spot) and actual_publication_spot>0):
+        raise RuntimeError("invalid source/current spot for late warning veto")
+    unobserved_move_pct=100*(actual_publication_spot/anchor_spot-1)
+    state,diagnostic=advance(
+        state,history,snapshot,issued_utc=issued,
+        live_change_since_anchor_pct=unobserved_move_pct)
     # A missed predecessor with nonzero CUSUM is rejected by the raw hash
     # chain, rather than silently rebuilding a favorable history.
     event={"schema":"btc-v7r3-signed-pressure-event-v1",
@@ -224,6 +232,8 @@ def current_slot_signal(root,r2root,reg,ts):
            "public_delivery_only_after_successful_GitHub_run":True,
            "snapshot_received_at_utc":snapshot["retrieved_at_utc"],
            "reference_spot":reference["spot"],
+           "underlying_spot_at_orderflow_anchor":anchor_spot,
+           "market_move_during_information_latency_pct":unobserved_move_pct,
            "reference_1m_raw":reference,
            "decision_price_not_stale_5m":True,
            "upstream_r2_snapshot_canonical_sha256":source_hash(snapshot),

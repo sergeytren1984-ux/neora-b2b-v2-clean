@@ -159,6 +159,7 @@ def run(path,out):
         dat={'train':[],'validation':[],'known_test':[]}
         for i,at,x,cl,lg in inputs:
             if at%(15*60000):continue
+            if i+steps>=len(raw):continue
             end=int(raw[i+steps][0])+STEP
             if end<c1:bucket='train'
             elif c1<=at and end<c2:bucket='validation'

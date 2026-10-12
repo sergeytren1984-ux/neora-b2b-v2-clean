@@ -2,10 +2,12 @@ name: BTC v7R3 stateful demand change audit (research only)
 
 on:
   push:
-    branches: [btc-v7r3-demand-stateful-challenger-20261012]
+    branches: [btc-v7r3-asof-latency-remediation-20261012]
     paths:
       - btc_demand_v7/demand_change_v2.py
       - btc_demand_v7/test_demand_change_v2.py
+      - btc_demand_v7/v7r3_shadow_worker.py
+      - btc_demand_v7/test_v7r3_shadow_worker.py
       - btc_demand_v7/shadow_contract_v3.py
       - btc_demand_v7/test_shadow_contract_v3.py
       - btc_demand_v7/v7r3_shadow_worker.py
@@ -82,12 +84,12 @@ jobs:
                "research_commit_sha":os.environ["GITHUB_SHA"],
                "github_run":os.environ["GITHUB_RUN_ID"],
                "previous_detector_bug":"CUSUM state was reset for each observation",
-               "new_detector_contract":"sequential stateful two-sided pressure, previous signed raw binding, pre-move veto",
+               "new_detector_contract":"sequential stateful two-sided pressure, previous signed raw binding, pre-move veto including post-snapshot publication price jump",
                "signed_real_snapshot_source_run":38204591089,
                "synthetic_regression_verified":True,
                "predictive_skill_verified":False,
                "trading_authority":False,
-               "statistical_conclusion":"NO CLAIM; needs independent prospective warning-vs-onset outcomes"}
+               "statistical_conclusion":"NO CLAIM; registered earlier R3 source remains IMMUTABLE; requires new registered epoch for deployment"}
           pathlib.Path("/tmp/v7r3-audit/verdict.json").write_text(json.dumps(doc,sort_keys=True,indent=2)+"\n")
           PY
           cosign sign-blob --yes \

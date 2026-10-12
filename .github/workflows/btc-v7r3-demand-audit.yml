@@ -8,6 +8,8 @@ on:
       - btc_demand_v7/test_demand_change_v2.py
       - btc_demand_v7/shadow_contract_v3.py
       - btc_demand_v7/test_shadow_contract_v3.py
+      - btc_demand_v7/v7r3_shadow_worker.py
+      - btc_demand_v7/test_v7r3_shadow_worker.py
       - .github/workflows/btc-v7r3-demand-audit.yml
   workflow_dispatch: {}
 
@@ -39,6 +41,7 @@ jobs:
           python -m py_compile btc_demand_v7/demand_change_v2.py btc_demand_v7/test_demand_change_v2.py
           python -m btc_demand_v7.test_demand_change_v2
           python -m btc_demand_v7.test_shadow_contract_v3
+          python -m btc_demand_v7.test_v7r3_shadow_worker
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           name: btc-v7-full-shadow-38204591089

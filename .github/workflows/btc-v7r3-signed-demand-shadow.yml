@@ -1,8 +1,8 @@
-name: BTC v7R4 hardened causal research (no trading)
+name: BTC v7R5 corrected same CUSUM source-asof research (no trading)
 
 on:
   push:
-    branches: [btc-v7r4-hardening-20261012]
+    branches: [btc-v7r5-live-cadence-reliability-20261012]
     paths:
       - btc_demand_v7/v7r3_shadow_worker.py
       - btc_demand_v7/shadow_contract_v3.py
@@ -11,6 +11,10 @@ on:
       - btc_demand_v7/test_demand_change_v2.py
       - btc_demand_v7/test_shadow_contract_v3.py
       - btc_demand_v7/test_v7r4_adversarial.py
+      - btc_demand_v7/source_integrity_v5.py
+      - btc_demand_v7/test_source_integrity_v5.py
+      - btc_demand_v7/test_anchor_receipt_jitter_v5.py
+      - btc_demand_v7/test_public_daily_budget_v5.py
       - btc_demand_v7/episode_quality_v4.py
       - btc_demand_v7/test_episode_quality_v4.py
       - btc_demand_v7/prospective_core.py
@@ -45,7 +49,7 @@ jobs:
   signed-research-only:
     concurrency:
       # Forecast is NEVER queued behind long post-due raw replays.
-      group: btc-v7r4-${{ github.ref }}-${{ inputs.action }}
+      group: btc-v7r5-${{ github.ref }}-${{ inputs.action }}-${{ inputs.action == 'forecast' && github.run_id || 'serial' }}
       cancel-in-progress: false
     runs-on: ubuntu-24.04
     timeout-minutes: 35
@@ -76,6 +80,8 @@ jobs:
           python -m btc_demand_v7.test_v7r3_shadow_worker
           python -m btc_demand_v7.test_event_semantics
           python -m btc_demand_v7.test_v7r4_adversarial
+          python -m btc_demand_v7.test_anchor_receipt_jitter_v5
+          python -m btc_demand_v7.test_public_daily_budget_v5
           python -m btc_demand_v7.test_episode_quality_v4
           python -m btc_demand_v7.test_snapshot
           python -m btc_demand_v7.test_prospective

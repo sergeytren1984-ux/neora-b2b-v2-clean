@@ -69,8 +69,12 @@ def daily_score(observations,model,shrink):
         "full_budget_spot_proxy_total_incremental_btc_not_realized":sum(gains),
         "always_buy_now_btc_gain":0.,
         "always_wait_mean_btc_gain":statistics.mean(all_wait),
+        "oracle_mean_btc_gain_EX_POST_ONLY":statistics.mean(max(0.,g) for g in all_wait),
+        "oracle_number_wait_winning_days_EX_POST_ONLY":sum(g>0 for g in all_wait),
+        "oracle_regret_btc_EX_POST_ONLY":sum(max(0.,g) for g in all_wait)-sum(gains),
         "robust_wait_signals_correct":robust_correct,
         "robust_wait_signals_wrong":robust_wrong,
+        "historical_spot_proxy_with_fixed_markup_only":True,
         "not_multiple_actual_OTC_positions":True,
         "economic_execution_proof":False}
 
@@ -99,8 +103,10 @@ def run(raw,out):
                 if start<=t<end and
                    dt.datetime.fromtimestamp(t/1000,UTC).hour==15 and
                    dt.datetime.fromtimestamp(t/1000,UTC).minute==0]
-        if len(train)<1000 or len(valid)<5 or len(future)<5:
-            raise ValueError("incomplete prospective-like daily validation grid")
+        # No selective denominator: a missing scheduled daily outcome is
+        # NOT an opportunity which can disappear from the backtest.
+        if len(train)<1000 or len(valid)!=7 or len(future)!=7:
+            raise ValueError("incomplete fixed seven-day OTC opportunity grid")
         model=fit_ridge(train)
         # Select only on previous validation; if nothing beats BUY_NOW
         # choose zero-shrink, explicitly abstaining from WAIT.

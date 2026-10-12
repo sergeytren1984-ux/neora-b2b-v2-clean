@@ -132,6 +132,11 @@ def forecast_receipt(grid,slot,issued,live,*,snapshot_sha,live_sha):
             "source_commit_sha":grid["model_source_sha"],
             "training_model_sha256":binding["model_sha256"],
             "spot_reference":raw_spot,"heads":heads,
+            "event_head_diagnostics":{name:{
+                "estimate":float(value["estimate"]),
+                "status":value["status"],"watch":bool(value["watch"])
+             } for name,value in live.get("large_move_probabilities",{}).items()
+             if "estimate" in value},
             "trading_authority":False,"skill_verified":False,
             "otc_status":live["otc_comparison"]["status"],
             "otc_calculation_is_executable":False}

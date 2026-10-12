@@ -56,6 +56,34 @@ class PairwiseProspectiveMath(unittest.TestCase):
                 [{'slot_id':sid(90),'side':'UP_FIRST','eligible':False,
                   'public_delivery_utc':iso(95)}],registered_due_slots=self.registry())
 
+    def test_paired_nonoverlap_sign_test_not_repeated_for_two_alerts(self):
+        # Two alerts for nearby same-side first-touch windows count as
+        # ONE economic episode, not two independent favorable outcomes.
+        a=[self.a(sid(75),'UP_FIRST',80),
+           self.a(sid(90),'UP_FIRST',95)]
+        res=paired_source_signal_score(
+            '4h',7,2,self.observations(),[],a,
+            registered_due_slots=self.registry())
+        v=res['lead_minutes']['30']
+        self.assertEqual(v['candidate_correct_public_alerts'],2)
+        self.assertEqual(v['paired_episodes_only_candidate_correct'],1)
+        self.assertEqual(v['paired_episodes_neither_correct'],1)
+        self.assertAlmostEqual(
+            v['descriptive_one_sided_episode_sign_p_candidate_better'],0.5)
+        self.assertTrue(v['episode_sign_test_is_not_proof_due_to_event_dependence'])
+
+    def test_independent_opposite_side_wins_can_cancel(self):
+        old=[self.a(sid(120),'DOWN_FIRST',125)]
+        new=[self.a(sid(75),'UP_FIRST',80)]
+        r=paired_source_signal_score(
+            '4h',7,2,self.observations(),old,new,
+            registered_due_slots=self.registry())
+        v=r['lead_minutes']['30']
+        self.assertEqual(v['paired_episodes_only_candidate_correct'],1)
+        self.assertEqual(v['paired_episodes_only_original_correct'],1)
+        self.assertEqual(v['paired_episodes_both_correct'],0)
+        self.assertAlmostEqual(v['descriptive_one_sided_episode_sign_p_candidate_better'],0.75)
+
     def test_pre_anchor_fake_publication_and_late_publication_rejected(self):
         obs=self.observations()
         for public in (74,89):

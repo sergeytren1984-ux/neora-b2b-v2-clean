@@ -24,12 +24,12 @@ def main():
     assert ep[0]["member_windows"]==4
     assert ep[1]["side"]=="DOWN_FIRST"
     eligible=[
-        {"slot_id":"a1","side":"UP_FIRST","eligible":True,
+        {"slot_id":"s1","side":"UP_FIRST","eligible":True,
          "public_delivery_utc":iso(origin+timedelta(minutes=1,seconds=30))},
-        {"slot_id":"a2","side":"DOWN_FIRST","eligible":False,
+        {"slot_id":"s4","side":"DOWN_FIRST","eligible":False,
          "public_delivery_utc":iso(origin+timedelta(minutes=10))},
     ]
-    scored=report("1h",observed,eligible,full_due_count=42,missing_or_late_count=5)
+    scored=report("1h",observed,eligible,full_due_count=11,missing_or_late_count=5)
     assert scored["n_verified_nonoverlapping_episodes"]==2
     assert scored["n_verified_public_alerts"]==2
     assert scored["partial_coverage"] is True
@@ -40,7 +40,7 @@ def main():
     assert scored["conservative_lead_minutes"]["60"]["verified_alerts_matched"]==0
     assert scored["conservative_lead_minutes"]["10"]["verified_distinct_episodes_matched"]==1
     must_reject(lambda:report("1h",observed,eligible+eligible[:1],
-                               full_due_count=42,missing_or_late_count=5))
+                               full_due_count=11,missing_or_late_count=5))
     must_reject(lambda:episodes_from_verified_barriers(observed+observed[:1]))
     # Overlapping first-touch windows 230 and 210 minutes apart form ONE
     # independent pressure episode. Comparing to its first touch falsely
@@ -59,9 +59,38 @@ def main():
     must_reject(lambda:episodes_from_verified_barriers(chain,gap_minutes=0))
     must_reject(lambda:report("1h",observed,eligible,full_due_count=4,missing_or_late_count=5))
 
-    no_alert=report("4h",observed,[],full_due_count=10,missing_or_late_count=0)
+    # A timely UP alert at an unrelated slot MUST NOT get credit for a
+    # nearby winning UP event, even when lead and direction match.
+    unrelated={"slot_id":"s5","side":"UP_FIRST","eligible":True,
+               "public_delivery_utc":iso(origin+timedelta(minutes=1))}
+    wrong=report("1h",observed,[unrelated],full_due_count=6,missing_or_late_count=0)
+    assert wrong["conservative_lead_minutes"]["10"]["verified_alerts_matched"]==0
+    assert wrong["conservative_lead_minutes"]["10"]["verified_distinct_episodes_matched"]==0
+    must_reject(lambda:report("1h",observed,eligible,
+                              full_due_count=42,missing_or_late_count=5))
+    # NEITHER was independently resolved. A second conflicting outcome
+    # with the same slot ID must fail BEFORE it can inflate coverage.
+    must_reject(lambda:report("1h",observed+[
+        {"slot_id":"s5","direction":"UP_FIRST",
+         "touch_open_utc":iso(origin+timedelta(minutes=10))}],[],
+         full_due_count=7,missing_or_late_count=0))
+    assert scored["n_verified_resolved_including_neither"]==6
+    # An ambiguous same-minute double touch resolves the due slot, but
+    # cannot be awarded as a directional first touch.
+    ambiguous=[*observed,{"slot_id":"s7","direction":"AMBIGUOUS_SAME_MINUTE",
+                         "touch_open_utc":None}]
+    ag=report("4h",ambiguous,[],full_due_count=7,missing_or_late_count=0)
+    assert ag["n_verified_resolved_including_neither"]==7
+    assert ag["n_verified_nonoverlapping_episodes"]==2
+    must_reject(lambda:report("4h",ambiguous[:-1]+[
+        {"slot_id":"s7","direction":"AMBIGUOUS_SAME_MINUTE",
+         "touch_open_utc":iso(origin)}],[],full_due_count=7,missing_or_late_count=0))
+    assert scored["otc_60min_lead_unattainable_within_1h_event_horizon"] is True
+    no_alert=report("4h",observed,[],full_due_count=6,missing_or_late_count=0)
     assert no_alert["conservative_lead_minutes"]["30"]["observed_alert_precision"] is None
     assert no_alert["conservative_lead_minutes"]["30"]["observed_episode_recall"]==0
     print("BTC_V7R4_VERIFIED_NONOVERLAPPING_EVENT_PRECISION_RECALL_AND_MINUTE_LEAD_TEST_PASS")
 
 if __name__=="__main__":main()
+
+[executed on device: MacBook-Air-Sergey.local (ec25f5e8-4047-48da-b895-a85c27d563ae)]

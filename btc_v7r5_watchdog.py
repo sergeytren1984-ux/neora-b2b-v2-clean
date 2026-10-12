@@ -77,7 +77,7 @@ def exists(path):
         raise
 
 def slot_signed(anchor):
-    key=anchor.strftime("%Y%m%dT%H%M%SZ")
+    key=anchor.strftime("%Y%m%dT%H%MZ")
     path=f"btc_v7r3_evidence/slots/{key}/signal.json"
     return exists(path),exists(path+".sigstore.json")
 

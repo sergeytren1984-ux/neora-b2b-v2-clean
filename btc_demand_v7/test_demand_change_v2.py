@@ -15,11 +15,29 @@ def snap(i, *,direction=0,price_pct=0.01,valid=True):
     book=.06*((i%5)-2) if direction==0 else (.75 if direction>0 else -.75)
     oi=.015*((i%7)-3) if direction==0 else .35
     vol=1.1+.05*(i%6) if direction==0 else 4.0
+    micro_close=t-60000
+    bars=[]
+    for j in range(6):
+        end=micro_close-(5-j)*60000
+        buy_fraction=.5 if j<3 else flow
+        size=10. if j<3 or direction==0 else 50.
+        bars.append([end-60000,"83000","83010","82990","83000",
+                     str(size),end-1,str(83000*size),100,
+                     str(buy_fraction*size),str(83000*buy_fraction*size),"0"])
+    micro={
+        "vendor_close_ms":micro_close,
+        "request_started_ms":t-1200,
+        "response_received_ms":t-500,
+        "recent3_taker_buy_fraction":flow,
+        "recent3_volume_vs_prior3":(5. if direction else 1.),
+        "price_last_closed_1m":83000.}
     result={
         "schema":"btc-v7-live-shadow-snapshot-v1",
         "symbol":"BTCUSDT","anchor_utc":anchor.isoformat(),
         "retrieved_at_utc":received.isoformat(),
+        "microflow_rows":bars,
         "observation":{
+            "microflow":micro,
             "15m_taker_buy_fraction":flow,
             "15m_volume_vs_previous_1h_quarter":vol,
             "15m_price_change_pct":price_pct,
@@ -69,6 +87,13 @@ def test():
                 live_change_since_anchor_pct=float("nan"))
     except ValueError:pass
     else:raise AssertionError("nonfinite publication gap accepted")
+    # Current 3m signed flow must reject fabricated/retroactive samples.
+    poisoned=copy.deepcopy(snap(BASELINE_COUNT,direction=1))
+    poisoned["observation"]["microflow"]["recent3_taker_buy_fraction"]=-1.
+    require_error(lambda:feature(poisoned),"forged contemporary 3m taker ratio")
+    poisoned=copy.deepcopy(snap(BASELINE_COUNT,direction=1))
+    poisoned["observation"]["microflow"]["vendor_close_ms"]+=90000
+    require_error(lambda:feature(poisoned),"future 3m vendor minute")
     # Symmetric down pressure, no need for price to fall first.
     negative=baseline+[snap(BASELINE_COUNT+j,direction=-1) for j in range(8)]
     nstate,negative_events=replay(negative)

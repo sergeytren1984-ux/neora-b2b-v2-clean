@@ -1,0 +1,16 @@
+name: BTC v7R5 read-only OTC score endpoint (main refuses execution)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  refuse-unfrozen-main:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Use only the previously frozen independent evaluator ref
+        run: |
+          echo "Dispatch only with --ref btc-v7r5-otc-independent-outcome-audit-20261012"
+          exit 1

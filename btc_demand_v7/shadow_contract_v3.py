@@ -104,6 +104,13 @@ def future_due(issued,horizon):
     if horizon not in HORIZONS:raise ValueError("unsupported event horizon")
     return future_anchor(issued)+timedelta(minutes=HORIZONS[horizon])
 
+def factor_usable_pressure_status(status):
+    return status in ("NO_PREMOVE_PRESSURE",
+                      "UNVALIDATED_PRESSURE_WATCH",
+                      "SUPPRESSED_IN_COOLDOWN",
+                      "LATE_PRESSURE_AFTER_PRICE_IMPULSE") or (
+           isinstance(status,str) and status.startswith("UNCALIBRATED_PRE_MOVE_"))
+
 def status_grid(reg,event_items,as_of,deliveries=()):
     """Frozen grid is sole denominator; signed DELIVERY, not claim, is clock."""
     now=when(as_of)
@@ -122,11 +129,21 @@ def status_grid(reg,event_items,as_of,deliveries=()):
             raise ValueError("duplicate or unregistered delivery receipt")
         by_delivery[key]=item
     due=correct=missed=no_source=warming=invalid=alert=late_delivery=unconfirmed=0
+    expected_warmup=eligible_due=unusable_factors=0
     by_day={}
     for item in reg["due_slots"]:
         if now<when(item["decision_window_close_utc"]):continue
         due+=1
         row=observed.get(item["slot_id"])
+        if item.get("first_32_signed_slots_are_warmup"):
+            if row is None or row.get("status")=="MISSED_DEADLINE":
+                missed+=1
+            elif row.get("status")=="INSUFFICIENT_ASOF_HISTORY":
+                expected_warmup+=1
+            else:
+                invalid+=1
+            continue
+        eligible_due+=1
         if row is None or row.get("status")=="MISSED_DEADLINE":
             missed+=1;continue
         if row.get("status") in ("MISSING_R2_SIGNED_INPUT","WAITING_R2_SIGNED_SNAPSHOT"):
@@ -147,6 +164,10 @@ def status_grid(reg,event_items,as_of,deliveries=()):
         publication=when(delivery["public_delivery_utc"])
         if publication<issued or publication>when(item["decision_window_close_utc"]):
             late_delivery+=1;continue
+        if not factor_usable_pressure_status(row.get("diagnostic",{}).get("status")):
+            unusable_factors+=1
+            warming+=1
+            continue
         correct+=1
         if row.get("diagnostic",{}).get("alert"):
             alert+=1
@@ -154,7 +175,11 @@ def status_grid(reg,event_items,as_of,deliveries=()):
             by_day[day]=by_day.get(day,0)+1
     return {"schema":"btc-v7r3-registered-slot-coverage-v2",
             "as_of_utc":now.isoformat(),"grid_sha256":digest(reg),
-            "due":due,"on_time_signed_model_state":correct,
+            "due":due,
+            "explicit_warmup_due":expected_warmup,
+            "eligible_signal_due":eligible_due,
+            "factor_unusable_due":unusable_factors,
+            "on_time_signed_model_state":correct,
             "missing_slots":missed,"missing_r2_source":no_source,
             "warming_or_missing_factors":warming,"invalid":invalid,
             "late_public_deliveries":late_delivery,

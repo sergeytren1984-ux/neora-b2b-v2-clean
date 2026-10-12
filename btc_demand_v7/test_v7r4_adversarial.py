@@ -179,6 +179,7 @@ def warmup_to_first_live_pressure():
             assert anchor_ms==int(first.timestamp()*1000)
             raw=copy.deepcopy(sample)
             raw["anchor_utc"]=first.isoformat()
+            raw["observation"]["reference_spot"]=83000.
             return raw
         reference={"spot":83000.,"row":[1,"83000","83001","82999","83000",1,2]}
         # Advance computes a correct non-zero initial CUSUM from signed

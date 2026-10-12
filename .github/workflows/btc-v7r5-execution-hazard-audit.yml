@@ -1,0 +1,91 @@
+name: BTC v7R5 single 60min-actionable signed historical hazard research
+
+on:
+  push:
+    branches: [btc-v7r5-execution-aligned-price-research-20261012]
+    paths:
+      - btc_demand_v7/execution_hazard_v5.py
+      - btc_demand_v7/test_execution_hazard_v5.py
+      - .github/workflows/btc-v7r5-execution-hazard-audit.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+
+concurrency:
+  group: btc-v7r5-one-hazard-diagnostic-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  retrospective-actionable-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PYTHONHASHSEED: '0'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - name: Pin one numerical runtime
+        run: |
+          python -m pip install --disable-pip-version-check \
+            numpy==2.2.6 scipy==1.16.3 scikit-learn==1.7.2 \
+            joblib==1.5.2 threadpoolctl==3.6.0
+      - name: Reject future leakage and nonactionable 59-minute warnings
+        run: |
+          python -m py_compile btc_demand_v7/execution_hazard_v5.py
+          python -m btc_demand_v7.test_execution_hazard_v5
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: btc-vnext6-minute-comparison-f1cead14844d900b23d39d46b5a620bd1a14b2fa
+          path: /tmp/signed-minute-source
+          run-id: 38167948896
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: Cryptographically verify original 1m market raw and producer
+        shell: bash
+        run: |
+          set -euo pipefail
+          cosign verify-blob /tmp/signed-minute-source/raw_minute_klines.json.gz \
+            --bundle /tmp/signed-minute-source/raw_minute_klines.sigstore.json \
+            --certificate-identity "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-vnext6-micro-audit.yml@refs/heads/btc-predictive-vnext6-skill-rebuild-20261011" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          python - <<'PY'
+          import gzip,hashlib,json,pathlib
+          from btc_demand_v7.release_guard import certificate_source_sha
+          folder=pathlib.Path("/tmp/signed-minute-source")
+          if certificate_source_sha(str(folder/"raw_minute_klines.sigstore.json"))!="f1cead14844d900b23d39d46b5a620bd1a14b2fa":
+              raise RuntimeError("wrong source SHA for historical 1m flow")
+          audit=json.loads((folder/"micro_audit.json").read_text())
+          with gzip.open(folder/"raw_minute_klines.json.gz","rb") as fh:raw=fh.read()
+          if hashlib.sha256(raw).hexdigest()!=audit["raw_1m_sha256"]:
+              raise RuntimeError("raw content substituted")
+          print("BTC_V7R5_HAZARD_SIGNED_MINUTE_SOURCE_VERIFIED")
+          PY
+      - name: Train one 3-class hazard on past; calibrate daily threshold on validation only
+        run: |
+          python -m btc_demand_v7.execution_hazard_v5 \
+            --signed-minutes /tmp/signed-minute-source/raw_minute_klines.json.gz \
+            --out /tmp/v7r5-one-execution-hazard.json
+      - name: OIDC/Rekor sign even negative inference evidence
+        run: |
+          cosign sign-blob --yes \
+            --bundle /tmp/v7r5-one-execution-hazard.sigstore.json \
+            /tmp/v7r5-one-execution-hazard.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: btc-v7r5-historical-one-hazard-${{ github.sha }}
+          path: /tmp/v7r5-one-execution-hazard*
+          retention-days: 90
+          if-no-files-found: error

@@ -138,6 +138,51 @@ def test():
     altered=snap(34)
     altered["optional_receipts"]["oi_okx"]["response_received_ms"] = int(datetime(2026,10,30,tzinfo=UTC).timestamp()*1000)
     require_error(lambda:feature(altered),"future HTTP response")
+    # A relative Z-score rise out of an extremely SELL-heavy baseline is
+    # not yet absolute buy pressure. Conversely weakening STRONG buying
+    # is not absolute aggressive selling. Both cases used to emit alerts.
+    def fewer_sellers(i):
+        item=snap(i,direction=-1)
+        item["observation"]["15m_taker_buy_fraction"]=.45
+        item["observation"]["book"]["top10_size_imbalance"]=-.20
+        item["observation"]["microflow"]["recent3_taker_buy_fraction"]=.45
+        for row in item["microflow_rows"][-3:]:
+            size=float(row[5]);row[9]=str(.45*size);row[10]=str(83000*.45*size)
+        return item
+    bearish=[snap(i,direction=-1) for i in range(BASELINE_COUNT)]
+    _,less_bearish=replay(bearish+[fewer_sellers(BASELINE_COUNT+i) for i in range(5)])
+    relative_up=less_bearish[BASELINE_COUNT:]
+    assert any(e.get("relative_pressure_side")=="UP" for e in relative_up)
+    assert not any(e["alert"] for e in relative_up),relative_up
+    assert any(e.get("absolute_side_consensus_veto") for e in relative_up)
+    from btc_demand_v7.demand_change_v2 import paired_shadow_replay
+    paired=paired_shadow_replay(bearish+[fewer_sellers(BASELINE_COUNT+i) for i in range(5)])
+    assert any(e["alert"] and e["warning_side"]=="UP"
+               for e in paired["baseline_diagnostics"][BASELINE_COUNT:])
+    assert not any(e["alert"] for e in paired["challenger_diagnostics"][BASELINE_COUNT:])
+    assert paired["trade_skill_proven"] is False
+    # The challenger did not waste its daily alert budget on weak buying:
+    # it remains able to warn on a later absolute buy-pressure reversal.
+    future=[*bearish,*[fewer_sellers(BASELINE_COUNT+i) for i in range(5)],
+            *[snap(BASELINE_COUNT+5+i,direction=1) for i in range(8)]]
+    staged=paired_shadow_replay(future)
+    assert any(e["alert"] and e["warning_side"]=="UP"
+               for e in staged["challenger_diagnostics"][BASELINE_COUNT+5:])
+    assert not any(e["alert"] for e in staged["baseline_diagnostics"][BASELINE_COUNT+5:])
+    def fewer_buyers(i):
+        item=snap(i,direction=1)
+        item["observation"]["15m_taker_buy_fraction"]=.55
+        item["observation"]["book"]["top10_size_imbalance"] = .20
+        item["observation"]["microflow"]["recent3_taker_buy_fraction"]=.55
+        for row in item["microflow_rows"][-3:]:
+            size=float(row[5]);row[9]=str(.55*size);row[10]=str(83000*.55*size)
+        return item
+    bullish=[snap(i,direction=1) for i in range(BASELINE_COUNT)]
+    _,less_bullish=replay(bullish+[fewer_buyers(BASELINE_COUNT+i) for i in range(5)])
+    relative_down=less_bullish[BASELINE_COUNT:]
+    assert any(e.get("relative_pressure_side")=="DOWN" for e in relative_down)
+    assert not any(e["alert"] for e in relative_down),relative_down
+    assert any(e.get("absolute_side_consensus_veto") for e in relative_down)
     print("BTC_V7R3_STATEFUL_CAUSAL_PREMOVE_DETECTOR_NEGATIVE_TESTS_PASS",
           {"UP_first_alert_at_index":[i for i,x in enumerate(valid) if x["alert"]],
            "DOWN_first_alert_at_index":[i for i,x in enumerate(down) if x["alert"]],

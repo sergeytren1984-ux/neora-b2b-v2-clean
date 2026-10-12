@@ -1,0 +1,13 @@
+{
+  "schema": "btc-v7r1-frozen-research-inputs-v1",
+  "source_commit_sha": "3d08e5a767f1848a9e10d6bea1ef939c2b77238a",
+  "source_run_id": 38169934478,
+  "source_workflow": "btc-v7-demand-otc-audit.yml",
+  "issuer": "https://token.actions.githubusercontent.com",
+  "model_sha256": "e76fedec482b399cc13f3e3366778e8942cb648db9019ca92ad5de123a9b2d2a",
+  "audit_sha256": "0fddfab706a0627cb14f0e0baeca5bfe3786a439dd3d06bea5fe12f64b3add54",
+  "paired_sha256": "061a12db53e10748768ef2e5f4e23dec5f75a560ce695da24d85f6db0af9368b",
+  "trading_authority": false,
+  "prospective_skill_proven": false,
+  "note": "This is an allowlist for already verified negative-skill research data; not a new numerical release."
+}

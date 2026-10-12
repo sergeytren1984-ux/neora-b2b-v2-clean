@@ -16,7 +16,15 @@ NOT observable from public Binance candles.
 """
 from __future__ import annotations
 import datetime as dt,json,math,hashlib
-from btc_demand_v7.prospective_core import when
+def when(value):
+    timestamp=dt.datetime.fromisoformat(value.replace("Z","+00:00")) if isinstance(value,str) else value
+    if not isinstance(timestamp,dt.datetime) or timestamp.tzinfo is None:
+        raise ValueError("must supply offset-aware time")
+    return timestamp.astimezone(UTC)
+
+def digest(value):
+    data=json.dumps(value,sort_keys=True,separators=(",",":"),ensure_ascii=False,allow_nan=False)
+    return hashlib.sha256(data.encode()).hexdigest()
 
 UTC=dt.timezone.utc
 BUDGET=147600.0
@@ -117,7 +125,6 @@ def simulated_execution(price_on_request,price_on_execution,guard,premium):
     return {"BTC":BUDGET/(execution+premium),"USDT":0.,"request_rejected_proxy":False}
 
 def compare_pair(event,delivery,raw):
-    from btc_demand_v7.shadow_contract_v3 import digest
     published=when(delivery["public_delivery_utc"])
     if (delivery.get("source_signal_sha256")!=digest(event)
         or delivery.get("model_source_sha")!=MODEL_SHA

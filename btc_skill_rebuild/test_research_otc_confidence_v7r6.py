@@ -47,6 +47,18 @@ class TailVetoTests(unittest.TestCase):
         self.assertTrue(r["mathematical_wait_candidate"])
         self.assertFalse(r["prospective_trade_profit_proven"])
 
+    def test_one_severe_loss_not_hidden_by_optimistic_percentile(self):
+        a=samples(residual=.002)
+        s=a[2]
+        a[2]=MaturedDay(s.issued_utc,s.publicly_issued_utc,
+                         s.outcome_matured_utc,s.predicted_nominal_wait_gain_btc,
+                         s.predicted_nominal_wait_gain_btc-.02)
+        result=bound_wait_utility(NOW,.002,a)
+        self.assertGreater(result["adverse_residual_lower_quantile_btc"],0)
+        self.assertLess(result["adverse_tail_average_residual_btc"],0)
+        self.assertLess(result["forecast_lower_bound_btc"],0)
+        self.assertFalse(result["mathematical_wait_candidate"])
+
     def test_current_and_future_outcome_not_allowed_into_calibration(self):
         old=bound_wait_utility(NOW,.004,samples())
         t=NOW

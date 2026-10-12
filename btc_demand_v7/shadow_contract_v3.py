@@ -10,12 +10,9 @@ import hashlib,json,math
 from btc_demand_v7.prospective_core import when
 
 UTC=timezone.utc
-SOURCE_R2_SHA="39f61562803f3120bcda872b56f76a392989ed4e"
-SOURCE_R2_GRID_SHA="6c65642c24d2b093cdeaf707dfe0da5d5339f5988e8643dabbde497a5cc51c28"
 BRANCH="btc-v7r4-hardening-20261012"
 EVIDENCE="btc-v7r4-direct-evidence-20261013"
 SCHEDULER_BLOB_SHA="9e2e4f32bb60fc891c06bb7bf2086cef1e8cc27a"
-R2_EVIDENCE="btc-v7r2-prospective-evidence-20261013"
 CYCLE=timedelta(minutes=15)
 TICK_MIN=3
 TICK_MAX=13

@@ -38,6 +38,14 @@ DECAY = 0.94
 WATCH_LEVEL = 3.25
 ALERT_LEVEL = 7.25
 COOLDOWN_MINUTES = 180
+# Public GitHub completion is only verified AFTER emitting the research alert.
+# Since a valid alert can be publicly available up to 13 minutes AFTER its
+# closed source candle anchor, the previous source-time rule allowed two
+# alerts PUBLICLY DELIVERED ON THE SAME UTC DAY at the midnight boundary.
+# A conservative >=24h+13m rolling source cooldown is strictly stronger
+# than the promised <=1 public alert per UTC date, independent of jitter.
+PUBLICATION_LATENCY_BOUND_MINUTES = 13
+GLOBAL_PUBLIC_DAILY_ALERT_SAFETY_MINUTES = 24*60 + PUBLICATION_LATENCY_BOUND_MINUTES
 MAX_ADMISSIBLE_PRICE_MOVE_PCT = 0.30
 ROBUST_CLIP = 4.0
 
@@ -244,8 +252,10 @@ def advance(state, history, observation, *,issued_utc=None,
     cooldown=False
     if side and state["last_alert_utc"] is not None:
         previous_alert=timestamp(state["last_alert_utc"])
-        cooldown=(at-previous_alert<timedelta(minutes=COOLDOWN_MINUTES)
-                  or at.date()==previous_alert.date())  # fixed <=1 alert per UTC day
+        if at < previous_alert:
+            raise ValueError("previous signed alert timestamp is in the future")
+        cooldown=(at-previous_alert<=timedelta(minutes=GLOBAL_PUBLIC_DAILY_ALERT_SAFETY_MINUTES)
+                  or at.date()==previous_alert.date())  # public UTC day guard
     raw_alert=bool(side and not cooldown)
     # If the price already moved, this is not an advance warning.
     eligible = raw_alert and readiness=="PRE_MOVE"

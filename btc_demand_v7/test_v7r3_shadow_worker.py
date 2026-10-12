@@ -40,6 +40,12 @@ def test():
             dest.parent.mkdir(parents=True,exist_ok=True)
             dest.write_bytes(canonical(value))
             return dest
+        def mock_direct_collect(anchor_ms):
+            i=int((anchor_ms/1000-base.timestamp())//(15*60))
+            return samples[i]
+        def mock_prior_signed_history(root,slot):
+            i=int((slot.timestamp()-base.timestamp())//(15*60))
+            return samples[i-32:i]
         def mock_close():
             return {"source":"Binance BTCUSDT closed 1m spot","spot":83000.,
                     "minute_close_utc":received.replace(second=0,microsecond=0).isoformat(),
@@ -47,8 +53,8 @@ def test():
                     "row":[1,"83000","83001","82999","83000","1",2]}
         first=base+dt.timedelta(minutes=15*32)
         received=first+dt.timedelta(minutes=10,seconds=15)
-        with patch.object(worker,"verify",lambda *x:None),patch.object(worker,"write",mock_signed),patch.object(worker,"last_close_before_issuance",mock_close),patch.object(worker,"utcnow",lambda:received):
-            status=worker.current_slot_signal(root,r2,reg,received)
+        with patch.object(worker,"verify",lambda *x:None),patch.object(worker,"write",mock_signed),patch.object(worker,"last_close_before_issuance",mock_close),patch.object(worker,"utcnow",lambda:received),patch.object(worker,"market_collect",mock_direct_collect),patch.object(worker,"historic_snapshots",mock_prior_signed_history):
+            status=worker.current_slot_signal(root,reg,received)
         assert status=="SIGNED_STATE_PUBLISHED",status
         firstevent=json.loads((root/"slots"/slot_id(first)/"signal.json").read_text())
         assert firstevent["diagnostic"]["alert"] is False or firstevent["diagnostic"]["warning_side"]=="UP"

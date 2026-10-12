@@ -10,6 +10,7 @@ from __future__ import annotations
 from btc_demand_v7.episode_quality_v4 import report,episodes_from_verified_barriers
 from btc_demand_v7.prospective_core import when
 from datetime import timedelta
+from math import comb
 
 
 def paired_source_signal_score(horizon, full_due_count,missing_due,
@@ -88,12 +89,59 @@ def paired_source_signal_score(horizon, full_due_count,missing_due,
                  full_due_count=full_due_count,missing_or_late_count=missing_due)
     second=report(horizon,resolved_outcomes,new,
                  full_due_count=full_due_count,missing_or_late_count=missing_due)
+    # Each episode contributes at most ONE paired binary observation.
+    # A gain in the number of overlapping 15min alarms cannot masquerade
+    # as repeated independent correctly forecast price movements.
+    episodes=first['unique_verified_episodes']
+    baseline_alert_index={a['slot_id']:a for a in old}
+    candidate_alert_index={a['slot_id']:a for a in new}
+    def episode_hit(episode,alerts,lead):
+        for member in episode['members']:
+            sid=member['slot_id']
+            a=alerts.get(sid)
+            if a is None or a['side']!=episode['side']:
+                continue
+            if not 0<= (when(member['touch_open_utc'])-
+                        when(a['public_delivery_utc'])).total_seconds()/60:
+                continue
+            dtm=(when(member['touch_open_utc'])-
+                 when(a['public_delivery_utc'])).total_seconds()/60
+            if lead<=dtm<=(60 if horizon=='1h' else 240):
+                return True
+        return False
+    def one_sided_p(candidate_only,baseline_only):
+        # Descriptive exact sign-tail of DISCORDANT clustered episodes.
+        # Market episodes can share macro regime: independence and 20-day
+        # maturity are NOT certified here.
+        n=candidate_only+baseline_only
+        if n==0:return None
+        return sum(comb(n,j) for j in range(candidate_only,n+1))/(2**n)
     horizons={}
     for lead in (10,30,60):
         k=str(lead)
         baseline=first['conservative_lead_minutes'][k]
         candidate=second['conservative_lead_minutes'][k]
+        both=only_original=only_candidate=neither=0
+        for ep in episodes:
+            a=episode_hit(ep,baseline_alert_index,lead)
+            b=episode_hit(ep,candidate_alert_index,lead)
+            if a and b:both+=1
+            elif a:only_original+=1
+            elif b:only_candidate+=1
+            else:neither+=1
+        if both+only_original+only_candidate+neither!=len(episodes):
+            raise ValueError('paired episode denominator not reconciled')
+        if (only_original+both!=baseline['verified_distinct_episodes_matched']
+                or only_candidate+both!=candidate['verified_distinct_episodes_matched']):
+            raise ValueError('own-slot episode matching contradictory')
         horizons[k]={
+            'paired_episodes_both_correct':both,
+            'paired_episodes_only_original_correct':only_original,
+            'paired_episodes_only_candidate_correct':only_candidate,
+            'paired_episodes_neither_correct':neither,
+            'descriptive_one_sided_episode_sign_p_candidate_better':one_sided_p(
+                only_candidate,only_original),
+            'episode_sign_test_is_not_proof_due_to_event_dependence':True,
             'baseline_episodes_own_slot_correct':baseline['verified_distinct_episodes_matched'],
             'candidate_episodes_own_slot_correct':candidate['verified_distinct_episodes_matched'],
             'added_episodes_correct_candidate_minus_baseline':(

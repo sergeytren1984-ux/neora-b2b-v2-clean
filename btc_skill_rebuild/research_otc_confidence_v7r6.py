@@ -8,6 +8,7 @@ engineer/infra changes or confidence guarantees for nonstationary BTC.
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from math import ceil, isfinite
+from statistics import mean
 from typing import Sequence
 
 UTC=timezone.utc
@@ -93,12 +94,19 @@ def bound_wait_utility(current_issued_utc: datetime,
     residuals=sorted(s.worst_realized_wait_gain_btc-s.predicted_nominal_wait_gain_btc
                      for s in past.values())
     rank=max(1,ceil((len(residuals)+1)*alpha))
-    lower=predicted+residuals[rank-1]
+    # A 10% percentile can conceal a rare catastrophic historical miss.
+    # Check BOTH percentile and bottom-tail expected shortfall. These are
+    # descriptive empirical guards, not distribution-free BTC guarantees.
+    tail_count=max(1,ceil(alpha*len(residuals)))
+    tail_mean=mean(residuals[:tail_count])
+    lower=predicted+min(residuals[rank-1],tail_mean)
     return {**basis,
             "decision":"WAIT_CANDIDATE_RESEARCH_ONLY" if lower>0 else "ABSTAIN_WAIT",
             "nominal_wait_gain_forecast_btc":predicted,
             "adverse_residual_lower_quantile_btc":residuals[rank-1],
             "residual_quantile_rank_1based":rank,
+            "adverse_tail_average_residual_btc":tail_mean,
+            "adverse_tail_days_used":tail_count,
             "forecast_lower_bound_btc":lower,
             "mathematical_wait_candidate":lower>0,
             "tail_alpha":alpha,

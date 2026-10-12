@@ -134,10 +134,16 @@ def spot_state(one_min,anchor_ms):
         "breakout_pct":100*(c[k]/prev1h_high-1),
     }
 
-def collect():
+def collect(anchor_ms=None):
     obtained=int(time.time()*1000)
-    # Ensure last full 5-min closed candle is available; exact vendor close verified.
-    anchor_ms=(obtained//300000)*300000
+    # The v7R4 issuer must fetch REQUIRED closed spot for the FROZEN
+    # registered slot, never dynamically shift anchor when its job queues.
+    if anchor_ms is None:
+        anchor_ms=(obtained//300000)*300000
+    else:
+        anchor_ms=int(anchor_ms)
+        if (anchor_ms%300000!=0 or not 0<=obtained-anchor_ms<=12*60*1000):
+            raise ValueError("registered anchor is future/stale/unaligned")
     one=json_get(SOURCE_SPOT,{"symbol":"BTCUSDT","interval":"1m","endTime":anchor_ms-1,"limit":220})
     five=json_get(SOURCE_SPOT,{"symbol":"BTCUSDT","interval":"5m","endTime":anchor_ms-1,"limit":1000})
     one=strict_closed(one,60000,anchor_ms,200)

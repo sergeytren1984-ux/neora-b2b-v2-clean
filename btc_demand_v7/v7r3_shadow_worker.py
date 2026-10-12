@@ -321,7 +321,9 @@ def verified_delivery_time(event):
     if data.get("status")!="completed":return None
     if data.get("conclusion")!="success":
         raise RuntimeError("signal source job has no successful completion")
-    expected_path=f".github/workflows/btc-v7r3-signed-demand-shadow.yml@refs/heads/{BRANCH}"
+    # GitHub REST workflow-runs.path contains JUST the workflow file,
+    # while head_branch independently carries the exact ref.
+    expected_path=".github/workflows/btc-v7r3-signed-demand-shadow.yml"
     if (data.get("head_sha")!=event["model_source_sha"]
         or data.get("head_branch")!=BRANCH
         or data.get("event")!="workflow_dispatch"

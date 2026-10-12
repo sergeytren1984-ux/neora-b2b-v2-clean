@@ -99,7 +99,13 @@ def evaluate(raw):
             start=int(fold.timestamp()*1000);end=start+7*DAY
             vstart=start-8*DAY;vend=start-DAY
             train=[(t,x,y) for t,d,x,y in population if d<vstart]
-            valid=[(t,x,y) for t,d,x,y in population if vstart<=t and d<vend]
+            # Choose BOTH shrink and climatology baseline on the SAME
+            # nonoverlapping due-grid used for prospective scoring. Using
+            # overlapping 15m validation overweights one future BTC move
+            # as many independent-looking labels and can reverse selection.
+            valid_overlap=[(t,x,y) for t,d,x,y in population
+                           if vstart<=t and d<vend]
+            valid=[(t,x,y) for t,x,y in valid_overlap if t%(n*STEP)==0]
             test=[(t,x,y) for t,d,x,y in population
                   if start<=t<end and t%(n*STEP)==0]
             due=7*24*60//(n*5)
@@ -116,6 +122,8 @@ def evaluate(raw):
             test_score=matched_score(test,model,alpha,chosen,climate)
             weekly.append({
                 'week_start_utc':fold.isoformat(),'validation_n':len(valid),
+                'validation_overlapping_15m_slots_not_used_for_selection':len(valid_overlap),
+                'validation_and_forward_identical_nonoverlap_UTC_grid':True,
                 'training_n':len(train),'fixed_due_expected':due,
                 'fixed_due_resolved':len(test),'missing_or_not_yet_mature':absent,
                 'entire_fixed_due_grid_complete':absent==0,

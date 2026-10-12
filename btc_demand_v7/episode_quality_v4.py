@@ -17,6 +17,8 @@ def episodes_from_verified_barriers(verified_events, *,gap_minutes=GAP_MINUTES):
     Minute-open is the EARLIEST possible touch and thus the conservative
     warning lead. Every source row must be signed and independently rederived.
     """
+    if not isinstance(gap_minutes,int) or gap_minutes<=0:
+        raise ValueError("cluster gap must be positive whole minutes")
     inputs=[]
     for e in verified_events:
         side=e["direction"]
@@ -32,10 +34,10 @@ def episodes_from_verified_barriers(verified_events, *,gap_minutes=GAP_MINUTES):
     items=[]
     seen=set()
     for touch,side,sid in inputs:
-        if (sid,side) in seen:raise ValueError("duplicate signed barrier")
-        seen.add((sid,side))
+        if sid in seen:raise ValueError("duplicate signed slot, including conflicting directions")
+        seen.add(sid)
         last=next((x for x in reversed(items) if x["side"]==side),None)
-        if last is not None and touch-when(last["first_touch_utc"])<timedelta(minutes=gap_minutes):
+        if last is not None and touch-when(last["last_member_touch_utc"])<timedelta(minutes=gap_minutes):
             last["member_windows"]+=1
             last["last_member_touch_utc"]=touch.isoformat()
             continue
@@ -48,7 +50,9 @@ def report(horizon, verified_outcomes, verified_alerts, *,full_due_count,
            missing_or_late_count):
     if horizon not in ("1h","4h"):raise ValueError("invalid horizon")
     minutes={"1h":60,"4h":240}[horizon]
-    if full_due_count<0 or missing_or_late_count<0:
+    if (not isinstance(full_due_count,int) or not isinstance(missing_or_late_count,int)
+        or full_due_count<0 or not 0<=missing_or_late_count<=full_due_count
+        or len(verified_outcomes)>full_due_count):
         raise ValueError("invalid fixed-grid denominators")
     episodes=episodes_from_verified_barriers(verified_outcomes)
     unique_alerts={}

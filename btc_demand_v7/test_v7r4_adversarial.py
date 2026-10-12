@@ -153,7 +153,53 @@ def missing_state_resets_are_forbidden():
         assert json.loads((folder/"signal.json").read_text())["zero_reset_not_allowed"] is True
     print("MISSING_PREVIOUS_STATE_CANNOT_RESTART_ALERT_BUDGET_PASS")
 
+def warmup_to_first_live_pressure():
+    # 32 consecutive previous slots carry signed raw but ZERO valid
+    # directional state. First legitimate event MUST start exactly once,
+    # then second event must retain the prior CUSUM.
+    from btc_demand_v7.test_demand_change_v2 import snap
+    from btc_demand_v7.demand_change_v2 import state_zero
+    reg=grid(START,START-timedelta(hours=4),"a"*40,days=1)
+    first=START+timedelta(minutes=32*15)
+    sample=snap(32,direction=1)
+    def signed(root,name,obj):
+        p=pathlib.Path(root)/name;p.parent.mkdir(parents=True,exist_ok=True)
+        p.write_bytes(canonical(obj));return p
+    with tempfile.TemporaryDirectory() as t:
+        root=pathlib.Path(t)
+        previous_slot=first-timedelta(minutes=15)
+        p=signed(root/"slots"/slot_id(previous_slot),"signal.json",{
+            "slot_id":slot_id(previous_slot),
+            "status":"INSUFFICIENT_ASOF_HISTORY",
+            "state":state_zero(),
+            "anchor_utc":previous_slot.isoformat()})
+        with patch.object(w,"verify",lambda *x:None):
+            assert w.available_previous_state(root,first) is None
+        def collect(anchor_ms):
+            assert anchor_ms==int(first.timestamp()*1000)
+            raw=copy.deepcopy(sample)
+            raw["anchor_utc"]=first.isoformat()
+            return raw
+        reference={"spot":83000.,"row":[1,"83000","83001","82999","83000",1,2]}
+        # Advance computes a correct non-zero initial CUSUM from signed
+        # 32-slot baseline but must never adopt warmup placeholder state.
+        received=first+timedelta(minutes=10)
+        with (patch.object(w,"verify",lambda *x:None),
+              patch.object(w,"write",signed),
+              patch.object(w,"market_collect",collect),
+              patch.object(w,"historic_snapshots",
+                           lambda *x:[snap(i) for i in range(32)]),
+              patch.object(w,"last_close_before_issuance",lambda:reference),
+              patch.object(w,"utcnow",lambda:received)):
+            result=w.current_slot_signal(root,reg,received)
+        assert result=="SIGNED_STATE_PUBLISHED",result
+        event=json.loads((root/"slots"/slot_id(first)/"signal.json").read_text())
+        assert event["state"]["sequence"]==1
+        assert event["state"]["up_cusum"]>=0
+        print("FIRST_FROZEN_WARMUP_STATE_INITIALIZES_EXACTLY_ONCE_PASS")
+
 def run():
+    warmup_to_first_live_pressure()
     r2_denom_and_errors()
     wrong_delivery_identity()
     unsigned_or_forged_outcome()

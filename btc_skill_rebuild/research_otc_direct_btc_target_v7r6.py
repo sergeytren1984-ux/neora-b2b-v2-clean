@@ -44,6 +44,12 @@ def decide_from_expected_btc_gain(gain,known_price):
     return "WAIT_60" if gain>forecast_markup_uncertainty_margin(known_price) else "BUY_NOW"
 
 def daily_score(observations,model,shrink):
+    # Never treat correlated hourly or 15m counterfactual whole-budget
+    # purchases as independent decisions. There is exactly ONE issue/day.
+    dates=[dt.datetime.fromtimestamp(t/1000,UTC).date().isoformat()
+           for t,x,y,known,spot60,spot120 in observations]
+    if not dates or len(dates)!=len(set(dates)):
+        raise ValueError("one prospective full-capital opportunity per UTC day")
     gains=[];all_wait=[];n_wait=0;robust_correct=0;robust_wrong=0
     for t,x,y,known,spot60,spot120 in observations:
         ex_ante=shrink*predict(model,x)
@@ -105,7 +111,10 @@ def run(raw,out):
                        "train_overlapping_15m":len(train),
                        "validation_daily":len(valid),"selected_shrink":chosen,
                        "validation":daily_score(valid,model,chosen),
-                       "historical_forward":scores})
+                       "historical_forward":scores,
+                       "expected_calendar_days":7,
+                       "missing_daily_forward_outcomes":7-len(future),
+                       "complete_day_grid":len(future)==7})
         print("OTC_DIRECT_BTC_TARGET",str(fold.date()),"shrink",chosen,
               "days",scores["n_predeclared_daily_decisions"],
               "wait",scores["historical_wait_decisions"],

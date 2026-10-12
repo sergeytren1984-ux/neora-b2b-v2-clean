@@ -114,5 +114,3 @@ def report(horizon, verified_outcomes, verified_alerts, *,full_due_count,
             "conservative_lead_minutes":by_lead,
             "prospective_skill_proven":False,
             "trading_authority":False}
-
-[executed on device: MacBook-Air-Sergey.local (ec25f5e8-4047-48da-b895-a85c27d563ae)]

@@ -1,4 +1,4 @@
-name: BTC v7R6 independent prospective paired shadow clock (no trading)
+name: BTC v7R6 separate prospective scheduler to immutable observer branch
 
 on:
   push:
@@ -7,57 +7,63 @@ on:
       - .github/workflows/btc-v7r6-live-clock.yml
   schedule:
     - cron: '9,24,39,54 * * * *'
-  workflow_dispatch:
-    inputs:
-      action:
-        type: choice
-        options: [slot, register]
-        default: slot
-        required: true
+  workflow_dispatch: {}
 
 permissions:
-  contents: write
-  id-token: write
+  contents: read
+  actions: write
 
 concurrency:
-  group: btc-v7r6-independent-live-shadow
+  group: btc-v7r6-pinned-dispatch-clock
   cancel-in-progress: false
 
 jobs:
-  prospective-v7r6:
+  immutable-ref-dispatcher:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    timeout-minutes: 5
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GH_REPOSITORY: ${{ github.repository }}
-      RUNNER_SOURCE_SHA: d9f259b852c85f60417ff2d24acc21c47ef83880
-      PYTHONHASHSEED: '0'
     steps:
-      - name: Pin research runner and original frozen R6 formula source
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          ref: d9f259b852c85f60417ff2d24acc21c47ef83880
-          persist-credentials: false
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
-        with:
-          python-version: '3.12.14'
-      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
-        with:
-          cosign-release: v3.0.6
-      - name: Reject invalid sources, late records, state-reset attempts and mathematical drift
+      - name: Dispatch only the immutable preregistered mathematical observer
+        shell: bash
         run: |
-          python -m btc_demand_v7.test_v7r6_live_pair_worker
-          python -m btc_demand_v7.test_demand_change_v2
-          python -m btc_demand_v7.test_episode_quality_v4
-          python - <<'PY'
-          from btc_demand_v7.v7r6_live_pair_worker import verify_runner
-          print("BTC_V7R6_VERIFIED_PINNED_MATH_AND_SOURCE",verify_runner())
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime as dt,json,os,time,urllib.request
+          now=dt.datetime.now(dt.timezone.utc)
+          start=dt.datetime(2026,10,13,tzinfo=dt.timezone.utc)
+          end=dt.datetime(2026,10,20,tzinfo=dt.timezone.utc)
+          event=os.environ.get('GITHUB_EVENT_NAME')
+          slot=now.replace(minute=now.minute//15*15,second=0,microsecond=0)
+          offset=(now-slot).total_seconds()/60
+          if event=='push':
+              if now>=start:
+                  print('R6_PINNED_SMOKE_NOT_ALLOWED_IN_FUTURE_EPOCH',now.isoformat());raise SystemExit(0)
+              print('R6_PINNED_BEFORE_START_DISPATCH_SMOKE_TEST',now.isoformat(),flush=True)
+          elif not(start<=slot<end):
+              print('R6_PINNED_SCHEDULER_OUTSIDE_EPOCH',now.isoformat(),flush=True);raise SystemExit(0)
+          elif not 8<=offset<12:
+              # GitHub scheduled work can arrive late. Do not pretend that
+              # a delayed downstream forecast was timely or backfill it.
+              print('R6_PINNED_SCHEDULE_TOO_LATE_DISPATCH_SKIPPED',now.isoformat(),flush=True)
+              raise SystemExit(0)
+          branch='btc-v7r6-pinned-observer-20261012'
+          endpoint=f"https://api.github.com/repos/{os.environ['GH_REPOSITORY']}/actions/workflows/btc-v7r6-pinned-live.yml/dispatches"
+          payload=json.dumps({'ref':branch,'inputs':{'action':'slot'}}).encode()
+          headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+                   'Accept':'application/vnd.github+json',
+                   'Content-Type':'application/json',
+                   'X-GitHub-Api-Version':'2022-11-28',
+                   'User-Agent':'btc-v7r6-pinned-immutable-clock'}
+          for n in range(3):
+              try:
+                  req=urllib.request.Request(endpoint,data=payload,headers=headers,method='POST')
+                  with urllib.request.urlopen(req,timeout=18) as response:
+                      if response.status!=204:raise RuntimeError('unexpected dispatch status')
+                  print('R6_PINNED_RESEARCH_DISPATCH_204',branch,'UTC',now.isoformat(),flush=True)
+                  break
+              except Exception:
+                  if n==2:raise
+                  time.sleep(3*(n+1))
           PY
-      - name: Sign immutable pre-epoch research grid (push/manual register only)
-        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.action == 'register')
-        run: |
-          python -m btc_demand_v7.v7r6_live_pair_worker register
-      - name: Publish no-backdated future signed challenger before frozen deadline
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.action == 'slot')
-        run: |
-          python -m btc_demand_v7.v7r6_live_pair_worker slot

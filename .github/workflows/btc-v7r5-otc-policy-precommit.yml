@@ -64,13 +64,15 @@ jobs:
             --certificate-identity "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-v7r5-otc-policy-precommit.yml@refs/heads/btc-v7r5-otc-prospective-proxy-20261012" \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com
           python - <<'PY'
-          import json
-          from btc_demand_v7.release_guard import certificate_source_sha
+          import json,os,datetime
           p="/tmp/btc-v7r5-otc-precommitted-policy.sigstore.json"
           b=json.load(open(p))
           assert any(e.get("inclusionProof") for e in b["verificationMaterial"]["tlogEntries"])
-          print("BTC_V7R5_OTC_PRECOMMITTED_SIGNED_SOURCE_SHA",
-                certificate_source_sha(p))
+          policy=json.load(open("/tmp/btc-v7r5-otc-precommitted-policy.json"))
+          assert policy["policy_producer_sha"]==os.environ["GITHUB_SHA"]
+          assert datetime.datetime.fromisoformat(policy["registered_before_future_epoch_utc"])<datetime.datetime.fromisoformat(policy["source_epoch_start"])
+          assert policy["source_precommitted"] is True
+          print("BTC_V7R5_OTC_PRECOMMITTED_POLICY_SHA_VERIFIED",policy["policy_producer_sha"])
           PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:

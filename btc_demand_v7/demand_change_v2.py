@@ -28,7 +28,11 @@ UTC = timezone.utc
 SCHEMA = "btc-v7r3-causal-pressure-state-v1"
 BASELINE_COUNT = 32
 CADENCE_MINUTES = 15
-GAP_MAX_MINUTES = 22
+# Due anchors are EXACTLY 15m apart. Valid HTTP receipt offsets vary
+# between anchor+0 and anchor+12m, so two consecutive valid receipts
+# can be separated by as much as 27m. A 22m receipt gap wrongly rejects
+# valid slots. Exact anchor grid is the continuity authority.
+GAP_MAX_MINUTES = 27
 DRIFT = 0.55
 DECAY = 0.94
 WATCH_LEVEL = 3.25
@@ -156,6 +160,14 @@ def advance(state, history, observation, *,issued_utc=None,
         raise ValueError("decision precedes received observation")
     if issued-at > timedelta(minutes=10):
         raise ValueError("stale detection decision: signed source older than 10 minutes")
+    # Invariant: a 15m *candle anchor*, not variable API latency,
+    # defines every due slot. Accept variable collection latency ONLY
+    # within the strictly checked <=12m fresh-as-of bound in feature().
+    current_anchor=timestamp(observation["anchor_utc"])
+    if history:
+        previous_anchor=timestamp(history[-1]["anchor_utc"])
+        if current_anchor-previous_anchor!=timedelta(minutes=CADENCE_MINUTES):
+            raise ValueError("missed/duplicate 15m anchor slot, not allowable latency jitter")
     last = state["last_receipt_utc"]
     if last is not None:
         prev = timestamp(last)
@@ -163,8 +175,7 @@ def advance(state, history, observation, *,issued_utc=None,
         if gap <= 0:
             raise ValueError("duplicate or backwards observation")
         if gap > GAP_MAX_MINUTES:
-            # Fail closed rather than reset state and hide missing data.
-            raise ValueError("observation grid gap: must start new provisional epoch")
+            raise ValueError("as-of HTTP receipt age exceeds anchored 15m+12m maximum")
         if state["last_snapshot_sha256"]!=source_hash(history[-1]):
             raise ValueError("state does not bind to most recent signed source")
     def advance_without_signal(status):
@@ -196,12 +207,20 @@ def advance(state, history, observation, *,issued_utc=None,
             raise ValueError("future point in pressure baseline")
         previous_time.append(ts)
         prior_features.append(f)
-    for earlier,later in zip(previous_time, previous_time[1:]):
+    # Signed candle anchors MUST be contiguous even if receipt times
+    # legitimately fluctuate by up to 12 minutes per due window.
+    anchor_times=[timestamp(snap["anchor_utc"]) for snap in previous]
+    for earlier,later in zip(anchor_times,anchor_times[1:]):
+        if later-earlier!=timedelta(minutes=CADENCE_MINUTES):
+            raise ValueError("missing or duplicated signed candle in 32-slot baseline")
+    for earlier,later in zip(previous_time,previous_time[1:]):
         gap=(later-earlier).total_seconds()/60
         if gap<=0 or gap>GAP_MAX_MINUTES:
-            raise ValueError("noncausal or incomplete signed baseline grid")
-    if (at-previous_time[-1]).total_seconds()/60>GAP_MAX_MINUTES:
-        raise ValueError("baseline not contiguous with latest reading")
+            raise ValueError("noncausal HTTP receipt order in signed baseline")
+    if current_anchor-anchor_times[-1]!=timedelta(minutes=CADENCE_MINUTES):
+        raise ValueError("current signed anchor not adjacent to baseline")
+    if not 0<(at-previous_time[-1]).total_seconds()/60<=GAP_MAX_MINUTES:
+        raise ValueError("noncausal/missing current signed receipt")
     if state["last_receipt_utc"] is not None and timestamp(state["last_receipt_utc"])!=previous_time[-1]:
         raise ValueError("state receipt does not match signed history")
     zs=[zscore([h[j] for h in prior_features],cur[j]) for j in range(len(cur))]

@@ -148,7 +148,8 @@ def state_zero():
     }
 
 def advance(state, history, observation, *,issued_utc=None,
-            live_change_since_anchor_pct=None):
+            live_change_since_anchor_pct=None,
+            absolute_consensus_required=True):
     """Advance one tick, carrying previous score and source hash forward.
 
     history: prior as-of signed snapshots, ordered chronologically, not including
@@ -247,8 +248,22 @@ def advance(state, history, observation, *,issued_utc=None,
     down=max(0., DECAY*float(state["down_cusum"])-pressure-DRIFT)
     if not math.isfinite(up+down):
         raise ValueError("unbounded pressure state")
-    side=("UP" if up>=ALERT_LEVEL and up>down else
-          "DOWN" if down>=ALERT_LEVEL and down>up else None)
+    raw_side=("UP" if up>=ALERT_LEVEL and up>down else
+              "DOWN" if down>=ALERT_LEVEL and down>up else None)
+    # A positive *change relative to a bearish baseline* is not proof that
+    # contemporaneous buyers dominate: 20% -> 40% taker buys still means
+    # 60% aggressive sellers. Suppress a directional alert unless at least
+    # two of the three signed current inputs confirm the absolute side.
+    # This is a research-stage safety veto; its impact on recall/precision
+    # must be measured prospectively before any production replacement.
+    up_votes=sum(x>0 for x in cur[:3])
+    down_votes=sum(x<0 for x in cur[:3])
+    contrary_baseline_veto=(raw_side=="UP" and up_votes<2 or
+                             raw_side=="DOWN" and down_votes<2)
+    # In the isolated comparative replay, the unfiltered branch follows the
+    # FROZEN v7R5 cooldown path. The filtered branch has its OWN state chain.
+    applied_consensus_veto=bool(absolute_consensus_required and contrary_baseline_veto)
+    side=None if applied_consensus_veto else raw_side
     cooldown=False
     if side and state["last_alert_utc"] is not None:
         previous_alert=timestamp(state["last_alert_utc"])
@@ -265,6 +280,8 @@ def advance(state, history, observation, *,issued_utc=None,
         up=0.
         down=0.
         status="LATE_PRESSURE_AFTER_PRICE_IMPULSE"
+    elif applied_consensus_veto:
+        status="RELATIVE_PRESSURE_WITHOUT_ABSOLUTE_SIDE_CONSENSUS"
     elif cooldown:
         status="SUPPRESSED_IN_COOLDOWN"
     elif eligible:
@@ -296,6 +313,10 @@ def advance(state, history, observation, *,issued_utc=None,
         "z_micro_volume_3m":micro_volume_z,
         "z_oi":oi_z,"z_spread":spread_z,
         "pressure":pressure,"up_cusum":up,"down_cusum":down,
+        "absolute_buy_votes":up_votes,"absolute_sell_votes":down_votes,
+        "relative_pressure_side":raw_side,
+        "absolute_side_consensus_veto":applied_consensus_veto,
+        "absolute_consensus_policy_enabled":bool(absolute_consensus_required),
         "status":status,"warning_side":side if eligible else None,
         "watch":max(up,down)>=WATCH_LEVEL,
         "alert":eligible,
@@ -309,7 +330,7 @@ def advance(state, history, observation, *,issued_utc=None,
     }
     return next_state,diagnostic
 
-def replay(snapshots,*,issued_utc=None):
+def replay(snapshots,*,issued_utc=None,absolute_consensus_required=True):
     """Deterministic full causal replay. Every previous record must be signed upstream."""
     ordered=sorted(snapshots,key=lambda s:timestamp(s["retrieved_at_utc"]))
     state=state_zero()
@@ -317,6 +338,31 @@ def replay(snapshots,*,issued_utc=None):
     for i,s in enumerate(ordered):
         ts=timestamp(s["retrieved_at_utc"])
         issued=timestamp(issued_utc) if i==len(ordered)-1 and issued_utc else ts
-        state,diag=advance(state,ordered[:i],s,issued_utc=issued)
+        state,diag=advance(state,ordered[:i],s,issued_utc=issued,
+                           absolute_consensus_required=absolute_consensus_required)
         reports.append(diag)
     return state,reports
+
+def paired_shadow_replay(signed_snapshots,*,issued_utc=None):
+    """Two *separate* deterministic state chains from identical signed inputs.
+
+    Frozen R5 source must be independently cosign/Rekor verified by caller.
+    This is NOT live advance warning: offline retrospective replay has no
+    publication-time proof and cannot replace prospective signed alerts.
+    Compare paired signals to future independently verified outcomes before
+    making any claim of predictive or economic improvement.
+    """
+    original,orig_diag=replay(signed_snapshots,issued_utc=issued_utc,
+                              absolute_consensus_required=False)
+    challenger,challenge_diag=replay(signed_snapshots,issued_utc=issued_utc,
+                                      absolute_consensus_required=True)
+    assert len(orig_diag)==len(challenge_diag)
+    for a,b in zip(orig_diag,challenge_diag):
+        if (a["observed_at_utc"]!=b["observed_at_utc"]
+            or a["current_snapshot_sha256"]!=b["current_snapshot_sha256"]):
+            raise ValueError("paired as-of source divergence")
+    return {"baseline_state":original,"challenger_state":challenger,
+            "baseline_diagnostics":orig_diag,
+            "challenger_diagnostics":challenge_diag,
+            "comparison_is_prospective":False,
+            "trade_skill_proven":False,"trading_authority":False}

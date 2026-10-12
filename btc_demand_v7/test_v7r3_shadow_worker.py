@@ -64,7 +64,7 @@ def test():
         received=first+dt.timedelta(minutes=25,seconds=15)
         second=first+dt.timedelta(minutes=15)
         with patch.object(worker,"verify",lambda *x:None),patch.object(worker,"write",mock_signed),patch.object(worker,"last_close_before_issuance",mock_close),patch.object(worker,"utcnow",lambda:received):
-            status=worker.current_slot_signal(root,r2,reg,received)
+            status=worker.current_slot_signal(root,reg,received)
         assert status=="SIGNED_STATE_PUBLISHED",status
         nextstate=json.loads((root/"slots"/slot_id(second)/"signal.json").read_text())
         assert nextstate["state"]["sequence"]==2
@@ -81,7 +81,7 @@ def test():
             result=mock_close()
             return {**result,"spot":84000.}
         with patch.object(worker,"verify",lambda *x:None),patch.object(worker,"write",mock_signed),patch.object(worker,"last_close_before_issuance",moved_close),patch.object(worker,"utcnow",lambda:received):
-            third_status=worker.current_slot_signal(root,r2,reg,received)
+            third_status=worker.current_slot_signal(root,reg,received)
         assert third_status=="SIGNED_STATE_PUBLISHED"
         third_event=json.loads((root/"slots"/slot_id(third)/"signal.json").read_text())
         assert third_event["diagnostic"]["price_already_moved"]
@@ -90,7 +90,7 @@ def test():
         # An earlier UTC slot must never generate an alert after the deadline.
         received=second+dt.timedelta(minutes=14)
         with patch.object(worker,"write",mock_signed):
-            status=worker.current_slot_signal(root,r2,reg,received)
+            status=worker.current_slot_signal(root,reg,received)
         assert status=="DUPLICATE_NO_MUTATION"
         with patch.object(worker,"verify",lambda *x:None):
             assessed=worker.score(reg,root,second+dt.timedelta(hours=1))

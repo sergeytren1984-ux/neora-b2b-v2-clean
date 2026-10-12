@@ -45,7 +45,7 @@ def rejects(fn,label):
 def main():
     assert commitment()["trading_authority"] is False
     import hashlib,json
-    assert digest({"x":1})==hashlib.sha256(b'{"x":1}\\n').hexdigest()
+    assert digest({"x":1})==hashlib.sha256(b'{"x":1}\n').hexdigest()
     event,delivery,raw=setup("UP")
     answer=compare_pair(event,delivery,raw)
     assert answer["precommitted_action"]=="BUY_NOW"
@@ -67,6 +67,20 @@ def main():
     rejects(lambda:compare_pair(event,wrong,raw),"forged signed delivery hash")
     bad=copy.deepcopy(raw);bad["rows"].pop(4)
     rejects(lambda:compare_pair(event,delivery,bad),"missing future minute")
+    # A continuous but shifted 240-row grid would silently compare prices
+    # from the WRONG OTC execution hours despite a perfectly clean series.
+    bad=copy.deepcopy(raw)
+    for row in bad["rows"]:
+        row[0]+=60000
+        row[6]+=60000
+    rejects(lambda:compare_pair(event,delivery,bad),"complete forward path shifted by one minute")
+    bad=copy.deepcopy(raw)
+    bad["reference_row"][0]-=60000
+    bad["reference_row"][6]-=60000
+    rejects(lambda:compare_pair(event,delivery,bad),"stale public reference minute")
+    bad=copy.deepcopy(raw)
+    bad["reference_row"][2]="82900"
+    rejects(lambda:compare_pair(event,delivery,bad),"invalid reference minute OHLC")
     bad=copy.deepcopy(raw);bad["rows"][45][4]="NaN"
     rejects(lambda:compare_pair(event,delivery,bad),"nonfinite future close")
     event_down=copy.deepcopy(event);event_down["diagnostic"]["warning_side"]="DOWN"

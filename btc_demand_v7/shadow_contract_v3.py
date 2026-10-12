@@ -14,6 +14,7 @@ SOURCE_R2_SHA="39f61562803f3120bcda872b56f76a392989ed4e"
 SOURCE_R2_GRID_SHA="6c65642c24d2b093cdeaf707dfe0da5d5339f5988e8643dabbde497a5cc51c28"
 BRANCH="btc-v7r4-hardening-20261012"
 EVIDENCE="btc-v7r4-direct-evidence-20261013"
+SCHEDULER_BLOB_SHA="9e2e4f32bb60fc891c06bb7bf2086cef1e8cc27a"
 R2_EVIDENCE="btc-v7r2-prospective-evidence-20261013"
 CYCLE=timedelta(minutes=15)
 TICK_MIN=3
@@ -51,6 +52,8 @@ def grid(start,created,model_sha,days=7):
         "start_utc":start.isoformat(),
         "end_utc":(start+timedelta(days=days)).isoformat(),
         "model_source_sha":model_sha,"model_source_ref":"refs/heads/"+BRANCH,
+        "github_prestart_scheduler_blob_sha":SCHEDULER_BLOB_SHA,
+        "github_prestart_scheduler_workflow":".github/workflows/btc-v7r3-forward-clock.yml",
         "source_provenance":"self-collected and independently Cosign signed BTC 1m+5m/OKX observation",
         "upstream_r2_evidence_required":False,
         "due_slots":slots,"days":days,"cadence_minutes":15,

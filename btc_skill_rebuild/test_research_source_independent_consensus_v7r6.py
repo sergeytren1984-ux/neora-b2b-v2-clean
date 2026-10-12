@@ -3,7 +3,7 @@ import unittest
 from btc_demand_v7.test_demand_change_v2 import snap
 from btc_demand_v7.demand_change_v2 import BASELINE_COUNT,replay
 from btc_skill_rebuild.research_source_independent_consensus_v7r6 import (
-    paired_mathematical_replay,source_family_consensus)
+    paired_mathematical_replay,source_family_consensus,binance_window_overlap_minutes)
 
 
 def after_bearish_recovery(i):
@@ -16,6 +16,19 @@ def after_bearish_recovery(i):
     return obs
 
 class SourceCorrelationVeto(unittest.TestCase):
+    def test_recent_microflow_is_not_a_subset_of_older_15m(self):
+        from datetime import datetime,timezone,timedelta
+        item=snap(BASELINE_COUNT,direction=1)
+        # Snapshot was retrieved at anchor+3m; the most recent 3m bar
+        # ranges [anchor-1m,anchor+2m] and overlaps ONLY 1m of the old 15m.
+        self.assertEqual(binance_window_overlap_minutes(item),1)
+        # A later anchored source retrieval can overlap zero minutes.
+        from copy import deepcopy
+        later=deepcopy(item)
+        for row in later['microflow_rows']:
+            row[0]+=4*60000;row[6]+=4*60000
+        self.assertEqual(binance_window_overlap_minutes(later),0)
+
     def test_two_correlated_taker_votes_wrongly_confirm_up(self):
         base=[snap(i,direction=-1) for i in range(BASELINE_COUNT)]
         future=[after_bearish_recovery(BASELINE_COUNT+j) for j in range(8)]

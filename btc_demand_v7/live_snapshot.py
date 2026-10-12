@@ -75,6 +75,23 @@ def liquidity_state(data):
             "top10_size_imbalance":(bs-ab)/(bs+ab),
             "book_depth_is_historical":False}
 
+def funding_state(data,request_started_ms,response_received_ms):
+    if data.get("code")!="0" or not data.get("data"):
+        raise ValueError("invalid funding response")
+    item=data["data"][0]
+    if item.get("instId")!="BTC-USDT-SWAP":
+        raise ValueError("unexpected instrument")
+    timestamp=int(item["ts"])
+    if not request_started_ms-180000<=timestamp<=response_received_ms:
+        raise ValueError("observation out of admissible time")
+    value=float(item["fundingRate"])
+    if not math.isfinite(value):
+        raise ValueError("nonfinite funding rate")
+    return {"source":"OKX BTC-USDT-SWAP current projected funding",
+            "value":value,"vendor_observation_ms":timestamp,
+            "funding_time_ms":int(item["fundingTime"])}
+
+
 def spot_state(one_min,anchor_ms):
     c=[float(r[4]) for r in one_min];h=[float(r[2]) for r in one_min]
     v=[float(r[5]) for r in one_min];t=[float(r[9]) for r in one_min]

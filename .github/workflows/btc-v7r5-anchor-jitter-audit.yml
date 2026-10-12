@@ -1,0 +1,70 @@
+name: BTC v7R5 verified anchor cadence remediation (NO trading)
+
+on:
+  push:
+    branches: [btc-v7r5-live-cadence-reliability-20261012]
+    paths:
+      - btc_demand_v7/demand_change_v2.py
+      - btc_demand_v7/test_anchor_receipt_jitter_v5.py
+      - .github/workflows/btc-v7r5-anchor-jitter-audit.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  reproduce-and-close-r4-latency-defect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PYTHONHASHSEED: '0'
+      GITHUB_RUN_ID: '123456789'
+      GITHUB_RUN_ATTEMPT: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - name: Reproduce valid +3m to +11m receipt jitter and illegal anchor gaps
+        run: |
+          set -euo pipefail
+          python -m py_compile btc_demand_v7/demand_change_v2.py
+          python -m btc_demand_v7.test_anchor_receipt_jitter_v5
+          python -m btc_demand_v7.test_demand_change_v2
+          python -m btc_demand_v7.test_shadow_contract_v3
+          python -m btc_demand_v7.test_v7r3_shadow_worker
+          python -m btc_demand_v7.test_v7r4_adversarial
+      - name: Preserve signed regression results with exact revision
+        run: |
+          python - <<'PY'
+          import datetime,json,os,pathlib
+          result={
+            "schema":"btc-v7r5-reproducible-fixed-anchor-latency-test-v1",
+            "source_sha":os.environ["GITHUB_SHA"],
+            "github_run_id":os.environ["GITHUB_RUN_ID"],
+            "test":"valid 27m receipt delta, exact 15m anchor requires signed continuity",
+            "old_r4_sha":"46baa51edbbffc328c747be5d365bcba34ea3d00",
+            "old_r4_max_receipt_gap_minutes":22,
+            "registered_anchor_distance_minutes":15,
+            "new_max_valid_receipt_gap_minutes":27,
+            "tests_run_successfully":True,
+            "trading_authority":False,"skill_proven":False}
+          pathlib.Path("/tmp/btc-v7r5-anchor-test.json").write_text(
+            json.dumps(result,sort_keys=True,separators=(",",":"))+"\n")
+          PY
+          cosign_version=3.0.6
+          echo "SIGSTORE_VERSION_REQUESTED=$cosign_version"
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: OIDC/Rekor sign actual negative-regression evidence
+        run: |
+          cosign sign-blob --yes --bundle /tmp/btc-v7r5-anchor-test.sigstore.json /tmp/btc-v7r5-anchor-test.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: btc-v7r5-anchor-latency-${{ github.sha }}
+          path: /tmp/btc-v7r5-anchor-test*
+          if-no-files-found: error

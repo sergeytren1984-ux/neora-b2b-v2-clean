@@ -247,8 +247,19 @@ def advance(state, history, observation, *,issued_utc=None,
     down=max(0., DECAY*float(state["down_cusum"])-pressure-DRIFT)
     if not math.isfinite(up+down):
         raise ValueError("unbounded pressure state")
-    side=("UP" if up>=ALERT_LEVEL and up>down else
-          "DOWN" if down>=ALERT_LEVEL and down>up else None)
+    raw_side=("UP" if up>=ALERT_LEVEL and up>down else
+              "DOWN" if down>=ALERT_LEVEL and down>up else None)
+    # A positive *change relative to a bearish baseline* is not proof that
+    # contemporaneous buyers dominate: 20% -> 40% taker buys still means
+    # 60% aggressive sellers. Suppress a directional alert unless at least
+    # two of the three signed current inputs confirm the absolute side.
+    # This is a research-stage safety veto; its impact on recall/precision
+    # must be measured prospectively before any production replacement.
+    up_votes=sum(x>0 for x in cur[:3])
+    down_votes=sum(x<0 for x in cur[:3])
+    contrary_baseline_veto=(raw_side=="UP" and up_votes<2 or
+                             raw_side=="DOWN" and down_votes<2)
+    side=None if contrary_baseline_veto else raw_side
     cooldown=False
     if side and state["last_alert_utc"] is not None:
         previous_alert=timestamp(state["last_alert_utc"])
@@ -265,6 +276,8 @@ def advance(state, history, observation, *,issued_utc=None,
         up=0.
         down=0.
         status="LATE_PRESSURE_AFTER_PRICE_IMPULSE"
+    elif contrary_baseline_veto:
+        status="RELATIVE_PRESSURE_WITHOUT_ABSOLUTE_SIDE_CONSENSUS"
     elif cooldown:
         status="SUPPRESSED_IN_COOLDOWN"
     elif eligible:
@@ -296,6 +309,9 @@ def advance(state, history, observation, *,issued_utc=None,
         "z_micro_volume_3m":micro_volume_z,
         "z_oi":oi_z,"z_spread":spread_z,
         "pressure":pressure,"up_cusum":up,"down_cusum":down,
+        "absolute_buy_votes":up_votes,"absolute_sell_votes":down_votes,
+        "relative_pressure_side":raw_side,
+        "absolute_side_consensus_veto":bool(contrary_baseline_veto),
         "status":status,"warning_side":side if eligible else None,
         "watch":max(up,down)>=WATCH_LEVEL,
         "alert":eligible,

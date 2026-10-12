@@ -1,0 +1,61 @@
+name: BTC v7R6 pinned independent signed prospective observer
+
+on:
+  push:
+    branches: [btc-v7r6-pinned-observer-20261012]
+    paths:
+      - .github/workflows/btc-v7r6-pinned-live.yml
+  workflow_dispatch:
+    inputs:
+      action:
+        type: choice
+        options: [slot, register]
+        required: true
+        default: slot
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: btc-v7r6-pinned-immutable-observer
+  cancel-in-progress: false
+
+jobs:
+  strictly-pinned-r6:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPOSITORY: ${{ github.repository }}
+      RUNNER_SOURCE_SHA: ${{ github.sha }}
+      PYTHONHASHSEED: '0'
+    steps:
+      - name: Checkout exact immutable source commit, NOT latest main
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: Verify pinned research formulas, source and all adversarial tests
+        run: |
+          python -m btc_demand_v7.test_v7r6_live_pair_worker
+          python -m btc_demand_v7.test_demand_change_v2
+          python -m btc_demand_v7.test_episode_quality_v4
+          python - <<'PY'
+          from btc_demand_v7.v7r6_live_pair_worker import verify_runner
+          print("BTC_V7R6_IMMUTABLE_OBSERVER_PINNED",verify_runner())
+          PY
+      - name: Preregister before market epoch (first push only)
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.action == 'register')
+        run: |
+          python -m btc_demand_v7.v7r6_live_pair_worker register
+      - name: Publish paired signal only while still actionable (dispatch only)
+        if: github.event_name == 'workflow_dispatch' && inputs.action == 'slot'
+        run: |
+          python -m btc_demand_v7.v7r6_live_pair_worker slot

@@ -18,6 +18,8 @@ def test():
     base=dt.datetime(2026,10,14,tzinfo=UTC)
     reg=grid(base,base-dt.timedelta(hours=3),"a"*40,days=1)
     samples=[snap(i,direction=1 if i>=32 else 0) for i in range(35)]
+    for sample in samples:
+        sample["observation"]["reference_spot"]=83000.
     with tempfile.TemporaryDirectory() as temp:
         root=pathlib.Path(temp)/"r3"; r2=pathlib.Path(temp)/"r2"
         for s in samples:
@@ -64,6 +66,21 @@ def test():
         assert nextstate["state"]["last_snapshot_sha256"]==source_hash(samples[33])
         assert nextstate["diagnostic"]["calibrated_probability"] is False
         assert nextstate["trading_authority"] is False
+        assert nextstate["market_move_during_information_latency_pct"]==0.
+        # Third slot: the model source remains bullish, but BTC has already
+        # risen >0.3% before publication. Must NOT count an "early" alert.
+        received=first+dt.timedelta(minutes=40,seconds=15)
+        third=first+dt.timedelta(minutes=30)
+        def moved_close():
+            result=mock_close()
+            return {**result,"spot":84000.}
+        with patch.object(worker,"verify",lambda *x:None),patch.object(worker,"write",mock_signed),patch.object(worker,"last_close_before_issuance",moved_close),patch.object(worker,"utcnow",lambda:received):
+            third_status=worker.current_slot_signal(root,r2,reg,received)
+        assert third_status=="SIGNED_STATE_PUBLISHED"
+        third_event=json.loads((root/"slots"/slot_id(third)/"signal.json").read_text())
+        assert third_event["diagnostic"]["price_already_moved"]
+        assert third_event["diagnostic"]["alert"] is False
+        assert third_event["state"]["up_cusum"]==0.
         # An earlier UTC slot must never generate an alert after the deadline.
         received=second+dt.timedelta(minutes=14)
         with patch.object(worker,"write",mock_signed):

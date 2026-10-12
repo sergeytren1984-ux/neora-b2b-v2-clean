@@ -342,8 +342,27 @@ def resolve_outcomes(root,now):
     for p in (root/"slots").glob("*/signal.json") if (root/"slots").exists() else []:
         event=json.loads(p.read_text())
         if event.get("status")!="SIGNED_STATE_PUBLISHED":continue
-        delivery=verified_delivery_time(event)
-        if delivery is None:continue
+        delivery_file=p.parent/"delivery.json"
+        verify(p,SELF_ID,os.environ["GITHUB_SHA"])
+        if delivery_file.exists():
+            verify(delivery_file,SELF_ID,os.environ["GITHUB_SHA"])
+            entry=json.loads(delivery_file.read_text())
+            if entry.get("source_signal_sha256")!=digest(event):
+                raise RuntimeError("delivery proof does not bind signed signal")
+            delivery=when(entry["public_delivery_utc"])
+        else:
+            delivery=verified_delivery_time(event)
+            if delivery is None:continue
+            write(p.parent,"delivery.json",{
+                "schema":"btc-v7r4-publication-receipt-v1",
+                "slot_id":event["slot_id"],
+                "public_delivery_utc":delivery.isoformat(),
+                "source_signal_sha256":digest(event),
+                "github_run_id":event["github_run_id"],
+                "github_run_attempt":event["github_run_attempt"],
+                "model_source_sha":event["model_source_sha"],
+                "evidence_context":"successful forecast GitHub job completion; conservative bound",
+                "trading_authority":False})
         for horizon in HORIZONS:
             due=future_due(delivery,horizon)
             filename=p.parent/("outcome_"+horizon+".json")
@@ -379,7 +398,19 @@ def resolve_outcomes(root,now):
         predicted=("UP_FIRST" if warning_side=="UP" else
                    "DOWN_FIRST" if warning_side=="DOWN" else None)
         touch=result["first_barrier_touch_utc"]
-        lead=((when(touch)-delivery).total_seconds()/60 if touch else None)
+        # Intra-minute high/low order unknown: earliest touch is the
+        # minute OPEN. Use the LOWER bound of actionable warning lead.
+        touch_open=when(touch)-dt.timedelta(minutes=1) if touch else None
+        lead_lower=((touch_open-delivery).total_seconds()/60 if touch_open else None)
+        lead_upper=((when(touch)-delivery).total_seconds()/60 if touch else None)
+        pre_delivery_spot=float(event["reference_spot"])
+        move_since_compute=100*(ref/pre_delivery_spot-1)
+        moved_before_publication=(abs(move_since_compute)>=0.30)
+        # Do not relabel the already-realized move as successful early
+        # warning merely by resetting a first-touch barrier at delivery.
+        lead_eligible=(delivery<=when(event["anchor_utc"])+dt.timedelta(minutes=13)
+                       and not moved_before_publication
+                       and event["diagnostic"].get("price_already_moved") is False)
         write(path.parent,path.name,{
             "schema":"btc-v7r3-signed-pre-move-forward-outcome-v1",
             "slot_id":event["slot_id"],"horizon":horizon,
@@ -396,8 +427,14 @@ def resolve_outcomes(root,now):
             "warning_issued":bool(event["diagnostic"].get("alert")),
             "warning_side":predicted,
             "actual_first_touch_side":result["direction"],
-            "warning_lead_minutes":lead if predicted==result["direction"] else None,
-            "early_warning_eligible":(delivery<=when(event["anchor_utc"])+dt.timedelta(minutes=13)),
+            "warning_lead_minutes":lead_lower if predicted==result["direction"] else None,
+            "warning_lead_lower_minutes":lead_lower,
+            "warning_lead_upper_minutes":lead_upper,
+            "first_touch_minute_open_utc":touch_open.isoformat() if touch_open else None,
+            "first_touch_minute_close_utc":touch,
+            "price_move_between_compute_and_publication_pct":move_since_compute,
+            "already_moved_before_publication":moved_before_publication,
+            "early_warning_eligible":lead_eligible,
             "raw_independent_vendor_close_time_verified":True,
             "trading_authority":False})
         completed+=1

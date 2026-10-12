@@ -44,6 +44,8 @@ class DirectOTCMathTests(unittest.TestCase):
         self.assertLess(x["full_budget_spot_proxy_mean_incremental_btc_vs_buy_now"],0.)
         self.assertEqual(x["robust_wait_signals_correct"],0)
         self.assertEqual(x["robust_wait_signals_wrong"],7)
+        self.assertGreater(x["oracle_regret_btc_EX_POST_ONLY"],0.)
+        self.assertEqual(x["oracle_number_wait_winning_days_EX_POST_ONLY"],0)
         with patch("btc_skill_rebuild.research_otc_direct_btc_target_v7r6.predict",
                    return_value=.01):
             abstain=daily_score(sample,None,0.)

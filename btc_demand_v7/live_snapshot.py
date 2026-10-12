@@ -177,9 +177,39 @@ def collect(anchor_ms=None):
             "response_received_ms":response_end,
             "url":url,"query":query,
         }
+    # REQUIRED current 3m market pressure from closed 1m trades, not
+    # the now-stale 15m taker ratio anchored before computation.
+    micro_req=int(time.time()*1000)
+    micro_cutoff=(micro_req//60000)*60000
+    latest=json_get(SOURCE_SPOT,{"symbol":"BTCUSDT","interval":"1m",
+                                 "endTime":micro_cutoff-1,"limit":8})
+    micro_received=int(time.time()*1000)
+    if not isinstance(latest,list) or len(latest)<6:
+        raise ValueError("required current microflow missing")
+    latest=latest[-6:]
+    last_close=int(latest[-1][6])+1
+    if not(micro_cutoff-60000<=last_close<=micro_cutoff
+           and 0<=micro_received-last_close<=120000):
+        raise ValueError("recent minute imbalance stale/future")
+    strict_closed(latest,60000,last_close,6)
+    recent=latest[-3:];prior=latest[-6:-3]
+    volume3=sum(float(r[5]) for r in recent)
+    vol_prior=sum(float(r[5]) for r in prior)
+    if volume3<=0 or vol_prior<=0:raise ValueError("zero required 3m trade volume")
+    buy3=sum(float(r[9]) for r in recent)/volume3
+    if not(math.isfinite(buy3) and 0<=buy3<=1):raise ValueError("invalid taker share")
+    micro_observation={"source":"Binance BTCUSDT last six completed 1m taker rows",
+       "vendor_close_ms":last_close,
+       "request_started_ms":micro_req,
+       "response_received_ms":micro_received,
+       "recent3_taker_buy_fraction":buy3,
+       "recent3_volume_vs_prior3":volume3/vol_prior,
+       "price_last_closed_1m":float(latest[-1][4])}
+    state["microflow_rows"]=latest
     recorded=int(time.time()*1000)
     state["retrieved_at_utc"]=dt.datetime.fromtimestamp(recorded/1000,UTC).isoformat()
     observation=spot_state(one,anchor_ms)
+    observation["microflow"]=micro_observation
     observation["oi"]=None;observation["book"]=None;observation["funding"]=None
     for name in ("oi_okx","book_okx"):
         if name not in state["raw_optional"]:continue

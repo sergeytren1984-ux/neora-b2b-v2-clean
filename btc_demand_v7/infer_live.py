@@ -52,7 +52,7 @@ def issue(snapshot,model,paired,audit,now=None):
                       "watch":bool(prob>=threshold),
                       "status":"EXPERIMENTAL_NOT_CALIBRATED_FOR_TRADING"}
     # All action calculations use quote time, not the 5m anchor time.
-    decision=compare(issued,preds,paired_errors=paired,demonstrated_price_skill=False)
+    decision=compare(issued,preds,prediction_anchor=anchor,paired_errors=paired,demonstrated_price_skill=False)
     return {
         "schema":"btc-v7-frozen-shadow-inference-v1",
         "model_branch":"btc-predictive-vnext7-demand-price-otc-20261011",
@@ -63,7 +63,7 @@ def issue(snapshot,model,paired,audit,now=None):
         "spot":price,
         "price_point_forecasts":preds,
         "price_test_mae":{h:audit["spot_1m_only_deployable_shadow"]["price_metrics"][h]["model_mae_usdt"] for h in preds},
-        "forecast_target_offset_warning":"Prices refer to horizon measured from last closed 5m anchor; OTC due times start at this report timestamp and can differ by minutes.",
+        "forecast_target_offset_warning":"OTC price comparisons are invalidated unless exact forecast target_at matches each execution due timestamp.",
         "large_move_probabilities":alert,
         "spot_demand_watch":snapshot["observation"]["demand_watch"],
         "positioning_context":snapshot["observation"]["positioning_context"],

@@ -46,7 +46,8 @@ class ProperReferenceContract(unittest.TestCase):
         due=population[i][1]
         earlier=c.probability(due-1,7)
         ontime=c.probability(due,7)
-        self.assertNotEqual(earlier,ontime)
+        self.assertEqual(earlier,ontime)
+        self.assertNotEqual(ontime,c.probability(due+1,7))
         # Force a drastic later-only rewrite: should not affect past.
         changed=[(t,m,x,0 if m>=due else y) for t,m,x,y in population]
         edited=CausalClimatology(changed)

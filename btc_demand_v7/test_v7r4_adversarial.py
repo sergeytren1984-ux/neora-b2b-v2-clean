@@ -148,7 +148,7 @@ def missing_state_resets_are_forbidden():
         def mock_signed(root,name,obj):
             p=pathlib.Path(root)/name;p.parent.mkdir(parents=True,exist_ok=True)
             p.write_bytes(canonical(obj));return p
-        with patch.object(w,"market_collect",lambda *x,**kw:base),patch.object(w,"historic_snapshots",lambda *x:[base]*32),patch.object(w,"write",mock_signed):
+        with patch.object(w,"market_collect",lambda *x,**kw:base),patch.object(w,"rederive",lambda _:{"pressure_factor_ready":True}),patch.object(w,"historic_snapshots",lambda *x:[base]*32),patch.object(w,"write",mock_signed):
             result=w.current_slot_signal(root,reg,current+timedelta(minutes=10))
         assert result=="STATEFUL_CHAIN_DISCONTINUITY"
         assert (folder/"signal.json").exists()
@@ -190,7 +190,7 @@ def warmup_to_first_live_pressure():
         received=first+timedelta(minutes=10)
         with (patch.object(w,"verify",lambda *x:None),
               patch.object(w,"write",signed),
-              patch.object(w,"market_collect",collect),
+              patch.object(w,"market_collect",collect),patch.object(w,"rederive",lambda _:{"pressure_factor_ready":True}),
               patch.object(w,"historic_snapshots",
                            lambda *x:[snap(i) for i in range(32)]),
               patch.object(w,"last_close_before_issuance",lambda:reference),
@@ -228,7 +228,7 @@ def recovery_after_32_new_signed_snapshots_preserves_daily_budget():
         history=[snap(i) for i in range(35,67)]
         now=recovered+timedelta(minutes=10)
         with (patch.object(w,"verify",lambda *x:None),
-              patch.object(w,"market_collect",lambda *a,**kw:raw),
+              patch.object(w,"market_collect",lambda *a,**kw:raw),patch.object(w,"rederive",lambda _:{"pressure_factor_ready":True}),
               patch.object(w,"historic_snapshots",lambda *a:history),
               patch.object(w,"last_close_before_issuance",
                            lambda:{"spot":83000.,"row":[1,83000,83010,82990,83000,1,2]}),

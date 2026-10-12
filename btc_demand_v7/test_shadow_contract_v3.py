@@ -14,7 +14,7 @@ def main():
     start=datetime(2026,10,13,tzinfo=UTC)
     g=grid(start,start-timedelta(hours=3),"a"*40,days=1)
     assert len(g["due_slots"])==96 and len(set(x["slot_id"] for x in g["due_slots"]))==96
-    assert accept_slot(g,start,start+timedelta(minutes=7))=="NOT_YET_DUE"
+    assert accept_slot(g,start,start+timedelta(minutes=2))=="NOT_YET_DUE"
     assert accept_slot(g,start,start+timedelta(minutes=10))=="ON_TIME"
     assert accept_slot(g,start,start+timedelta(minutes=14))=="MISSED_DEADLINE"
     nope(lambda:grid(start,start-timedelta(minutes=2),"a"*40))

@@ -12,8 +12,8 @@ from btc_demand_v7.prospective_core import when
 UTC=timezone.utc
 SOURCE_R2_SHA="39f61562803f3120bcda872b56f76a392989ed4e"
 SOURCE_R2_GRID_SHA="6c65642c24d2b093cdeaf707dfe0da5d5339f5988e8643dabbde497a5cc51c28"
-BRANCH="btc-v7r3-asof-latency-remediation-20261012"
-EVIDENCE="btc-v7r3-asof-evidence-20261013"
+BRANCH="btc-v7r4-hardening-20261012"
+EVIDENCE="btc-v7r4-direct-evidence-20261013"
 R2_EVIDENCE="btc-v7r2-prospective-evidence-20261013"
 CYCLE=timedelta(minutes=15)
 TICK_MIN=8
@@ -51,13 +51,15 @@ def grid(start,created,model_sha,days=7):
         "start_utc":start.isoformat(),
         "end_utc":(start+timedelta(days=days)).isoformat(),
         "model_source_sha":model_sha,"model_source_ref":"refs/heads/"+BRANCH,
-        "r2_registered_source_sha":SOURCE_R2_SHA,
-        "r2_grid_sha256":SOURCE_R2_GRID_SHA,
+        "source_provenance":"self-collected and independently Cosign signed BTC 1m+5m/OKX observation",
+        "upstream_r2_evidence_required":False,
         "due_slots":slots,"days":days,"cadence_minutes":15,
         "min_issue_minutes_after_anchor":TICK_MIN,
         "max_issue_minutes_after_anchor":TICK_MAX,
-        "source_required":["signed R2 forecast receipt","signed R2 raw spot 1m+5m",
-                           "signed R2 current OKX OI","signed R2 current OKX top 10 book"],
+        "source_required":["BTC 1m and 5m closed spot at frozen anchor",
+                           "OKX current OI and timestamp-specific top10 book",
+                           "snapshot signed before any state and decision"],
+        "collector_policy":"DIRECT_SOURCE_NO_UPSTREAM_R2_QUEUING",
         "forecast_warning_definition":"verified public GitHub delivery time (NOT candle-open or computation time)",
         "price_latency_veto":"disable early warning if BTC moved >=0.30 pct since last signed closed spot anchor",
         "revision_reason":"fix stale flow/book model signal after already realized 5-10m price impulse",

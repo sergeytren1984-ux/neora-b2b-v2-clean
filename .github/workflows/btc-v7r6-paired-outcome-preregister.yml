@@ -1,0 +1,93 @@
+name: BTC v7R6 preregister no-cross-window independent forward outcome audit
+
+on:
+  push:
+    branches: [btc-v7r6-independent-outcome-audit-20261012]
+    paths:
+      - .github/workflows/btc-v7r6-paired-outcome-preregister.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  strict-paired-score-frozen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - name: Reject false positives, mismatched publication times, unverified outcomes
+        run: |
+          python -m btc_demand_v7.test_v7r6_live_pair_worker
+          python -m btc_demand_v7.test_v7r6_paired_forward_audit
+          python -m btc_demand_v7.test_demand_change_v2
+          python -m btc_demand_v7.test_episode_quality_v4
+      - name: Make immutable before-epoch independent scoring contract
+        run: |
+          python - <<'PY'
+          import datetime as dt,json,os,pathlib,hashlib
+          now=dt.datetime.now(dt.timezone.utc)
+          begin=dt.datetime(2026,10,13,tzinfo=dt.timezone.utc)
+          if now>=begin:raise RuntimeError("cannot register after target market epoch")
+          files=('btc_demand_v7/v7r6_paired_forward_audit.py',
+                 'btc_demand_v7/test_v7r6_paired_forward_audit.py')
+          x={'schema':'btc-v7r6-shared-future-audit-registration-v1',
+             'registration_utc':now.isoformat(),'epoch_start_utc':begin.isoformat(),
+             'audit_exact_source_sha':os.environ['GITHUB_SHA'],
+             'fixed_research_r6_sha':'559faaa4895f8874bc7103b4f1d92f350a8d6403',
+             'fixed_live_runner_sha':'d9f259b852c85f60417ff2d24acc21c47ef83880',
+             'fixed_source_r5_sha':'d6acb83d45ea484d2f2c88b725faedf3de97775d',
+             'horizons':['1h','4h'],'barriers_pct':{'1h':0.7,'4h':1.2},
+             'public_clock':'verified independent successful GitHub Actions completion bound',
+             'outcome_clock':'independent signed minute source after maturity',
+             'reference':'last complete 1m candle before public GitHub completion',
+             'never_pair_different_publication_price_clocks':True,
+             'label_both_candidates_on_exact_same_future_minute_grid':True,
+             'no_hindsight_oracle_regime_selection':True,
+             'full_due_grid_including_missing':True,
+             'warmup_slots':32,'nonoverlapping_episodes_for_recall':True,
+             'enough_day_blocks_for_admission':20,
+             'no_forged_OTC_execution_quote':True,
+             'source_blobs_sha256':{p:hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in files},
+             'trading_authority':False}
+          pathlib.Path('/tmp/btc-v7r6-shared-future-audit.json').write_text(
+              json.dumps(x,sort_keys=True,separators=(',',':'),allow_nan=False)+'\n')
+          print('BTC_V7R6_SHARED_FUTURE_AUDIT_PREREGISTERED',now.isoformat(),os.environ['GITHUB_SHA'])
+          PY
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: Sign locked prospective research audit policy without keys
+        run: |
+          cosign sign-blob --yes --bundle /tmp/btc-v7r6-shared-future-audit.sigstore.json /tmp/btc-v7r6-shared-future-audit.json
+      - name: Independently verify Rekor transparency and correct source identity
+        run: |
+          cosign verify-blob /tmp/btc-v7r6-shared-future-audit.json \
+            --bundle /tmp/btc-v7r6-shared-future-audit.sigstore.json \
+            --certificate-identity "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-v7r6-paired-outcome-preregister.yml@refs/heads/btc-v7r6-independent-outcome-audit-20261012" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          python - <<'PY'
+          import datetime as dt,json,os
+          x=json.load(open('/tmp/btc-v7r6-shared-future-audit.json'))
+          bundle=json.load(open('/tmp/btc-v7r6-shared-future-audit.sigstore.json'))
+          assert dt.datetime.fromisoformat(x['registration_utc']) < dt.datetime.fromisoformat(x['epoch_start_utc'])
+          assert x['audit_exact_source_sha']==os.environ['GITHUB_SHA']
+          assert any(e.get('inclusionProof') for e in bundle['verificationMaterial']['tlogEntries'])
+          assert x['trading_authority'] is False
+          print('BTC_V7R6_SHARED_FUTURE_AUDIT_REKOR_VERIFIED_PRESTART')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: btc-v7r6-shared-future-outcome-audit-${{ github.sha }}
+          path: |
+            /tmp/btc-v7r6-shared-future-audit.json
+            /tmp/btc-v7r6-shared-future-audit.sigstore.json
+          if-no-files-found: error
+          retention-days: 90

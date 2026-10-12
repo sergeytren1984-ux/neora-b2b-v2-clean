@@ -13,7 +13,7 @@ import argparse, datetime as dt, hashlib, json, math, os, pathlib
 import subprocess,tempfile,urllib.parse,urllib.request,concurrent.futures,time
 from btc_demand_v7.shadow_contract_v3 import (
     grid,accept_slot,slot_id,digest,canonical,
-    future_anchor,future_due,HORIZONS,status_grid,
+    future_anchor,future_due,HORIZONS,status_grid,factor_usable_pressure_status,
     BRANCH,EVIDENCE,SCHEDULER_BLOB_SHA)
 from btc_demand_v7.demand_change_v2 import (
     advance,state_zero,source_hash,BASELINE_COUNT)
@@ -522,8 +522,9 @@ def score(reg,root,at):
     for horizon,minutes in HORIZONS.items():
         verified_barriers=[]
         verified_alerts=[]
-        count={"due":0,"resolved":0,"missing":0,"late":0,
-               "no_valid_forecast":0,"warning_count":0,
+        count={"due":0,"eligible_due":0,"registered_warmup_due":0,
+               "resolved":0,"missing":0,"late":0,
+               "no_valid_forecast":0,"unavailable_factor_due":0,"warning_count":0,
                "wrong_side":0,"no_touch":0,
                "true_warning_at_least_minutes":{k:0 for k in (10,30,60)},
                "false_or_insufficient_lead":{k:0 for k in (10,30,60)}}
@@ -549,8 +550,17 @@ def score(reg,root,at):
             if current<due+dt.timedelta(minutes=35):
                 continue
             count["due"]+=1
+            if slot.get("first_32_signed_slots_are_warmup"):
+                count["registered_warmup_due"]+=1
+                continue
+            count["eligible_due"]+=1
             if (event is None or event.get("status")!="SIGNED_STATE_PUBLISHED"
                 or delivery is None):
+                count["no_valid_forecast"]+=1
+                count["missing"]+=1
+                continue
+            if not factor_usable_pressure_status(event.get("diagnostic",{}).get("status")):
+                count["unavailable_factor_due"]+=1
                 count["no_valid_forecast"]+=1
                 count["missing"]+=1
                 continue
@@ -653,7 +663,7 @@ def score(reg,root,at):
         metrics[horizon]=count
         independent_episodes[horizon]=independent_episode_report(
             horizon,verified_barriers,verified_alerts,
-            full_due_count=count["due"],
+            full_due_count=count["eligible_due"],
             missing_or_late_count=count["missing"]+count["late"])
     return {
         "schema":"btc-v7r4-strict-full-grid-signed-recomputed-quality-v1",

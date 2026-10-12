@@ -1,13 +1,19 @@
-name: BTC v7R3 signed early-demand prospective shadow (no trading)
+name: BTC v7R4 hardened causal research (no trading)
 
 on:
   push:
-    branches: [btc-v7r3-asof-latency-remediation-20261012]
+    branches: [btc-v7r4-hardening-20261012]
     paths:
       - btc_demand_v7/v7r3_shadow_worker.py
       - btc_demand_v7/shadow_contract_v3.py
       - btc_demand_v7/demand_change_v2.py
       - btc_demand_v7/test_v7r3_shadow_worker.py
+      - btc_demand_v7/test_v7r4_adversarial.py
+      - btc_demand_v7/prospective_core.py
+      - btc_demand_v7/live_snapshot.py
+      - btc_demand_v7/infer_live.py
+      - btc_demand_v7/otc_execution.py
+      - btc_demand_v7/test_otc_execution.py
       - .github/workflows/btc-v7r3-signed-demand-shadow.yml
   workflow_dispatch:
     inputs:
@@ -31,12 +37,12 @@ permissions:
   actions: read
   id-token: write
 
-concurrency:
-  group: btc-v7r3-prospective-evidence-write
-  cancel-in-progress: false
-
 jobs:
   signed-research-only:
+    concurrency:
+      # Forecast is NEVER queued behind long post-due raw replays.
+      group: btc-v7r4-${{ github.ref }}-${{ inputs.action }}
+      cancel-in-progress: false
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     env:
@@ -55,6 +61,7 @@ jobs:
         with:
           cosign-release: v3.0.6
       - name: Reject prior-state resets, future prices and unscheduled warnings
+        if: github.event_name == 'push' || inputs.action == 'register'
         run: |
           python -m py_compile \
             btc_demand_v7/demand_change_v2.py \
@@ -63,6 +70,10 @@ jobs:
           python -m btc_demand_v7.test_demand_change_v2
           python -m btc_demand_v7.test_shadow_contract_v3
           python -m btc_demand_v7.test_v7r3_shadow_worker
+          python -m btc_demand_v7.test_v7r4_adversarial
+          python -m btc_demand_v7.test_snapshot
+          python -m btc_demand_v7.test_prospective
+          python -m btc_demand_v7.test_otc_execution
       - name: Verify and sign future-epoch registration before first target
         if: github.event_name == 'workflow_dispatch' && inputs.action == 'register'
         run: |

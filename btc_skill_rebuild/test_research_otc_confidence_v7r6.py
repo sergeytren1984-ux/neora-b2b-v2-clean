@@ -67,10 +67,21 @@ class TailVetoTests(unittest.TestCase):
         new=bound_wait_utility(NOW,.004,tampered)
         self.assertEqual(old["forecast_lower_bound_btc"],new["forecast_lower_bound_btc"])
 
+    def test_frozen_daily_issue_clock_prevents_cherry_picking(self):
+        a=samples()
+        prev=a[0]
+        a[0]=MaturedDay(prev.issued_utc+timedelta(minutes=15),
+                         prev.publicly_issued_utc+timedelta(minutes=15),
+                         prev.outcome_matured_utc+timedelta(minutes=15),
+                         prev.predicted_nominal_wait_gain_btc,
+                         prev.worst_realized_wait_gain_btc)
+        with self.assertRaises(ValueError):
+            bound_wait_utility(NOW,.01,a)
+
     def test_untimely_predictions_or_immature_outcomes_rejected(self):
         a=samples()
         s=a[2]
-        a[2]=MaturedDay(s.issued_utc,s.issued_utc+timedelta(minutes=61),
+        a[2]=MaturedDay(s.issued_utc,s.issued_utc+timedelta(minutes=14),
                          s.outcome_matured_utc,s.predicted_nominal_wait_gain_btc,
                          s.worst_realized_wait_gain_btc)
         with self.assertRaises(ValueError):

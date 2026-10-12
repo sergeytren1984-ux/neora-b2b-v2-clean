@@ -171,10 +171,13 @@ def price_outcome(grid,forecast,head,now,spot_close,*,raw_sha):
             "signed_error_usdt":pred-value,
             "trading_authority":False}
 
-def score_fixed_grid(grid,forecast_events,outcome_events,now):
+def score_fixed_grid(grid,forecast_events,outcome_events,now,barrier_events=()):
     now=when(now)
     slotted={x["slot_id"]:x for x in forecast_events}
     outcomes={(x["slot_id"],x["horizon"]):x for x in outcome_events}
+    barriers={(x["slot_id"],x["period"]):x for x in barrier_events}
+    if len(barriers)!=len(barrier_events):
+        raise ValueError("duplicate barrier outcome")
     known_ids=set(x["id"] for x in grid["slots"])
     if not set(slotted).issubset(known_ids):
         raise ValueError("unknown forecast id")
@@ -217,6 +220,49 @@ def score_fixed_grid(grid,forecast_events,outcome_events,now):
             settled+=1;v["n"]+=1
             v["sum_absolute_error"]+=float(o["absolute_error_usdt"])
             v["sum_baseline_absolute_error"]+=float(o["persistence_absolute_error_usdt"])
+    # Symmetric first-passage outcomes on a separate 1m causal grid.
+    # They are NOT interchangeable with old independent touch classifiers.
+    from btc_demand_v7.event_semantics import BARRIERS,clustered_episodes,warning_lead_minutes,validate_alert_budget
+    barrier_summary={h:{"due":0,"recorded":0,"missing":0,"late":0,"ambiguous":0,
+                        "up_first":0,"down_first":0,"neither":0,
+                        "actionable_warnings_ge_60m":0,"not_validated_warnings":0}
+                     for h in BARRIERS}
+    observed_events=[];alerts=[]
+    for slot in grid["slots"]:
+        f=slotted.get(slot["id"])
+        if f is None or f.get("kind")!="FORECAST_ISSUED":continue
+        for h,(minutes,threshold) in BARRIERS.items():
+            due=when(slot["slot_utc"])+timedelta(minutes=minutes)
+            if now<due+OUTCOME_GRACE:continue
+            v=barrier_summary[h];v["due"]+=1
+            outcome=barriers.get((slot["id"],h))
+            if outcome is None:
+                v["missing"]+=1;continue
+            if outcome["forecast_sha256"]!=sha256(f) or outcome["frozen_grid_sha256"]!=sha256(grid):
+                raise ValueError("forged barrier outcome provenance")
+            if outcome.get("kind")!="BARRIER_OUTCOME_RECORDED":
+                v["late"]+=1;continue
+            result=outcome["result"]
+            v["recorded"]+=1
+            direction=result["direction"]
+            key={"UP_FIRST":"up_first","DOWN_FIRST":"down_first",
+                 "NEITHER":"neither","AMBIGUOUS_SAME_MINUTE":"ambiguous"}.get(direction)
+            if key is None:raise ValueError("unknown first-passage outcome")
+            v[key]+=1;observed_events.append(result)
+            for side,event_direction in (("up","UP_FIRST"),("down","DOWN_FIRST")):
+                model_key=side+"_"+h
+                head=f.get("event_head_diagnostics",{}).get(model_key,{})
+                if head.get("watch") is True:
+                    alerts.append({"alert_id":slot["id"]+model_key,
+                                   "issued_utc":f["recorded_utc"]})
+                    if head.get("status")!="EXPERIMENTAL_NOT_CALIBRATED_FOR_TRADING":
+                        v["not_validated_warnings"]+=1;continue
+                    if direction==event_direction and result["first_barrier_touch_utc"]:
+                        lead=warning_lead_minutes(result["first_barrier_touch_utc"],f["recorded_utc"])
+                        if lead is not None and lead>=60:
+                            v["actionable_warnings_ge_60m"]+=1
+    budget=validate_alert_budget(alerts,max_per_day=1)
+    episodes=clustered_episodes(observed_events)
     metrics={}
     for h,v in head_scores.items():
         n=v["n"]
@@ -235,7 +281,12 @@ def score_fixed_grid(grid,forecast_events,outcome_events,now):
             "outcomes_late":late_outcomes,"outcomes_not_due":unsettled,
             "distinct_issuance_days":len(days),
             "heads":metrics,
-            "missing_slots_block_admission":bool(missed or late or early or missing or late_outcomes),
+            "first_passage":barrier_summary,
+            "distinct_clustered_barrier_episodes":len(episodes),
+            "alert_budget":budget,
+            "missing_slots_block_admission":bool(missed or late or early or missing or late_outcomes
+                or any(v["missing"] or v["late"] for v in barrier_summary.values())
+                or not budget["within_budget"]),
             "admission_ready":False,
             "why_no_admission":"No proven directional/price/OTC edge; insufficient independent future events; baseline-only prices",
             "trading_authority":False}

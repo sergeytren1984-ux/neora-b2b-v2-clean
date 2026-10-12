@@ -141,7 +141,8 @@ def missing_state_resets_are_forbidden():
     with tempfile.TemporaryDirectory() as t:
         root=pathlib.Path(t);r2=pathlib.Path(t)/"r2"
         folder=root/"slots"/slot_id(current);folder.mkdir(parents=True)
-        base={**snap(34,direction=1),"observation":{**snap(34,direction=1)["observation"],"reference_spot":83000.}}
+        base={**snap(34,direction=1),"anchor_utc":current.isoformat(),
+              "observation":{**snap(34,direction=1)["observation"],"reference_spot":83000.}}
         def mock_signed(root,name,obj):
             p=pathlib.Path(root)/name;p.parent.mkdir(parents=True,exist_ok=True)
             p.write_bytes(canonical(obj));return p

@@ -1,12 +1,9 @@
-"""v7R3: independent signed prospective demand research, no trade permissions.
+"""v7R5 corrected SAME stateful CUSUM, signed direct prospective demand research.
 
-The only source of OI/depth/taker features is the PREVIOUSLY signed v7R2
-prospective raw. Release and all future recorded decisions are signed using
-GitHub OIDC Cosign/Rekor. No retroactive early warning is ever permitted.
-
-Modes:
-  register --start-utc ..., future >=2h -> frozen 672-slot schedule and SHA.
-  tick -> only CURRENT UTC window, then resolves matured first-touch outcomes.
+Every observed pressure factor is rebuilt from raw Binance/OKX HTTP responses
+and backed by GitHub OIDC Cosign/Rekor. Frozen 15m candle anchor continuity is
+independent of variable (+0..12m) collection latency. Strict UTC-publication-
+day global alert limit; one registered immutable future grid, no trade rights.
 """
 from __future__ import annotations
 import argparse, datetime as dt, hashlib, json, math, os, pathlib
@@ -90,7 +87,7 @@ def publish(ledger,message):
 
 def scheduler_blob_sha():
     return run("gh","api",
-        f"repos/{REPO}/contents/.github/workflows/btc-v7r3-forward-clock.yml?ref=main",
+        f"repos/{REPO}/contents/.github/workflows/btc-v7r5-forward-clock.yml?ref=main",
         "--jq",".sha")
 
 def register(args):
@@ -319,6 +316,7 @@ def current_slot_signal(root,reg,ts):
            "market_move_during_information_latency_pct":unobserved_move_pct,
            "reference_1m_raw":reference,
            "decision_price_not_stale_5m":True,
+           "source_direct_market_snapshot_canonical_sha256":source_hash(snapshot),
            "upstream_r2_snapshot_canonical_sha256":source_hash(snapshot),
            "model_source_sha":reg["model_source_sha"],
            "registered_grid_sha256":digest(reg),

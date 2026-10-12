@@ -249,6 +249,7 @@ def current_slot_signal(root,r2root,reg,ts):
            "status":"SIGNED_STATE_PUBLISHED",
            "issued_at_utc":issued.isoformat(),
            "github_run_id":os.environ.get("GITHUB_RUN_ID","SYNTHETIC_TEST"),
+           "github_run_attempt":int(os.environ.get("GITHUB_RUN_ATTEMPT","1")),
            "public_delivery_only_after_successful_GitHub_run":True,
            "snapshot_received_at_utc":snapshot["retrieved_at_utc"],
            "reference_spot":reference["spot"],
@@ -286,34 +287,55 @@ def get_future_raw(pending,now):
     return recorded
 
 def verified_delivery_time(event):
-    """Use GitHub's completed_at, NOT the earlier model computation timestamp.
+    """Conservative signed GitHub *JOB completion* bound, not mutable updated_at.
 
-    Run success proves that the signed evidence was pushed to GitHub before
-    completion; this conservative upper bound prevents phantom advance warning.
+    Verify run attempt, exact workflow path/ref, repository and frozen SHA.
+    This can only establish delivery was no later than job completion; it
+    CANNOT prove an earlier user notification or exchange quote delivery.
     """
     runid=event.get("github_run_id")
     if not runid or not str(runid).isdigit():
         raise RuntimeError("forecast lacks verifiable source GitHub run")
-    url=f"https://api.github.com/repos/{REPO}/actions/runs/{runid}"
     headers={"Accept":"application/vnd.github+json",
              "X-GitHub-Api-Version":"2022-11-28",
-             "User-Agent":"btc-v7r3-conservative-signed-delivery"}
+             "User-Agent":"btc-v7r4-strict-delivery"}
     token=os.environ.get("GH_TOKEN")
     if token:headers["Authorization"]="Bearer "+token
-    request=urllib.request.Request(url,headers=headers)
-    with urllib.request.urlopen(request,timeout=20) as response:
-        data=json.load(response)
-    if data.get("status")!="completed":
-        return None
+
+    def get(url):
+        req=urllib.request.Request(url,headers=headers)
+        with urllib.request.urlopen(req,timeout=20) as response:
+            return json.load(response)
+    runurl=f"https://api.github.com/repos/{REPO}/actions/runs/{runid}"
+    data=get(runurl)
+    if data.get("status")!="completed":return None
     if data.get("conclusion")!="success":
-        raise RuntimeError("signal source GitHub run did not succeed")
-    if data.get("head_sha")!=event["model_source_sha"]:
-        raise RuntimeError("signal run source SHA differs from frozen model")
-    completed=when(data["updated_at"] if not data.get("completed_at") else data["completed_at"])
+        raise RuntimeError("signal source job has no successful completion")
+    expected_path=f".github/workflows/btc-v7r3-signed-demand-shadow.yml@refs/heads/{BRANCH}"
+    if (data.get("head_sha")!=event["model_source_sha"]
+        or data.get("head_branch")!=BRANCH
+        or data.get("event")!="workflow_dispatch"
+        or data.get("path")!=expected_path
+        or data.get("head_repository",{}).get("full_name")!=REPO):
+        raise RuntimeError("GitHub delivery has wrong workflow/ref/repository")
+    attempt=int(data.get("run_attempt",0))
+    if attempt<1 or attempt!=int(event.get("github_run_attempt",1)):
+        raise RuntimeError("GitHub delivery attempt differs from signed event")
+    jobs=get(runurl+f"/attempts/{attempt}/jobs?per_page=100")
+    candidates=[j for j in jobs.get("jobs",[]) if j.get("name")=="signed-research-only"
+                and j.get("conclusion")=="success"
+                and j.get("status")=="completed"
+                and j.get("completed_at")]
+    if len(candidates)!=1:
+        raise RuntimeError("no single matching successfully completed forecast job")
+    completed=when(candidates[0]["completed_at"])
     computed=when(event["issued_at_utc"])
     if completed<computed:
-        raise RuntimeError("GitHub delivery completion before computed signal")
+        raise RuntimeError("signed forecast completed after purported job completion")
+    if completed<when(data["created_at"]):
+        raise RuntimeError("completion before GitHub dispatch")
     return completed
+
 
 def resolve_outcomes(root,now):
     pending=[]

@@ -27,6 +27,7 @@ def run(rawpath,out):
     dataset=[]
     for i,at,x,cl,lg in src:
         if at%(15*60000):continue
+        if i+HORIZON_5M>=len(raw):continue
         due=int(raw[i+HORIZON_5M][0])+STEP
         first,touch_idx=labels(raw,i,HORIZON_5M,BARRIER)
         close=int(raw[touch_idx][0])+STEP if touch_idx is not None else None

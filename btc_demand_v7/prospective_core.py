@@ -68,7 +68,18 @@ def registered_grid(start,*,days=7,source_sha,created_at,source_ref):
             "model_skill_status":"BASELINE_ONLY_UNVALIDATED",
             "trading_authority":False,
             "source":"Binance BTCUSDT closed 1m+5m; OKX optional book/funding/OI",
-            "no_backfill":True,"slots":entries}
+            "no_backfill":True,
+            "pre_registered_event_semantics":{
+                "30m":{"barrier_fraction":0.0045,"window_minutes":30},
+                "1h":{"barrier_fraction":0.007,"window_minutes":60},
+                "4h":{"barrier_fraction":0.012,"window_minutes":240},
+                "competition":"upper-first / lower-first / neither / AMBIGUOUS_SAME_MINUTE",
+                "episode_cluster_gap_minutes":240,
+                "minimum_actionable_lead_minutes":60,
+                "maximum_alerts_per_utc_day":1,
+                "overlapping_grid_rows_are_not_independent_events":True
+            },
+            "no_auto_trade":True,"slots":entries}
 
 def find_slot(grid,slot):
     i=due_slot_id(slot)

@@ -21,6 +21,7 @@ from btc_demand_v7.event_semantics import first_passage
 from btc_demand_v7.episode_quality_v4 import report as independent_episode_report
 from btc_demand_v7.prospective_core import when
 from btc_demand_v7.live_snapshot import collect as market_collect, strict_closed, spot_state
+from btc_demand_v7.source_integrity_v5 import rederive
 from btc_demand_v7.release_guard import certificate_source_sha
 
 REPO="sergeytren1984-ux/neora-b2b-v2-clean"
@@ -151,6 +152,9 @@ def validated_snapshot(root,slot,unused=None):
     if not path.is_file():return None
     verify(path,SELF_ID,os.environ["GITHUB_SHA"])
     snapshot=json.loads(path.read_text())
+    # Original market JSON is signed; independent numerical recomputation
+    # additionally binds displayed OI, depth and microflow to raw source.
+    rederive(snapshot)
     if when(snapshot["anchor_utc"])!=slot:
         raise RuntimeError("wrong signed self-collected candle anchor")
     anchor_ms=int(slot.timestamp()*1000)
@@ -208,6 +212,9 @@ def current_slot_signal(root,reg,ts):
     # Fetch fresh direct market observations IN THIS SOURCE JOB. Waiting
     # for an R2 outcome backlog cannot prevent a time-critical signal.
     snapshot=market_collect(anchor_ms=int(slot.timestamp()*1000))
+    # Fail CLOSED before publishing any signal if observed positioning or
+    # 3m aggressive flow cannot be rebuilt from its raw vendor response.
+    rederive(snapshot)
     if when(snapshot["anchor_utc"])!=slot:
         raise RuntimeError("collector shifted preregistered anchor")
     write(path.parent,"snapshot.json",snapshot)

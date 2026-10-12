@@ -131,24 +131,31 @@ def advance(state, history, observation, *,issued_utc=None):
             raise ValueError("observation grid gap: must start new provisional epoch")
         if state["last_snapshot_sha256"]!=source_hash(history[-1]):
             raise ValueError("state does not bind to most recent signed source")
-    if cur is None:
-        return dict(state), {
-            "schema":"btc-v7r3-pressure-diagnostic-v1","observed_at_utc":at.isoformat(),
-            "issued_at_utc":issued.isoformat(),"status":readiness,"watch":False,
-            "alert":False,"trading_authority":False,"calibrated_probability":False}
-    if len(history)<BASELINE_COUNT:
-        return dict(state), {
-            "schema":"btc-v7r3-pressure-diagnostic-v1","observed_at_utc":at.isoformat(),
-            "issued_at_utc":issued.isoformat(),"status":"INSUFFICIENT_PAST_SIGNED_HISTORY",
-            "past_count":len(history),"watch":False,"alert":False,
+    def advance_without_signal(status):
+        # Explicitly record the unavailable reading in the cryptographic
+        # state chain, but NEVER substitute zero factor values.
+        updated={**state,"sequence":int(state["sequence"])+1,
+                 "last_receipt_utc":at.isoformat(),
+                 "last_snapshot_sha256":source_hash(observation),
+                 "up_cusum":0.,"down_cusum":0.}
+        return updated,{
+            "schema":"btc-v7r3-pressure-diagnostic-v1",
+            "observed_at_utc":at.isoformat(),"issued_at_utc":issued.isoformat(),
+            "state_sequence":updated["sequence"],
+            "current_snapshot_sha256":updated["last_snapshot_sha256"],
+            "status":status,"watch":False,"alert":False,
             "trading_authority":False,"calibrated_probability":False}
+    if cur is None:
+        return advance_without_signal(readiness)
+    if len(history)<BASELINE_COUNT:
+        return advance_without_signal("INSUFFICIENT_PAST_SIGNED_HISTORY")
     previous = history[-BASELINE_COUNT:]
     previous_time = []
     prior_features=[]
     for snap in previous:
         ts,f,validity=feature(snap)
         if f is None:
-            raise ValueError("past factor unavailable: cannot silently fill baseline")
+            return advance_without_signal("CLEAN_BASELINE_REBUILD_REQUIRED")
         if ts>=at:
             raise ValueError("future point in pressure baseline")
         previous_time.append(ts)
@@ -185,6 +192,10 @@ def advance(state, history, observation, *,issued_utc=None):
     # If the price already moved, this is not an advance warning.
     eligible = raw_alert and readiness=="PRE_MOVE"
     if readiness=="ALREADY_MOVED":
+        # Do not allow an after-the-fact strong move to accumulate into a
+        # "new early" alarm on the next quiet candle.
+        up=0.
+        down=0.
         status="LATE_PRESSURE_AFTER_PRICE_IMPULSE"
     elif cooldown:
         status="SUPPRESSED_IN_COOLDOWN"

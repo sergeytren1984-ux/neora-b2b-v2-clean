@@ -15,6 +15,7 @@ from btc_demand_v7.prospective_core import when
 from btc_demand_v7.demand_change_v2 import source_hash
 from btc_demand_v7.v7r6_live_pair_worker import START,END,R5_SHA,R6_SHA,sha
 
+PINNED_RUNNER_SHA="a68632de49b1afb5a4d1b614b28fdef76f769e96"
 MAX_PUBLIC_MINUTES=13
 SCORE_GRACE=35
 
@@ -35,7 +36,8 @@ def one_pair(shadow,proof,reference,raw_rows,head,*,observed_utc,as_of_utc):
     if head not in ('1h','4h'):raise ValueError('unknown registered barrier horizon')
     if shadow.get('schema')!='btc-v7r6-paired-future-public-shadow-v1' or shadow.get('kind')!='R6_SIGNED_SHADOW':
         raise ValueError('not a signed prospective R6 comparison')
-    if shadow.get('research_model_sha')!=R6_SHA or shadow.get('trading_authority') is not False:
+    if (shadow.get('research_model_sha')!=R6_SHA or shadow.get('runner_sha')!=PINNED_RUNNER_SHA
+        or shadow.get('trading_authority') is not False):
         raise ValueError('wrong frozen model or unapproved trade rights')
     slot=when(shadow['anchor_utc'])
     if not START<=slot<END or slot.minute%15 or slot.second or slot.microsecond:
@@ -46,7 +48,9 @@ def one_pair(shadow,proof,reference,raw_rows,head,*,observed_utc,as_of_utc):
         !=shadow['challenger_diagnostic']['current_snapshot_sha256']
         or shadow['source_r5_snapshot_sha256']!=shadow['challenger_diagnostic']['current_snapshot_sha256']):
         raise ValueError('contenders do not see identical signed market information')
-    if proof.get('status')!='VERIFIED_GITHUB_COMPLETED_JOB_AND_SIGNED_COMMIT' or proof.get('conclusion')!='success':
+    if (proof.get('status')!='VERIFIED_GITHUB_COMPLETED_JOB_AND_SIGNED_COMMIT'
+        or proof.get('conclusion')!='success'
+        or proof.get('job_source_sha')!=PINNED_RUNNER_SHA):
         raise ValueError('not an independently verified GitHub public release')
     if proof.get('signed_shadow_sha256')!=sha(shadow):
         raise ValueError('Git public release not bound to exact signed decision')

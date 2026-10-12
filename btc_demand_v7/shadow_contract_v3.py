@@ -41,6 +41,8 @@ def grid(start,created,model_sha,days=7):
     for i in range(days*96):
         origin=start+i*CYCLE
         slots.append({"slot_id":slot_id(origin),"anchor_utc":origin.isoformat(),
+                      "first_32_signed_slots_are_warmup":i<32,
+                      "forecast_eligible_after_warmup":i>=32,
                       "decision_window_open_utc":(origin+timedelta(minutes=TICK_MIN)).isoformat(),
                       "decision_window_close_utc":(origin+timedelta(minutes=TICK_MAX)).isoformat()})
     return {
@@ -54,6 +56,9 @@ def grid(start,created,model_sha,days=7):
         "source_provenance":"self-collected and independently Cosign signed BTC 1m+5m/OKX observation",
         "upstream_r2_evidence_required":False,
         "due_slots":slots,"days":days,"cadence_minutes":15,
+        "explicit_warmup_slots":32,
+        "all_due_slots_visible_including_warmup":True,
+        "warmup_is_not_a_model_forecast":True,
         "min_issue_minutes_after_anchor":TICK_MIN,
         "max_issue_minutes_after_anchor":TICK_MAX,
         "source_required":["BTC 1m and 5m closed spot at frozen anchor",

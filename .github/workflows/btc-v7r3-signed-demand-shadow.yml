@@ -1,0 +1,31 @@
+name: BTC v7R3 signed research endpoint (main refuses execution)
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Must run with --ref btc-v7r3-demand-stateful-challenger-20261012"
+        required: true
+        type: choice
+        options: [register,forecast,outcome]
+      start_utc:
+        description: "Future start UTC for register"
+        required: false
+        type: string
+      days:
+        description: "Number of days"
+        required: false
+        default: "7"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  refuse-main:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Prevent mistaken use of mutable default branch in evidence
+        run: |
+          echo "Run only the frozen signed research source branch; never use main for forecast evidence" >&2
+          exit 1

@@ -96,12 +96,12 @@ def test():
         recorded={}
         completed=when(firstevent["issued_at_utc"])+dt.timedelta(seconds=25)
         ref_end=int(completed.timestamp()*1000)//60000*60000
-        recorded[ref_end]=[ref_end-60000,"83000","83001","82999","83000","1",ref_end-1]
+        recorded[ref_end]=[ref_end-60000,"83000","83800","82999","83800","1",ref_end-1]
         start=worker.future_anchor(completed)
         for i in range(1,300):
             end=start+dt.timedelta(minutes=i)
             ms=int(end.timestamp()*1000)
-            recorded[ms]=[ms-60000,"83000",str(84000 if i==20 else 83100),"82900","83030","1",ms-1]
+            recorded[ms]=[ms-60000,"83800",str(85000 if i==20 else 83900),"83700","83830","1",ms-1]
         def closed_bars(pending,now):return recorded
         at=first+dt.timedelta(hours=4,minutes=55)
         with patch.object(worker,"verify",lambda *x:None),patch.object(worker,"write",mock_signed),patch.object(worker,"get_future_raw",closed_bars),patch.object(worker,"verified_delivery_time",lambda e:when(e["issued_at_utc"])+dt.timedelta(seconds=25)):
@@ -111,6 +111,14 @@ def test():
         assert any(json.loads(p.read_text())["barrier_result"]["direction"]=="UP_FIRST" for p in outcomes)
         assert all(json.loads(p.read_text())["public_delivery_utc"]==completed.isoformat() for p in outcomes)
         assert all(json.loads(p.read_text())["reference_price_after_delivery_not_model_feature"] is True for p in outcomes)
+        # The model saw 83000, the public learned it only after 83800.
+        # Never credit the prior +800 dollars as an "early" warning.
+        first_outcomes=[json.loads(p.read_text()) for p in outcomes]
+        assert all(x["early_warning_eligible"] is False for x in first_outcomes)
+        assert all(x["already_moved_before_publication"] is True for x in first_outcomes)
+        for x in first_outcomes:
+            if x["first_touch_minute_open_utc"] is not None:
+                assert x["warning_lead_upper_minutes"]-x["warning_lead_lower_minutes"]==1.0
         with patch.object(worker,"verify",lambda *x:None):
             scored=worker.score(reg,root,at+dt.timedelta(hours=1))
         assert scored["forward_outcomes"]["1h"]["due"]>=1

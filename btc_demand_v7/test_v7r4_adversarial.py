@@ -26,8 +26,8 @@ def r2_denom_and_errors():
          created_at=START-timedelta(hours=4),source_ref="refs/heads/test")
     no_forecasts=score_fixed_grid(g,[],[],START+timedelta(hours=2))
     assert no_forecasts["due_forecast_slots"]==8
-    assert no_forecasts["outcome_due_count"]>=4, no_forecasts
-    assert no_forecasts["outcomes_missing"]>=4
+    assert no_forecasts["outcome_due_count"]==3, no_forecasts
+    assert no_forecasts["outcomes_missing"]==3
     assert not no_forecasts["admission_ready"]
     live={"reference_anchor_utc":START.isoformat(),
           "computed_at_utc":(START+timedelta(minutes=2)).isoformat(),

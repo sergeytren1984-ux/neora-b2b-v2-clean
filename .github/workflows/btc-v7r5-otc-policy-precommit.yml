@@ -1,0 +1,80 @@
+name: BTC v7R5 freeze pre-outcome OTC buy-vs-wait shadow policy
+
+on:
+  push:
+    branches: [btc-v7r5-otc-prospective-proxy-20261012]
+    paths:
+      - btc_demand_v7/otc_prospective_policy_v5.py
+      - btc_demand_v7/test_otc_prospective_policy_v5.py
+      - .github/workflows/btc-v7r5-otc-policy-precommit.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  signed-fixed-policy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - name: Reject hindsight policy, forged delivery, nonfinite prices and hidden cash
+        run: |
+          python -m py_compile btc_demand_v7/otc_prospective_policy_v5.py
+          python -m btc_demand_v7.test_otc_prospective_policy_v5
+      - name: Freeze one policy BEFORE first public prospective signal
+        run: |
+          python - <<'PY'
+          import datetime,json,os,pathlib
+          from btc_demand_v7.otc_prospective_policy_v5 import commitment
+          policy=commitment()
+          now=datetime.datetime.now(datetime.timezone.utc)
+          earliest=datetime.datetime.fromisoformat(policy["source_epoch_start"])
+          if now>=earliest:
+              raise RuntimeError("cannot establish pre-event policy after frozen epoch began")
+          policy["policy_producer_sha"]=os.environ["GITHUB_SHA"]
+          policy["policy_producer_run_id"]=os.environ["GITHUB_RUN_ID"]
+          policy["registered_before_future_epoch_utc"]=now.isoformat()
+          policy["source_precommitted"]=True
+          p=pathlib.Path("/tmp/btc-v7r5-otc-precommitted-policy.json")
+          p.write_text(json.dumps(policy,sort_keys=True,allow_nan=False,separators=(",",":"))+"\n")
+          print("BTC_V7R5_OTC_POLICY_PRECOMMITTED",
+                policy["policy_producer_sha"],policy["registered_before_future_epoch_utc"])
+          PY
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: Sign immutable before-event policy with GitHub OIDC Rekor
+        run: |
+          cosign sign-blob --yes \
+            --bundle /tmp/btc-v7r5-otc-precommitted-policy.sigstore.json \
+            /tmp/btc-v7r5-otc-precommitted-policy.json
+      - name: Independently verify policy identity and transparency
+        run: |
+          cosign verify-blob /tmp/btc-v7r5-otc-precommitted-policy.json \
+            --bundle /tmp/btc-v7r5-otc-precommitted-policy.sigstore.json \
+            --certificate-identity "https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-v7r5-otc-policy-precommit.yml@refs/heads/btc-v7r5-otc-prospective-proxy-20261012" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          python - <<'PY'
+          import json
+          from btc_demand_v7.release_guard import certificate_source_sha
+          p="/tmp/btc-v7r5-otc-precommitted-policy.sigstore.json"
+          b=json.load(open(p))
+          assert any(e.get("inclusionProof") for e in b["verificationMaterial"]["tlogEntries"])
+          print("BTC_V7R5_OTC_PRECOMMITTED_SIGNED_SOURCE_SHA",
+                certificate_source_sha(p))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: btc-v7r5-otc-precommitted-policy-${{ github.sha }}
+          path: /tmp/btc-v7r5-otc-precommitted-policy*
+          retention-days: 90
+          if-no-files-found: error

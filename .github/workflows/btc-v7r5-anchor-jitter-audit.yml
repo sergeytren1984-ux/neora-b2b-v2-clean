@@ -6,6 +6,7 @@ on:
     paths:
       - btc_demand_v7/demand_change_v2.py
       - btc_demand_v7/test_anchor_receipt_jitter_v5.py
+      - btc_demand_v7/test_public_daily_budget_v5.py
       - .github/workflows/btc-v7r5-anchor-jitter-audit.yml
   workflow_dispatch: {}
 
@@ -33,6 +34,7 @@ jobs:
           set -euo pipefail
           python -m py_compile btc_demand_v7/demand_change_v2.py
           python -m btc_demand_v7.test_anchor_receipt_jitter_v5
+          python -m btc_demand_v7.test_public_daily_budget_v5
           python -m btc_demand_v7.test_demand_change_v2
           python -m btc_demand_v7.test_shadow_contract_v3
           python -m btc_demand_v7.test_v7r3_shadow_worker
@@ -50,6 +52,7 @@ jobs:
             "old_r4_max_receipt_gap_minutes":22,
             "registered_anchor_distance_minutes":15,
             "new_max_valid_receipt_gap_minutes":27,
+            "public_alert_safety_window_minutes":1453,
             "tests_run_successfully":True,
             "trading_authority":False,"skill_proven":False}
           pathlib.Path("/tmp/btc-v7r5-anchor-test.json").write_text(

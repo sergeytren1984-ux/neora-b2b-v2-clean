@@ -118,8 +118,8 @@ def advance(state, history, observation, *,issued_utc=None):
     issued = timestamp(issued_utc) if issued_utc else at
     if issued < at:
         raise ValueError("decision precedes received observation")
-    if issued-at > timedelta(minutes=3):
-        raise ValueError("stale detection decision")
+    if issued-at > timedelta(minutes=10):
+        raise ValueError("stale detection decision: signed source older than 10 minutes")
     last = state["last_receipt_utc"]
     if last is not None:
         prev = timestamp(last)
@@ -218,6 +218,7 @@ def advance(state, history, observation, *,issued_utc=None):
         "schema":"btc-v7r3-pressure-diagnostic-v1",
         "observed_at_utc":at.isoformat(),
         "issued_at_utc":issued.isoformat(),
+        "source_age_seconds_at_publication":(issued-at).total_seconds(),
         "current_snapshot_sha256":source_hash(observation),
         "previous_snapshot_sha256":state["last_snapshot_sha256"],
         "previous_state_sequence":state["sequence"],

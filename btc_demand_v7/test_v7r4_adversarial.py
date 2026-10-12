@@ -90,15 +90,17 @@ def wrong_delivery_identity():
 
 def unsigned_or_forged_outcome():
     reg=grid(START,START-timedelta(hours=4),"a"*40,days=1)
-    slot=reg["due_slots"][0]
-    issue=START+timedelta(minutes=10)
-    delivered=START+timedelta(minutes=11)
+    slot=reg["due_slots"][32]
+    anchor=START+timedelta(minutes=32*15)
+    issue=anchor+timedelta(minutes=10)
+    delivered=anchor+timedelta(minutes=11)
     event={"schema":"btc-v7r3-signed-pressure-event-v1",
-           "slot_id":slot["slot_id"],"anchor_utc":START.isoformat(),
+           "slot_id":slot["slot_id"],"anchor_utc":anchor.isoformat(),
            "status":"SIGNED_STATE_PUBLISHED","issued_at_utc":issue.isoformat(),
            "github_run_id":"777","model_source_sha":"a"*40,
            "reference_spot":83000.,
-           "diagnostic":{"alert":True,"warning_side":"UP","price_already_moved":False}}
+           "diagnostic":{"alert":True,"warning_side":"UP","price_already_moved":False,
+                         "status":"UNCALIBRATED_PRE_MOVE_UP_PRESSURE"}}
     delivery={"slot_id":slot["slot_id"],"public_delivery_utc":delivered.isoformat(),
               "source_signal_sha256":digest(event)}
     with tempfile.TemporaryDirectory() as t:
@@ -106,7 +108,7 @@ def unsigned_or_forged_outcome():
         folder.mkdir(parents=True)
         (folder/"signal.json").write_bytes(canonical(event))
         (folder/"delivery.json").write_bytes(canonical(delivery))
-        at=START+timedelta(hours=2)
+        at=anchor+timedelta(hours=2)
         scored=None
         with patch.object(w,"verify",lambda *a:None):
             scored=w.score(reg,root,at)

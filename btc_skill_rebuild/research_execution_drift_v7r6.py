@@ -81,7 +81,7 @@ def examples(rows):
     vv=cum(vol);bb=cum(buy);tt=cum(trades)
     def sum12(c,i,n):return c[i+1]-c[i-n+1]
     result=[]
-    for i in range(289,len(t)-288):
+    for i in range(289,len(t)-1):
         at=t[i]+STEP
         buy_ratio=lambda n:sum12(bb,i,n)/max(sum12(vv,i,n),1e-8)
         fr5=buy_ratio(1);fr15=buy_ratio(3);fr60=buy_ratio(12)
@@ -133,6 +133,8 @@ def run(raw,out):
     for name,(from_i,to_i) in HEADS.items():
         dat={'train':[],'validation':[],'known_test':[]}
         for i,at,f,c,lg in r:
+            if i+to_i>=len(rows):
+                continue  # target maturity is horizon-specific, NEVER use unclosed rows
             end=int(rows[i+to_i][0])+STEP
             if end<tr:part='train'
             elif tr<=at and end<va:part='validation'

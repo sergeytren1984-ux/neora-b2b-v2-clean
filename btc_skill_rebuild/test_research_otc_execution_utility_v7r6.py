@@ -78,13 +78,22 @@ class OTCDelayedUtilityTests(unittest.TestCase):
             q120=Quote(ti+timedelta(minutes=120),82850,"firm_available",
                        "operator",CAPITAL_USDT)
             rows.append(paired_economic_outcome(sig,q60,q120))
-        agg=independent_day_economic_evidence(rows)
+        expected=[r["slot"] for r in rows]
+        # Without a frozen full grid, successful slots are cherry-pickable.
+        self.assertFalse(independent_day_economic_evidence(rows)[
+            "conditional_quote_lower95_positive"])
+        agg=independent_day_economic_evidence(rows,expected_slot_ids=expected)
         self.assertEqual(agg["calendar_days"],20)
         self.assertTrue(agg["conditional_quote_lower95_positive"])
         self.assertFalse(agg["verified_positive_economic_edge"])
         self.assertFalse(agg["trading_authority"])
+        # Omission and explicit unavailable outcomes BOTH block promotion.
+        dropped=independent_day_economic_evidence(rows[1:],expected_slot_ids=expected)
+        self.assertEqual(dropped["missing_entire_future_slots_from_grid"],1)
+        self.assertFalse(dropped["conditional_quote_lower95_positive"])
         rows[0]={"slot":rows[0]["slot"],"identified":False}
-        self.assertFalse(independent_day_economic_evidence(rows)["conditional_quote_lower95_positive"])
+        self.assertFalse(independent_day_economic_evidence(
+            rows,expected_slot_ids=expected)["conditional_quote_lower95_positive"])
 
     def test_spot_proxy_never_establishes_operator_execution(self):
         r=self.outcome(origin="spot_proxy")

@@ -106,7 +106,8 @@ def state_zero():
         "trading_authority": False, "calibrated_probability": False,
     }
 
-def advance(state, history, observation, *,issued_utc=None):
+def advance(state, history, observation, *,issued_utc=None,
+            live_change_since_anchor_pct=None):
     """Advance one tick, carrying previous score and source hash forward.
 
     history: prior as-of signed snapshots, ordered chronologically, not including
@@ -115,6 +116,12 @@ def advance(state, history, observation, *,issued_utc=None):
     if state.get("schema") != SCHEMA or state.get("trading_authority") is not False:
         raise ValueError("invalid frozen pressure state")
     at, cur, readiness = feature(observation)
+    if live_change_since_anchor_pct is not None:
+        gap_move=float(live_change_since_anchor_pct)
+        if not math.isfinite(gap_move):
+            raise ValueError("invalid price movement after source anchor")
+        if abs(gap_move)>=MAX_ADMISSIBLE_PRICE_MOVE_PCT:
+            readiness="ALREADY_MOVED"
     issued = timestamp(issued_utc) if issued_utc else at
     if issued < at:
         raise ValueError("decision precedes received observation")
@@ -230,6 +237,10 @@ def advance(state, history, observation, *,issued_utc=None):
         "watch":max(up,down)>=WATCH_LEVEL,
         "alert":eligible,
         "price_already_moved":readiness=="ALREADY_MOVED",
+        "price_change_since_anchor_pct":live_change_since_anchor_pct,
+        "after_anchor_move_veto_applied":bool(
+            live_change_since_anchor_pct is not None
+            and abs(live_change_since_anchor_pct)>=MAX_ADMISSIBLE_PRICE_MOVE_PCT),
         "trading_authority":False,"calibrated_probability":False,
         "meaning":"pre-move heuristic pressure watch, not a future-price forecast or probability",
     }

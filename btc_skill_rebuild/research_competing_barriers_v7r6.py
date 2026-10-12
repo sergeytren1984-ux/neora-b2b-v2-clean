@@ -117,6 +117,11 @@ def classify_threshold(valid,model,shrink,per_day=1):
         p=prob(model,x,shrink)
         strengths.append(max(p[0],p[1]))
     ordered=sorted(strengths)
+    # If every predicted risk is identical, the probability conveys NO
+    # timing/directional selection information. Quantile threshold ties
+    # must never fabricate one warning per day from constant priors.
+    if ordered[-1]-ordered[0]<=1e-12:
+        return None
     daily=len(valid)/max(1,len(set(dt.datetime.fromtimestamp(x[0]/1000,UTC).date() for x in valid)))
     frac=per_day/max(1,daily)
     pos=int((1-min(1.,frac))*(len(ordered)-1))
@@ -127,7 +132,7 @@ def alert_score(sample,model,shrink,threshold):
     for at,x,y,touch in sample:
         p=prob(model,x,shrink)
         strength=max(p[0],p[1]);candidate=0 if p[0]>=p[1] else 1
-        if strength<threshold:continue
+        if threshold is None or strength<=threshold:continue
         # deterministic one per UTC day to match conservative frozen cap
         day=dt.datetime.fromtimestamp(at/1000,UTC).date().isoformat()
         if day in days:continue

@@ -1,0 +1,81 @@
+name: BTC v7R5 independent frozen R4 full source-to-state replay CI
+
+on:
+  push:
+    branches: [btc-v7r5-live-cadence-reliability-20261012]
+    paths:
+      - btc_demand_v7/independent_live_replay_v5.py
+      - btc_demand_v7/test_independent_live_replay_v5.py
+      - .github/workflows/btc-v7r5-independent-live-replay-ci.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  prospective-frozen-r4-numerical-source-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONPATH: ${{ github.workspace }}/auditor
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          path: auditor
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: 46baa51edbbffc328c747be5d365bcba34ea3d00
+          path: frozen-r4
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: btc-v7r4-direct-evidence-20261013
+          path: signed-evidence
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: Prove independently recomputed CUSUM and five synthetic counterexamples
+        working-directory: auditor
+        run: |
+          python -m py_compile btc_demand_v7/independent_live_replay_v5.py
+          python -m btc_demand_v7.test_independent_live_replay_v5
+      - name: Audit ACTUAL frozen R4 signed GitHub ledger with exact as-of source
+        run: |
+          python -m btc_demand_v7.independent_live_replay_v5 \
+            --evidence-root signed-evidence \
+            --frozen-r4-source frozen-r4 \
+            --latest 3 \
+            --out /tmp/btc-v7r5-independent-frozen-r4-replay.json
+      - name: Bind independent audit result to exact evidence Git head
+        run: |
+          python - <<'PY'
+          import json,pathlib,subprocess,os
+          p=pathlib.Path("/tmp/btc-v7r5-independent-frozen-r4-replay.json")
+          content=json.loads(p.read_text())
+          evidence=subprocess.check_output(
+              ["git","-C","signed-evidence","rev-parse","HEAD"],text=True).strip()
+          content["evidence_head_sha"]=evidence
+          content["independent_auditor_source_sha"]=os.environ["GITHUB_SHA"]
+          content["is_one_point_in_time_evidence_head"]=True
+          p.write_text(json.dumps(content,sort_keys=True,allow_nan=False,indent=2)+"\n")
+          print("INDEPENDENT_R4_EVIDENCE_HEAD",evidence)
+          PY
+      - name: OIDC/Rekor sign actual result, including no-data or errors
+        run: |
+          cosign sign-blob --yes \
+            --bundle /tmp/btc-v7r5-independent-frozen-r4-replay.sigstore.json \
+            /tmp/btc-v7r5-independent-frozen-r4-replay.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: btc-v7r5-independent-frozen-r4-replay-${{ github.sha }}
+          path: /tmp/btc-v7r5-independent-frozen-r4-replay*
+          retention-days: 90
+          if-no-files-found: error

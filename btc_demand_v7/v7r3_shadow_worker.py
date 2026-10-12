@@ -10,7 +10,7 @@ Modes:
 """
 from __future__ import annotations
 import argparse, datetime as dt, hashlib, json, math, os, pathlib
-import subprocess,tempfile,urllib.parse,urllib.request,concurrent.futures
+import subprocess,tempfile,urllib.parse,urllib.request,concurrent.futures,time
 from btc_demand_v7.shadow_contract_v3 import (
     grid,accept_slot,slot_id,digest,canonical,
     future_anchor,future_due,HORIZONS,status_grid,
@@ -70,7 +70,16 @@ def publish(ledger,message):
     if not run("git","status","--porcelain",cwd=ledger):
         raise RuntimeError("no new signed evidence")
     run("git","commit","--quiet","-m",message,cwd=ledger)
-    run("git","push","--quiet","origin","HEAD:refs/heads/"+EVIDENCE,cwd=ledger)
+    # Independent forecast/outcome workflows can write unrelated signed
+    # paths concurrently. Never force push and never overwrite evidence.
+    for retry in range(4):
+        try:
+            run("git","pull","--quiet","--rebase","origin",EVIDENCE,cwd=ledger)
+            run("git","push","--quiet","origin","HEAD:refs/heads/"+EVIDENCE,cwd=ledger)
+            return
+        except RuntimeError:
+            if retry==3:raise
+            time.sleep(2**retry)
 
 def source_r2(r2_root):
     p=r2_root/"schedule.json"
@@ -617,16 +626,24 @@ def tick(args):
         if args.action=="forecast":
             status=current_slot_signal(root,r2/"btc_v7r2_evidence",reg,ts)
             outcomes=0
-        elif args.action=="outcome":
-            status="OUTCOME_ONLY_NO_FORECAST_CRITICAL_PATH"
-            outcomes=resolve_outcomes(root,utcnow())
-        else:
+            # Do NOT wait for 672-slot audit/cosign replay in critical path.
+            # A no-op due to missing R2 source is not a successful forecast.
+            if status in ("WAITING_R2_SIGNED_SNAPSHOT","NOT_YET_DUE","OUTSIDE_FUTURE_EPOCH",
+                          "DUPLICATE_NO_MUTATION"):
+                print("R4_NO_NEW_FORECAST",status,flush=True)
+                return
+            publish(ledger,"Append signed R4 time-critical forecast only")
+            print("R4_FORECAST_PUBLISHED",status,flush=True)
+            return
+        if args.action!="outcome":
             raise ValueError("invalid work action")
+        status="OUTCOME_ONLY_NO_FORECAST_CRITICAL_PATH"
+        outcomes=resolve_outcomes(root,utcnow())
         scored=score(reg,root,utcnow())
         scored["github_run_id"]=os.environ["GITHUB_RUN_ID"]
         write(root/"scorecards",os.environ["GITHUB_RUN_ID"]+".json",scored)
-        publish(ledger,"Append signed R3 prospective warning, outcomes and full due grid")
-    print("BTC_V7R3_SIGNED_TICK",json.dumps({
+        publish(ledger,"Append signed R4 matured outcomes and strict score")
+    print("BTC_V7R4_SIGNED_TICK",json.dumps({
         "source_status":status,"new_outcomes":outcomes,
         "due_slots":scored["coverage"]["due"],
         "on_time":scored["coverage"]["on_time_signed_model_state"],

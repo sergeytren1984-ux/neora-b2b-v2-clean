@@ -59,7 +59,7 @@ def wrong_delivery_identity():
            "issued_at_utc":(START+timedelta(minutes=10)).isoformat()}
     data={"id":777,"status":"completed","conclusion":"success",
           "head_sha":"a"*40,"head_branch":"another-branch",
-          "event":"workflow_dispatch","path":".github/workflows/btc-v7r3-signed-demand-shadow.yml@refs/heads/"+w.BRANCH,
+          "event":"workflow_dispatch","path":".github/workflows/btc-v7r3-signed-demand-shadow.yml",
           "head_repository":{"full_name":w.REPO},
           "created_at":START.isoformat(),"run_attempt":1,
           "updated_at":(START+timedelta(days=3)).isoformat()}
@@ -75,7 +75,7 @@ def wrong_delivery_identity():
         rejects(lambda:w.verified_delivery_time(event),
                 "wrong branch accepted despite same source hash")
     data["head_branch"]=w.BRANCH
-    data["path"]=".github/workflows/btc-v7r3-signed-demand-shadow.yml@refs/heads/"+w.BRANCH
+    data["path"]=".github/workflows/btc-v7r3-signed-demand-shadow.yml"
     assert data["updated_at"].startswith("2026-10-16")
     job_end=START+timedelta(minutes=13)
     def good_urlopen(req,timeout=None):

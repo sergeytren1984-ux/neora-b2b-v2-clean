@@ -154,24 +154,26 @@ def collect():
     state["retrieved_at_utc"]=dt.datetime.fromtimestamp(recorded/1000,UTC).isoformat()
     observation=spot_state(one,anchor_ms)
     observation["oi"]=None;observation["book"]=None;observation["funding"]=None
-    for name,compute in (("oi_okx",lambda d:open_interest_state(d,recorded)),
-                         ("book_okx",liquidity_state)):
+    for name in ("oi_okx","book_okx"):
         if name not in state["raw_optional"]:continue
         try:
-            value=compute(state["raw_optional"][name])
-            if name=="book_okx" and not (0<=recorded-value["vendor_timestamp_ms"]<=60_000):
-                raise ValueError("future or stale order book")
+            received_at=state["optional_receipts"][name]["response_received_ms"]
+            if name=="oi_okx":
+                value=open_interest_state(state["raw_optional"][name],received_at)
+            else:
+                value=liquidity_state(state["raw_optional"][name])
+                if not (0<=received_at-value["vendor_timestamp_ms"]<=60_000):
+                    raise ValueError("future or stale order book")
             observation["oi" if name=="oi_okx" else "book"]=value
         except Exception as e:
             state["optional_status"][name]={"state":"UNAVAILABLE_OR_STALE","reason":type(e).__name__}
     if "funding_okx" in state["raw_optional"]:
         try:
-            raw=state["raw_optional"]["funding_okx"]
-            if raw.get("code")!="0" or not raw.get("data"):raise ValueError("invalid funding")
-            d=raw["data"][0]
-            observation["funding"]={"source":"OKX BTC-USDT-SWAP current projected funding",
-                                    "value":float(d["fundingRate"]),
-                                    "funding_time_ms":int(d["fundingTime"])}
+            receipt=state["optional_receipts"]["funding_okx"]
+            observation["funding"]=funding_state(
+                state["raw_optional"]["funding_okx"],
+                receipt["request_started_ms"],
+                receipt["response_received_ms"])
         except Exception as e:state["optional_status"]["funding_okx"]={"state":"INVALID","reason":type(e).__name__}
     up=observation["15m_price_change_pct"]>0.20 and observation["15m_taker_buy_fraction"]>0.58 and observation["15m_volume_vs_previous_1h_quarter"]>2 and observation["breakout_pct"]>.10
     down=observation["15m_price_change_pct"]<-.20 and observation["15m_taker_buy_fraction"]<.42 and observation["15m_volume_vs_previous_1h_quarter"]>2

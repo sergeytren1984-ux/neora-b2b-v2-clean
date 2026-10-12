@@ -10,15 +10,16 @@ A chain break is FAIL, not a silent reset. Recovery epochs are explicitly
 reported as NOT VERIFIED until their own numerical replay is supported.
 """
 from __future__ import annotations
-import argparse,concurrent.futures,datetime as dt,hashlib,json,math,os,pathlib,subprocess
+import argparse,concurrent.futures,datetime as dt,hashlib,importlib.util,json,math,os,pathlib,subprocess
 from btc_demand_v7.source_integrity_v5 import rederive
-from btc_demand_v7.demand_change_v2 import advance,state_zero,source_hash,timestamp
+from btc_demand_v7.demand_change_v2 import timestamp
 from btc_demand_v7.shadow_contract_v3 import digest,canonical,slot_id,accept_slot
 from btc_demand_v7.release_guard import certificate_source_sha
 from btc_demand_v7.prospective_core import when
 
 REPO="sergeytren1984-ux/neora-b2b-v2-clean"
 FROZEN_R4_SHA="46baa51edbbffc328c747be5d365bcba34ea3d00"
+FROZEN_R4_DEMAND_BLOB_SHA="0adcded652193522ab893061c5b3816b91e48ca1"
 EVIDENCE_BRANCH="btc-v7r4-direct-evidence-20261013"
 REG_PATH="btc_v7r3_evidence/registration.json"
 IDENTITY=f"https://github.com/{REPO}/.github/workflows/btc-v7r3-signed-demand-shadow.yml@refs/heads/btc-v7r4-hardening-20261012"
@@ -64,7 +65,26 @@ def compare(actual,expected,name):
     if canonical(actual)!=canonical(expected):
         raise RuntimeError("published signed "+name+" differs from independent numerical source replay")
 
-def run(repo_dir,max_recent=5):
+def frozen_numerics(source_root):
+    """Never falsely replay R4 using the newer R5 repaired mathematics."""
+    root=pathlib.Path(source_root)
+    marker=subprocess.run(["git","-C",str(root),"rev-parse","HEAD"],
+                          capture_output=True,text=True,timeout=20)
+    if marker.returncode or marker.stdout.strip()!=FROZEN_R4_SHA:
+        raise RuntimeError("independent numerical replay is not using exact frozen R4 source SHA")
+    path=root/"btc_demand_v7"/"demand_change_v2.py"
+    current=subprocess.run(["git","hash-object",str(path)],
+                          capture_output=True,text=True,timeout=20)
+    if current.returncode or current.stdout.strip()!=FROZEN_R4_DEMAND_BLOB_SHA:
+        raise RuntimeError("frozen R4 numerical engine not byte-identical to preregistration")
+    spec=importlib.util.spec_from_file_location("_btc_immutable_r4_numerics",str(path))
+    if not spec or not spec.loader:raise RuntimeError("immutable R4 module unavailable")
+    module=importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+def run(repo_dir,source_root,max_recent=5):
+    frozen=frozen_numerics(source_root)
     root=pathlib.Path(repo_dir)/"btc_v7r3_evidence"
     regfile=root/"registration.json"
     freeze=root/"frozen_config.json"
@@ -126,13 +146,13 @@ def run(repo_dir,max_recent=5):
             raise RuntimeError("signed recent source has wrong 15m anchor")
         if when(event["snapshot_received_at_utc"])!=when(snapshot["retrieved_at_utc"]):
             raise RuntimeError("published claim of snapshot receipt differs from raw")
-        if event.get("upstream_r2_snapshot_canonical_sha256")!=source_hash(snapshot):
+        if event.get("upstream_r2_snapshot_canonical_sha256")!=frozen.source_hash(snapshot):
             raise RuntimeError("signed state not bound to actual market raw snapshot")
         if event.get("registered_grid_sha256")!=digest(reg) or event["model_source_sha"]!=FROZEN_R4_SHA:
             raise RuntimeError("model release/source grid not exact")
         if accept_slot(reg,when(entry["anchor_utc"]),when(event["issued_at_utc"]))!="ON_TIME":
             raise RuntimeError("forecast outside original preregistered window")
-        if index==32:prior=state_zero()
+        if index==32:prior=frozen.state_zero()
         else:
             previous=base/slots[index-1]["slot_id"]/"signal.json"
             if not previous.exists():raise RuntimeError("missing signed predecessor")
@@ -145,7 +165,7 @@ def run(repo_dir,max_recent=5):
         gap=100*(reference/anchor_price-1)
         if not math.isclose(gap,float(event["market_move_during_information_latency_pct"]),rel_tol=0,abs_tol=1e-9):
             raise RuntimeError("unsigned fabricated movement during information latency")
-        state,diagnostic=advance(
+        state,diagnostic=frozen.advance(
             prior,baseline,snapshot,
             issued_utc=when(event["issued_at_utc"]),
             live_change_since_anchor_pct=gap)
@@ -158,7 +178,7 @@ def run(repo_dir,max_recent=5):
             "actual_source_anchor":snapshot["anchor_utc"],
             "source_received_at_utc":snapshot["retrieved_at_utc"],
             "model_issued_utc":event["issued_at_utc"],
-            "raw_snapshot_SHA256":source_hash(snapshot),
+            "raw_snapshot_SHA256":frozen.source_hash(snapshot),
             "exact_signed_numerical_state_replay":True,
             "real_public_delivery_verified_here":False,
             "trading_authority":False})
@@ -181,10 +201,11 @@ def run(repo_dir,max_recent=5):
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--evidence-root",required=True)
+    ap.add_argument("--frozen-r4-source",required=True)
     ap.add_argument("--out",required=True)
     ap.add_argument("--latest",type=int,default=3)
     a=ap.parse_args()
-    report=run(a.evidence_root,a.latest)
+    report=run(a.evidence_root,a.frozen_r4_source,a.latest)
     p=pathlib.Path(a.out)
     p.parent.mkdir(parents=True,exist_ok=True)
     p.write_text(json.dumps(report,sort_keys=True,indent=2,allow_nan=False)+"\n")

@@ -63,6 +63,7 @@ def registered_grid(start,*,days=7,source_sha,created_at,source_ref):
                                  for h in HORIZONS}})
     return {"schema":SCHEMA,"registered_at_utc":created.isoformat(),
             "model_source_sha":source_sha,"model_source_ref":source_ref,
+            "frozen_train_priors_sha256":"8473c2d0c1fea5b27744432dd96a9e89515fc1d2a9aba7b693766fed72c7167c",
             "start_utc":t.isoformat(),"days":days,"cadence_minutes":15,
             "forecast_deadline_minutes":10,"outcome_grace_minutes":30,
             "model_skill_status":"BASELINE_ONLY_UNVALIDATED",

@@ -75,11 +75,20 @@ def source_minutes(raw,public_at):
     rows=raw["rows"]
     if len(rows)!=PATH_MINUTES:raise ValueError("incomplete 4h first minute raw")
     reference=raw["reference_row"]
+    published_ms=int(when(public_at).timestamp()*1000)
+    minute_floor_ms=(published_ms//60000)*60000
+    # One deterministic causal grid. The reference is the latest FULL
+    # minute closed before delivery; forward prices start at the NEXT
+    # minute open, strictly after the public timestamp.
     ref_close=int(reference[6])+1
-    if ref_close!=int(reference[0])+60000:
-        raise ValueError("invalid reference closed minute")
-    if ref_close>int(when(public_at).timestamp()*1000):
-        raise ValueError("reference price after public delivery")
+    if int(reference[0])+60000!=ref_close or ref_close!=minute_floor_ms:
+        raise ValueError("reference minute not adjacent to public delivery")
+    ref_open,ref_high,ref_low,ref_price=map(float,reference[1:5])
+    if (not all(math.isfinite(n) for n in (ref_open,ref_high,ref_low,ref_price))
+        or not 0<ref_low<=min(ref_open,ref_price)<=max(ref_open,ref_price)<=ref_high):
+        raise ValueError("noncausal reference OHLC")
+    if int(rows[0][0])!=minute_floor_ms+60000:
+        raise ValueError("forward path does not start on first post-public minute")
     result=[]
     prev=None
     for row in rows:
@@ -95,8 +104,6 @@ def source_minutes(raw,public_at):
         prev=open_ms
     # The first full minute starts strictly after public delivery:
     # never obtain a within-minute half-bar execution price.
-    if int(rows[0][0])<int(when(public_at).timestamp()*1000):
-        raise ValueError("forward source includes uncompleted pre-delivery minute")
     return (require_float(reference[4],"public reference"),
             result[59],result[119],result[239])
 

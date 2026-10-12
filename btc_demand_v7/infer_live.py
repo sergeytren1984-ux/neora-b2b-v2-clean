@@ -4,13 +4,14 @@ Never inject contemporaneous OKX OI/funding into offline-trained Binance OI
 slots. OI/book remain explicit context, until same-source causal training exists.
 """
 from __future__ import annotations
-import argparse,datetime as dt,json,math,hashlib,pathlib
+import argparse,datetime as dt,json,math,hashlib,pathlib,os
 import numpy as np
 from joblib import load
 from btc_skill_rebuild.evaluate import features,build_arrays,STEP,UTC
 from btc_skill_rebuild.evaluate_microstructure import micro_features
 from btc_demand_v7.otc_decision import compare, prediction_target_times
 from btc_demand_v7.live_snapshot import strict_closed, spot_state
+from btc_demand_v7.release_guard import check as check_release
 
 def issue(snapshot,model,paired,audit,now=None):
     if snapshot.get("schema")!="btc-v7-live-shadow-snapshot-v1":
@@ -102,12 +103,31 @@ def main():
     p.add_argument("--paired",required=True)
     p.add_argument("--audit",required=True)
     p.add_argument("--output",required=True)
+    p.add_argument("--trusted-release",required=True)
     args=p.parse_args()
-    snapshot=json.loads(pathlib.Path(args.snapshot).read_text())
+    # Do not deserialize an unpinned or mixed joblib release.
+    release=check_release(pathlib.Path(args.candidate).parent,args.trusted_release)
+    for path,key in ((args.audit,"audit_sha256"),(args.paired,"paired_sha256")):
+        actual=hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
+        if release[key]!=actual:raise RuntimeError("forecast received mixed source: "+key)
+    snapshot_raw=pathlib.Path(args.snapshot).read_bytes()
+    snapshot=json.loads(snapshot_raw)
     model=load(args.candidate)
     errors=json.loads(pathlib.Path(args.paired).read_text())
     audit=json.loads(pathlib.Path(args.audit).read_text())
     result=issue(snapshot,model,errors,audit)
+    result["evidence_binding"]={
+        "snapshot_sha256":hashlib.sha256(snapshot_raw).hexdigest(),
+        "model_sha256":release["model_sha256"],
+        "audit_sha256":release["audit_sha256"],
+        "paired_sha256":release["paired_sha256"],
+        "training_source_commit_sha":release["source_commit_sha"],
+        "training_source_run_id":release["source_run_id"],
+        "trusted_release_manifest_sha256":release["release_manifest_sha256"],
+        "inference_source_commit_sha":os.environ.get("GITHUB_SHA"),
+        "inference_run_id":os.environ.get("GITHUB_RUN_ID"),
+        "forecast_target_utc":result["price_exact_target_utc"],
+    }
     out=pathlib.Path(args.output);out.parent.mkdir(parents=True,exist_ok=True)
     out.write_text(json.dumps(result,ensure_ascii=False,sort_keys=True,indent=2,allow_nan=False)+"\n")
     print("BTC_V7_SHADOW_PRICE_OTC",json.dumps({

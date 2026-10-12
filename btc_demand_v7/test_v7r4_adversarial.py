@@ -200,7 +200,51 @@ def warmup_to_first_live_pressure():
         assert event["state"]["up_cusum"]>=0
         print("FIRST_FROZEN_WARMUP_STATE_INITIALIZES_EXACTLY_ONCE_PASS")
 
+def recovery_after_32_new_signed_snapshots_preserves_daily_budget():
+    from btc_demand_v7.demand_change_v2 import state_zero
+    origin=datetime(2026,10,14,tzinfo=UTC)
+    reg=grid(origin,origin-timedelta(hours=4),"a"*40,days=2)
+    previous_good=origin+timedelta(minutes=33*15)
+    recovered=origin+timedelta(minutes=67*15)
+    oldstate=state_zero()
+    oldstate.update(sequence=2,
+       last_alert_utc=(previous_good+timedelta(minutes=3)).isoformat(),
+       last_alert_side="UP",up_cusum=12.)
+    def signed(root,name,obj):
+        p=pathlib.Path(root)/name;p.parent.mkdir(parents=True,exist_ok=True)
+        p.write_bytes(canonical(obj));return p
+    with tempfile.TemporaryDirectory() as directory:
+        root=pathlib.Path(directory)
+        signed(root/"slots"/slot_id(previous_good),"signal.json",{
+            "schema":"btc-v7r3-signed-pressure-event-v1",
+            "slot_id":slot_id(previous_good),
+            "anchor_utc":previous_good.isoformat(),
+            "status":"SIGNED_STATE_PUBLISHED",
+            "state":oldstate})
+        raw=copy.deepcopy(snap(67,direction=1))
+        raw["observation"]["reference_spot"]=83000.
+        history=[snap(i) for i in range(35,67)]
+        now=recovered+timedelta(minutes=10)
+        with (patch.object(w,"verify",lambda *x:None),
+              patch.object(w,"market_collect",lambda *a,**kw:raw),
+              patch.object(w,"historic_snapshots",lambda *a:history),
+              patch.object(w,"last_close_before_issuance",
+                           lambda:{"spot":83000.,"row":[1,83000,83010,82990,83000,1,2]}),
+              patch.object(w,"write",signed),
+              patch.object(w,"utcnow",lambda:now)):
+            result=w.current_slot_signal(root,reg,now)
+        assert result=="SIGNED_STATE_PUBLISHED",result
+        event=json.loads((root/"slots"/slot_id(recovered)/"signal.json").read_text())
+        assert event["recovery"]["full_new_signed_baseline"] is True
+        assert event["recovery"]["prior_global_alert_retained"] is True
+        assert event["diagnostic"]["alert"] is False
+        assert event["state"]["last_alert_utc"]==oldstate["last_alert_utc"]
+        assert event["state"]["sequence"]>oldstate["sequence"]
+        assert event["diagnostic"]["not_a_clean_continuous_state_chain"] is True
+    print("RECOVERY_AFTER_32_SNAPSHOT_GAP_CANNOT_DOUBLE_ALERT_SAME_DAY_PASS")
+
 def run():
+    recovery_after_32_new_signed_snapshots_preserves_daily_budget()
     warmup_to_first_live_pressure()
     r2_denom_and_errors()
     wrong_delivery_identity()

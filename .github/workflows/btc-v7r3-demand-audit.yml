@@ -1,0 +1,95 @@
+name: BTC v7R3 stateful demand change audit (research only)
+
+on:
+  push:
+    branches: [btc-v7r3-demand-stateful-challenger-20261012]
+    paths:
+      - btc_demand_v7/demand_change_v2.py
+      - btc_demand_v7/test_demand_change_v2.py
+      - .github/workflows/btc-v7r3-demand-audit.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+
+concurrency:
+  group: btc-v7r3-stateful-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  independently-signed-research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PYTHONHASHSEED: '0'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - name: Strict causal, stateful, symmetrical, late-veto unit tests
+        run: |
+          python -m py_compile btc_demand_v7/demand_change_v2.py btc_demand_v7/test_demand_change_v2.py
+          python -m btc_demand_v7.test_demand_change_v2
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: btc-v7-full-shadow-38170130611
+          path: /tmp/v7r3-signed-observation
+          run-id: 38170130611
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.0.6
+      - name: Verify real historical observation OIDC/Rekor before as-of validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          cosign verify-blob /tmp/v7r3-signed-observation/snapshot.json \
+            --bundle /tmp/v7r3-signed-observation/snapshot.sigstore.json \
+            --certificate-identity https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workflows/btc-v7-shadow-full.yml@refs/heads/btc-predictive-vnext7-demand-price-otc-20261011 \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          python - <<'PY'
+          import json
+          from btc_demand_v7.demand_change_v2 import feature
+          p="/tmp/v7r3-signed-observation/snapshot.json"
+          with open(p) as f:snapshot=json.load(f)
+          at,factor,status=feature(snapshot)
+          print("VERIFIED_REAL_SNAPSHOT_ASOF",at.isoformat(),
+                "source_coverage",status,"features",factor)
+          if factor is None:raise RuntimeError("signed actual OI/book factors missing")
+          PY
+      - name: Sign fixed-scope negative test verdict through OIDC/Rekor
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/v7r3-audit
+          python - <<'PY'
+          import datetime,json,os,pathlib
+          doc={"schema":"btc-v7r3-pressure-negative-tests-v1",
+               "issued_utc":datetime.datetime.now(datetime.timezone.utc).isoformat(),
+               "research_commit_sha":os.environ["GITHUB_SHA"],
+               "github_run":os.environ["GITHUB_RUN_ID"],
+               "previous_detector_bug":"CUSUM state was reset for each observation",
+               "new_detector_contract":"sequential stateful two-sided pressure, previous signed raw binding, pre-move veto",
+               "signed_real_snapshot_source_run":38170130611,
+               "synthetic_regression_verified":True,
+               "predictive_skill_verified":False,
+               "trading_authority":False,
+               "statistical_conclusion":"NO CLAIM; needs independent prospective warning-vs-onset outcomes"}
+          pathlib.Path("/tmp/v7r3-audit/verdict.json").write_text(json.dumps(doc,sort_keys=True,indent=2)+"\n")
+          PY
+          cosign sign-blob --yes \
+            --bundle /tmp/v7r3-audit/verdict.sigstore.json \
+            /tmp/v7r3-audit/verdict.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: btc-v7r3-causal-pressure-audit-${{ github.sha }}
+          path: /tmp/v7r3-audit/
+          retention-days: 90
+          if-no-files-found: error

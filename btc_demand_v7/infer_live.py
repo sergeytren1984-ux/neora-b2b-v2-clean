@@ -9,7 +9,8 @@ import numpy as np
 from joblib import load
 from btc_skill_rebuild.evaluate import features,build_arrays,STEP,UTC
 from btc_skill_rebuild.evaluate_microstructure import micro_features
-from btc_demand_v7.otc_decision import compare
+from btc_demand_v7.otc_decision import compare, prediction_target_times
+from btc_demand_v7.live_snapshot import strict_closed, spot_state
 
 def issue(snapshot,model,paired,audit,now=None):
     if snapshot.get("schema")!="btc-v7-live-shadow-snapshot-v1":
@@ -24,10 +25,29 @@ def issue(snapshot,model,paired,audit,now=None):
     received=dt.datetime.fromisoformat(snapshot["retrieved_at_utc"])
     issued=dt.datetime.now(UTC) if now is None else now
     if anchor.tzinfo is None or received.tzinfo is None or issued.tzinfo is None:raise ValueError("missing timezone")
-    if (issued-anchor).total_seconds()<0 or (issued-anchor).total_seconds()>15*60:
-        raise RuntimeError("snapshot exceeds 15-minute active window; no live forecast")
-    if received>issued:raise RuntimeError("future snapshot receipt")
-    times,a=build_arrays(snapshot["five_min_rows"])
+    anchor=anchor.astimezone(UTC)
+    received=received.astimezone(UTC)
+    issued=issued.astimezone(UTC)
+    if anchor.timestamp()%300!=0:
+        raise ValueError("5m snapshot anchor not aligned")
+    if not (anchor<=received<=issued) or (issued-anchor).total_seconds()>15*60:
+        raise RuntimeError("snapshot anchor/receipt/issuance temporal contract violated")
+    if snapshot.get("symbol")!="BTCUSDT" or snapshot.get("raw_source")!="Binance data-api closed 1m/5m":
+        raise ValueError("wrong instrument or required source")
+    anchor_ms=int(anchor.timestamp()*1000)
+    one=strict_closed(snapshot["one_min_rows"],60000,anchor_ms,200)
+    five=strict_closed(snapshot["five_min_rows"],300000,anchor_ms,600)
+    if len(one)!=len(snapshot["one_min_rows"]) or len(five)!=len(snapshot["five_min_rows"]):
+        raise ValueError("future/unclosed spot candle included")
+    state=spot_state(one,anchor_ms)
+    observation=snapshot.get("observation")
+    if not isinstance(observation,dict):
+        raise ValueError("missing independently reproducible observation")
+    for field,expected in state.items():
+        actual=float(observation.get(field,float("nan")))
+        if not math.isfinite(actual) or not math.isclose(actual,expected,rel_tol=1e-11,abs_tol=1e-9):
+            raise ValueError("signed spot observation inconsistent with raw: "+field)
+    times,a=build_arrays(five)
     if len(times)<600:raise ValueError("insufficient 5m history")
     idx,base=features(times,a)
     m_idx,m_feat=micro_features(snapshot["one_min_rows"],times,idx)
@@ -62,6 +82,7 @@ def issue(snapshot,model,paired,audit,now=None):
         "snapshot_age_seconds":(issued-anchor).total_seconds(),
         "spot":price,
         "price_point_forecasts":preds,
+        "price_exact_target_utc":{k:v.isoformat() for k,v in prediction_target_times(anchor).items()},
         "price_test_mae":{h:audit["spot_1m_only_deployable_shadow"]["price_metrics"][h]["model_mae_usdt"] for h in preds},
         "forecast_target_offset_warning":"OTC price comparisons are invalidated unless exact forecast target_at matches each execution due timestamp.",
         "large_move_probabilities":alert,
@@ -88,7 +109,7 @@ def main():
     audit=json.loads(pathlib.Path(args.audit).read_text())
     result=issue(snapshot,model,errors,audit)
     out=pathlib.Path(args.output);out.parent.mkdir(parents=True,exist_ok=True)
-    out.write_text(json.dumps(result,ensure_ascii=False,sort_keys=True,indent=2)+"\n")
+    out.write_text(json.dumps(result,ensure_ascii=False,sort_keys=True,indent=2,allow_nan=False)+"\n")
     print("BTC_V7_SHADOW_PRICE_OTC",json.dumps({
         "anchor":result["reference_anchor_utc"],
         "computed":result["computed_at_utc"],

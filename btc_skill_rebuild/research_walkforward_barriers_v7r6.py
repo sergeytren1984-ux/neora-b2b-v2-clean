@@ -23,6 +23,7 @@ def forward(rows):
         indexed=[]
         for i,at,f,cl,lgs in inputs:
             if at%(15*60000):continue
+            if i+n>=len(rows):continue
             end=int(rows[i+n][0])+STEP
             y,touch=labels(rows,i,n,band)
             indexed.append((at,end,f,y,int(rows[touch][0])+STEP if touch is not None else None))

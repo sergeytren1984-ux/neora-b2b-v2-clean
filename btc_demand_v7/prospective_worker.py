@@ -11,6 +11,7 @@ from btc_demand_v7.prospective_core import (
 )
 from btc_demand_v7.release_guard import check as check_release,certificate_source_sha
 from btc_demand_v7.event_semantics import first_passage,BARRIERS
+from btc_demand_v7.demand_change import estimate as estimate_demand
 
 REPO="sergeytren1984-ux/neora-b2b-v2-clean"
 SOURCE_BRANCH="btc-v7r2-prospective-contour-20261012"
@@ -229,6 +230,14 @@ def tick(args):
                     forecast=forecast_receipt(grid,slot,issued,live,
                         snapshot_sha=snapshot_sha,live_sha=live_sha)
                     if forecast["kind"]=="FORECAST_ISSUED":
+                        # Compare only with prior signed snapshots, never
+                        # invented or backfilled OI/order-book observations.
+                        prior=sorted((root/"slots").glob("*/snapshot.json")) if (root/"slots").exists() else []
+                        historical=[]
+                        for previous in prior[-32:]:
+                            verify(previous,grid["model_source_sha"])
+                            historical.append(json.loads(previous.read_text()))
+                        forecast["demand_position_change"]=estimate_demand(historical+[snapshot])
                         for name in ("snapshot.json","observation.json","live_forecast.json"):
                             dest=folder/name
                             dest.parent.mkdir(parents=True,exist_ok=True)

@@ -1,0 +1,348 @@
+{
+  "schema": "btc-component-stratified-historical-evidence-v1",
+  "scope": "distribution component only",
+  "historical_only": true,
+  "post_selection_diagnostic": true,
+  "full_system_ready": false,
+  "prospective_skill_proven": false,
+  "trading_authority": false,
+  "bootstrap_block_days": 7,
+  "comparisons": {
+    "vol24": {
+      "1": {
+        "mean_crps_gain_usdt": 2.9140065154625856,
+        "diagnostic_ci95": [
+          2.425149733433189,
+          3.456029566677945
+        ],
+        "paired_observations": 9144,
+        "period_means": [
+          2.581029236208775,
+          5.474404485548953,
+          2.379844076225448,
+          1.8812090853221688,
+          0.7396445362443776
+        ],
+        "every_period_mean_positive": true,
+        "single_period_significance_not_implied": true,
+        "historical_selection_bias_not_removed": true
+      },
+      "4": {
+        "mean_crps_gain_usdt": 4.228095660477362,
+        "diagnostic_ci95": [
+          3.352653921763359,
+          5.6385512724065565
+        ],
+        "paired_observations": 9144,
+        "period_means": [
+          1.3963157250832228,
+          10.098572035141549,
+          3.8165246471106333,
+          2.395909365914894,
+          1.6064916958119488
+        ],
+        "every_period_mean_positive": true,
+        "single_period_significance_not_implied": true,
+        "historical_selection_bias_not_removed": true
+      },
+      "24": {
+        "mean_crps_gain_usdt": 10.067841366901312,
+        "diagnostic_ci95": [
+          5.48176394137443,
+          14.832603099283869
+        ],
+        "paired_observations": 9144,
+        "period_means": [
+          5.642559455339652,
+          21.610405978497475,
+          11.802664011827801,
+          2.949528360975189,
+          4.426549013680704
+        ],
+        "every_period_mean_positive": true,
+        "single_period_significance_not_implied": true,
+        "historical_selection_bias_not_removed": true
+      }
+    },
+    "vol1": {
+      "1": {
+        "mean_crps_gain_usdt": 3.0375521205784457,
+        "diagnostic_ci95": [
+          2.524185920139252,
+          3.6789292241773004
+        ],
+        "paired_observations": 9144,
+        "period_means": [
+          3.2306527785672383,
+          3.896477392066378,
+          2.9872346162922723,
+          2.1290131863361834,
+          2.705364312106574
+        ],
+        "every_period_mean_positive": true,
+        "single_period_significance_not_implied": true,
+        "historical_selection_bias_not_removed": true
+      },
+      "4": {
+        "mean_crps_gain_usdt": 9.254923319875369,
+        "diagnostic_ci95": [
+          7.980766442369118,
+          10.931740697596082
+        ],
+        "paired_observations": 9144,
+        "period_means": [
+          8.350280048878522,
+          9.044777416469081,
+          11.895024579770164,
+          8.896777392955482,
+          5.720790051303313
+        ],
+        "every_period_mean_positive": true,
+        "single_period_significance_not_implied": true,
+        "historical_selection_bias_not_removed": true
+      },
+      "24": {
+        "mean_crps_gain_usdt": 36.49213100177775,
+        "diagnostic_ci95": [
+          32.39551304890664,
+          42.78505437414112
+        ],
+        "paired_observations": 9144,
+        "period_means": [
+          19.190153395934434,
+          52.782048501052394,
+          46.50227834052157,
+          33.619431938692415,
+          17.634561307685253
+        ],
+        "every_period_mean_positive": true,
+        "single_period_significance_not_implied": true,
+        "historical_selection_bias_not_removed": true
+      }
+    },
+    "vol4": {
+      "1": {
+        "mean_crps_gain_usdt": 1.9941884060800763,
+        "diagnostic_ci95": [
+          1.5070617787713099,
+          2.5167676967828916
+        ],
+        "paired_observations": 9144,
+        "period_means": [
+          1.9861911599807887,
+          2.644304365937759,
+          1.7524572629912525,
+          1.7146335100142427,
+          1.5828625052952146
+        ],
+        "every_period_mean_positive": true,
+        "single_period_significance_not_implied": true,
+        "historical_selection_bias_not_removed": true
+      },
+      "4": {
+        "mean_crps_gain_usdt": 6.586690411615397,
+        "diagnostic_ci95": [
+          5.504412080717993,
+          8.011885572869712
+        ],
+        "paired_observations": 9144,
+        "period_means": [
+          3.663243462176634,
+          8.47894701928717,
+          9.52625180640114,
+          6.183840469822006,
+          1.9968651954982726
+        ],
+        "every_period_mean_positive": true,
+        "single_period_significance_not_implied": true,
+        "historical_selection_bias_not_removed": true
+      },
+      "24": {
+        "mean_crps_gain_usdt": 18.032793311215045,
+        "diagnostic_ci95": [
+          14.291982589458081,
+          23.253502070276735
+        ],
+        "paired_observations": 9144,
+        "period_means": [
+          4.16405454662908,
+          28.976425794953922,
+          26.12730897055906,
+          15.880550861546467,
+          8.943826604189901
+        ],
+        "every_period_mean_positive": true,
+        "single_period_significance_not_implied": true,
+        "historical_selection_bias_not_removed": true
+      }
+    },
+    "ewma1": {
+      "1": {
+        "mean_crps_gain_usdt": 0.9859108164907117,
+        "diagnostic_ci95": [
+          0.5547839154632255,
+          1.4578463842580611
+        ],
+        "paired_observations": 9144,
+        "period_means": [
+          1.2097072829983475,
+          1.0581043715603708,
+          0.8017643299437011,
+          0.7927307356641103,
+          1.2243922279889787
+        ],
+        "every_period_mean_positive": true,
+        "single_period_significance_not_implied": true,
+        "historical_selection_bias_not_removed": true
+      },
+      "4": {
+        "mean_crps_gain_usdt": 5.38453702106732,
+        "diagnostic_ci95": [
+          4.334803091499638,
+          6.715033563265674
+        ],
+        "paired_observations": 9144,
+        "period_means": [
+          3.6276947153686776,
+          5.687742984620674,
+          7.920576226718362,
+          5.411075084809929,
+          2.0417825192794785
+        ],
+        "every_period_mean_positive": true,
+        "single_period_significance_not_implied": true,
+        "historical_selection_bias_not_removed": true
+      },
+      "24": {
+        "mean_crps_gain_usdt": 19.630564763859663,
+        "diagnostic_ci95": [
+          15.839545178267151,
+          25.12966059555213
+        ],
+        "paired_observations": 9144,
+        "period_means": [
+          5.269415448950585,
+          31.886976615696643,
+          28.386656805509666,
+          16.540572718354905,
+          8.825597856512678
+        ],
+        "every_period_mean_positive": true,
+        "single_period_significance_not_implied": true,
+        "historical_selection_bias_not_removed": true
+      }
+    },
+    "ewma4": {
+      "1": {
+        "mean_crps_gain_usdt": 1.4836448573522136,
+        "diagnostic_ci95": [
+          1.11046285034461,
+          1.899059701911757
+        ],
+        "paired_observations": 9144,
+        "period_means": [
+          1.3752568494305908,
+          2.6054159907656707,
+          1.2224584511872698,
+          1.0801743324565507,
+          0.34212790586632585
+        ],
+        "every_period_mean_positive": true,
+        "single_period_significance_not_implied": true,
+        "historical_selection_bias_not_removed": true
+      },
+      "4": {
+        "mean_crps_gain_usdt": 4.074686826929861,
+        "diagnostic_ci95": [
+          3.266983533872906,
+          5.324267111140337
+        ],
+        "paired_observations": 9144,
+        "period_means": [
+          1.0344555741453307,
+          7.6685836782468,
+          5.317070146885083,
+          3.1900298784878873,
+          1.2349091254086066
+        ],
+        "every_period_mean_positive": true,
+        "single_period_significance_not_implied": true,
+        "historical_selection_bias_not_removed": true
+      },
+      "24": {
+        "mean_crps_gain_usdt": 8.109505962299027,
+        "diagnostic_ci95": [
+          4.471381325957015,
+          12.33123659026293
+        ],
+        "paired_observations": 9144,
+        "period_means": [
+          -2.289428807706785,
+          17.951461400402273,
+          13.337406417428141,
+          4.880676353977595,
+          3.78382119356264
+        ],
+        "every_period_mean_positive": false,
+        "single_period_significance_not_implied": true,
+        "historical_selection_bias_not_removed": true
+      }
+    },
+    "har": {
+      "1": {
+        "mean_crps_gain_usdt": 0.1895275404796407,
+        "diagnostic_ci95": [
+          -0.30501593613026046,
+          0.5831581301719498
+        ],
+        "paired_observations": 9144,
+        "period_means": [
+          0.8410117484596761,
+          0.049844987169328524,
+          -0.33105464090013037,
+          0.1601298638231107,
+          0.27264532834426186
+        ],
+        "every_period_mean_positive": false,
+        "single_period_significance_not_implied": true,
+        "historical_selection_bias_not_removed": true
+      },
+      "4": {
+        "mean_crps_gain_usdt": 1.3801930921737977,
+        "diagnostic_ci95": [
+          0.08138013791025338,
+          2.5469209217974775
+        ],
+        "paired_observations": 9144,
+        "period_means": [
+          1.7588194750580357,
+          0.39938995809795197,
+          2.2729720071701975,
+          1.4477588556769234,
+          0.3079137372842008
+        ],
+        "every_period_mean_positive": true,
+        "single_period_significance_not_implied": true,
+        "historical_selection_bias_not_removed": true
+      },
+      "24": {
+        "mean_crps_gain_usdt": -1.4259736860201664,
+        "diagnostic_ci95": [
+          -6.238224127778076,
+          3.2140154094578155
+        ],
+        "paired_observations": 9144,
+        "period_means": [
+          -0.9031813478202483,
+          -10.394019889302845,
+          4.349588086290867,
+          0.5210031002752197,
+          1.3533035499552557
+        ],
+        "every_period_mean_positive": false,
+        "single_period_significance_not_implied": true,
+        "historical_selection_bias_not_removed": true
+      }
+    }
+  }
+}

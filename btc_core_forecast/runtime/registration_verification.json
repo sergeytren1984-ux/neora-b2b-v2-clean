@@ -1,0 +1,7 @@
+{
+  "verified": true,
+  "source_sha": "a3c0827ae39c849f3626dcaba3c702ab5b0557d2",
+  "trusted_root_sha256": "6494e21ea73fa7ee769f85f57d5a3e6a08725eae1e38c755fc3517c9e6bc0b66",
+  "signature_and_rekor_checks_required": true,
+  "issuer_and_identity_required": true
+}

@@ -1,0 +1,24 @@
+{
+  "schema": "verified-frozen-r6-input-vector-v1",
+  "available": true,
+  "anchor_utc": "2026-10-13T11:15:00+00:00",
+  "input_received_at_utc": "2026-10-13T11:15:15.878000+00:00",
+  "values": {
+    "signed_15m_taker": -0.20360217938145286,
+    "signed_3m_taker": -0.09211865630504745,
+    "book_imbalance": 0.9790250976865544,
+    "log_15m_volume_ratio": 0.43222312914157063,
+    "log_3m_volume_ratio": -0.5200553178101998,
+    "OI_change_15m_pct": -0.0890904548878968,
+    "spread_bps": 0.012016392761958126
+  },
+  "price_veto_status": "PRE_MOVE",
+  "snapshot_math_digest": "55df7a21f058ce90d087be9e39fc5736786f50925f71ecda26c4922cca999779",
+  "signed_record_sha256": "3d0e591c5085513333af4a52487d3aafd33af473681d868a2c27814ecf9dfe61",
+  "source_sha": "b8d2d1be108f249427bd97d446a7fc261ba5b553",
+  "frozen_R6_formula_blob": "eb569c083b42936944da6abf638a0a876febd3f6",
+  "this_is_not_an_R6_alert_or_price_forecast": true,
+  "trading_authority": false,
+  "prospective_skill_proven": false,
+  "calibrated_probability": false
+}

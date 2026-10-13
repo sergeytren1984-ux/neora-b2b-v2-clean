@@ -1,0 +1,10 @@
+{
+  "url": "https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/5m/BTCUSDT-5m-2026-07.zip",
+  "publisher_sha256": "425f6e1a0de85dc99d8a7f17924bcb210c8f92100fb71e5993e1d197577b7053",
+  "local_sha256": "425f6e1a0de85dc99d8a7f17924bcb210c8f92100fb71e5993e1d197577b7053",
+  "july_rows": 8928,
+  "new_complete_hourly_labels": 744,
+  "historical_only": true,
+  "previous_project_usage_unknown": true,
+  "never_claim_unseen_future_evidence": true
+}

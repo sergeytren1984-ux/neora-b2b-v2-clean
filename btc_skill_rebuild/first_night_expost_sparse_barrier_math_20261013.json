@@ -1,0 +1,542 @@
+{
+  "R5_sample_blobs_not_cosign_verified": true,
+  "all_samples_later_known_NO_prospective_policy_publication": true,
+  "due_slots_include_missing": true,
+  "horizons": {
+    "1h": {
+      "asof_published_R5_samples": 23,
+      "asof_rule_exploratory_score_not_prospective": {
+        "historic_flow_okx_book": {
+          "historically_heuristic_directions_not_real_alerts": 10,
+          "independent_event_count_NOT_established": true,
+          "matched_distinct_240m_first_touch_clusters_EX_POST": 1,
+          "precision_unknown_on_new_prospective_future": true,
+          "same_direction_and_possible_60min_lead_assuming_8min_delivery": 0,
+          "same_direction_first_touch_rows": 2,
+          "wrong_or_neither_or_ambiguous_rows": 8
+        },
+        "microflow_okx_book": {
+          "historically_heuristic_directions_not_real_alerts": 10,
+          "independent_event_count_NOT_established": true,
+          "matched_distinct_240m_first_touch_clusters_EX_POST": 2,
+          "precision_unknown_on_new_prospective_future": true,
+          "same_direction_and_possible_60min_lead_assuming_8min_delivery": 0,
+          "same_direction_first_touch_rows": 2,
+          "wrong_or_neither_or_ambiguous_rows": 8
+        },
+        "two_binance_flows": {
+          "historically_heuristic_directions_not_real_alerts": 10,
+          "independent_event_count_NOT_established": true,
+          "matched_distinct_240m_first_touch_clusters_EX_POST": 1,
+          "precision_unknown_on_new_prospective_future": true,
+          "same_direction_and_possible_60min_lead_assuming_8min_delivery": 0,
+          "same_direction_first_touch_rows": 2,
+          "wrong_or_neither_or_ambiguous_rows": 8
+        }
+      },
+      "conservatively_clustered_240m_distinct_first_touch_episodes": 2,
+      "due_slots": 32,
+      "fully_matured_before_last_signed_snapshot": 22,
+      "future_episode_clustering_EX_POST_not_public_forecast": true,
+      "matched_rows": [
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": null,
+            "microflow_okx_book": "DOWN_FIRST",
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T00:00:00Z",
+          "source_blob": "fdef3fe285c91086e00e9c0f3eb1bb4229a70a0f",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T00:35:00+00:00",
+          "true_first_touch_or_neither": "DOWN_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": null,
+            "microflow_okx_book": null,
+            "two_binance_flows": "DOWN_FIRST"
+          },
+          "slot_utc": "2026-10-13T00:15:00Z",
+          "source_blob": "ffded668b5dfb34330f5087df535ae3148106275",
+          "touch_upper_bound_5m_close_utc": null,
+          "true_first_touch_or_neither": "NEITHER"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": "UP_FIRST",
+            "microflow_okx_book": null,
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T00:30:00Z",
+          "source_blob": "ba8f16a1d39bde849590dd1bbca773564980d572",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T01:20:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": "UP_FIRST",
+            "microflow_okx_book": null,
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T00:45:00Z",
+          "source_blob": "d9aa19efa664912fded6c2ec59ab216050eb84cb",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T01:20:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": "DOWN_FIRST",
+            "microflow_okx_book": null,
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T01:00:00Z",
+          "source_blob": "00663970bea4e90d7fcb8bc27c48d3a31173a012",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T01:20:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": null,
+            "microflow_okx_book": null,
+            "two_binance_flows": "UP_FIRST"
+          },
+          "slot_utc": "2026-10-13T01:15:00Z",
+          "source_blob": "862e23561b88dc21fe9df32eb2565f8dcca3ebbe",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T01:55:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": null,
+            "microflow_okx_book": null,
+            "two_binance_flows": "UP_FIRST"
+          },
+          "slot_utc": "2026-10-13T01:30:00Z",
+          "source_blob": "37b73d576efc16feb7c6e7e70508a8cd65e9404b",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T02:15:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": "UP_FIRST",
+            "microflow_okx_book": null,
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T01:45:00Z",
+          "source_blob": "c9b6aa46354dcd59de3f38ad3217115cbfa3113f",
+          "touch_upper_bound_5m_close_utc": null,
+          "true_first_touch_or_neither": "NEITHER"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": "UP_FIRST",
+            "microflow_okx_book": "UP_FIRST",
+            "two_binance_flows": "UP_FIRST"
+          },
+          "slot_utc": "2026-10-13T02:15:00Z",
+          "source_blob": "b20d73b7aea8efd23b5d9fb62948d9ecea7917a9",
+          "touch_upper_bound_5m_close_utc": null,
+          "true_first_touch_or_neither": "NEITHER"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": null,
+            "microflow_okx_book": "DOWN_FIRST",
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T02:45:00Z",
+          "source_blob": "622d24b7afa4432ce4473b96019a04051acb445b",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T03:40:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": null,
+            "microflow_okx_book": "DOWN_FIRST",
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T03:00:00Z",
+          "source_blob": "748b56066b270d1ca239715257b70e0bad987174",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T03:40:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": "DOWN_FIRST",
+            "microflow_okx_book": "DOWN_FIRST",
+            "two_binance_flows": "DOWN_FIRST"
+          },
+          "slot_utc": "2026-10-13T03:15:00Z",
+          "source_blob": "279112308cf42a4881c03491e3718d7d3eed5478",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T03:40:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": null,
+            "microflow_okx_book": "UP_FIRST",
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T03:30:00Z",
+          "source_blob": "a388b67b429b0748fcb33ba47d6f86b0dee23e25",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T03:40:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": "UP_FIRST",
+            "microflow_okx_book": "UP_FIRST",
+            "two_binance_flows": "UP_FIRST"
+          },
+          "slot_utc": "2026-10-13T03:45:00Z",
+          "source_blob": "487d0a476d4cf4400684bc839c7a50ebb943522a",
+          "touch_upper_bound_5m_close_utc": null,
+          "true_first_touch_or_neither": "NEITHER"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": null,
+            "microflow_okx_book": null,
+            "two_binance_flows": "UP_FIRST"
+          },
+          "slot_utc": "2026-10-13T04:15:00Z",
+          "source_blob": "8311bc46eb92060c0d982486a93cd55ebe85500e",
+          "touch_upper_bound_5m_close_utc": null,
+          "true_first_touch_or_neither": "NEITHER"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": "UP_FIRST",
+            "microflow_okx_book": "UP_FIRST",
+            "two_binance_flows": "UP_FIRST"
+          },
+          "slot_utc": "2026-10-13T04:30:00Z",
+          "source_blob": "b77aac2c1541eb784e97340cb60d6eb915bb2f5b",
+          "touch_upper_bound_5m_close_utc": null,
+          "true_first_touch_or_neither": "NEITHER"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": null,
+            "microflow_okx_book": "DOWN_FIRST",
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T04:45:00Z",
+          "source_blob": "9514cd08c0db8fcb1dc688b1c8f008132d7e6809",
+          "touch_upper_bound_5m_close_utc": null,
+          "true_first_touch_or_neither": "NEITHER"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": null,
+            "microflow_okx_book": null,
+            "two_binance_flows": "UP_FIRST"
+          },
+          "slot_utc": "2026-10-13T05:00:00Z",
+          "source_blob": "3930f20ac519b1d67e46c0cc9ecfa39d74dff8fa",
+          "touch_upper_bound_5m_close_utc": null,
+          "true_first_touch_or_neither": "NEITHER"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": null,
+            "microflow_okx_book": null,
+            "two_binance_flows": "UP_FIRST"
+          },
+          "slot_utc": "2026-10-13T05:15:00Z",
+          "source_blob": "3273c703f89602a9ce992c992ae78242f78e010e",
+          "touch_upper_bound_5m_close_utc": null,
+          "true_first_touch_or_neither": "NEITHER"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": "UP_FIRST",
+            "microflow_okx_book": null,
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T05:30:00Z",
+          "source_blob": "78099da63fdf5699d9eecd52b1e8914f915f2184",
+          "touch_upper_bound_5m_close_utc": null,
+          "true_first_touch_or_neither": "NEITHER"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": null,
+            "microflow_okx_book": "UP_FIRST",
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T05:45:00Z",
+          "source_blob": "9a8c32e2f117a8a7382e27264b93c6f4d7d85d3b",
+          "touch_upper_bound_5m_close_utc": null,
+          "true_first_touch_or_neither": "NEITHER"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": "UP_FIRST",
+            "microflow_okx_book": null,
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T06:15:00Z",
+          "source_blob": "f173ff0d821a1ca0c80530705453c145969ef484",
+          "touch_upper_bound_5m_close_utc": null,
+          "true_first_touch_or_neither": "NEITHER"
+        }
+      ],
+      "missing_R5_samples_full_due_denominator": 9,
+      "outcome_counts": {
+        "AMBIGUOUS_SAME_5M": 0,
+        "DOWN_FIRST": 1,
+        "NEITHER": 12,
+        "UP_FIRST": 9
+      }
+    },
+    "4h": {
+      "asof_published_R5_samples": 23,
+      "asof_rule_exploratory_score_not_prospective": {
+        "historic_flow_okx_book": {
+          "historically_heuristic_directions_not_real_alerts": 6,
+          "independent_event_count_NOT_established": true,
+          "matched_distinct_240m_first_touch_clusters_EX_POST": 1,
+          "precision_unknown_on_new_prospective_future": true,
+          "same_direction_and_possible_60min_lead_assuming_8min_delivery": 3,
+          "same_direction_first_touch_rows": 4,
+          "wrong_or_neither_or_ambiguous_rows": 2
+        },
+        "microflow_okx_book": {
+          "historically_heuristic_directions_not_real_alerts": 5,
+          "independent_event_count_NOT_established": true,
+          "matched_distinct_240m_first_touch_clusters_EX_POST": 1,
+          "precision_unknown_on_new_prospective_future": true,
+          "same_direction_and_possible_60min_lead_assuming_8min_delivery": 1,
+          "same_direction_first_touch_rows": 1,
+          "wrong_or_neither_or_ambiguous_rows": 4
+        },
+        "two_binance_flows": {
+          "historically_heuristic_directions_not_real_alerts": 5,
+          "independent_event_count_NOT_established": true,
+          "matched_distinct_240m_first_touch_clusters_EX_POST": 1,
+          "precision_unknown_on_new_prospective_future": true,
+          "same_direction_and_possible_60min_lead_assuming_8min_delivery": 3,
+          "same_direction_first_touch_rows": 3,
+          "wrong_or_neither_or_ambiguous_rows": 2
+        }
+      },
+      "conservatively_clustered_240m_distinct_first_touch_episodes": 1,
+      "due_slots": 32,
+      "fully_matured_before_last_signed_snapshot": 12,
+      "future_episode_clustering_EX_POST_not_public_forecast": true,
+      "matched_rows": [
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": true,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": null,
+            "microflow_okx_book": "DOWN_FIRST",
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T00:00:00Z",
+          "source_blob": "fdef3fe285c91086e00e9c0f3eb1bb4229a70a0f",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T02:25:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": true,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": null,
+            "microflow_okx_book": null,
+            "two_binance_flows": "DOWN_FIRST"
+          },
+          "slot_utc": "2026-10-13T00:15:00Z",
+          "source_blob": "ffded668b5dfb34330f5087df535ae3148106275",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T02:10:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": true,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": "UP_FIRST",
+            "microflow_okx_book": null,
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T00:30:00Z",
+          "source_blob": "ba8f16a1d39bde849590dd1bbca773564980d572",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T01:55:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": "UP_FIRST",
+            "microflow_okx_book": null,
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T00:45:00Z",
+          "source_blob": "d9aa19efa664912fded6c2ec59ab216050eb84cb",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T01:45:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": "DOWN_FIRST",
+            "microflow_okx_book": null,
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T01:00:00Z",
+          "source_blob": "00663970bea4e90d7fcb8bc27c48d3a31173a012",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T01:55:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": true,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": null,
+            "microflow_okx_book": null,
+            "two_binance_flows": "UP_FIRST"
+          },
+          "slot_utc": "2026-10-13T01:15:00Z",
+          "source_blob": "862e23561b88dc21fe9df32eb2565f8dcca3ebbe",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T02:40:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": true,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": null,
+            "microflow_okx_book": null,
+            "two_binance_flows": "UP_FIRST"
+          },
+          "slot_utc": "2026-10-13T01:30:00Z",
+          "source_blob": "37b73d576efc16feb7c6e7e70508a8cd65e9404b",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T03:00:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": true,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": "UP_FIRST",
+            "microflow_okx_book": null,
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T01:45:00Z",
+          "source_blob": "c9b6aa46354dcd59de3f38ad3217115cbfa3113f",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T03:35:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": true,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": "UP_FIRST",
+            "microflow_okx_book": "UP_FIRST",
+            "two_binance_flows": "UP_FIRST"
+          },
+          "slot_utc": "2026-10-13T02:15:00Z",
+          "source_blob": "b20d73b7aea8efd23b5d9fb62948d9ecea7917a9",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T05:15:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": true,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": null,
+            "microflow_okx_book": "DOWN_FIRST",
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T02:45:00Z",
+          "source_blob": "622d24b7afa4432ce4473b96019a04051acb445b",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T05:25:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": false,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": null,
+            "microflow_okx_book": "DOWN_FIRST",
+            "two_binance_flows": null
+          },
+          "slot_utc": "2026-10-13T03:00:00Z",
+          "source_blob": "748b56066b270d1ca239715257b70e0bad987174",
+          "touch_upper_bound_5m_close_utc": null,
+          "true_first_touch_or_neither": "NEITHER"
+        },
+        {
+          "independent_signed_evidence_cosign_unchecked": true,
+          "max_possible_60min_warning_after_hypothetical_8min_publication": true,
+          "raw_rule_directions_NOT_ACTUALLY_PUBLIC_FORECASTS": {
+            "historic_flow_okx_book": "DOWN_FIRST",
+            "microflow_okx_book": "DOWN_FIRST",
+            "two_binance_flows": "DOWN_FIRST"
+          },
+          "slot_utc": "2026-10-13T03:15:00Z",
+          "source_blob": "279112308cf42a4881c03491e3718d7d3eed5478",
+          "touch_upper_bound_5m_close_utc": "2026-10-13T05:25:00+00:00",
+          "true_first_touch_or_neither": "UP_FIRST"
+        }
+      ],
+      "missing_R5_samples_full_due_denominator": 9,
+      "outcome_counts": {
+        "AMBIGUOUS_SAME_5M": 0,
+        "DOWN_FIRST": 0,
+        "NEITHER": 1,
+        "UP_FIRST": 11
+      }
+    }
+  },
+  "outcome_R5_future_blob": "ac3f903e291f4af614d86ad9d67d8f6d5b5799fa",
+  "schema": "btc-v7r6-asof-factor-vs-closed-first-touch-sparse-night-research-v1",
+  "trading_authority": false
+}

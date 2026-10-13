@@ -1,0 +1,11 @@
+{
+  "verified": true,
+  "source_sha": "08987b0fbfeb5ea1aa6b1c3fd287fea0b676ee21",
+  "trusted_root_sha256": "6494e21ea73fa7ee769f85f57d5a3e6a08725eae1e38c755fc3517c9e6bc0b66",
+  "signature_and_rekor_checks_required": true,
+  "issuer_and_identity_required": true,
+  "registered_before_future_grid": true,
+  "preflight_quotes_and_primary_BLS_receipt_verified": true,
+  "integrated_input_eligible": true,
+  "full_system_ready": false
+}

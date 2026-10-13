@@ -8,9 +8,17 @@ import numpy as np
 import joint_candidate as joint
 import forecast as f
 import walkforward as w
+from factor_integration import calculation_gate
+import integrated_candidate
 
-def summarize(model,x,sigma,spot,anchor,budget,premium):
-    c,h,l,weights=joint.paths(model,np.asarray(x),sigma)
+def summarize(model,x,sigma,spot,anchor,budget,premium,inputs=None,execution=None):
+    gate=calculation_gate(model,inputs or {},execution)
+    if not gate['direction']['allowed']:
+        return {'schema':'btc-unified-candidate-research-output-v1','anchor_utc':anchor,
+            'status':'BLOCKED_BEFORE_CALCULATION','forecast':None,'entry':None,'barriers':None,
+            'dependency_checks':gate,'trading_authority':False,'full_system_ready':False,
+            'prospective_skill_proven':False}
+    c,h,l,weights=integrated_candidate.paths(model,np.asarray(x),sigma)
     result={'schema':'btc-unified-candidate-research-output-v1','anchor_utc':anchor,
         'scope':'price, direction, competing barriers and hypothetical delayed entry from one joint distribution',
         'trading_authority':False,'full_system_ready':False,'prospective_skill_proven':False,
@@ -21,13 +29,16 @@ def summarize(model,x,sigma,spot,anchor,budget,premium):
         result['forecast'][str(hours)]={'медиана':float(q[1]),'квантиль_10':float(q[0]),'квантиль_90':float(q[2]),
             'вероятность_существенного_роста':float(p[0]),'вероятность_существенного_снижения':float(p[1]),'вероятность_малого_изменения':float(p[2]),
             'вероятности_подтверждены_перспективно':False}
-        expected=joint.entry(c,weights,spot,hours,budget,premium)
-        expected['исследовательская_гипотеза']='ПОДОЖДАТЬ' if expected['expected_extra_btc']>0 else 'КУПИТЬ_СЕЙЧАС'
-        expected['hypothesis_not_trade_recommendation']=True;result['entry'][str(hours)]=expected
+        if gate['buy_or_wait']['allowed']:
+            expected=joint.entry(c,weights,spot,hours,budget,premium)
+            expected['исследовательская_гипотеза']='ПОДОЖДАТЬ' if expected['expected_extra_btc']>0 else 'КУПИТЬ_СЕЙЧАС'
+            expected['hypothesis_not_trade_recommendation']=True;result['entry'][str(hours)]=expected
     for hours in (24,48,72):
         classes=f.first_passage(h,l,hours=hours);result['barriers'][str(hours)]=(np.bincount(classes,weights=weights,minlength=4)).tolist()
     result['execution_assumptions']={'budget_usdt':budget,'buy_premium_usdt_per_btc':premium,'delay_from_closed_anchor_hours':1,
         'hypothetical':True,'rejections_and_partial_fills_in_model':False}
+    result['dependency_checks']=gate
+    if not gate['buy_or_wait']['allowed']:result['entry']=None
     return result
 
 REQUIREMENTS=('predictive_advantage_on_unknown_outcomes','probabilities_calibrated_prospectively',

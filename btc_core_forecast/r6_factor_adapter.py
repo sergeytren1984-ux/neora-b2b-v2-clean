@@ -33,6 +33,9 @@ def extract(path,verifier,source_sha=SOURCE_SHA):
     if record.get('kind')!='RAW_CAPTURED':
         return {'available':False,'values':None,'status':record.get('kind'),'anchor_utc':record.get('anchor_utc'),
             'trading_authority':False,'prospective_skill_proven':False}
+    bundle=json.loads(pathlib.Path(str(path)+'.sigstore.json').read_bytes())
+    logged=max(int(t['integratedTime'])+1 for t in bundle['verificationMaterial']['tlogEntries'])
+    signed_available=dt.datetime.fromtimestamp(logged,dt.timezone.utc).isoformat()
     snapshot=record['snapshot']
     canonical=(json.dumps(snapshot,sort_keys=True,separators=(',',':'),allow_nan=False)+'\n').encode()
     if hashlib.sha256(canonical).hexdigest()!=record['snapshot_sha256']:raise ValueError('wrapper snapshot digest mismatch')
@@ -44,6 +47,9 @@ def extract(path,verifier,source_sha=SOURCE_SHA):
         'values':None if vector is None else dict(zip(NAMES,vector)),
         'price_veto_status':status,'snapshot_math_digest':source_hash(snapshot),
         'signed_record_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),
+        'signed_record_available_not_before_utc':signed_available,
+        'book_observed_at_utc':dt.datetime.fromtimestamp(int(snapshot['observation']['book']['vendor_timestamp_ms'])/1000,dt.timezone.utc).isoformat(),
+        'microflow_closed_at_utc':dt.datetime.fromtimestamp(int(snapshot['observation']['microflow']['vendor_close_ms'])/1000,dt.timezone.utc).isoformat(),
         'source_sha':proof['source_sha'],'frozen_R6_formula_blob':R6_FORMULA_BLOB,
         'this_is_not_an_R6_alert_or_price_forecast':True,
         'trading_authority':False,'prospective_skill_proven':False,'calibrated_probability':False}

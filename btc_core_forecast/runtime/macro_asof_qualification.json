@@ -1,0 +1,261 @@
+{
+  "verified_contexts": 6,
+  "rejected_contexts": [],
+  "matched_rows": [
+    {
+      "anchor": "2026-10-13T11:00:00+00:00",
+      "macro": {
+        "available": true,
+        "features": [
+          102.30799865722656,
+          1574.682,
+          30747.25,
+          1573.682,
+          5.240000247955322,
+          57909.682,
+          1
+        ],
+        "feature_names": [
+          "dxy_quoted_index",
+          "dxy_quote_age_seconds",
+          "nasdaq_futures_quote",
+          "nasdaq_quote_age_seconds",
+          "tnx_quoted_index",
+          "tnx_quote_age_seconds",
+          "tnx_previous_session_flag"
+        ],
+        "reasons": [],
+        "record_sha256": "93dbfc4310286e243b035b0a877f5401180b59e639c8b802d00d1b49ab32241d",
+        "source_sha": "9f843873541d30b3de3e1e0129fe9c8b0e459589",
+        "available_at_utc": "2026-10-13T10:43:59+00:00",
+        "signature_and_numeric_replay_verified": true,
+        "immutable_collector_source_proven": false,
+        "TNX_quote_not_assumed_to_be_a_live_Treasury_yield": true,
+        "full_system_ready": false,
+        "trading_authority": false
+      }
+    },
+    {
+      "anchor": "2026-10-13T11:15:00+00:00",
+      "macro": {
+        "available": true,
+        "features": [
+          102.28399658203125,
+          1458.878,
+          30722.0,
+          1457.878,
+          5.240000247955322,
+          58815.878,
+          1
+        ],
+        "feature_names": [
+          "dxy_quoted_index",
+          "dxy_quote_age_seconds",
+          "nasdaq_futures_quote",
+          "nasdaq_quote_age_seconds",
+          "tnx_quoted_index",
+          "tnx_quote_age_seconds",
+          "tnx_previous_session_flag"
+        ],
+        "reasons": [],
+        "record_sha256": "1101619ec9d606c64cb5ff27734a33ef29c1e046bdc22e5e5a16515cf664afaa",
+        "source_sha": "d01eed79c869c74ab0c2407eb5be92041af54ade",
+        "available_at_utc": "2026-10-13T11:01:01+00:00",
+        "signature_and_numeric_replay_verified": true,
+        "immutable_collector_source_proven": false,
+        "TNX_quote_not_assumed_to_be_a_live_Treasury_yield": true,
+        "full_system_ready": false,
+        "trading_authority": false
+      }
+    },
+    {
+      "anchor": "2026-10-13T11:30:00+00:00",
+      "macro": {
+        "available": false,
+        "features": null,
+        "feature_names": [
+          "dxy_quoted_index",
+          "dxy_quote_age_seconds",
+          "nasdaq_futures_quote",
+          "nasdaq_quote_age_seconds",
+          "tnx_quoted_index",
+          "tnx_quote_age_seconds",
+          "tnx_previous_session_flag"
+        ],
+        "reasons": [
+          "MISSING_OR_STALE:dxy",
+          "MISSING_OR_STALE:nasdaq_futures"
+        ],
+        "record_sha256": "1101619ec9d606c64cb5ff27734a33ef29c1e046bdc22e5e5a16515cf664afaa",
+        "source_sha": "d01eed79c869c74ab0c2407eb5be92041af54ade",
+        "available_at_utc": "2026-10-13T11:01:01+00:00",
+        "signature_and_numeric_replay_verified": true,
+        "immutable_collector_source_proven": false,
+        "TNX_quote_not_assumed_to_be_a_live_Treasury_yield": true,
+        "full_system_ready": false,
+        "trading_authority": false
+      }
+    },
+    {
+      "anchor": "2026-10-13T11:45:00+00:00",
+      "macro": {
+        "available": true,
+        "features": [
+          102.28900146484375,
+          1485.327,
+          30666.75,
+          1484.327,
+          5.240000247955322,
+          60628.327,
+          1
+        ],
+        "feature_names": [
+          "dxy_quoted_index",
+          "dxy_quote_age_seconds",
+          "nasdaq_futures_quote",
+          "nasdaq_quote_age_seconds",
+          "tnx_quoted_index",
+          "tnx_quote_age_seconds",
+          "tnx_previous_session_flag"
+        ],
+        "reasons": [],
+        "record_sha256": "410175fad86ba7245817605a3c67a47efef4d8a0de6caf306c3911887da3899b",
+        "source_sha": "c2e482b65dc27c9c8bd3b812476b012d62ac7f7e",
+        "available_at_utc": "2026-10-13T11:30:46+00:00",
+        "signature_and_numeric_replay_verified": true,
+        "immutable_collector_source_proven": false,
+        "TNX_quote_not_assumed_to_be_a_live_Treasury_yield": true,
+        "full_system_ready": false,
+        "trading_authority": false
+      }
+    },
+    {
+      "anchor": "2026-10-13T12:00:00+00:00",
+      "macro": {
+        "available": true,
+        "features": [
+          102.25900268554688,
+          1031.371,
+          30679.75,
+          1032.371,
+          5.240000247955322,
+          61517.371,
+          1
+        ],
+        "feature_names": [
+          "dxy_quoted_index",
+          "dxy_quote_age_seconds",
+          "nasdaq_futures_quote",
+          "nasdaq_quote_age_seconds",
+          "tnx_quoted_index",
+          "tnx_quote_age_seconds",
+          "tnx_previous_session_flag"
+        ],
+        "reasons": [],
+        "record_sha256": "ad42a9f90ad482ba1109b49275a25ceb65fec8b8680fdaac011304cec8ebd4b8",
+        "source_sha": "2c8b22d75c8dd2cf5ae55770e661267f5ed8ca1a",
+        "available_at_utc": "2026-10-13T11:53:10+00:00",
+        "signature_and_numeric_replay_verified": true,
+        "immutable_collector_source_proven": false,
+        "TNX_quote_not_assumed_to_be_a_live_Treasury_yield": true,
+        "full_system_ready": false,
+        "trading_authority": false
+      }
+    },
+    {
+      "anchor": "2026-10-13T12:15:00+00:00",
+      "macro": {
+        "available": true,
+        "features": [
+          102.2750015258789,
+          1483.631,
+          30678.25,
+          1482.631,
+          5.240000247955322,
+          62422.631,
+          1
+        ],
+        "feature_names": [
+          "dxy_quoted_index",
+          "dxy_quote_age_seconds",
+          "nasdaq_futures_quote",
+          "nasdaq_quote_age_seconds",
+          "tnx_quoted_index",
+          "tnx_quote_age_seconds",
+          "tnx_previous_session_flag"
+        ],
+        "reasons": [],
+        "record_sha256": "2e41b2c1450e5240098d385b0eee7854633e5ec72998a38a910d8d6c57c77610",
+        "source_sha": "2c8b22d75c8dd2cf5ae55770e661267f5ed8ca1a",
+        "available_at_utc": "2026-10-13T12:00:44+00:00",
+        "signature_and_numeric_replay_verified": true,
+        "immutable_collector_source_proven": false,
+        "TNX_quote_not_assumed_to_be_a_live_Treasury_yield": true,
+        "full_system_ready": false,
+        "trading_authority": false
+      }
+    },
+    {
+      "anchor": "2026-10-13T12:30:00+00:00",
+      "macro": {
+        "available": false,
+        "features": null,
+        "feature_names": [
+          "dxy_quoted_index",
+          "dxy_quote_age_seconds",
+          "nasdaq_futures_quote",
+          "nasdaq_quote_age_seconds",
+          "tnx_quoted_index",
+          "tnx_quote_age_seconds",
+          "tnx_previous_session_flag"
+        ],
+        "reasons": [
+          "MISSING_OR_STALE:dxy",
+          "MISSING_OR_STALE:nasdaq_futures"
+        ],
+        "record_sha256": "2e41b2c1450e5240098d385b0eee7854633e5ec72998a38a910d8d6c57c77610",
+        "source_sha": "2c8b22d75c8dd2cf5ae55770e661267f5ed8ca1a",
+        "available_at_utc": "2026-10-13T12:00:44+00:00",
+        "signature_and_numeric_replay_verified": true,
+        "immutable_collector_source_proven": false,
+        "TNX_quote_not_assumed_to_be_a_live_Treasury_yield": true,
+        "full_system_ready": false,
+        "trading_authority": false
+      }
+    },
+    {
+      "anchor": "2026-10-13T12:45:00+00:00",
+      "macro": {
+        "available": true,
+        "features": [
+          102.24700164794922,
+          1100.092,
+          30680.0,
+          1098.092,
+          5.189000129699707,
+          1409.092,
+          0
+        ],
+        "feature_names": [
+          "dxy_quoted_index",
+          "dxy_quote_age_seconds",
+          "nasdaq_futures_quote",
+          "nasdaq_quote_age_seconds",
+          "tnx_quoted_index",
+          "tnx_quote_age_seconds",
+          "tnx_previous_session_flag"
+        ],
+        "reasons": [],
+        "record_sha256": "e6183c9b5410dda21a5f1e2a8b356278277c7528c1139c98b5f39ab19356867d",
+        "source_sha": "baa3ba3f90c68acb7ac69418cd876b1fdd3c8f95",
+        "available_at_utc": "2026-10-13T12:36:49+00:00",
+        "signature_and_numeric_replay_verified": true,
+        "immutable_collector_source_proven": false,
+        "TNX_quote_not_assumed_to_be_a_live_Treasury_yield": true,
+        "full_system_ready": false,
+        "trading_authority": false
+      }
+    }
+  ],
+  "full_system_ready": false
+}

@@ -1,0 +1,12 @@
+{
+  "verified": true,
+  "source_sha": "d6acb83d45ea484d2f2c88b725faedf3de97775d",
+  "trusted_root_sha256": "6494e21ea73fa7ee769f85f57d5a3e6a08725eae1e38c755fc3517c9e6bc0b66",
+  "signature_and_rekor_checks_required": true,
+  "issuer_and_identity_required": true,
+  "anchor_utc": "2026-10-13T09:00:00+00:00",
+  "R6_feature_vector_available": true,
+  "calendar_available_at_observation": false,
+  "raw_usable_does_not_repair_original_R6_epoch": true,
+  "full_system_ready": false
+}

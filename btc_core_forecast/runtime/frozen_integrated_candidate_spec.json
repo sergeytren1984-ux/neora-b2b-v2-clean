@@ -1,0 +1,96 @@
+{
+  "schema": "btc-one-r6-macro-candidate-spec-v1",
+  "candidate_id": "R6_MACRO_SIGN_PATH_V1",
+  "status": "FROZEN_SPEC_NOT_TRAINED",
+  "feature_names": [
+    "spot_15m_log_return",
+    "spot_15m_realized_volatility",
+    "spot_15m_signed_taker_fraction",
+    "spot_15m_path_efficiency",
+    "spot_1h_log_return",
+    "spot_1h_realized_volatility",
+    "spot_1h_signed_taker_fraction",
+    "spot_1h_path_efficiency",
+    "spot_4h_log_return",
+    "spot_4h_realized_volatility",
+    "spot_4h_signed_taker_fraction",
+    "spot_4h_path_efficiency",
+    "spot_24h_log_return",
+    "spot_24h_realized_volatility",
+    "spot_24h_signed_taker_fraction",
+    "spot_24h_path_efficiency",
+    "spot_1h_volume_vs_4h_quarter",
+    "spot_distance_4h_high",
+    "spot_distance_4h_low",
+    "UTC_hour_sine",
+    "UTC_hour_cosine",
+    "signed_15m_taker",
+    "signed_3m_taker",
+    "book_imbalance",
+    "log_15m_volume_ratio",
+    "log_3m_volume_ratio",
+    "OI_change_15m_pct",
+    "spread_bps",
+    "dxy_quoted_index",
+    "dxy_quote_age_seconds",
+    "nasdaq_futures_quote",
+    "nasdaq_quote_age_seconds",
+    "tnx_quoted_index",
+    "tnx_quote_age_seconds",
+    "tnx_previous_session_flag",
+    "bls_scheduled_events_next_1h",
+    "bls_scheduled_events_next_4h",
+    "bls_scheduled_events_next_24h"
+  ],
+  "forecast_horizons_hours": [
+    1,
+    4,
+    24
+  ],
+  "competing_barriers": {
+    "lower": -0.02,
+    "upper": 0.05,
+    "hours": [
+      24,
+      48,
+      72
+    ]
+  },
+  "implementation": "integrated_candidate.fit_verified / integrated_candidate.paths",
+  "fixed_classifier": {
+    "method": "logistic_regression",
+    "C": 0.1,
+    "max_iter": 500,
+    "calibration_offset_bounds": [
+      -3,
+      3
+    ]
+  },
+  "joint_path_weight": "geometric mean of 1/4/24h signed-direction likelihood ratios; retain full coherent paths",
+  "missing_required_inputs": "block affected calculation before prediction; no zero or stale substitution",
+  "comparison": {
+    "same_anchors_and_outcomes_required": true,
+    "price": [
+      "persistence",
+      "conditional_spot_distribution",
+      "HAR_volatility"
+    ],
+    "direction": [
+      "probability_half",
+      "previous_calibration_direction_frequency",
+      "conditional_spot_distribution"
+    ],
+    "entry": [
+      "buy_now",
+      "always_wait"
+    ],
+    "entry_terms": "actual quote, commission, delay and rejected/partial execution; unavailable blocks BTC utility"
+  },
+  "acceptance_criteria_unchanged": true,
+  "previous_spot_only_candidates_rejected": true,
+  "history_seen_not_independent_evidence": true,
+  "full_system_ready": false,
+  "trading_authority": false,
+  "immutable_macro_source": "08987b0fbfeb5ea1aa6b1c3fd287fea0b676ee21",
+  "training_status": "NOT_FITTED"
+}

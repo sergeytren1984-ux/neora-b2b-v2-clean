@@ -1,0 +1,34 @@
+{
+  "schema": "btc-full-candidate-precalculation-contract-v1",
+  "anchor_utc": "2026-10-13T17:30:00+00:00",
+  "dependency_checks": {
+    "direction": {
+      "allowed": false,
+      "reasons": [
+        "R6_STALE_OR_FUTURE_AT_CALCULATION:book_observed_at_utc",
+        "R6_STALE_OR_FUTURE_AT_CALCULATION:microflow_closed_at_utc",
+        "MODEL_NOT_FITTED_WITH_R6_AND_CALENDAR_SCHEMA",
+        "PAIRED_FACTOR_TRAINING_NOT_VERIFIED",
+        "REQUIRED_MACRO_EVENT_COVERAGE_NOT_VERIFIED"
+      ]
+    },
+    "buy_or_wait": {
+      "allowed": false,
+      "reasons": [
+        "R6_STALE_OR_FUTURE_AT_CALCULATION:book_observed_at_utc",
+        "R6_STALE_OR_FUTURE_AT_CALCULATION:microflow_closed_at_utc",
+        "MODEL_NOT_FITTED_WITH_R6_AND_CALENDAR_SCHEMA",
+        "PAIRED_FACTOR_TRAINING_NOT_VERIFIED",
+        "REQUIRED_MACRO_EVENT_COVERAGE_NOT_VERIFIED",
+        "ACTUAL_OPERATOR_EXECUTION_NOT_VERIFIED"
+      ]
+    },
+    "full_system_ready": false,
+    "trading_authority": false
+  },
+  "forecast": null,
+  "entry": null,
+  "full_system_ready": false,
+  "trading_authority": false,
+  "status": "BLOCKED_BEFORE_CALCULATION"
+}

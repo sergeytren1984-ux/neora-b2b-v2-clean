@@ -3,7 +3,7 @@
 No synthetic historical book and no claim that an input vector is a forecast.
 Old R5/R6 registered epochs and mathematical thresholds remain untouched.
 """
-import hashlib,json,pathlib,inspect
+import hashlib,json,pathlib,inspect,datetime as dt
 from btc_demand_v7.demand_change_v2 import feature,source_hash
 from btc_demand_v7.source_integrity_v5 import rederive
 
@@ -12,15 +12,24 @@ IDENTITY='https://github.com/sergeytren1984-ux/neora-b2b-v2-clean/.github/workfl
 ISSUER='https://token.actions.githubusercontent.com'
 R6_FORMULA_BLOB='eb569c083b42936944da6abf638a0a876febd3f6'
 NAMES=('signed_15m_taker','signed_3m_taker','book_imbalance','log_15m_volume_ratio','log_3m_volume_ratio','OI_change_15m_pct','spread_bps')
+PROFILES={
+    SOURCE_SHA:(IDENTITY,'2026-10-13T11:00:00+00:00','2026-10-14T11:00:00+00:00'),
+    '6ad82b3afa3fce1eaff477a02ac26cb99ac878e5':(
+        IDENTITY.replace('btc-core-forward-source-20261013','btc-core-forward-source2-20261014'),
+        '2026-10-14T11:00:00+00:00','2026-10-20T11:30:00+00:00')}
 
-def extract(path,verifier):
+def extract(path,verifier,source_sha=SOURCE_SHA):
+    if source_sha not in PROFILES:raise ValueError('unregistered source epoch')
+    identity,start,end=PROFILES[source_sha]
     code=pathlib.Path(inspect.getfile(feature)).read_bytes()
     if hashlib.sha1(b'blob '+str(len(code)).encode()+b'\0'+code).hexdigest()!=R6_FORMULA_BLOB:
         raise ValueError('frozen R6 formula changed')
     path=pathlib.Path(path)
-    proof=verifier.verify(path,IDENTITY,ISSUER,SOURCE_SHA)
+    proof=verifier.verify(path,identity,ISSUER,source_sha)
     record=json.loads(path.read_bytes())
     if record.get('schema')!='btc-core-forward-slot-v1':raise ValueError('wrong slot schema')
+    anchor=dt.datetime.fromisoformat(record['anchor_utc'])
+    if anchor.tzinfo is None or not dt.datetime.fromisoformat(start)<=anchor<dt.datetime.fromisoformat(end):raise ValueError('anchor outside registered source epoch')
     if record.get('kind')!='RAW_CAPTURED':
         return {'available':False,'values':None,'status':record.get('kind'),'anchor_utc':record.get('anchor_utc'),
             'trading_authority':False,'prospective_skill_proven':False}

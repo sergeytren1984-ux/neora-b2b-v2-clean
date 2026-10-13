@@ -1,0 +1,68 @@
+{
+  "schema": "btc-independent-forward-endpoint-audit-v1",
+  "anchor_utc": "2026-10-13T11:30:00+00:00",
+  "horizon_hours": 1,
+  "forecast_sha256": "ae390621703740541994ba5d5f7a2e6528d46e40c65c3be6c4f46beb8148bfc3",
+  "outcome_sha256": "3bd13fecfe96680b24b0d2b43911c9e98dc05cf960764d311b304caf8a0dc9b3",
+  "signature_identity_source_and_rekor_verified": true,
+  "forecast_signed_before_outcome": true,
+  "initial_public_release_independently_proven": false,
+  "actual_endpoint": 83407.19,
+  "reference_spot": 83540.52,
+  "independently_recomputed_scores": {
+    "candidate": {
+      "crps": 120.43611784845646,
+      "mae": 189.53878548330977,
+      "coverage_80pct": true,
+      "brier": 0.008993055555555551
+    },
+    "ewma1": {
+      "crps": 139.69615661381363,
+      "mae": 201.5854641533515,
+      "coverage_80pct": true,
+      "brier": 0.04024305555555556
+    },
+    "ewma4": {
+      "crps": 116.3686359239702,
+      "mae": 185.9686131041526,
+      "coverage_80pct": true,
+      "brier": 0.006562500000000001
+    },
+    "har": {
+      "crps": 133.00626144432601,
+      "mae": 199.68646812842053,
+      "coverage_80pct": true,
+      "brier": 0.01628472222222222
+    },
+    "vol1": {
+      "crps": 166.6839464756368,
+      "mae": 217.61601149936905,
+      "coverage_80pct": true,
+      "brier": 0.11461805555555557
+    },
+    "vol24": {
+      "crps": 111.72166466735248,
+      "mae": 180.93493745625892,
+      "coverage_80pct": true,
+      "brier": 0.006562500000000001
+    },
+    "vol4": {
+      "crps": 123.7087461478929,
+      "mae": 189.06490239684354,
+      "coverage_80pct": true,
+      "brier": 0.008576388888888885
+    }
+  },
+  "crps_gain_vs_baselines": {
+    "ewma1": 19.260038765357166,
+    "ewma4": -4.067481924486259,
+    "har": 12.570143595869553,
+    "vol1": 46.247828627180326,
+    "vol24": -8.714453181103977,
+    "vol4": 3.272628299436434
+  },
+  "single_outcome_is_not_skill_evidence": true,
+  "prospective_skill_proven": false,
+  "full_system_ready": false,
+  "trading_authority": false
+}

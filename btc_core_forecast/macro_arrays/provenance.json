@@ -1,0 +1,29 @@
+{
+  "schema": "macro-history-paired-diagnostic-v1",
+  "historical_only": true,
+  "series": {
+    "DGS10": {
+      "lag_days": 2,
+      "name": "Treasury constant maturity 10y daily yield",
+      "yield": true
+    },
+    "DTWEXBGS": {
+      "lag_days": 10,
+      "name": "Nominal broad USD index, not DXY",
+      "yield": false
+    },
+    "NASDAQ100": {
+      "lag_days": 2,
+      "name": "Nasdaq100 cash close, not futures",
+      "yield": false
+    }
+  },
+  "kept": 20400,
+  "missing_anchors": [],
+  "receipt_times_unverified": true,
+  "fixed_lags_are_not_verified_publication_times": true,
+  "latest_vintage_not_first_release": true,
+  "not_DXY_or_Nasdaq_futures": true,
+  "trading_authority": false,
+  "full_system_ready": false
+}

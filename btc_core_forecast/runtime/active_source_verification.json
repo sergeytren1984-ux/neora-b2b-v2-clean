@@ -1,0 +1,19 @@
+{
+  "quality_record.json": {
+    "verified": true,
+    "source_sha": "6feff10e759c6c71a65e6387281ae5888140eb13",
+    "trusted_root_sha256": "6494e21ea73fa7ee769f85f57d5a3e6a08725eae1e38c755fc3517c9e6bc0b66",
+    "signature_and_rekor_checks_required": true,
+    "issuer_and_identity_required": true,
+    "independently_recomputed": true
+  },
+  "extended_registration.json": {
+    "verified": true,
+    "source_sha": "6ad82b3afa3fce1eaff477a02ac26cb99ac878e5",
+    "trusted_root_sha256": "6494e21ea73fa7ee769f85f57d5a3e6a08725eae1e38c755fc3517c9e6bc0b66",
+    "signature_and_rekor_checks_required": true,
+    "issuer_and_identity_required": true,
+    "registered_before_start": true
+  },
+  "full_system_ready": false
+}

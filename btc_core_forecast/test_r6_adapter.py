@@ -9,6 +9,14 @@ class VerifierTestDouble:
     def verify(self,*args):return {'source_sha':a.SOURCE_SHA}
 
 class R6AdapterTests(unittest.TestCase):
+    def test_unregistered_source_is_not_trusted(self):
+        with self.assertRaisesRegex(ValueError,'unregistered'):a.extract('unused',VerifierTestDouble(),'0'*40)
+
+    def test_wrong_epoch_cannot_receive_older_record(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            p=pathlib.Path(tmp)/'raw.json';p.write_text(json.dumps({'schema':'btc-core-forward-slot-v1','kind':'MISSING_NOT_BACKFILLED','anchor_utc':'2026-10-13T11:15:00+00:00'}))
+            with self.assertRaisesRegex(ValueError,'outside'):a.extract(p,VerifierTestDouble(),'6ad82b3afa3fce1eaff477a02ac26cb99ac878e5')
+
     def test_unsigned_record_is_not_an_input(self):
         with tempfile.TemporaryDirectory() as tmp:
             p=pathlib.Path(tmp)/'raw.json';p.write_text('{}')

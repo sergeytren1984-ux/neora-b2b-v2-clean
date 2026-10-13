@@ -1,0 +1,944 @@
+{
+  "schema": "btc-one-joint-direction-entry-candidate-v1",
+  "historical_only": true,
+  "history_already_seen": true,
+  "prospective_skill_proven": false,
+  "trading_authority": false,
+  "full_system_ready": false,
+  "fixed_parameters": {
+    "nearest_training_paths": 256,
+    "local_probability_mass": 0.5,
+    "wait_probability_threshold": 0.6
+  },
+  "R6_numeric_used": false,
+  "macro_numeric_used": true,
+  "actual_OTC_used": false,
+  "macro_history_availability_unverified": true,
+  "utility_is_per_hypothetical_decision_not_cumulative": true,
+  "folds": {
+    "2025-07-01": {
+      "price_direction": {
+        "1": {
+          "mae_gain_vs_persistence": {
+            "mean": 0.10816976020622578,
+            "days": 89,
+            "ci95": [
+              -0.8511023818925734,
+              0.8029796983785735
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "crps_gain_vs_uncertainty_component": {
+            "mean": 0.3141493805034908,
+            "days": 89,
+            "ci95": [
+              0.08629469104382523,
+              0.49996495654669104
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "direction_brier_gain": {
+            "mean": -2.5123198185560824e-05,
+            "days": 89,
+            "ci95": [
+              -0.00047125927229634164,
+              0.00044319059325204893
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "coverage_80pct": 0.8174157303370787
+        },
+        "4": {
+          "mae_gain_vs_persistence": {
+            "mean": -1.548568389565585,
+            "days": 89,
+            "ci95": [
+              -4.520338474075345,
+              1.6621521988598664
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "crps_gain_vs_uncertainty_component": {
+            "mean": -0.6097436509555789,
+            "days": 89,
+            "ci95": [
+              -1.684970985805347,
+              0.5222017400565465
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "direction_brier_gain": {
+            "mean": -0.0015019735496420784,
+            "days": 89,
+            "ci95": [
+              -0.002432058649485977,
+              -0.0006018921056493233
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "coverage_80pct": 0.8319288389513109
+        },
+        "24": {
+          "mae_gain_vs_persistence": {
+            "mean": -18.264422361002616,
+            "days": 89,
+            "ci95": [
+              -35.27027036852558,
+              -1.901614853163317
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "crps_gain_vs_uncertainty_component": {
+            "mean": -23.17032610175972,
+            "days": 89,
+            "ci95": [
+              -41.194971153085255,
+              -7.341539475443483
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "direction_brier_gain": {
+            "mean": -0.011793556546067408,
+            "days": 89,
+            "ci95": [
+              -0.020760831321406194,
+              -0.0026083904234821013
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "coverage_80pct": 0.850187265917603
+        }
+      },
+      "entry": {
+        "1": {
+          "signals": 1118,
+          "gain_vs_buy_now": {
+            "mean": 1.6035629109804588e-06,
+            "days": 89,
+            "ci95": [
+              -0.00013448817205350224,
+              0.00011718405602821986
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "gain_vs_always_wait": {
+            "mean": 1.4617031563619132e-05,
+            "days": 89,
+            "ci95": [
+              -8.561436651025401e-05,
+              0.00010509182323162035
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          }
+        },
+        "4": {
+          "signals": 786,
+          "gain_vs_buy_now": {
+            "mean": -8.675624333072807e-05,
+            "days": 89,
+            "ci95": [
+              -0.0004145365068782605,
+              0.00017335432127848097
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "gain_vs_always_wait": {
+            "mean": -3.4377686270357456e-05,
+            "days": 89,
+            "ci95": [
+              -0.0004983136066724762,
+              0.0004373863800052871
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          }
+        },
+        "24": {
+          "signals": 1210,
+          "gain_vs_buy_now": {
+            "mean": -0.0013087100539401922,
+            "days": 89,
+            "ci95": [
+              -0.0034331088062268572,
+              0.000634997487841281
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "gain_vs_always_wait": {
+            "mean": -0.0008152752449891025,
+            "days": 89,
+            "ci95": [
+              -0.0033533984299406196,
+              0.001696171154604045
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          }
+        }
+      },
+      "barrier_brier_gain": {
+        "mean": -0.08728820032977858,
+        "days": 89,
+        "ci95": [
+          -0.14212700589973132,
+          -0.02705100303347167
+        ],
+        "effective_week_blocks": 12.714285714285714,
+        "independent_future_evidence": false
+      }
+    },
+    "2025-10-01": {
+      "price_direction": {
+        "1": {
+          "mae_gain_vs_persistence": {
+            "mean": 0.1115362517432297,
+            "days": 89,
+            "ci95": [
+              -1.1539611848578044,
+              1.1052778237510963
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "crps_gain_vs_uncertainty_component": {
+            "mean": 2.242872903267101,
+            "days": 89,
+            "ci95": [
+              1.71903633480245,
+              3.1463226204224837
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "direction_brier_gain": {
+            "mean": 0.0015205620400535018,
+            "days": 89,
+            "ci95": [
+              0.0007420062600175178,
+              0.002591721853924889
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "coverage_80pct": 0.798689138576779
+        },
+        "4": {
+          "mae_gain_vs_persistence": {
+            "mean": -2.1244874629181356,
+            "days": 89,
+            "ci95": [
+              -9.308365136330492,
+              2.9316281553029904
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "crps_gain_vs_uncertainty_component": {
+            "mean": 1.3929254405940668,
+            "days": 89,
+            "ci95": [
+              -0.597713333426727,
+              3.554613874267307
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "direction_brier_gain": {
+            "mean": 0.0018269888642886856,
+            "days": 89,
+            "ci95": [
+              0.00016657615774735003,
+              0.004363309775525002
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "coverage_80pct": 0.7935393258426966
+        },
+        "24": {
+          "mae_gain_vs_persistence": {
+            "mean": 1.1140992629494808,
+            "days": 89,
+            "ci95": [
+              -21.927760316027605,
+              20.940810686795075
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "crps_gain_vs_uncertainty_component": {
+            "mean": 4.073025294420228,
+            "days": 89,
+            "ci95": [
+              -9.418860252081966,
+              17.216562279089157
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "direction_brier_gain": {
+            "mean": -0.00044301876060050765,
+            "days": 89,
+            "ci95": [
+              -0.005963762290781305,
+              0.005540122954509454
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "coverage_80pct": 0.7902621722846442
+        }
+      },
+      "entry": {
+        "1": {
+          "signals": 2071,
+          "gain_vs_buy_now": {
+            "mean": 0.00019028709480612018,
+            "days": 89,
+            "ci95": [
+              -1.4177036171340808e-05,
+              0.0005168557067913879
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "gain_vs_always_wait": {
+            "mean": 1.3798435712838e-05,
+            "days": 89,
+            "ci95": [
+              -3.4250717263039563e-05,
+              6.302964597097006e-05
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          }
+        },
+        "4": {
+          "signals": 1964,
+          "gain_vs_buy_now": {
+            "mean": 0.0008568232919834864,
+            "days": 89,
+            "ci95": [
+              8.184605483138355e-05,
+              0.0021394974088196654
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "gain_vs_always_wait": {
+            "mean": 0.00017401702310266594,
+            "days": 89,
+            "ci95": [
+              -5.464443557715646e-05,
+              0.00041694758939842203
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          }
+        },
+        "24": {
+          "signals": 1776,
+          "gain_vs_buy_now": {
+            "mean": 0.0038659279229432937,
+            "days": 89,
+            "ci95": [
+              0.0007822408387805196,
+              0.008418389139166892
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          },
+          "gain_vs_always_wait": {
+            "mean": -0.0006243088370750333,
+            "days": 89,
+            "ci95": [
+              -0.00361616812532113,
+              0.0016935144672948093
+            ],
+            "effective_week_blocks": 12.714285714285714,
+            "independent_future_evidence": false
+          }
+        }
+      },
+      "barrier_brier_gain": {
+        "mean": 0.018701661462408287,
+        "days": 89,
+        "ci95": [
+          -0.00017723981959504487,
+          0.04470982747459809
+        ],
+        "effective_week_blocks": 12.714285714285714,
+        "independent_future_evidence": false
+      }
+    },
+    "2026-01-01": {
+      "price_direction": {
+        "1": {
+          "mae_gain_vs_persistence": {
+            "mean": 0.5650018934106654,
+            "days": 87,
+            "ci95": [
+              -0.34039068864629396,
+              1.4250111384960242
+            ],
+            "effective_week_blocks": 12.428571428571429,
+            "independent_future_evidence": false
+          },
+          "crps_gain_vs_uncertainty_component": {
+            "mean": 0.6071907185669295,
+            "days": 87,
+            "ci95": [
+              0.19469311562416933,
+              1.0621075313444426
+            ],
+            "effective_week_blocks": 12.428571428571429,
+            "independent_future_evidence": false
+          },
+          "direction_brier_gain": {
+            "mean": 0.0001350029714012359,
+            "days": 87,
+            "ci95": [
+              -0.000825698048630927,
+              0.0012486578139268652
+            ],
+            "effective_week_blocks": 12.428571428571429,
+            "independent_future_evidence": false
+          },
+          "coverage_80pct": 0.8127394636015326
+        },
+        "4": {
+          "mae_gain_vs_persistence": {
+            "mean": 1.913051651395871,
+            "days": 87,
+            "ci95": [
+              0.37298338158337546,
+              3.743260970616677
+            ],
+            "effective_week_blocks": 12.428571428571429,
+            "independent_future_evidence": false
+          },
+          "crps_gain_vs_uncertainty_component": {
+            "mean": 1.8659902265326147,
+            "days": 87,
+            "ci95": [
+              0.006600028469781771,
+              3.5617155217265655
+            ],
+            "effective_week_blocks": 12.428571428571429,
+            "independent_future_evidence": false
+          },
+          "direction_brier_gain": {
+            "mean": 0.0015072556227638876,
+            "days": 87,
+            "ci95": [
+              8.28359544598298e-05,
+              0.003141503083316629
+            ],
+            "effective_week_blocks": 12.428571428571429,
+            "independent_future_evidence": false
+          },
+          "coverage_80pct": 0.796455938697318
+        },
+        "24": {
+          "mae_gain_vs_persistence": {
+            "mean": 7.215245003733551,
+            "days": 87,
+            "ci95": [
+              -5.722322622657442,
+              27.007868999203392
+            ],
+            "effective_week_blocks": 12.428571428571429,
+            "independent_future_evidence": false
+          },
+          "crps_gain_vs_uncertainty_component": {
+            "mean": 1.1446171628764106,
+            "days": 87,
+            "ci95": [
+              -12.01020603804359,
+              11.878689986353956
+            ],
+            "effective_week_blocks": 12.428571428571429,
+            "independent_future_evidence": false
+          },
+          "direction_brier_gain": {
+            "mean": 0.0003411446996717029,
+            "days": 87,
+            "ci95": [
+              -0.003780796555753856,
+              0.006103185189820527
+            ],
+            "effective_week_blocks": 12.428571428571429,
+            "independent_future_evidence": false
+          },
+          "coverage_80pct": 0.7418582375478927
+        }
+      },
+      "entry": {
+        "1": {
+          "signals": 1901,
+          "gain_vs_buy_now": {
+            "mean": 0.00026388627503275976,
+            "days": 87,
+            "ci95": [
+              -0.00011839025321352081,
+              0.0006752072458494274
+            ],
+            "effective_week_blocks": 12.428571428571429,
+            "independent_future_evidence": false
+          },
+          "gain_vs_always_wait": {
+            "mean": 8.099100518898147e-06,
+            "days": 87,
+            "ci95": [
+              -9.930506608531213e-05,
+              0.00010125344540844716
+            ],
+            "effective_week_blocks": 12.428571428571429,
+            "independent_future_evidence": false
+          }
+        },
+        "4": {
+          "signals": 1847,
+          "gain_vs_buy_now": {
+            "mean": 0.001241874383281254,
+            "days": 87,
+            "ci95": [
+              -0.00017605907425387427,
+              0.0027955600264652934
+            ],
+            "effective_week_blocks": 12.428571428571429,
+            "independent_future_evidence": false
+          },
+          "gain_vs_always_wait": {
+            "mean": 0.0002292205619362976,
+            "days": 87,
+            "ci95": [
+              -0.00018620066388565467,
+              0.0006505022404491521
+            ],
+            "effective_week_blocks": 12.428571428571429,
+            "independent_future_evidence": false
+          }
+        },
+        "24": {
+          "signals": 2038,
+          "gain_vs_buy_now": {
+            "mean": 0.006033489997741213,
+            "days": 87,
+            "ci95": [
+              -0.002853496577500326,
+              0.01680321734937698
+            ],
+            "effective_week_blocks": 12.428571428571429,
+            "independent_future_evidence": false
+          },
+          "gain_vs_always_wait": {
+            "mean": -0.00011917810563862929,
+            "days": 87,
+            "ci95": [
+              -0.000810515952970477,
+              0.0003741093988968511
+            ],
+            "effective_week_blocks": 12.428571428571429,
+            "independent_future_evidence": false
+          }
+        }
+      },
+      "barrier_brier_gain": {
+        "mean": -0.001883773209941234,
+        "days": 87,
+        "ci95": [
+          -0.012784569370724209,
+          0.011761601374289934
+        ],
+        "effective_week_blocks": 12.428571428571429,
+        "independent_future_evidence": false
+      }
+    },
+    "2026-04-01": {
+      "price_direction": {
+        "1": {
+          "mae_gain_vs_persistence": {
+            "mean": 0.4393120645716367,
+            "days": 88,
+            "ci95": [
+              -0.0024242484546857755,
+              0.9556016598182095
+            ],
+            "effective_week_blocks": 12.571428571428571,
+            "independent_future_evidence": false
+          },
+          "crps_gain_vs_uncertainty_component": {
+            "mean": 0.5417552449771519,
+            "days": 88,
+            "ci95": [
+              0.37196661284829785,
+              0.7869103382286827
+            ],
+            "effective_week_blocks": 12.571428571428571,
+            "independent_future_evidence": false
+          },
+          "direction_brier_gain": {
+            "mean": 0.000709289916175528,
+            "days": 88,
+            "ci95": [
+              0.00022791890007910692,
+              0.0015329045616942916
+            ],
+            "effective_week_blocks": 12.571428571428571,
+            "independent_future_evidence": false
+          },
+          "coverage_80pct": 0.8087121212121212
+        },
+        "4": {
+          "mae_gain_vs_persistence": {
+            "mean": 2.142664031514173,
+            "days": 88,
+            "ci95": [
+              0.22933527596763287,
+              4.799122924020278
+            ],
+            "effective_week_blocks": 12.571428571428571,
+            "independent_future_evidence": false
+          },
+          "crps_gain_vs_uncertainty_component": {
+            "mean": 1.4835078913637265,
+            "days": 88,
+            "ci95": [
+              0.209114784274428,
+              2.624967373172221
+            ],
+            "effective_week_blocks": 12.571428571428571,
+            "independent_future_evidence": false
+          },
+          "direction_brier_gain": {
+            "mean": 0.0011742144407234853,
+            "days": 88,
+            "ci95": [
+              0.00018230692421574612,
+              0.0022651982428943435
+            ],
+            "effective_week_blocks": 12.571428571428571,
+            "independent_future_evidence": false
+          },
+          "coverage_80pct": 0.7978219696969697
+        },
+        "24": {
+          "mae_gain_vs_persistence": {
+            "mean": -6.214286378214583,
+            "days": 88,
+            "ci95": [
+              -36.127005263006964,
+              29.925483386887315
+            ],
+            "effective_week_blocks": 12.571428571428571,
+            "independent_future_evidence": false
+          },
+          "crps_gain_vs_uncertainty_component": {
+            "mean": 6.937023713435622,
+            "days": 88,
+            "ci95": [
+              -5.088277623677974,
+              21.30314739093286
+            ],
+            "effective_week_blocks": 12.571428571428571,
+            "independent_future_evidence": false
+          },
+          "direction_brier_gain": {
+            "mean": 0.003877762368425202,
+            "days": 88,
+            "ci95": [
+              -0.004184423572300157,
+              0.010581020167335317
+            ],
+            "effective_week_blocks": 12.571428571428571,
+            "independent_future_evidence": false
+          },
+          "coverage_80pct": 0.8333333333333334
+        }
+      },
+      "entry": {
+        "1": {
+          "signals": 1687,
+          "gain_vs_buy_now": {
+            "mean": 0.00011765802826077059,
+            "days": 88,
+            "ci95": [
+              -0.00024487840533975197,
+              0.0005535357337607604
+            ],
+            "effective_week_blocks": 12.571428571428571,
+            "independent_future_evidence": false
+          },
+          "gain_vs_always_wait": {
+            "mean": -2.001097660637344e-05,
+            "days": 88,
+            "ci95": [
+              -6.637036511769101e-05,
+              8.533933923358736e-05
+            ],
+            "effective_week_blocks": 12.571428571428571,
+            "independent_future_evidence": false
+          }
+        },
+        "4": {
+          "signals": 2063,
+          "gain_vs_buy_now": {
+            "mean": 0.0006014179912936682,
+            "days": 88,
+            "ci95": [
+              -0.001021065243749169,
+              0.0022912179630981033
+            ],
+            "effective_week_blocks": 12.571428571428571,
+            "independent_future_evidence": false
+          },
+          "gain_vs_always_wait": {
+            "mean": 7.371761845611237e-05,
+            "days": 88,
+            "ci95": [
+              -5.867578447220102e-05,
+              0.00024405937275621614
+            ],
+            "effective_week_blocks": 12.571428571428571,
+            "independent_future_evidence": false
+          }
+        },
+        "24": {
+          "signals": 2061,
+          "gain_vs_buy_now": {
+            "mean": 0.003951537101605019,
+            "days": 88,
+            "ci95": [
+              -0.005554821604310297,
+              0.01377203761083218
+            ],
+            "effective_week_blocks": 12.571428571428571,
+            "independent_future_evidence": false
+          },
+          "gain_vs_always_wait": {
+            "mean": 0.00053360002600364,
+            "days": 88,
+            "ci95": [
+              -9.805759911062621e-05,
+              0.0017303861303064225
+            ],
+            "effective_week_blocks": 12.571428571428571,
+            "independent_future_evidence": false
+          }
+        }
+      },
+      "barrier_brier_gain": {
+        "mean": 0.010624258535287154,
+        "days": 88,
+        "ci95": [
+          -0.012050022033486736,
+          0.0310268889729275
+        ],
+        "effective_week_blocks": 12.571428571428571,
+        "independent_future_evidence": false
+      }
+    },
+    "2026-07-01": {
+      "price_direction": {
+        "1": {
+          "mae_gain_vs_persistence": {
+            "mean": -0.3394758989338806,
+            "days": 28,
+            "ci95": [
+              -0.9144934887968442,
+              0.00035637824297293606
+            ],
+            "effective_week_blocks": 4.0,
+            "independent_future_evidence": false
+          },
+          "crps_gain_vs_uncertainty_component": {
+            "mean": 0.4402919115088127,
+            "days": 28,
+            "ci95": [
+              0.12160332333565235,
+              0.6559079862661553
+            ],
+            "effective_week_blocks": 4.0,
+            "independent_future_evidence": false
+          },
+          "direction_brier_gain": {
+            "mean": 0.00036997473796703456,
+            "days": 28,
+            "ci95": [
+              -0.00012543839153035443,
+              0.0010392341076581792
+            ],
+            "effective_week_blocks": 4.0,
+            "independent_future_evidence": false
+          },
+          "coverage_80pct": 0.8184523809523809
+        },
+        "4": {
+          "mae_gain_vs_persistence": {
+            "mean": 1.8426807640221883,
+            "days": 28,
+            "ci95": [
+              0.0722553904479839,
+              3.022392041789945
+            ],
+            "effective_week_blocks": 4.0,
+            "independent_future_evidence": false
+          },
+          "crps_gain_vs_uncertainty_component": {
+            "mean": 1.4667592637796296,
+            "days": 28,
+            "ci95": [
+              -0.14895150921979977,
+              2.1646788257364094
+            ],
+            "effective_week_blocks": 4.0,
+            "independent_future_evidence": false
+          },
+          "direction_brier_gain": {
+            "mean": 0.0008674027309231403,
+            "days": 28,
+            "ci95": [
+              -0.00020999417402867263,
+              0.001068591482883464
+            ],
+            "effective_week_blocks": 4.0,
+            "independent_future_evidence": false
+          },
+          "coverage_80pct": 0.7976190476190477
+        },
+        "24": {
+          "mae_gain_vs_persistence": {
+            "mean": 4.770409241309424,
+            "days": 28,
+            "ci95": [
+              -9.611576924135433,
+              16.43232833264228
+            ],
+            "effective_week_blocks": 4.0,
+            "independent_future_evidence": false
+          },
+          "crps_gain_vs_uncertainty_component": {
+            "mean": 21.715195509588234,
+            "days": 28,
+            "ci95": [
+              5.301598442575593,
+              28.606184789974026
+            ],
+            "effective_week_blocks": 4.0,
+            "independent_future_evidence": false
+          },
+          "direction_brier_gain": {
+            "mean": 0.008222539029803709,
+            "days": 28,
+            "ci95": [
+              0.000912733288569447,
+              0.01027615885619511
+            ],
+            "effective_week_blocks": 4.0,
+            "independent_future_evidence": false
+          },
+          "coverage_80pct": 0.8214285714285714
+        }
+      },
+      "entry": {
+        "1": {
+          "signals": 444,
+          "gain_vs_buy_now": {
+            "mean": -3.188705013471875e-05,
+            "days": 28,
+            "ci95": [
+              -0.00034041316305475803,
+              0.00029074834275057924
+            ],
+            "effective_week_blocks": 4.0,
+            "independent_future_evidence": false
+          },
+          "gain_vs_always_wait": {
+            "mean": 0.00027985270651023235,
+            "days": 28,
+            "ci95": [
+              -0.00013183721470806311,
+              0.00040697625949696626
+            ],
+            "effective_week_blocks": 4.0,
+            "independent_future_evidence": false
+          }
+        },
+        "4": {
+          "signals": 585,
+          "gain_vs_buy_now": {
+            "mean": -0.0007788374792959943,
+            "days": 28,
+            "ci95": [
+              -0.00174661947882555,
+              0.0005722409620045614
+            ],
+            "effective_week_blocks": 4.0,
+            "independent_future_evidence": false
+          },
+          "gain_vs_always_wait": {
+            "mean": 0.000362448959102817,
+            "days": 28,
+            "ci95": [
+              -0.0003199438519119447,
+              0.0005836342395594987
+            ],
+            "effective_week_blocks": 4.0,
+            "independent_future_evidence": false
+          }
+        },
+        "24": {
+          "signals": 645,
+          "gain_vs_buy_now": {
+            "mean": -0.0054142894662315855,
+            "days": 28,
+            "ci95": [
+              -0.009292202833407611,
+              0.003537292894032334
+            ],
+            "effective_week_blocks": 4.0,
+            "independent_future_evidence": false
+          },
+          "gain_vs_always_wait": {
+            "mean": 0.0010158342797020668,
+            "days": 28,
+            "ci95": [
+              0.0,
+              0.0019386061756468001
+            ],
+            "effective_week_blocks": 4.0,
+            "independent_future_evidence": false
+          }
+        }
+      },
+      "barrier_brier_gain": {
+        "mean": 0.01465531343533667,
+        "days": 28,
+        "ci95": [
+          -0.002969299617528631,
+          0.023626744241134423
+        ],
+        "effective_week_blocks": 4.0,
+        "independent_future_evidence": false
+      }
+    }
+  },
+  "decision_policy": "expected-btc",
+  "admission_criteria_unchanged": true,
+  "expected_btc_policy_is_objective_not_calibrated_confidence_claim": true,
+  "stable_entry_gain_vs_both": false
+}

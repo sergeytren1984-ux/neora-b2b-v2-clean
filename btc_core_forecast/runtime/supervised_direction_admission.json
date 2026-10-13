@@ -1,0 +1,37 @@
+{
+  "schema": "btc-supervised-sign-admission-review-v1",
+  "full_system_ready": false,
+  "trading_authority": false,
+  "history_already_used": true,
+  "prospective_skill_proven": false,
+  "candidate_spec": {
+    "schema": "btc-supervised-sign-path-candidate-v1",
+    "features": "30 causal spot/regime features",
+    "direction_horizons_hours": [
+      1,
+      4,
+      24
+    ],
+    "classifier": "logistic regression",
+    "regularization_C": 0.1,
+    "calibration": "held-out additive log-odds correction bounded [-3,3]",
+    "path_weight": "geometric mean of three sign likelihood ratios",
+    "ratio_bounds": [
+      0.05,
+      20
+    ],
+    "hypothetical_entry_policy": "expected extra BTC > 0",
+    "previous_candidate_rejected": true,
+    "historical_selection_bias": true,
+    "R6_numeric_used": false,
+    "macro_numeric_used": false,
+    "actual_OTC_used": false,
+    "trading_authority": false,
+    "full_system_ready": false
+  },
+  "all_1h_sign_gain_means_vs_half_positive": false,
+  "all_1h_sign_lower_confidence_bounds_vs_half_positive": false,
+  "stable_entry_gain_vs_both": false,
+  "decision": "NOT_ADMITTED",
+  "needs_independent_unseen_outcomes": true
+}

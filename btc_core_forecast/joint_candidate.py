@@ -62,7 +62,7 @@ def entry(close,weights,spot,wait,budget=147600.,premium=350.,delay=1):
         'research_wait_signal':expected>0 and probability>.60,'trading_authority':False,
         'actual_operator_quotes':False}
 
-def run(array_file,out,policy='conservative'):
+def run(array_file,out,policy='conservative',fit_fn=None,paths_fn=None,candidate_spec=None):
     if policy not in ('conservative','expected-btc'):raise ValueError('unknown fixed decision policy')
     a=dict(np.load(array_file,allow_pickle=False));out=pathlib.Path(out);out.mkdir(exist_ok=True,parents=True)
     report={'schema':'btc-one-joint-direction-entry-candidate-v1','historical_only':True,'history_already_seen':True,
@@ -72,15 +72,18 @@ def run(array_file,out,policy='conservative'):
         'macro_history_availability_unverified':a['x'].shape[1]>30,
         'utility_is_per_hypothetical_decision_not_cumulative':True,'folds':{}}
     report['decision_policy']=policy
+    if candidate_spec is not None:
+        report['candidate_spec']=candidate_spec
+        report['fixed_parameters']=candidate_spec
     report['admission_criteria_unchanged']=True
     report['expected_btc_policy_is_objective_not_calibrated_confidence_claim']=policy=='expected-btc'
     folds=w.FOLDS+(('2026-07-01T00:00:00Z','2026-08-01T00:00:00Z'),)
     for start,end in folds:
-        tr,ca,te=w.split(a['anchors'],start,end);m=fit(a,tr,ca)
+        tr,ca,te=w.split(a['anchors'],start,end);m=(fit if fit_fn is None else fit_fn)(a,tr,ca)
         logs=np.column_stack([head.predict(a['x'][te]) for head in m['volatility']['heads']])
         rows={h:[] for h in w.HORIZONS};gains={h:[] for h in w.HORIZONS};always={h:[] for h in w.HORIZONS};signals={h:0 for h in w.HORIZONS};touch=[]
         for row,j in enumerate(te):
-            c,h,l,weights=paths(m,a['x'][j],a['scales'][j],logs[row]);spot=a['spot'][j];actual=a['close'][j]*a['scales'][j]
+            c,h,l,weights=(paths if paths_fn is None else paths_fn)(m,a['x'][j],a['scales'][j],logs[row]);spot=a['spot'][j];actual=a['close'][j]*a['scales'][j]
             bc,bh,bl=cp.distribution(m['volatility'],a['x'][j],a['scales'][j],logs[row])
             true_touch=f.first_passage(a['high'][j:j+1]*a['scales'][j],a['low'][j:j+1]*a['scales'][j])[0]
             pp=np.bincount(f.first_passage(h,l),weights=weights,minlength=4);bp=np.bincount(f.first_passage(bh,bl),minlength=4)/len(bc)
@@ -90,7 +93,10 @@ def run(array_file,out,policy='conservative'):
                 pp=np.bincount(w.endpoint_classes(c,horizon),weights=weights,minlength=3);bp=np.bincount(w.endpoint_classes(bc,horizon),minlength=3)/len(bc)
                 label=w.endpoint_classes(actual[None],horizon)[0]
                 rows[horizon].append([abs(spot-truth)-abs(q[1]-truth),f.crps(spot*np.exp(bc[:,horizon-1]),truth)-weighted_crps(values,weights,truth),
-                    np.sum((bp-np.eye(3)[label])**2)-np.sum((pp-np.eye(3)[label])**2),float(q[0]<=truth<=q[2])])
+                    np.sum((bp-np.eye(3)[label])**2)-np.sum((pp-np.eye(3)[label])**2),float(q[0]<=truth<=q[2]),
+                    float((np.mean(bc[:,horizon-1]>0)-(actual[horizon-1]>0))**2-(np.sum(weights[c[:,horizon-1]>0])-(actual[horizon-1]>0))**2),
+                    float(.25-(np.sum(weights[c[:,horizon-1]>0])-(actual[horizon-1]>0))**2),
+                    float((np.mean(a['close'][ca,horizon-1]>0)-(actual[horizon-1]>0))**2-(np.sum(weights[c[:,horizon-1]>0])-(actual[horizon-1]>0))**2)])
                 action=entry(c,weights,spot,horizon)
                 waiting=action['research_wait_signal'] if policy=='conservative' else action['expected_extra_btc']>0
                 signals[horizon]+=int(waiting)
@@ -100,7 +106,9 @@ def run(array_file,out,policy='conservative'):
         for horizon in w.HORIZONS:
             z=np.array(rows[horizon]);anchors=a['anchors'][te]
             fold['price_direction'][str(horizon)]={'mae_gain_vs_persistence':block_stats(z[:,0],anchors),'crps_gain_vs_uncertainty_component':block_stats(z[:,1],anchors),
-                'direction_brier_gain':block_stats(z[:,2],anchors),'coverage_80pct':float(z[:,3].mean())}
+                    'direction_brier_gain':block_stats(z[:,2],anchors),'sign_brier_gain':block_stats(z[:,4],anchors),
+                    'sign_brier_gain_vs_half':block_stats(z[:,5],anchors),'sign_brier_gain_vs_causal_calibration_prior':block_stats(z[:,6],anchors),
+                    'coverage_80pct':float(z[:,3].mean())}
             chosen=np.array(gains[horizon]);fold['entry'][str(horizon)]={'signals':signals[horizon],
                 'gain_vs_buy_now':block_stats(chosen,anchors),'gain_vs_always_wait':block_stats(chosen-np.array(always[horizon]),anchors)}
         report['folds'][start[:10]]=fold;f.write(out/'diagnostic.json',report)

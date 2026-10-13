@@ -1,0 +1,26 @@
+[
+  {
+    "factor": "DGS10",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS10&cosd=2023-01-01&coed=2026-10-12",
+    "sha256": "fe6b9193999a18199855ef7747569e6e396ed5da6fd023249c6c362b8e26467e",
+    "received_at_utc": "2026-10-13T11:50:51.112163+00:00",
+    "historical_receipt_time_verified": false,
+    "latest_vintage_not_first_release": true
+  },
+  {
+    "factor": "DTWEXBGS",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DTWEXBGS&cosd=2023-01-01&coed=2026-10-12",
+    "sha256": "be8604ce04b38f3f0f45ffc60535227dd17d94ed9e614f4cd4aba1b8ebf2c0b9",
+    "received_at_utc": "2026-10-13T11:50:57.976380+00:00",
+    "historical_receipt_time_verified": false,
+    "latest_vintage_not_first_release": true
+  },
+  {
+    "factor": "NASDAQ100",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=NASDAQ100&cosd=2023-01-01&coed=2026-10-12",
+    "sha256": "ec17b8c0ba5a303be5b4821fc24895a60aa4e49c5717cae66ebe3fca30107074",
+    "received_at_utc": "2026-10-13T11:51:04.178390+00:00",
+    "historical_receipt_time_verified": false,
+    "latest_vintage_not_first_release": true
+  }
+]

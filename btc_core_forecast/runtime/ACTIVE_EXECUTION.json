@@ -1,6 +1,6 @@
 {
   "schema": "btc-active-execution-v1",
-  "checked_at_utc": "2026-10-13T12:29:20.739515+00:00",
+  "checked_at_utc": "2026-10-13T12:39:33.697850+00:00",
   "full_system_ready": false,
   "overall_task_complete": false,
   "trading_authority": false,
@@ -17,7 +17,7 @@
   "R6_feature_real_signature_and_rederivation_passed": true,
   "R6_numeric_in_current_forecast": false,
   "macro_numeric_in_current_forecast": false,
-  "unit_tests_research": 57,
+  "unit_tests_research": 61,
   "unit_tests_forecast_worker": 4,
   "unit_tests_raw_collector": 3,
   "historical_extra_July_grid_complete": true,
@@ -32,5 +32,12 @@
   "minute_health_source_sha": "6feff10e759c6c71a65e6387281ae5888140eb13",
   "minute_health_is_predictor": false,
   "raw_second_epoch_preregistration_signature_verified": true,
-  "first_minute_health_signature_and_arithmetic_verified": true
+  "first_minute_health_signature_and_arithmetic_verified": true,
+  "first_1h_outcome_signature_and_arithmetic_verified": true,
+  "first_outcome_is_not_confirmation_of_skill": true,
+  "second_forecast_signature_and_features_and_model_verified": true,
+  "forecast_initial_run_completed_successfully": true,
+  "forecast_automatic_relay_run_id": 38398618220,
+  "supervised_direction_candidate_admitted": false,
+  "direction_replacement_failed_July_against_both_sign_baselines": true
 }

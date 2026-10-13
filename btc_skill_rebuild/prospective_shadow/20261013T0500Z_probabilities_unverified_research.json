@@ -1,0 +1,46 @@
+{
+  "schema": "btc-v7r6-unpromoted-ex-ante-research-spot-probabilities-v1",
+  "clock_anchor_utc": "2026-10-13T05:00:00+00:00",
+  "input_R5_spot_source_blob_GitHub_sha1": "3930f20ac519b1d67e46c0cc9ecfa39d74dff8fa",
+  "input_R5_spot_source_path": "btc_v7r3_evidence/slots/20261013T0500Z/snapshot.json",
+  "source_retrieved_at_utc": "2026-10-13T05:04:14.308000+00:00",
+  "generated_utc": "2026-10-13T05:05:05.783+00:00",
+  "training_weights_sha256": "cddf85d3e8b352b1eae4560ff145e927b9c7f0da5853d48d725e535f0f6f772f",
+  "evidence_signature_not_independently_verified": true,
+  "not_GitHub_signed_prospective_v7r6": true,
+  "publication_must_be_committed_BEFORE_outcome_and_within_13m_for_slot_admission": true,
+  "has_real_operator_OTC_quotes": false,
+  "trading_authority": false,
+  "three_way": {
+    "1h": {
+      "up": 0.017694913705938578,
+      "down": 0.022491945671237565,
+      "range": 0.959813140622824,
+      "source_anchor_utc": "2026-10-13T05:00:00+00:00",
+      "horizon_target_utc": "2026-10-13T06:00:00+00:00",
+      "reference_spot_usdt": 83453.87,
+      "endpoint_threshold_fraction": 0.007,
+      "estimated_probabilities_sum_to_one": true
+    },
+    "24h": {
+      "up": 0.14126744624669935,
+      "down": 0.06808751414560543,
+      "range": 0.7906450396076952,
+      "source_anchor_utc": "2026-10-13T05:00:00+00:00",
+      "horizon_target_utc": "2026-10-14T05:00:00+00:00",
+      "reference_spot_usdt": 83453.87,
+      "endpoint_threshold_fraction": 0.02,
+      "estimated_probabilities_sum_to_one": true
+    },
+    "4h": {
+      "up": 0.05128205128205128,
+      "down": 0.03678929765886288,
+      "range": 0.9119286510590858,
+      "source_anchor_utc": "2026-10-13T05:00:00+00:00",
+      "horizon_target_utc": "2026-10-13T09:00:00+00:00",
+      "reference_spot_usdt": 83453.87,
+      "endpoint_threshold_fraction": 0.012,
+      "estimated_probabilities_sum_to_one": true
+    }
+  }
+}

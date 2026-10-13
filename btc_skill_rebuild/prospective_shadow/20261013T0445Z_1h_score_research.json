@@ -1,0 +1,61 @@
+{
+  "schema": "btc-v7r6-research-ex-ante-own-slot-one-hour-endpoint-score-v1",
+  "research_only": true,
+  "trade_admission": false,
+  "trading_authority": false,
+  "original_public_research_forecast": {
+    "path": "btc_skill_rebuild/prospective_shadow/20261013T0445Z_probabilities_unverified_research.json",
+    "git_blob_sha1": "0d9e2946a403ec1701174ad21edce930154194f8",
+    "original_public_commit_sha": "5f69e7f842d10fe1d1348adf9fb2f9d1d3d4fa41",
+    "original_public_commit_time_utc": "2026-10-13T04:56:34.000Z",
+    "signed_frozen_R6_model_forecast": false
+  },
+  "frozen_historical_weights": {
+    "path": "btc_skill_rebuild/prospective_shadow/frozen_historical_weights_first_asof_20261013.json",
+    "git_blob_sha1": "05e61325250fbd470c988326cbeaf24853bd6947",
+    "sha256_claim_from_public_forecast": "cddf85d3e8b352b1eae4560ff145e927b9c7f0da5853d48d725e535f0f6f772f"
+  },
+  "target_outcome_evidence": {
+    "R5_snapshot_path": "btc_v7r3_evidence/slots/20261013T0615Z/snapshot.json",
+    "R5_snapshot_git_blob_sha1": "f173ff0d821a1ca0c80530705453c145969ef484",
+    "R5_snapshot_git_commit_sha": "e80e42c80bb0d2f60989b605a016e99a6ba5a995",
+    "R5_snapshot_git_commit_time_utc": "2026-10-13T06:18:29Z",
+    "R5_snapshot_retrieved_at_utc": "2026-10-13T06:18:25.985000+00:00",
+    "R5_snapshot_anchor_utc": "2026-10-13T06:15:00+00:00",
+    "R5_snapshot_sigstore_bundle_blob_sha1": "7776bd1afa8618a7ab38cbe34861c54508083b4c",
+    "has_inclusion_proof": true,
+    "cryptographic_Cosign_verification_performed": false,
+    "exact_target_bar_open_ms": 1791870000000,
+    "exact_target_bar_close_ms": 1791870299999,
+    "exact_target_closed_5m_price_usdt": 83587.45,
+    "no_backfill": true
+  },
+  "endpoint_1h": {
+    "forecast_slot_utc": "2026-10-13T04:45:00+00:00",
+    "actual_publication_lead_to_endpoint_minutes": 48.43333333333333,
+    "precommitted_target_utc": "2026-10-13T05:45:00+00:00",
+    "reference_spot_usdt": 83462.9,
+    "threshold_fraction": 0.007,
+    "observed_endpoint_return_pct": 0.14922798033618623,
+    "actual_class": "RANGE",
+    "precommitted_probabilities": {
+      "UP": 0.02231836339503352,
+      "DOWN": 0.027799809909358094,
+      "RANGE": 0.9498818266956085
+    },
+    "frozen_train_prior_probabilities": {
+      "UP": 0.03281423804226919,
+      "DOWN": 0.027067111605487578,
+      "RANGE": 0.9401186503522432
+    },
+    "strict_three_way_brier_divided_by_3": 0.0012609233569994126,
+    "strict_three_way_train_prior_brier_divided_by_3": 0.0017983929281985111,
+    "brier_gain_vs_frozen_train_prior": 0.0005374695711990985,
+    "independent_event_or_day_count_increment": 0,
+    "overlapping_1h_slots_are_not_independent": true
+  },
+  "pending_4h_24h_not_resolved": true,
+  "has_firm_OTC_quotes": false,
+  "has_real_OTC_fills": false,
+  "prospective_20_day_admission_met": false
+}

@@ -1,0 +1,22 @@
+{
+  "schema": "btc-worker-recovery-status-v1",
+  "checked_at_utc": "2026-10-13T18:32:10.054Z",
+  "minute_guard_source_sha": "6feff10e759c6c71a65e6387281ae5888140eb13",
+  "failed_run": 38406108646,
+  "failed_job": 115326050474,
+  "failure": "cosign ambient GitHub OIDC token retrieval returned invalid JSON",
+  "rerun_failed_jobs_requested_successfully": true,
+  "rerun_job": 115467867015,
+  "rerun_last_observed_status": "queued",
+  "minute_service_restored_not_yet_verified": true,
+  "forecast_run": 38446541412,
+  "forecast_last_observed_status": "pending",
+  "raw_and_macro_collectors_last_observed_status": "in_progress",
+  "repository_in_progress_runs_observed": 20,
+  "repository_queued_runs_observed": 15,
+  "missed_slots_are_not_backfilled_as_observations": true,
+  "original_source_code_and_thresholds_not_changed": true,
+  "overall_task_complete": false,
+  "full_system_ready": false,
+  "trading_authority": false
+}

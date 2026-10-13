@@ -1,0 +1,42 @@
+{
+  "schema": "btc-v7r6-HH00-research-math-20261013",
+  "checked_utc": "2026-10-13T19:33:11Z",
+  "source": "R5 GitHub snapshot; original research forecast GitHub commit times; exact closed 5m outcomes",
+  "hourly_due": 20,
+  "hourly_source_present": 9,
+  "on_time_forecasts": 2,
+  "missing_forecasts": 18,
+  "slots": [
+    "20261013T0500Z",
+    "20261013T1100Z"
+  ],
+  "horizons": {
+    "1h": {
+      "matured": 19,
+      "scored": 2,
+      "nonoverlap_scored": 2,
+      "labels": [
+        "RANGE",
+        "RANGE"
+      ],
+      "mean_Brier_gain": 0.00025795667028686296
+    },
+    "4h": {
+      "matured": 16,
+      "scored": 2,
+      "nonoverlap_midnight_origin_due": 4,
+      "nonoverlap_scored": 0,
+      "mean_Brier_gain": 0
+    },
+    "24h": {
+      "matured": 0,
+      "scored": 0
+    }
+  },
+  "independent_days": 1,
+  "first_touch_directional_events": 0,
+  "real_OTC_operator_quotes": 0,
+  "cosign_independently_verified": false,
+  "trading_authority": false,
+  "note": "Predeclared hourly HH00 grid, not prior overlapping 15-minute research grid; no mathematical trading edge proven."
+}

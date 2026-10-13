@@ -1,0 +1,159 @@
+{
+  "computed_at_utc": "2026-10-13T00:03:36.248485+00:00",
+  "evidence_binding": {
+    "audit_sha256": "0fddfab706a0627cb14f0e0baeca5bfe3786a439dd3d06bea5fe12f64b3add54",
+    "forecast_target_utc": {
+      "1h": "2026-10-13T01:00:00+00:00",
+      "2h": "2026-10-13T02:00:00+00:00",
+      "4h": "2026-10-13T04:00:00+00:00",
+      "5h": "2026-10-13T05:00:00+00:00",
+      "morning": "2026-10-13T05:00:00+00:00",
+      "morning_plus_1h": "2026-10-13T06:00:00+00:00"
+    },
+    "inference_run_id": "38325291271",
+    "inference_source_commit_sha": "39f61562803f3120bcda872b56f76a392989ed4e",
+    "model_sha256": "e76fedec482b399cc13f3e3366778e8942cb648db9019ca92ad5de123a9b2d2a",
+    "paired_sha256": "061a12db53e10748768ef2e5f4e23dec5f75a560ce695da24d85f6db0af9368b",
+    "snapshot_sha256": "0be6e6b4035f69d564d6957ac08bb63a72989d0c7968617e3bd9d2a2c4af202e",
+    "training_source_commit_sha": "3d08e5a767f1848a9e10d6bea1ef939c2b77238a",
+    "training_source_run_id": 38169934478,
+    "trusted_release_manifest_sha256": "c5b40d436f7e5a77c17ea9853bfc75b5180f75a24432cac64c97cdfb9180f6a2"
+  },
+  "forecast_target_offset_warning": "OTC price comparisons are invalidated unless exact forecast target_at matches each execution due timestamp.",
+  "large_move_probabilities": {
+    "down_1h": {
+      "estimate": 0.07633768675810094,
+      "historical_validation_threshold": 0.19079102745014836,
+      "raw_threshold_crossed": false,
+      "status": "EXPERIMENTAL_NOT_CALIBRATED_FOR_TRADING",
+      "watch": false
+    },
+    "down_30m": {
+      "estimate": 0.06429347579647983,
+      "historical_validation_threshold": 0.22691665337971867,
+      "raw_threshold_crossed": false,
+      "status": "EXPERIMENTAL_NOT_CALIBRATED_FOR_TRADING",
+      "watch": false
+    },
+    "down_4h": {
+      "estimate": 0.0896286038947211,
+      "historical_validation_threshold": 0.18994497631123125,
+      "raw_threshold_crossed": false,
+      "status": "EXPERIMENTAL_NOT_CALIBRATED_FOR_TRADING",
+      "watch": false
+    },
+    "up_1h": {
+      "estimate": 0.06801623058633345,
+      "historical_validation_threshold": 0.1460251629135709,
+      "raw_threshold_crossed": false,
+      "status": "NOT_VALIDATED_NO_ACTIONABLE_WARNING",
+      "watch": false
+    },
+    "up_30m": {
+      "estimate": 0.05601322223883255,
+      "historical_validation_threshold": 0.20087817805355435,
+      "raw_threshold_crossed": false,
+      "status": "EXPERIMENTAL_NOT_CALIBRATED_FOR_TRADING",
+      "watch": false
+    },
+    "up_4h": {
+      "estimate": 0.14197976378979893,
+      "historical_validation_threshold": 0.16644973805093,
+      "raw_threshold_crossed": false,
+      "status": "NOT_VALIDATED_NO_ACTIONABLE_WARNING",
+      "watch": false
+    }
+  },
+  "model_branch": "btc-predictive-vnext7-demand-price-otc-20261011",
+  "model_skill_status": "NOT_PROVEN_BASELINE_ONLY",
+  "no_auto_trade": true,
+  "oi_not_used_numerically": true,
+  "operator_quote_is_executable": false,
+  "otc_comparison": {
+    "actions": {
+      "BUY_NOW": {
+        "acquired_btc": null,
+        "difference_in_btc_vs_buy_now": null,
+        "due_utc": "2026-10-13T01:03:36.248485+00:00",
+        "executed_otc_price": null,
+        "forecast_target_utc": "2026-10-13T01:00:00+00:00",
+        "horizon": "1h",
+        "predicted_spot": null,
+        "status": "NO_EXECUTION_ALIGNED_FORECAST"
+      },
+      "WAIT_1H": {
+        "acquired_btc": null,
+        "difference_in_btc_vs_buy_now": null,
+        "due_utc": "2026-10-13T02:03:36.248485+00:00",
+        "executed_otc_price": null,
+        "forecast_target_utc": "2026-10-13T02:00:00+00:00",
+        "horizon": "2h",
+        "predicted_spot": null,
+        "status": "NO_EXECUTION_ALIGNED_FORECAST"
+      },
+      "WAIT_4H": {
+        "acquired_btc": null,
+        "difference_in_btc_vs_buy_now": null,
+        "due_utc": "2026-10-13T05:03:36.248485+00:00",
+        "executed_otc_price": null,
+        "forecast_target_utc": "2026-10-13T05:00:00+00:00",
+        "horizon": "5h",
+        "predicted_spot": null,
+        "status": "NO_EXECUTION_ALIGNED_FORECAST"
+      },
+      "WAIT_TILL_08_MSK": {
+        "acquired_btc": null,
+        "difference_in_btc_vs_buy_now": null,
+        "due_utc": "2026-10-13T06:00:00+00:00",
+        "executed_otc_price": null,
+        "forecast_target_utc": "2026-10-13T06:00:00+00:00",
+        "horizon": "morning_plus_1h",
+        "predicted_spot": null,
+        "status": "NO_EXECUTION_ALIGNED_FORECAST"
+      }
+    },
+    "anchor_utc": "2026-10-13T00:00:00+00:00",
+    "budget_usdt": 147600.0,
+    "execution_delay_hours": 1,
+    "market_order_placed": false,
+    "otc_markup_per_btc": 350.0,
+    "published_at_utc": "2026-10-13T00:03:36.248485+00:00",
+    "reason": "Forecast endpoint timestamps differ from OTC execution timestamps; no interpolated or day-shifted price is permitted.",
+    "schema": "btc-otc-delay-v2",
+    "status": "NO_EXECUTION_ALIGNED_FORECAST",
+    "trading_authority": false,
+    "uncertainty": {}
+  },
+  "positioning_context": "OI_NEAR_FLAT",
+  "price_exact_target_utc": {
+    "1h": "2026-10-13T01:00:00+00:00",
+    "2h": "2026-10-13T02:00:00+00:00",
+    "4h": "2026-10-13T04:00:00+00:00",
+    "5h": "2026-10-13T05:00:00+00:00",
+    "morning": "2026-10-13T05:00:00+00:00",
+    "morning_plus_1h": "2026-10-13T06:00:00+00:00"
+  },
+  "price_point_forecasts": {
+    "1h": 81850.0,
+    "2h": 81850.0,
+    "4h": 81850.0,
+    "5h": 81850.0,
+    "morning": 81850.0,
+    "morning_plus_1h": 81850.0
+  },
+  "price_test_mae": {
+    "1h": 171.92645576131667,
+    "2h": 245.09474120082805,
+    "4h": 347.7990461215932,
+    "5h": 387.4260232067508,
+    "morning": 576.5145190156603,
+    "morning_plus_1h": 564.0446532438467
+  },
+  "prospective_skill_proven": false,
+  "reference_anchor_utc": "2026-10-13T00:00:00+00:00",
+  "schema": "btc-v7-frozen-shadow-inference-v1",
+  "snapshot_age_seconds": 216.248485,
+  "spot": 81850.0,
+  "spot_demand_watch": "NO_EXTREME_FLOW_WATCH",
+  "trading_authority": false
+}

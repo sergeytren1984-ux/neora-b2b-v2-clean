@@ -1,0 +1,31 @@
+{
+  "schema": "btc-v7r6-research-1h-day-block-due-grid-v1",
+  "asof_utc": "2026-10-13T06:30:00Z",
+  "slots_from": "2026-10-13T04:45:00Z",
+  "slots_through": "2026-10-13T06:15:00Z",
+  "expected_15min_slots": 7,
+  "public_research_forecasts": 2,
+  "missing_research_slots": [
+    "05:15",
+    "05:30",
+    "05:45",
+    "06:00",
+    "06:15"
+  ],
+  "matured_1h": 2,
+  "matured_4h": 0,
+  "matured_24h": 0,
+  "actual_1h_classes": {
+    "UP": 0,
+    "DOWN": 0,
+    "RANGE": 2
+  },
+  "distinct_days": 1,
+  "independent_directional_events": 0,
+  "mean_1h_Brier": 0.001036125221456279,
+  "mean_1h_train_prior_Brier": 0.0017983929281985111,
+  "mean_gain_not_significant": 0.0007622677067422321,
+  "all_1h_windows_overlap": true,
+  "confidence_interval": null,
+  "admission": false
+}

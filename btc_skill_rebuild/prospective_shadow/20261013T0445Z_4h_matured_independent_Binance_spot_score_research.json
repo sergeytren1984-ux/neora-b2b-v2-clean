@@ -1,0 +1,54 @@
+{
+  "schema": "btc-v7r6-after-maturity-4h-research-v1",
+  "research_forecast_git_commit": "5f69e7f842d10fe1d1348adf9fb2f9d1d3d4fa41",
+  "research_forecast_git_blob": "0d9e2946a403ec1701174ad21edce930154194f8",
+  "forecast_slot_utc": "2026-10-13T04:45:00Z",
+  "forecast_public_git_commit_utc": "2026-10-13T04:56:34Z",
+  "target_utc": "2026-10-13T08:45:00Z",
+  "target_closed_5m_bar_start_ms": 1791880800000,
+  "target_closed_5m_bar_end_ms": 1791881099999,
+  "target_spot_exchange": "BTCUSDT Binance spot",
+  "target_close_usdt": 83807.81,
+  "source_read_only_endpoints": [
+    "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=5m&startTime=1791880800000&limit=1",
+    "https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=5m&startTime=1791880800000&limit=1"
+  ],
+  "source_values_identical": true,
+  "raw_bar": [
+    1791880800000,
+    "83788.01000000",
+    "83807.82000000",
+    "83752.00000000",
+    "83807.81000000",
+    "119.64191000",
+    1791881099999,
+    "10023418.54605190",
+    10078,
+    "68.38559000",
+    "5729244.50467490",
+    "0"
+  ],
+  "starting_reference_price_usdt": 83462.9,
+  "endpoint_threshold_fraction": 0.012,
+  "actual_outcome": "RANGE",
+  "realized_close_return_pct": 0.41324947970895476,
+  "prepublished_probabilities": {
+    "UP": 0.05128205128205128,
+    "DOWN": 0.03678929765886288,
+    "RANGE": 0.9119286510590858
+  },
+  "historical_training_prior_probabilities": {
+    "UP": 0.05128205128205128,
+    "DOWN": 0.03678929765886288,
+    "RANGE": 0.9119286510590858
+  },
+  "model_probabilities_exactly_equal_training_prior": true,
+  "model_three_way_brier_mean_squares": 0.003913287903399872,
+  "historical_training_prior_three_way_brier_mean_squares": 0.003913287903399872,
+  "skill_gain_vs_frozen_training_prior": 0,
+  "market_vendor_data_is_not_R5_signed_evidence": true,
+  "no_operator_OTC_quotes": true,
+  "only_one_4h_prospective_research_outcome": true,
+  "prospective_directional_advantage_proven": false,
+  "trading_authority": false
+}

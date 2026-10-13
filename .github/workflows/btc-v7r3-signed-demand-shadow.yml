@@ -1,102 +1,51 @@
-name: BTC v7R5 corrected same CUSUM source-asof research (no trading)
-
+name: BTC core bounded signed forward data only
 on:
   push:
-    branches: [btc-v7r5-live-cadence-reliability-20261012]
-    paths:
-      - btc_demand_v7/v7r3_shadow_worker.py
-      - btc_demand_v7/shadow_contract_v3.py
-      - btc_demand_v7/demand_change_v2.py
-      - btc_demand_v7/test_v7r3_shadow_worker.py
-      - btc_demand_v7/test_demand_change_v2.py
-      - btc_demand_v7/test_shadow_contract_v3.py
-      - btc_demand_v7/test_v7r4_adversarial.py
-      - btc_demand_v7/source_integrity_v5.py
-      - btc_demand_v7/test_source_integrity_v5.py
-      - btc_demand_v7/test_anchor_receipt_jitter_v5.py
-      - btc_demand_v7/test_public_daily_budget_v5.py
-      - btc_demand_v7/episode_quality_v4.py
-      - btc_demand_v7/test_episode_quality_v4.py
-      - btc_demand_v7/prospective_core.py
-      - btc_demand_v7/live_snapshot.py
-      - btc_demand_v7/infer_live.py
-      - btc_demand_v7/otc_execution.py
-      - btc_demand_v7/test_otc_execution.py
-      - .github/workflows/btc-v7r3-signed-demand-shadow.yml
+    branches: [btc-core-forward-source-20261013]
+    paths: [.github/workflows/btc-v7r3-signed-demand-shadow.yml, btc_core_observer/**]
   workflow_dispatch:
     inputs:
       action:
-        description: "register, forecast or resolve outcomes in separate signed job"
-        required: true
         type: choice
-        options: [register,forecast,outcome]
+        options: [register, forecast, outcome]
+        required: true
+        default: forecast
       start_utc:
-        description: "future, 15m aligned, UTC (only for register)"
-        required: false
         type: string
+        required: false
       days:
-        description: "fixed consecutive days, >=1 <=14"
-        required: false
-        default: "7"
         type: string
-
+        default: '1'
+        required: false
 permissions:
   contents: write
-  actions: read
   id-token: write
-
+  actions: write
+concurrency:
+  group: btc-core-forward-data-fixed-source
+  cancel-in-progress: false
 jobs:
-  signed-research-only:
-    concurrency:
-      # Forecast is NEVER queued behind long post-due raw replays.
-      group: btc-v7r5-${{ github.ref }}-${{ inputs.action }}-${{ inputs.action == 'forecast' && github.run_id || 'serial' }}
-      cancel-in-progress: false
+  collect-only:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 100
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      GH_REPOSITORY: ${{ github.repository }}
       PYTHONHASHSEED: '0'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           ref: ${{ github.sha }}
-          persist-credentials: true
+          persist-credentials: false
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.12.14'
       - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
         with:
           cosign-release: v3.0.6
-      - name: Reject prior-state resets, future prices and unscheduled warnings
-        if: github.event_name == 'push' || inputs.action == 'register'
-        run: |
-          python -m py_compile \
-            btc_demand_v7/demand_change_v2.py \
-            btc_demand_v7/shadow_contract_v3.py \
-            btc_demand_v7/v7r3_shadow_worker.py
-          python -m btc_demand_v7.test_demand_change_v2
-          python -m btc_demand_v7.test_shadow_contract_v3
-          python -m btc_demand_v7.test_v7r3_shadow_worker
-          python -m btc_demand_v7.test_event_semantics
-          python -m btc_demand_v7.test_v7r4_adversarial
-          python -m btc_demand_v7.test_anchor_receipt_jitter_v5
-          python -m btc_demand_v7.test_public_daily_budget_v5
-          python -m btc_demand_v7.test_episode_quality_v4
-          python -m btc_demand_v7.test_snapshot
-          python -m btc_demand_v7.test_prospective
-          python -m btc_demand_v7.test_otc_execution
-      - name: Verify and sign future-epoch registration before first target
-        if: github.event_name == 'workflow_dispatch' && inputs.action == 'register'
-        run: |
-          python -m btc_demand_v7.v7r3_shadow_worker register \
-            --start-utc "${{ inputs.start_utc }}" \
-            --days "${{ inputs.days }}"
-      - name: Emit one current pre-move signed warning before its exact deadline
-        if: github.event_name == 'workflow_dispatch' && inputs.action == 'forecast'
-        run: |
-          python -m btc_demand_v7.v7r3_shadow_worker forecast
-      - name: Resolve only matured independent future outcomes after the warning job completed
-        if: github.event_name == 'workflow_dispatch' && inputs.action == 'outcome'
-        run: |
-          python -m btc_demand_v7.v7r3_shadow_worker outcome
+      - name: Check fixed grid and no trade authority
+        run: python -m btc_core_observer.test_collector
+      - name: Signed raw data only, no price forecast and no trade
+        run: python -m btc_core_observer.collector watch --minutes 90
+      - name: Continue bounded collection until declared end
+        if: success()
+        run: python -m btc_core_observer.collector relay

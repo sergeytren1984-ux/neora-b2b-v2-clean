@@ -8,7 +8,7 @@ Scores cannot grant trade admission, no OTC operator ASK or actual fill.
 from __future__ import annotations
 import argparse,datetime as dt,json,hashlib,pathlib,math
 from btc_skill_rebuild.research_endpoint_24h_v7r6 import brier
-from btc_skill_rebuild.research_unified_endpoint_v7r6 import endpoint_class
+from btc_skill_rebuild.research_unified_endpoint_v7r6 import endpoint_class,HORIZONS
 UTC=dt.timezone.utc
 
 def when(raw):
@@ -27,11 +27,33 @@ def resolved_endpoint(prediction,freeze,target_snapshot,public_commit_time_utc,n
         raise ValueError('no real trading authority can be retroactively assigned')
     if not prediction.get('evidence_signature_not_independently_verified'):
         raise ValueError('research provenance must not claim cryptographic verification')
+    # Research-only immutable endpoint checks; no horizon relabelling after publication.
+    if set(prediction.get('three_way',{}))!=set(HORIZONS) or set(freeze.get('heads',{}))!=set(HORIZONS):
+        raise ValueError('missing or substituted frozen horizon')
+    reference=None
+    for h,(duration,threshold) in HORIZONS.items():
+        head=prediction['three_way'][h]
+        locked=freeze['heads'][h]
+        if int(locked['duration_5m_steps'])!=duration or float(locked['threshold'])!=threshold:
+            raise ValueError('frozen target duration or threshold drift')
+        if when(head['horizon_target_utc'])!=slot+dt.timedelta(minutes=duration*5):
+            raise ValueError('post-event target maturity shift')
+        if head.get('source_anchor_utc')!=prediction['clock_anchor_utc']:
+            raise ValueError('head anchor changed after public slot')
+        if float(head['endpoint_threshold_fraction'])!=threshold:
+            raise ValueError('post-event threshold change')
+        p=[float(head[k]) for k in ('up','down','range')]
+        if any(not math.isfinite(v) or v<0 or v>1 for v in p) or abs(sum(p)-1)>1e-9:
+            raise ValueError('invalid original probabilities')
+        price=float(head['reference_spot_usdt'])
+        if not math.isfinite(price) or price<=0 or reference is not None and price!=reference:
+            raise ValueError('original reference spot changed between heads')
+        reference=price
     obs=target_snapshot
     retrieved=when(obs['retrieved_at_utc'])
     anchor=when(obs['anchor_utc'])
-    if retrieved>now:
-        raise ValueError('future snapshot receipt relative to scoring time')
+    if retrieved>now or anchor>retrieved or anchor>now:
+        raise ValueError('future or impossible snapshot receipt relative to scoring time')
     if obs.get('no_backfill') is not True:
         raise ValueError('R5 future snapshot cannot be backfilled')
     bars=obs['five_min_rows']
@@ -76,6 +98,9 @@ def resolved_endpoint(prediction,freeze,target_snapshot,public_commit_time_utc,n
           'strict_3way_Brier_frozen_train_prior':brier(prior,y),
           'Brier_gain_vs_frozen_train_prior':brier(prior,y)-brier(p,y),
           'shrink_previous_validation_only':frozen['validation_selected_shrink']}
+    due_count=sum(bool(v.get('due')) for v in result.values())
+    resolved_count=sum(bool(v.get('resolved')) for v in result.values())
+    missing_count=sum(bool(v.get('due')) and not bool(v.get('resolved')) for v in result.values())
     return {'schema':'btc-v7r6-research-prospective-fixed-endpoint-own-slot-v1',
         'public_model_commit_time_utc_claimed_external':public.isoformat(),
         'public_model_commit_time_NOT_crypto_checked_inside_this_module':True,
@@ -83,7 +108,13 @@ def resolved_endpoint(prediction,freeze,target_snapshot,public_commit_time_utc,n
         'R5_signed_spot_input_Git_blob':prediction['input_R5_spot_source_blob_GitHub_sha1'],
         'future_R5_spot_snapshot_anchor_utc':obs['anchor_utc'],
         'future_R5_spot_snapshot_receipt_utc':obs['retrieved_at_utc'],
-        'has_real_OTC_operator_quotes':False,'independent_prospective_days_count':1,
+        'has_real_OTC_operator_quotes':False,
+        'fixed_horizon_due_count':due_count,
+        'fixed_horizon_resolved_count':resolved_count,
+        'fixed_horizon_due_missing_count':missing_count,
+        'calendar_days_with_any_resolved_endpoint':int(resolved_count>0),
+        'independent_prospective_days_count':0,
+        'independent_days_require_global_precommitted_nonoverlapping_grid':True,
         'prospective_market_skill_proven':False,'trading_authority':False,
         'three_way_horizons':result}
 

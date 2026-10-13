@@ -1,6 +1,6 @@
 {
   "schema": "btc-active-execution-v1",
-  "checked_at_utc": "2026-10-13T12:39:33.697850+00:00",
+  "checked_at_utc": "2026-10-13T18:27:02.945865+00:00",
   "full_system_ready": false,
   "overall_task_complete": false,
   "trading_authority": false,
@@ -17,7 +17,7 @@
   "R6_feature_real_signature_and_rederivation_passed": true,
   "R6_numeric_in_current_forecast": false,
   "macro_numeric_in_current_forecast": false,
-  "unit_tests_research": 61,
+  "unit_tests_research": 86,
   "unit_tests_forecast_worker": 4,
   "unit_tests_raw_collector": 3,
   "historical_extra_July_grid_complete": true,
@@ -39,5 +39,37 @@
   "forecast_initial_run_completed_successfully": true,
   "forecast_automatic_relay_run_id": 38398618220,
   "supervised_direction_candidate_admitted": false,
-  "direction_replacement_failed_July_against_both_sign_baselines": true
+  "direction_replacement_failed_July_against_both_sign_baselines": true,
+  "numeric_R6_and_macro_input_assembly_implemented": true,
+  "integrated_feature_count": 38,
+  "integrated_training_readiness": {
+    "eligible_inputs": 4,
+    "closed_direction_targets": {
+      "1": 4,
+      "4": 4,
+      "24": 0
+    },
+    "can_begin_full_candidate_training": false,
+    "reasons": [
+      "NO_CLOSED_DIRECTION_TARGETS:24h",
+      "LEGACY_MACRO_RUNTIME_UNPINNED",
+      "INSUFFICIENT_ROWS_FOR_TWO_240_ROW_SPLITS",
+      "COMPLETE_OBSERVED_72H_TRAJECTORIES_NOT_VERIFIED"
+    ],
+    "trading_authority": false,
+    "full_system_ready": false
+  },
+  "candidate_precalculation_gate_implemented": true,
+  "macro_immutable_source_commit": "08987b0fbfeb5ea1aa6b1c3fd287fea0b676ee21",
+  "macro_grid_start_MSK": "2026-10-13T21:00:00+03:00",
+  "integrated_candidate_spec_frozen": true,
+  "integrated_candidate_fitted": false,
+  "pinned_macro_registration_and_real_preflight_verified": true,
+  "one_fully_pinned_integrated_input_real_observation_verified": true,
+  "first_fixed_macro_grid_and_R6_input_signature_and_math_verified": true,
+  "verified_fixed_grid_anchor_utc": "2026-10-13T18:15:00+00:00",
+  "complete_integrated_training_model_exists": false,
+  "current_forward_endpoint_pairs_independently_verified": 9,
+  "current_forward_endpoints_prove_advantage": false,
+  "observed_72h_integrated_training_paths": 0
 }

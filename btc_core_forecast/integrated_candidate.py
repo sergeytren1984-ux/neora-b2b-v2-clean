@@ -4,6 +4,7 @@ from factor_integration import FEATURE_NAMES
 import supervised_direction as direction
 
 CANDIDATE='R6_MACRO_SIGN_PATH_V1'
+MINIMUM_SPLIT_ROWS=240
 
 def fit_verified(a,rows,train,calibration):
     if a['x'].shape!=(len(rows),len(FEATURE_NAMES)):raise ValueError('integrated feature matrix mismatch')
@@ -13,8 +14,14 @@ def fit_verified(a,rows,train,calibration):
         if (row.get('macro_quotes') or {}).get('immutable_collector_source_proven') is not True:raise ValueError('macro collector source unpinned')
     for name in ('close','high','low'):
         if a[name].shape!=(len(rows),72) or not np.isfinite(a[name]).all():raise ValueError('complete observed 72h target trajectories required')
+    expected=np.array([int(dt.datetime.fromisoformat(r['anchor_utc']).timestamp()*1000) for r in rows])
+    if not np.array_equal(a['anchors'],expected):raise ValueError('target anchor differs from verified input')
+    if not np.allclose(a['scales'],[r['past_sigma'] for r in rows],rtol=1e-12,atol=1e-12):raise ValueError('target scale differs from verified input')
+    if not np.allclose(a['spot'],[r['reference_spot'] for r in rows],rtol=1e-12,atol=1e-12):raise ValueError('target reference differs from verified input')
     train,calibration=np.asarray(train),np.asarray(calibration)
-    if min(len(train),len(calibration))==0:raise ValueError('separate causal training and calibration sets required')
+    for indexes in (train,calibration):
+        if indexes.ndim!=1 or indexes.dtype.kind not in 'iu' or np.any(indexes<0) or np.any(indexes>=len(rows)) or len(np.unique(indexes))!=len(indexes):raise ValueError('invalid or repeated split indexes')
+    if min(len(train),len(calibration))<MINIMUM_SPLIT_ROWS:raise ValueError('insufficient purged split: minimum 240 real rows each')
     if np.intersect1d(train,calibration).size:raise ValueError('training/calibration overlap')
     if a['anchors'][np.r_[train,calibration]].max()+72*3600000>int(dt.datetime.now(dt.timezone.utc).timestamp()*1000):raise ValueError('training targets have not closed yet')
     if a['anchors'][train].max()+72*3600000>=a['anchors'][calibration].min():raise ValueError('training targets overlap calibration')

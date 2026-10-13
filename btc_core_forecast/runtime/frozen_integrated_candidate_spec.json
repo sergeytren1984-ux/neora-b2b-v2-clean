@@ -92,5 +92,9 @@
   "full_system_ready": false,
   "trading_authority": false,
   "immutable_macro_source": "08987b0fbfeb5ea1aa6b1c3fd287fea0b676ee21",
-  "training_status": "NOT_FITTED"
+  "training_status": "NOT_FITTED",
+  "minimum_training_rows": 240,
+  "minimum_calibration_rows": 240,
+  "embargo_hours": 72,
+  "complete_actual_72h_trajectories_required": true
 }

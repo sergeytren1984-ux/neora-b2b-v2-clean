@@ -4,7 +4,7 @@
     {
       "schema": "btc-r6-bls-causal-input-row-v1",
       "anchor_utc": "2026-10-13T11:00:00+00:00",
-      "features_available_at_utc": "2026-10-13T11:00:09.682000+00:00",
+      "features_available_at_utc": "2026-10-13T11:00:11+00:00",
       "feature_names": [
         "spot_15m_log_return",
         "spot_15m_realized_volatility",
@@ -66,6 +66,9 @@
         "price_veto_status": "PRE_MOVE",
         "snapshot_math_digest": "6e2fd34170611ccf75313f30db8f3e6067f54ac7a7ad229422c9a6cc8dd8144b",
         "signed_record_sha256": "280dd863553fa46720108a51fb1813617c07f52de1dcf3c3cc9f59d76b3019f8",
+        "signed_record_available_not_before_utc": "2026-10-13T11:00:11+00:00",
+        "book_observed_at_utc": "2026-10-13T11:00:08.952000+00:00",
+        "microflow_closed_at_utc": "2026-10-13T11:00:00+00:00",
         "source_sha": "b8d2d1be108f249427bd97d446a7fc261ba5b553",
         "frozen_R6_formula_blob": "eb569c083b42936944da6abf638a0a876febd3f6",
         "this_is_not_an_R6_alert_or_price_forecast": true,
@@ -83,11 +86,11 @@
         "available": true,
         "features": [
           102.30799865722656,
-          1574.682,
+          1576.0,
           30747.25,
-          1573.682,
+          1575.0,
           5.240000247955322,
-          57909.682,
+          57911.0,
           1
         ],
         "feature_names": [
@@ -155,7 +158,7 @@
     {
       "schema": "btc-r6-bls-causal-input-row-v1",
       "anchor_utc": "2026-10-13T11:15:00+00:00",
-      "features_available_at_utc": "2026-10-13T11:15:15.878000+00:00",
+      "features_available_at_utc": "2026-10-13T11:15:17+00:00",
       "feature_names": [
         "spot_15m_log_return",
         "spot_15m_realized_volatility",
@@ -217,6 +220,9 @@
         "price_veto_status": "PRE_MOVE",
         "snapshot_math_digest": "55df7a21f058ce90d087be9e39fc5736786f50925f71ecda26c4922cca999779",
         "signed_record_sha256": "3d0e591c5085513333af4a52487d3aafd33af473681d868a2c27814ecf9dfe61",
+        "signed_record_available_not_before_utc": "2026-10-13T11:15:17+00:00",
+        "book_observed_at_utc": "2026-10-13T11:15:15.159000+00:00",
+        "microflow_closed_at_utc": "2026-10-13T11:15:00+00:00",
         "source_sha": "b8d2d1be108f249427bd97d446a7fc261ba5b553",
         "frozen_R6_formula_blob": "eb569c083b42936944da6abf638a0a876febd3f6",
         "this_is_not_an_R6_alert_or_price_forecast": true,
@@ -234,11 +240,11 @@
         "available": true,
         "features": [
           102.28399658203125,
-          1458.878,
+          1460.0,
           30722.0,
-          1457.878,
+          1459.0,
           5.240000247955322,
-          58815.878,
+          58817.0,
           1
         ],
         "feature_names": [
@@ -306,7 +312,7 @@
     {
       "schema": "btc-r6-bls-causal-input-row-v1",
       "anchor_utc": "2026-10-13T11:30:00+00:00",
-      "features_available_at_utc": "2026-10-13T11:30:22.280000+00:00",
+      "features_available_at_utc": "2026-10-13T11:30:24+00:00",
       "feature_names": [
         "spot_15m_log_return",
         "spot_15m_realized_volatility",
@@ -368,6 +374,9 @@
         "price_veto_status": "ALREADY_MOVED",
         "snapshot_math_digest": "520d4c69661f058a107d090874c9ea87cb40bdc974e04d92a4a5b3a465fdac7c",
         "signed_record_sha256": "c71653a531398ba48709e43401db5bc370a228dfa74d46a1c2d75e7add2bff42",
+        "signed_record_available_not_before_utc": "2026-10-13T11:30:24+00:00",
+        "book_observed_at_utc": "2026-10-13T11:30:21.509000+00:00",
+        "microflow_closed_at_utc": "2026-10-13T11:30:00+00:00",
         "source_sha": "b8d2d1be108f249427bd97d446a7fc261ba5b553",
         "frozen_R6_formula_blob": "eb569c083b42936944da6abf638a0a876febd3f6",
         "this_is_not_an_R6_alert_or_price_forecast": true,
@@ -463,7 +472,7 @@
     {
       "schema": "btc-r6-bls-causal-input-row-v1",
       "anchor_utc": "2026-10-13T11:45:00+00:00",
-      "features_available_at_utc": "2026-10-13T11:45:28.327000+00:00",
+      "features_available_at_utc": "2026-10-13T11:45:30+00:00",
       "feature_names": [
         "spot_15m_log_return",
         "spot_15m_realized_volatility",
@@ -534,11 +543,11 @@
         0.17780377516032342,
         0.011978881233084564,
         102.28900146484375,
-        1485.327,
+        1487.0,
         30666.75,
-        1484.327,
+        1486.0,
         5.240000247955322,
-        60628.327,
+        60630.0,
         1,
         0,
         0,
@@ -564,6 +573,9 @@
         "price_veto_status": "PRE_MOVE",
         "snapshot_math_digest": "b9cd90a5f58a6cfa036e78db41e61534774e8fb97f34fab1c6d9f37345faf3a4",
         "signed_record_sha256": "37104da2e265504c86eadccbbb9efa8221be7663323eeee021e19fc4612b6412",
+        "signed_record_available_not_before_utc": "2026-10-13T11:45:30+00:00",
+        "book_observed_at_utc": "2026-10-13T11:45:27.609000+00:00",
+        "microflow_closed_at_utc": "2026-10-13T11:45:00+00:00",
         "source_sha": "b8d2d1be108f249427bd97d446a7fc261ba5b553",
         "frozen_R6_formula_blob": "eb569c083b42936944da6abf638a0a876febd3f6",
         "this_is_not_an_R6_alert_or_price_forecast": true,
@@ -591,11 +603,11 @@
         "available": true,
         "features": [
           102.28900146484375,
-          1485.327,
+          1487.0,
           30666.75,
-          1484.327,
+          1486.0,
           5.240000247955322,
-          60628.327,
+          60630.0,
           1
         ],
         "feature_names": [
@@ -661,7 +673,7 @@
     {
       "schema": "btc-r6-bls-causal-input-row-v1",
       "anchor_utc": "2026-10-13T12:00:00+00:00",
-      "features_available_at_utc": "2026-10-13T12:00:17.371000+00:00",
+      "features_available_at_utc": "2026-10-13T12:00:19+00:00",
       "feature_names": [
         "spot_15m_log_return",
         "spot_15m_realized_volatility",
@@ -732,11 +744,11 @@
         -0.13119282694388223,
         0.012003785994801251,
         102.25900268554688,
-        1031.371,
+        1033.0,
         30679.75,
-        1032.371,
+        1034.0,
         5.240000247955322,
-        61517.371,
+        61519.0,
         1,
         0,
         0,
@@ -762,6 +774,9 @@
         "price_veto_status": "PRE_MOVE",
         "snapshot_math_digest": "26d7089e36d43a30a708c108713d8cedcd29df82d5863f95cad7dcf770882328",
         "signed_record_sha256": "fab65f681d03a266022ec1fdeb2bbf268a2b5e959109ad825d174f89afb1944e",
+        "signed_record_available_not_before_utc": "2026-10-13T12:00:19+00:00",
+        "book_observed_at_utc": "2026-10-13T12:00:16.909000+00:00",
+        "microflow_closed_at_utc": "2026-10-13T12:00:00+00:00",
         "source_sha": "b8d2d1be108f249427bd97d446a7fc261ba5b553",
         "frozen_R6_formula_blob": "eb569c083b42936944da6abf638a0a876febd3f6",
         "this_is_not_an_R6_alert_or_price_forecast": true,
@@ -789,11 +804,11 @@
         "available": true,
         "features": [
           102.25900268554688,
-          1031.371,
+          1033.0,
           30679.75,
-          1032.371,
+          1034.0,
           5.240000247955322,
-          61517.371,
+          61519.0,
           1
         ],
         "feature_names": [
@@ -859,7 +874,7 @@
     {
       "schema": "btc-r6-bls-causal-input-row-v1",
       "anchor_utc": "2026-10-13T12:15:00+00:00",
-      "features_available_at_utc": "2026-10-13T12:15:22.631000+00:00",
+      "features_available_at_utc": "2026-10-13T12:15:24+00:00",
       "feature_names": [
         "spot_15m_log_return",
         "spot_15m_realized_volatility",
@@ -930,11 +945,11 @@
         -0.4313663640690413,
         0.01201155751959762,
         102.2750015258789,
-        1483.631,
+        1485.0,
         30678.25,
-        1482.631,
+        1484.0,
         5.240000247955322,
-        62422.631,
+        62424.0,
         1,
         0,
         0,
@@ -960,6 +975,9 @@
         "price_veto_status": "PRE_MOVE",
         "snapshot_math_digest": "5b99e67c9d5db61db38f34713a9502539ffc514e875654f0d9fed24d7ffe8e10",
         "signed_record_sha256": "a67dfeb857e1ea442f491c1e8ebf47778e99e8ebe2d4fb8d900f17fdce3cb520",
+        "signed_record_available_not_before_utc": "2026-10-13T12:15:24+00:00",
+        "book_observed_at_utc": "2026-10-13T12:15:22.151000+00:00",
+        "microflow_closed_at_utc": "2026-10-13T12:15:00+00:00",
         "source_sha": "b8d2d1be108f249427bd97d446a7fc261ba5b553",
         "frozen_R6_formula_blob": "eb569c083b42936944da6abf638a0a876febd3f6",
         "this_is_not_an_R6_alert_or_price_forecast": true,
@@ -987,11 +1005,11 @@
         "available": true,
         "features": [
           102.2750015258789,
-          1483.631,
+          1485.0,
           30678.25,
-          1482.631,
+          1484.0,
           5.240000247955322,
-          62422.631,
+          62424.0,
           1
         ],
         "feature_names": [
@@ -1057,7 +1075,7 @@
     {
       "schema": "btc-r6-bls-causal-input-row-v1",
       "anchor_utc": "2026-10-13T12:30:00+00:00",
-      "features_available_at_utc": "2026-10-13T12:30:27.654000+00:00",
+      "features_available_at_utc": "2026-10-13T12:30:29+00:00",
       "feature_names": [
         "spot_15m_log_return",
         "spot_15m_realized_volatility",
@@ -1119,6 +1137,9 @@
         "price_veto_status": "PRE_MOVE",
         "snapshot_math_digest": "de230c1b0ce1ad52ad8abe2763318ef864c44c9d24f9dca143dcdd480c40ba37",
         "signed_record_sha256": "e77b41bf0cecff84934dad6fdb619fc8f4990f6f0a1cbf4f6fac9bb8b6b198fb",
+        "signed_record_available_not_before_utc": "2026-10-13T12:30:29+00:00",
+        "book_observed_at_utc": "2026-10-13T12:30:27.201000+00:00",
+        "microflow_closed_at_utc": "2026-10-13T12:30:00+00:00",
         "source_sha": "b8d2d1be108f249427bd97d446a7fc261ba5b553",
         "frozen_R6_formula_blob": "eb569c083b42936944da6abf638a0a876febd3f6",
         "this_is_not_an_R6_alert_or_price_forecast": true,
@@ -1208,7 +1229,7 @@
     {
       "schema": "btc-r6-bls-causal-input-row-v1",
       "anchor_utc": "2026-10-13T12:45:00+00:00",
-      "features_available_at_utc": "2026-10-13T12:45:04.092000+00:00",
+      "features_available_at_utc": "2026-10-13T12:45:06+00:00",
       "feature_names": [
         "spot_15m_log_return",
         "spot_15m_realized_volatility",
@@ -1279,11 +1300,11 @@
         -0.047510549468343655,
         0.012020018138907027,
         102.24700164794922,
-        1100.092,
+        1102.0,
         30680.0,
-        1098.092,
+        1100.0,
         5.189000129699707,
-        1409.092,
+        1411.0,
         0,
         0,
         0,
@@ -1309,6 +1330,9 @@
         "price_veto_status": "PRE_MOVE",
         "snapshot_math_digest": "a4c7b2a787e27929abd0afed767b90be2022b789661538ee7672b89643e8d659",
         "signed_record_sha256": "a3ae680540c399fbc35fa7b69e6af872cca2f9d11b1d43567793a89f452562e2",
+        "signed_record_available_not_before_utc": "2026-10-13T12:45:06+00:00",
+        "book_observed_at_utc": "2026-10-13T12:45:03.453000+00:00",
+        "microflow_closed_at_utc": "2026-10-13T12:45:00+00:00",
         "source_sha": "b8d2d1be108f249427bd97d446a7fc261ba5b553",
         "frozen_R6_formula_blob": "eb569c083b42936944da6abf638a0a876febd3f6",
         "this_is_not_an_R6_alert_or_price_forecast": true,
@@ -1336,11 +1360,11 @@
         "available": true,
         "features": [
           102.24700164794922,
-          1100.092,
+          1102.0,
           30680.0,
-          1098.092,
+          1100.0,
           5.189000129699707,
-          1409.092,
+          1411.0,
           0
         ],
         "feature_names": [
@@ -1416,10 +1440,51 @@
     "can_begin_full_candidate_training": false,
     "reasons": [
       "NO_CLOSED_DIRECTION_TARGETS:24h",
-      "LEGACY_MACRO_RUNTIME_UNPINNED"
+      "LEGACY_MACRO_RUNTIME_UNPINNED",
+      "INSUFFICIENT_ROWS_FOR_TWO_240_ROW_SPLITS",
+      "COMPLETE_OBSERVED_72H_TRAJECTORIES_NOT_VERIFIED"
     ],
     "trading_authority": false,
     "full_system_ready": false
   },
-  "checked_at_utc": "2026-10-13T17:24:02.308695+00:00"
+  "complete_72h_trajectory_readiness": {
+    "accepted_rows": 0,
+    "rejected_rows": [
+      {
+        "anchor_utc": "2026-10-13T11:00:00+00:00",
+        "reason": "REQUIRED_FACTOR_ROW_UNAVAILABLE"
+      },
+      {
+        "anchor_utc": "2026-10-13T11:15:00+00:00",
+        "reason": "REQUIRED_FACTOR_ROW_UNAVAILABLE"
+      },
+      {
+        "anchor_utc": "2026-10-13T11:30:00+00:00",
+        "reason": "REQUIRED_FACTOR_ROW_UNAVAILABLE"
+      },
+      {
+        "anchor_utc": "2026-10-13T11:45:00+00:00",
+        "reason": "72H_TARGET_NOT_CLOSED"
+      },
+      {
+        "anchor_utc": "2026-10-13T12:00:00+00:00",
+        "reason": "72H_TARGET_NOT_CLOSED"
+      },
+      {
+        "anchor_utc": "2026-10-13T12:15:00+00:00",
+        "reason": "72H_TARGET_NOT_CLOSED"
+      },
+      {
+        "anchor_utc": "2026-10-13T12:30:00+00:00",
+        "reason": "REQUIRED_FACTOR_ROW_UNAVAILABLE"
+      },
+      {
+        "anchor_utc": "2026-10-13T12:45:00+00:00",
+        "reason": "72H_TARGET_NOT_CLOSED"
+      }
+    ],
+    "future_targets_fabricated": false,
+    "full_system_ready": false,
+    "trading_authority": false
+  }
 }

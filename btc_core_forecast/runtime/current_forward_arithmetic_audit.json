@@ -1,0 +1,620 @@
+{
+  "records": [
+    {
+      "schema": "btc-independent-forward-endpoint-audit-v1",
+      "anchor_utc": "2026-10-13T11:30:00+00:00",
+      "horizon_hours": 1,
+      "forecast_sha256": "ae390621703740541994ba5d5f7a2e6528d46e40c65c3be6c4f46beb8148bfc3",
+      "outcome_sha256": "3bd13fecfe96680b24b0d2b43911c9e98dc05cf960764d311b304caf8a0dc9b3",
+      "signature_identity_source_and_rekor_verified": true,
+      "forecast_signed_before_outcome": true,
+      "initial_public_release_independently_proven": false,
+      "actual_endpoint": 83407.19,
+      "reference_spot": 83540.52,
+      "independently_recomputed_scores": {
+        "candidate": {
+          "crps": 120.43611784845646,
+          "mae": 189.53878548330977,
+          "coverage_80pct": true,
+          "brier": 0.008993055555555551
+        },
+        "ewma1": {
+          "crps": 139.69615661381363,
+          "mae": 201.5854641533515,
+          "coverage_80pct": true,
+          "brier": 0.04024305555555556
+        },
+        "ewma4": {
+          "crps": 116.3686359239702,
+          "mae": 185.9686131041526,
+          "coverage_80pct": true,
+          "brier": 0.006562500000000001
+        },
+        "har": {
+          "crps": 133.00626144432601,
+          "mae": 199.68646812842053,
+          "coverage_80pct": true,
+          "brier": 0.01628472222222222
+        },
+        "vol1": {
+          "crps": 166.6839464756368,
+          "mae": 217.61601149936905,
+          "coverage_80pct": true,
+          "brier": 0.11461805555555557
+        },
+        "vol24": {
+          "crps": 111.72166466735248,
+          "mae": 180.93493745625892,
+          "coverage_80pct": true,
+          "brier": 0.006562500000000001
+        },
+        "vol4": {
+          "crps": 123.7087461478929,
+          "mae": 189.06490239684354,
+          "coverage_80pct": true,
+          "brier": 0.008576388888888885
+        }
+      },
+      "crps_gain_vs_baselines": {
+        "ewma1": 19.260038765357166,
+        "ewma4": -4.067481924486259,
+        "har": 12.570143595869553,
+        "vol1": 46.247828627180326,
+        "vol24": -8.714453181103977,
+        "vol4": 3.272628299436434
+      },
+      "single_outcome_is_not_skill_evidence": true,
+      "prospective_skill_proven": false,
+      "full_system_ready": false,
+      "trading_authority": false
+    },
+    {
+      "schema": "btc-independent-forward-endpoint-audit-v1",
+      "anchor_utc": "2026-10-13T11:30:00+00:00",
+      "horizon_hours": 4,
+      "forecast_sha256": "ae390621703740541994ba5d5f7a2e6528d46e40c65c3be6c4f46beb8148bfc3",
+      "outcome_sha256": "8ba50a052e182584f6144bd83a61e72be65576b47e9b091a15a1bddfef4302f9",
+      "signature_identity_source_and_rekor_verified": true,
+      "forecast_signed_before_outcome": true,
+      "initial_public_release_independently_proven": false,
+      "actual_endpoint": 83552.0,
+      "reference_spot": 83540.52,
+      "independently_recomputed_scores": {
+        "candidate": {
+          "crps": 157.8029387941641,
+          "mae": 52.88114312925609,
+          "coverage_80pct": true,
+          "brier": 0.0692013888888889
+        },
+        "ewma1": {
+          "crps": 199.26037356097675,
+          "mae": 65.8782775006257,
+          "coverage_80pct": true,
+          "brier": 0.11565972222222223
+        },
+        "ewma4": {
+          "crps": 132.9070706132183,
+          "mae": 46.281011527287774,
+          "coverage_80pct": true,
+          "brier": 0.044826388888888874
+        },
+        "har": {
+          "crps": 166.07577416752906,
+          "mae": 66.38494424536475,
+          "coverage_80pct": true,
+          "brier": 0.07211805555555556
+        },
+        "vol1": {
+          "crps": 262.2481028317666,
+          "mae": 81.67428526790172,
+          "coverage_80pct": true,
+          "brier": 0.2082291666666667
+        },
+        "vol24": {
+          "crps": 117.23592300305324,
+          "mae": 33.99623470302322,
+          "coverage_80pct": true,
+          "brier": 0.025243055555555553
+        },
+        "vol4": {
+          "crps": 159.39932437649452,
+          "mae": 50.601493809139356,
+          "coverage_80pct": true,
+          "brier": 0.06968750000000001
+        }
+      },
+      "crps_gain_vs_baselines": {
+        "ewma1": 41.45743476681264,
+        "ewma4": -24.895868180945797,
+        "har": 8.272835373364956,
+        "vol1": 104.44516403760247,
+        "vol24": -40.56701579111086,
+        "vol4": 1.596385582330413
+      },
+      "single_outcome_is_not_skill_evidence": true,
+      "prospective_skill_proven": false,
+      "full_system_ready": false,
+      "trading_authority": false
+    },
+    {
+      "schema": "btc-independent-forward-endpoint-audit-v1",
+      "anchor_utc": "2026-10-13T12:30:00+00:00",
+      "horizon_hours": 1,
+      "forecast_sha256": "c3b8e4967db481371859eae0aecaa1f64ddf22d26033dbfb5dd705866053399f",
+      "outcome_sha256": "772251180d0524be9f7e002647297d077470d922cea32270cf350805724d0f2b",
+      "signature_identity_source_and_rekor_verified": true,
+      "forecast_signed_before_outcome": true,
+      "initial_public_release_independently_proven": false,
+      "actual_endpoint": 83432.01,
+      "reference_spot": 83407.19,
+      "independently_recomputed_scores": {
+        "candidate": {
+          "crps": 66.32322957537562,
+          "mae": 23.627638199264766,
+          "coverage_80pct": true,
+          "brier": 0.0069097222222222225
+        },
+        "ewma1": {
+          "crps": 86.88693516403413,
+          "mae": 33.30626594788919,
+          "coverage_80pct": true,
+          "brier": 0.01482638888888889
+        },
+        "ewma4": {
+          "crps": 67.38228132293594,
+          "mae": 26.66846088960301,
+          "coverage_80pct": true,
+          "brier": 0.006562500000000001
+        },
+        "har": {
+          "crps": 70.87039773726582,
+          "mae": 26.261428919169703,
+          "coverage_80pct": true,
+          "brier": 0.007916666666666666
+        },
+        "vol1": {
+          "crps": 72.5897595298178,
+          "mae": 21.699369642723468,
+          "coverage_80pct": true,
+          "brier": 0.011354166666666674
+        },
+        "vol24": {
+          "crps": 61.04808766834432,
+          "mae": 23.123170915379887,
+          "coverage_80pct": true,
+          "brier": 0.006562500000000001
+        },
+        "vol4": {
+          "crps": 77.78187394516848,
+          "mae": 28.087242754365434,
+          "coverage_80pct": true,
+          "brier": 0.008576388888888885
+        }
+      },
+      "crps_gain_vs_baselines": {
+        "ewma1": 20.563705588658507,
+        "ewma4": 1.0590517475603178,
+        "har": 4.547168161890198,
+        "vol1": 6.266529954442177,
+        "vol24": -5.275141907031298,
+        "vol4": 11.458644369792864
+      },
+      "single_outcome_is_not_skill_evidence": true,
+      "prospective_skill_proven": false,
+      "full_system_ready": false,
+      "trading_authority": false
+    },
+    {
+      "schema": "btc-independent-forward-endpoint-audit-v1",
+      "anchor_utc": "2026-10-13T12:30:00+00:00",
+      "horizon_hours": 4,
+      "forecast_sha256": "c3b8e4967db481371859eae0aecaa1f64ddf22d26033dbfb5dd705866053399f",
+      "outcome_sha256": "be334ed2ecf379ed7fee23d5d6640660c761fd9818210887ec0036a3a3ba2fca",
+      "signature_identity_source_and_rekor_verified": true,
+      "forecast_signed_before_outcome": true,
+      "initial_public_release_independently_proven": false,
+      "actual_endpoint": 83518.0,
+      "reference_spot": 83407.19,
+      "independently_recomputed_scores": {
+        "candidate": {
+          "crps": 144.82220180270684,
+          "mae": 60.54224534504465,
+          "coverage_80pct": true,
+          "brier": 0.04885416666666667
+        },
+        "ewma1": {
+          "crps": 169.00856998169832,
+          "mae": 44.93231503335119,
+          "coverage_80pct": true,
+          "brier": 0.07815972222222221
+        },
+        "ewma4": {
+          "crps": 132.05840196071068,
+          "mae": 54.31110004216316,
+          "coverage_80pct": true,
+          "brier": 0.041076388888888885
+        },
+        "har": {
+          "crps": 133.58474562945952,
+          "mae": 57.61684525363671,
+          "coverage_80pct": true,
+          "brier": 0.03461805555555556
+        },
+        "vol1": {
+          "crps": 145.98943643481846,
+          "mae": 59.39724425699387,
+          "coverage_80pct": true,
+          "brier": 0.06322916666666668
+        },
+        "vol24": {
+          "crps": 122.28367539793652,
+          "mae": 65.01066156208981,
+          "coverage_80pct": true,
+          "brier": 0.026979166666666658
+        },
+        "vol4": {
+          "crps": 151.69708100824045,
+          "mae": 51.87826449603017,
+          "coverage_80pct": true,
+          "brier": 0.06680555555555556
+        }
+      },
+      "crps_gain_vs_baselines": {
+        "ewma1": 24.186368178991472,
+        "ewma4": -12.76379984199616,
+        "har": -11.237456173247324,
+        "vol1": 1.1672346321116152,
+        "vol24": -22.538526404770323,
+        "vol4": 6.8748792055336025
+      },
+      "single_outcome_is_not_skill_evidence": true,
+      "prospective_skill_proven": false,
+      "full_system_ready": false,
+      "trading_authority": false
+    },
+    {
+      "schema": "btc-independent-forward-endpoint-audit-v1",
+      "anchor_utc": "2026-10-13T13:30:00+00:00",
+      "horizon_hours": 1,
+      "forecast_sha256": "cd03e3b5dbfa23f58abe7efef3f69671573059945275dcb28f0b461151d9ed42",
+      "outcome_sha256": "bdb36d35ee2c7bc12bfd77bc2ea4dd4db9a500e7917c516447edbe19f8532949",
+      "signature_identity_source_and_rekor_verified": true,
+      "forecast_signed_before_outcome": true,
+      "initial_public_release_independently_proven": false,
+      "actual_endpoint": 83652.0,
+      "reference_spot": 83432.01,
+      "independently_recomputed_scores": {
+        "candidate": {
+          "crps": 105.32616912878811,
+          "mae": 160.70256244411576,
+          "coverage_80pct": true,
+          "brier": 0.010868055555555565
+        },
+        "ewma1": {
+          "crps": 106.92364251436956,
+          "mae": 168.2695129448257,
+          "coverage_80pct": true,
+          "brier": 0.010138888888888881
+        },
+        "ewma4": {
+          "crps": 101.9340920581252,
+          "mae": 169.45732887163467,
+          "coverage_80pct": true,
+          "brier": 0.006562500000000001
+        },
+        "har": {
+          "crps": 100.80234126587575,
+          "mae": 170.9050193101575,
+          "coverage_80pct": true,
+          "brier": 0.007916666666666666
+        },
+        "vol1": {
+          "crps": 106.32998883629944,
+          "mae": 173.5046150531998,
+          "coverage_80pct": true,
+          "brier": 0.011354166666666674
+        },
+        "vol24": {
+          "crps": 102.31645659434324,
+          "mae": 172.48244708954007,
+          "coverage_80pct": true,
+          "brier": 0.006562500000000001
+        },
+        "vol4": {
+          "crps": 108.09612886797694,
+          "mae": 167.0148980411759,
+          "coverage_80pct": true,
+          "brier": 0.008576388888888885
+        }
+      },
+      "crps_gain_vs_baselines": {
+        "ewma1": 1.597473385581452,
+        "ewma4": -3.392077070662907,
+        "har": -4.523827862912356,
+        "vol1": 1.003819707511326,
+        "vol24": -3.0097125344448727,
+        "vol4": 2.7699597391888346
+      },
+      "single_outcome_is_not_skill_evidence": true,
+      "prospective_skill_proven": false,
+      "full_system_ready": false,
+      "trading_authority": false
+    },
+    {
+      "schema": "btc-independent-forward-endpoint-audit-v1",
+      "anchor_utc": "2026-10-13T13:30:00+00:00",
+      "horizon_hours": 4,
+      "forecast_sha256": "cd03e3b5dbfa23f58abe7efef3f69671573059945275dcb28f0b461151d9ed42",
+      "outcome_sha256": "778d967de81c51b77fb3084e9c58740ae5226ce63912749c6ee006e3c1a3e4de",
+      "signature_identity_source_and_rekor_verified": true,
+      "forecast_signed_before_outcome": true,
+      "initial_public_release_independently_proven": false,
+      "actual_endpoint": 83238.7,
+      "reference_spot": 83432.01,
+      "independently_recomputed_scores": {
+        "candidate": {
+          "crps": 201.26767451227352,
+          "mae": 258.13468773823115,
+          "coverage_80pct": true,
+          "brier": 0.06124999999999998
+        },
+        "ewma1": {
+          "crps": 198.1872491472554,
+          "mae": 251.9273649668321,
+          "coverage_80pct": true,
+          "brier": 0.06680555555555556
+        },
+        "ewma4": {
+          "crps": 181.04853443904,
+          "mae": 248.76006913244782,
+          "coverage_80pct": true,
+          "brier": 0.036701388888888895
+        },
+        "har": {
+          "crps": 180.0169711420076,
+          "mae": 246.71045445215714,
+          "coverage_80pct": true,
+          "brier": 0.03260416666666668
+        },
+        "vol1": {
+          "crps": 193.25091700480112,
+          "mae": 244.68519464264682,
+          "coverage_80pct": true,
+          "brier": 0.06322916666666668
+        },
+        "vol24": {
+          "crps": 173.28257308345064,
+          "mae": 238.69320525375952,
+          "coverage_80pct": true,
+          "brier": 0.025243055555555553
+        },
+        "vol4": {
+          "crps": 199.00777885741365,
+          "mae": 252.31732386295334,
+          "coverage_80pct": true,
+          "brier": 0.06680555555555556
+        }
+      },
+      "crps_gain_vs_baselines": {
+        "ewma1": -3.0804253650181295,
+        "ewma4": -20.21914007323352,
+        "har": -21.25070337026591,
+        "vol1": -8.016757507472391,
+        "vol24": -27.985101428822873,
+        "vol4": -2.2598956548598608
+      },
+      "single_outcome_is_not_skill_evidence": true,
+      "prospective_skill_proven": false,
+      "full_system_ready": false,
+      "trading_authority": false
+    },
+    {
+      "schema": "btc-independent-forward-endpoint-audit-v1",
+      "anchor_utc": "2026-10-13T14:30:00+00:00",
+      "horizon_hours": 1,
+      "forecast_sha256": "1bef0641ef7750bcf454df642955f1897a427931fe6f467adb76cc8dbb1628b5",
+      "outcome_sha256": "d715310a30b43c1011d799091492ced17ea379ce5ab247ed388323858685ed81",
+      "signature_identity_source_and_rekor_verified": true,
+      "forecast_signed_before_outcome": true,
+      "initial_public_release_independently_proven": false,
+      "actual_endpoint": 83552.0,
+      "reference_spot": 83652.0,
+      "independently_recomputed_scores": {
+        "candidate": {
+          "crps": 114.19233072800313,
+          "mae": 162.62963158222556,
+          "coverage_80pct": true,
+          "brier": 0.015729166666666666
+        },
+        "ewma1": {
+          "crps": 123.82810104119778,
+          "mae": 165.30915100179845,
+          "coverage_80pct": true,
+          "brier": 0.02961805555555555
+        },
+        "ewma4": {
+          "crps": 104.70331655079988,
+          "mae": 156.51551502782968,
+          "coverage_80pct": true,
+          "brier": 0.009687499999999995
+        },
+        "har": {
+          "crps": 116.93703927070433,
+          "mae": 164.0977997042355,
+          "coverage_80pct": true,
+          "brier": 0.01482638888888889
+        },
+        "vol1": {
+          "crps": 156.05398340616262,
+          "mae": 184.39844049676321,
+          "coverage_80pct": true,
+          "brier": 0.11461805555555557
+        },
+        "vol24": {
+          "crps": 96.64439119095863,
+          "mae": 149.62520211265655,
+          "coverage_80pct": true,
+          "brier": 0.00753472222222222
+        },
+        "vol4": {
+          "crps": 122.0946527348442,
+          "mae": 164.814889538422,
+          "coverage_80pct": true,
+          "brier": 0.020416666666666652
+        }
+      },
+      "crps_gain_vs_baselines": {
+        "ewma1": 9.635770313194655,
+        "ewma4": -9.489014177203245,
+        "har": 2.744708542701204,
+        "vol1": 41.86165267815949,
+        "vol24": -17.5479395370445,
+        "vol4": 7.902322006841075
+      },
+      "single_outcome_is_not_skill_evidence": true,
+      "prospective_skill_proven": false,
+      "full_system_ready": false,
+      "trading_authority": false
+    },
+    {
+      "schema": "btc-independent-forward-endpoint-audit-v1",
+      "anchor_utc": "2026-10-13T15:30:00+00:00",
+      "horizon_hours": 1,
+      "forecast_sha256": "7e9facc9d04c23712ec5718270dec567624c47de2c88aa02f86e12e70fe25479",
+      "outcome_sha256": "98efd5320f94e128e29d6c6e3ceb916943e804cbbee408af1388cb6d7124b309",
+      "signature_identity_source_and_rekor_verified": true,
+      "forecast_signed_before_outcome": true,
+      "initial_public_release_independently_proven": false,
+      "actual_endpoint": 83518.0,
+      "reference_spot": 83552.0,
+      "independently_recomputed_scores": {
+        "candidate": {
+          "crps": 79.41797139225082,
+          "mae": 86.3212856491009,
+          "coverage_80pct": true,
+          "brier": 0.007916666666666666
+        },
+        "ewma1": {
+          "crps": 105.02436572599959,
+          "mae": 99.20104981586337,
+          "coverage_80pct": true,
+          "brier": 0.02961805555555555
+        },
+        "ewma4": {
+          "crps": 83.2578836496414,
+          "mae": 91.56990195390244,
+          "coverage_80pct": true,
+          "brier": 0.009687499999999995
+        },
+        "har": {
+          "crps": 91.65867168354626,
+          "mae": 94.46659707250365,
+          "coverage_80pct": true,
+          "brier": 0.013437500000000005
+        },
+        "vol1": {
+          "crps": 108.33497392748541,
+          "mae": 98.21112886621268,
+          "coverage_80pct": true,
+          "brier": 0.04420138888888889
+        },
+        "vol24": {
+          "crps": 71.24532158111262,
+          "mae": 83.13506837491877,
+          "coverage_80pct": true,
+          "brier": 0.00753472222222222
+        },
+        "vol4": {
+          "crps": 94.74961147143642,
+          "mae": 93.30503921970376,
+          "coverage_80pct": true,
+          "brier": 0.012118055555555562
+        }
+      },
+      "crps_gain_vs_baselines": {
+        "ewma1": 25.606394333748767,
+        "ewma4": 3.83991225739058,
+        "har": 12.24070029129544,
+        "vol1": 28.917002535234587,
+        "vol24": -8.1726498111382,
+        "vol4": 15.331640079185604
+      },
+      "single_outcome_is_not_skill_evidence": true,
+      "prospective_skill_proven": false,
+      "full_system_ready": false,
+      "trading_authority": false
+    },
+    {
+      "schema": "btc-independent-forward-endpoint-audit-v1",
+      "anchor_utc": "2026-10-13T16:30:00+00:00",
+      "horizon_hours": 1,
+      "forecast_sha256": "7c9f7f1c1616b8ebddaab6fadaa3baa3a8e504e2cb0d042eabc7aa68848004f5",
+      "outcome_sha256": "e3f91926bf9bec79f54e45ed3ba689703dbc50cc8ead9a8f0df9d35fdf4b2c07",
+      "signature_identity_source_and_rekor_verified": true,
+      "forecast_signed_before_outcome": true,
+      "initial_public_release_independently_proven": false,
+      "actual_endpoint": 83238.7,
+      "reference_spot": 83518.0,
+      "independently_recomputed_scores": {
+        "candidate": {
+          "crps": 211.5566591747834,
+          "mae": 323.61318692885106,
+          "coverage_80pct": false,
+          "brier": 0.005972222222222224
+        },
+        "ewma1": {
+          "crps": 211.16249340699582,
+          "mae": 330.81570764866774,
+          "coverage_80pct": true,
+          "brier": 0.008993055555555551
+        },
+        "ewma4": {
+          "crps": 212.02263174548136,
+          "mae": 333.9133096555597,
+          "coverage_80pct": false,
+          "brier": 0.008576388888888885
+        },
+        "har": {
+          "crps": 214.9141448006759,
+          "mae": 322.6749455624813,
+          "coverage_80pct": false,
+          "brier": 0.0063541666666666686
+        },
+        "vol1": {
+          "crps": 215.47754602051353,
+          "mae": 316.4848604847357,
+          "coverage_80pct": false,
+          "brier": 0.005451388888888893
+        },
+        "vol24": {
+          "crps": 213.0447706988302,
+          "mae": 328.5438511206157,
+          "coverage_80pct": false,
+          "brier": 0.00753472222222222
+        },
+        "vol4": {
+          "crps": 212.40056323682703,
+          "mae": 337.0610059398314,
+          "coverage_80pct": true,
+          "brier": 0.009687499999999995
+        }
+      },
+      "crps_gain_vs_baselines": {
+        "ewma1": -0.3941657677875696,
+        "ewma4": 0.4659725706979714,
+        "har": 3.357485625892508,
+        "vol1": 3.920886845730138,
+        "vol24": 1.4881115240468148,
+        "vol4": 0.8439040620436344
+      },
+      "single_outcome_is_not_skill_evidence": true,
+      "prospective_skill_proven": false,
+      "full_system_ready": false,
+      "trading_authority": false
+    }
+  ],
+  "signature_link_and_arithmetic_checks_passed": 9,
+  "overlapping_windows_are_not_independent": true,
+  "full_system_ready": false,
+  "trading_authority": false
+}

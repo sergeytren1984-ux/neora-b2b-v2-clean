@@ -1,0 +1,32 @@
+{
+  "schema": "btc-required-historical-R6-factor-readiness-v1",
+  "checked_at_utc": "2026-10-13T18:27:02.948274+00:00",
+  "instrument": "BTC-USDT-SWAP",
+  "actual_historical_book_available": true,
+  "archive_download_lookup": {
+    "dateTs": "1790640000000",
+    "filename": "BTC-USDT-SWAP-L2orderbook-400lv-2026-09-29.tar.gz",
+    "sizeMB": "359.13",
+    "url": "https://static.okx.com/cdn/okx/match/orderbook/pro/L2/400lv/daily/20260929/BTC-USDT-SWAP-L2orderbook-400lv-2026-09-29.tar.gz"
+  },
+  "archive_sample_schema_verified": true,
+  "whole_archive_integrity_not_yet_verified": true,
+  "archive_has_exchange_timestamp": true,
+  "sample_has_historical_HTTP_receipt_or_sequence_checksum": false,
+  "OI_required_definition": "OKX rubik aggregated BTC expiry and perpetual open interest USD, exact t minus 15m reference",
+  "historical_5m_OI_api_limit_days": 2,
+  "official_definition_source": "https://www.okx.com/docs-v5/en/#trading-statistics-rest-api-get-contracts-open-interest-and-volume",
+  "old_5m_OI_query_response": {
+    "code": "50030",
+    "data": [],
+    "msg": "Illegal time range"
+  },
+  "verified_current_signed_OI_rows": 575,
+  "verified_current_signed_OI_first_utc": "2026-10-11T18:20:00+00:00",
+  "verified_current_signed_OI_last_utc": "2026-10-13T18:10:00+00:00",
+  "different_per_instrument_OI_or_hourly_substitution_admitted": false,
+  "complete_historical_joint_input_cohort_qualified": false,
+  "training_targets_fabricated": false,
+  "full_system_ready": false,
+  "trading_authority": false
+}

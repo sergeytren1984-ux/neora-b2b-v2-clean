@@ -38,5 +38,47 @@ def training_readiness(rows):
         if not labels:reasons.append('NO_CLOSED_DIRECTION_TARGETS:'+h+'h')
         elif len(set(labels))<2:reasons.append('BOTH_DIRECTION_CLASSES_NOT_OBSERVED:'+h+'h')
     if not all((r.get('macro_quotes') or {}).get('immutable_collector_source_proven') for r in eligible):reasons.append('LEGACY_MACRO_RUNTIME_UNPINNED')
+    if len(eligible)<480:reasons.append('INSUFFICIENT_ROWS_FOR_TWO_240_ROW_SPLITS')
+    if not eligible or not all(r.get('complete_72h_actual_target') is True for r in eligible):reasons.append('COMPLETE_OBSERVED_72H_TRAJECTORIES_NOT_VERIFIED')
     return {'eligible_inputs':len(eligible),'closed_direction_targets':count,'can_begin_full_candidate_training':not reasons,
         'reasons':reasons,'trading_authority':False,'full_system_ready':False}
+
+def trajectory_matrix(inputs,candles,cutoff_utc):
+    """Build observed 72h targets for the fixed candidate, never extrapolate.
+
+    Returned rows still require chronological splitting and source qualification
+    in fit_verified. This function grants no forecast or trading admission.
+    """
+    from factor_integration import FEATURE_NAMES
+    cutoff=int(stamp(cutoff_utc).timestamp()*1000);bars={}
+    for bar in candles:
+        start=int(bar[0]);end=int(bar[6])+1
+        op,hi,lo,cl=map(float,bar[1:5])
+        if end-start!=300000 or end>cutoff or not np.isfinite([op,hi,lo,cl]).all() or not 0<lo<=min(op,cl)<=max(op,cl)<=hi:raise ValueError('invalid or unclosed trajectory candle')
+        if start in bars:raise ValueError('duplicate trajectory candle')
+        bars[start]=(hi,lo,cl)
+    selected=[];rejected=[];arrays={k:[] for k in ('x','anchors','scales','spot','close','high','low')}
+    for row in inputs:
+        at=int(stamp(row['anchor_utc']).timestamp()*1000)
+        reason=None
+        if not row.get('eligible_for_research_matrix'):reason='REQUIRED_FACTOR_ROW_UNAVAILABLE'
+        elif tuple(row.get('feature_names',()))!=FEATURE_NAMES:raise ValueError('wrong trajectory feature schema')
+        elif at+72*3600000>cutoff:reason='72H_TARGET_NOT_CLOSED'
+        else:
+            starts=range(at,at+72*3600000,300000)
+            if any(t not in bars for t in starts):reason='ACTUAL_TRAJECTORY_GAP'
+        if reason:
+            rejected.append({'anchor_utc':row['anchor_utc'],'reason':reason});continue
+        spot=float(row['reference_spot']);sigma=float(row['past_sigma'])
+        if not np.isfinite([spot,sigma]).all() or min(spot,sigma)<=0:raise ValueError('invalid observed trajectory reference or scale')
+        f=np.asarray(row['features'],dtype=float)
+        if f.shape!=(len(FEATURE_NAMES),) or not np.isfinite(f).all():raise ValueError('invalid verified features')
+        blocks=np.array([bars[t] for t in starts]).reshape(72,12,3)
+        arrays['x'].append(f);arrays['anchors'].append(at);arrays['scales'].append(sigma);arrays['spot'].append(spot)
+        for name,values in (('high',blocks[:,:,0].max(1)),('low',blocks[:,:,1].min(1)),('close',blocks[:,-1,2])):
+            arrays[name].append(np.log(values/spot)/sigma)
+        selected.append(dict(row,complete_72h_actual_target=True))
+    arrays={k:np.asarray(v,dtype=np.int64 if k=='anchors' else float) for k,v in arrays.items()}
+    for k,width in (('x',len(FEATURE_NAMES)),('close',72),('high',72),('low',72)):arrays[k]=arrays[k].reshape(-1,width)
+    return arrays,selected,{'accepted_rows':len(selected),'rejected_rows':rejected,'future_targets_fabricated':False,
+        'full_system_ready':False,'trading_authority':False}

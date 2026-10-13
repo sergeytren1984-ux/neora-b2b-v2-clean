@@ -1,0 +1,39 @@
+{
+  "schema": "btc-v7r6-frozen-zero-shrink-math-identity-v1",
+  "asof_utc": "2026-10-13T14:20:15Z",
+  "frozen_weights_blob": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "formula": "p(x)=(1-alpha)*prior+alpha*softmax(beta*z(x))",
+  "heads": {
+    "4h": {
+      "alpha": 0,
+      "prior": [
+        0.05128205128205128,
+        0.03678929765886288,
+        0.9119286510590858
+      ],
+      "delta_brier_vs_prior_for_any_outcome": 0
+    },
+    "24h": {
+      "alpha": 0,
+      "prior": [
+        0.14126744624669935,
+        0.06808751414560543,
+        0.7906450396076952
+      ],
+      "delta_brier_vs_prior_for_any_outcome": 0
+    }
+  },
+  "hourly_research_grid": {
+    "issuance_due": 15,
+    "on_time_published": 2,
+    "missing": 13,
+    "one_hour_matured_due": 14,
+    "one_hour_scored": 2,
+    "four_hour_matured_due": 11,
+    "four_hour_scored": 1,
+    "twenty_four_hour_matured_due": 0
+  },
+  "independent_prospective_days": 1,
+  "cryptographic_verification_performed": false,
+  "trading_authority": false
+}

@@ -1,0 +1,16 @@
+{
+  "schema": "btc-v7r6-research-4h-matured-v1",
+  "slot": "20261013T0445Z",
+  "source_R5_snapshot_blob": "29579e149f272ab79a6f22ccdc645320707f013f",
+  "original_forecast_commit": "5f69e7f842d10fe1d1348adf9fb2f9d1d3d4fa41",
+  "original_forecast_public_utc": "2026-10-13T04:56:34Z",
+  "target": "2026-10-13T08:45:00Z",
+  "target_close": 83807.81,
+  "reference": 83462.9,
+  "actual": "RANGE",
+  "model_Brier": 0.003913287903399872,
+  "prior_Brier": 0.003913287903399872,
+  "gain": 0,
+  "crypto_verified": false,
+  "trading_authority": false
+}

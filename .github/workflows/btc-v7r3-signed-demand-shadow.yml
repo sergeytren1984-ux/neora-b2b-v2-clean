@@ -1,8 +1,8 @@
-name: BTC core bounded signed forward data only
+name: BTC frozen distribution forecasts and outcome checks
 on:
   push:
-    branches: [btc-core-forward-source-20261013]
-    paths: [.github/workflows/btc-v7r3-signed-demand-shadow.yml, btc_core_observer/**]
+    branches: [btc-core-distribution-forward-20261013]
+    paths: [.github/workflows/btc-v7r3-signed-demand-shadow.yml, btc_core_distribution/**]
   workflow_dispatch:
     inputs:
       action:
@@ -15,22 +15,25 @@ on:
         required: false
       days:
         type: string
-        default: '1'
+        default: '7'
         required: false
 permissions:
   contents: write
   id-token: write
   actions: write
 concurrency:
-  group: btc-core-forward-data-fixed-source
+  group: btc-core-distribution-fixed-source
   cancel-in-progress: false
 jobs:
-  collect-only:
+  forecasts-and-outcomes:
     runs-on: ubuntu-24.04
     timeout-minutes: 100
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      PYTHONPATH: ${{ github.workspace }}/btc_core_forecast:${{ github.workspace }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -42,10 +45,12 @@ jobs:
       - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
         with:
           cosign-release: v3.0.6
-      - name: Check fixed grid and no trade authority
-        run: python -m btc_core_observer.test_collector
-      - name: Signed raw data only, no price forecast and no trade
-        run: python -m btc_core_observer.collector watch --minutes 90
-      - name: Continue bounded collection until declared end
+      - name: Install exact numeric runtime
+        run: python -m pip install -r btc_core_forecast/requirements.txt
+      - name: Verify path causality and release contract
+        run: python -m unittest btc_core_forecast.test_conditional_path btc_core_distribution.test_worker
+      - name: Signed forecasts and automatic closed outcome assessment
+        run: python -m btc_core_distribution.worker watch
+      - name: Continue fixed forecasts and finish all outcome horizons
         if: success()
-        run: python -m btc_core_observer.collector relay
+        run: python -m btc_core_distribution.worker relay

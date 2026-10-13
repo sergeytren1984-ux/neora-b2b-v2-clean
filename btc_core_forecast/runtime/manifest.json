@@ -1,0 +1,91 @@
+{
+  "schema": "btc-current-frozen-distribution-component-v1",
+  "trading_authority": false,
+  "full_system_ready": false,
+  "prospective_skill_proven": false,
+  "scope": "conditional spot uncertainty component, not directional/core entry model",
+  "model_sha256": "9972d63cf83cfac83e661129599aa1e6a60fbbc1a2510886494d61bacffab9c1",
+  "training_input_sha256": "f6de6c1897c8d678484a36fff95904f848d5f11f4f2cf28b0068a23a2ebb38be",
+  "training_input_end_utc": "2026-10-13T11:00:00+00:00",
+  "training_n": 8616,
+  "calibration_n": 1368,
+  "scenario_n": 240,
+  "last_training_label_end": "2026-08-14T10:00:00+00:00",
+  "last_calibration_label_end": "2026-10-13T10:00:00+00:00",
+  "archives": [
+    {
+      "url": "https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/5m/BTCUSDT-5m-2026-07.zip",
+      "sha256": "425f6e1a0de85dc99d8a7f17924bcb210c8f92100fb71e5993e1d197577b7053",
+      "rows": 8928
+    },
+    {
+      "url": "https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/5m/BTCUSDT-5m-2026-08.zip",
+      "sha256": "85b174d0c091ab904341f1cce2f31fd88ebd0f10631678238756aa72d5d9897a",
+      "rows": 8928
+    },
+    {
+      "url": "https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/5m/BTCUSDT-5m-2026-09.zip",
+      "sha256": "4106fc73698fd1851b1821cd0293adc6304f86f0c2e72244e15c41f63c2bde08",
+      "rows": 8640
+    },
+    {
+      "url": "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-01.zip",
+      "sha256": "958f85306dfcc19289027069a301f02c079a62bb480d9ae15123f95b69188082",
+      "rows": 288
+    },
+    {
+      "url": "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-02.zip",
+      "sha256": "0ec1b8ddd70e722b26d8db10e2db95e9e6387457c0585734a01c2083ae811286",
+      "rows": 288
+    },
+    {
+      "url": "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-03.zip",
+      "sha256": "d789ac6cde23ce2ce7d000cd0c903f8922517e74a23dbb0ffad5064d4474bd26",
+      "rows": 288
+    },
+    {
+      "url": "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-04.zip",
+      "sha256": "d66287ed789b6908be0deabc8dc2f1015f0de70b4c7e755c8fffdfeff3286fdb",
+      "rows": 288
+    },
+    {
+      "url": "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-05.zip",
+      "sha256": "f21f624db4209ca32f828c7574c99fa1c01a50a359e4d1bfc48f8d6db3d9f5e1",
+      "rows": 288
+    },
+    {
+      "url": "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-06.zip",
+      "sha256": "6d3720d906dcf9284293687e1f8c75f89ac8c4de3469ff179809de3301cb1df8",
+      "rows": 288
+    },
+    {
+      "url": "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-07.zip",
+      "sha256": "134280882625bbc6712b4e394fcfd33363a886e22303f960a5f299ad22f4f7d7",
+      "rows": 288
+    },
+    {
+      "url": "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-08.zip",
+      "sha256": "5460365808290ed5fa0307a3e203d83fee13764024fd736933042ee785190101",
+      "rows": 288
+    },
+    {
+      "url": "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-09.zip",
+      "sha256": "02ad7357a3257d929444d4f24598e86195db63431b58f4cebb052c8593746bdd",
+      "rows": 288
+    },
+    {
+      "url": "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-10.zip",
+      "sha256": "8bc79d92e373adf684bdcf494e0ecb51e504b34c563794a45e14873ce46af845",
+      "rows": 288
+    },
+    {
+      "url": "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-11.zip",
+      "sha256": "f4d308f171bd70e154ee94716bd00696823bef793e36c000f3586c5688a2ae5e",
+      "rows": 288
+    }
+  ],
+  "R6_numeric_used": false,
+  "macro_numeric_used": false,
+  "history_used_in_development": true,
+  "actual_OTC_execution_tested": false
+}

@@ -12,5 +12,33 @@
   "prior_Brier": 0.003913287903399872,
   "gain": 0,
   "crypto_verified": false,
-  "trading_authority": false
+  "trading_authority": false,
+  "forecast_blob_sha": "0d9e2946a403ec1701174ad21edce930154194f8",
+  "frozen_weights_blob_sha": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "R5_snapshot_path": "btc_v7r3_evidence/slots/20261013T0900Z/snapshot.json",
+  "R5_snapshot_anchor_utc": "2026-10-13T09:00:00+00:00",
+  "R5_snapshot_retrieved_utc": "2026-10-13T09:09:01.622000+00:00",
+  "exact_target_bar_open_utc": "2026-10-13T08:40:00Z",
+  "exact_target_bar_close_utc": "2026-10-13T08:45:00Z",
+  "endpoint_threshold_fraction": 0.012,
+  "return_percent": 0.41324947970895476,
+  "public_probabilities": {
+    "UP": 0.05128205128205128,
+    "DOWN": 0.03678929765886288,
+    "RANGE": 0.9119286510590858
+  },
+  "frozen_train_prior_probabilities": {
+    "UP": 0.05128205128205128,
+    "DOWN": 0.03678929765886288,
+    "RANGE": 0.9119286510590858
+  },
+  "frozen_validation_shrink": 0,
+  "head_is_constant_train_prior": true,
+  "source_signature_cosign_independently_verified": false,
+  "source_GitHub_blob_not_Cosign": true,
+  "original_forecast_is_research_only": true,
+  "independent_prospective_day_blocks": 0,
+  "has_operator_quotes_or_fills": false,
+  "original_24h_target_utc": "2026-10-14T04:45:00Z",
+  "original_24h_not_due": true
 }

@@ -11,8 +11,10 @@ def sample():
     for name,mins,threshold in [('1h',60,.007),('4h',240,.012),('24h',1440,.02)]:
         heads[name]={'up':.1,'down':.1,'range':.8,
            'reference_spot_usdt':PRICE,'endpoint_threshold_fraction':threshold,
-           'horizon_target_utc':(ANCHOR+dt.timedelta(minutes=mins)).isoformat()}
-        weights[name]={'model_parameters':[[],[],[],[.15,.10,.75]],
+           'horizon_target_utc':(ANCHOR+dt.timedelta(minutes=mins)).isoformat(),
+           'source_anchor_utc':ANCHOR.isoformat()}
+        weights[name]={'duration_5m_steps':mins//5,'threshold':threshold,
+                       'model_parameters':[[],[],[],[.15,.10,.75]],
                        'validation_selected_shrink':1.}
     pred={'clock_anchor_utc':ANCHOR.isoformat(),
           'evidence_signature_not_independently_verified':True,
@@ -55,6 +57,39 @@ class ProspectiveScoreSafety(unittest.TestCase):
         later=(ANCHOR+dt.timedelta(minutes=14)).isoformat()
         with self.assertRaises(ValueError):resolved_endpoint(p,w,s,later,(ANCHOR+dt.timedelta(days=2)).isoformat())
         p['three_way']['1h']['up']=.9
+        with self.assertRaises(ValueError):resolved_endpoint(p,w,s,PUB.isoformat(),(ANCHOR+dt.timedelta(days=2)).isoformat())
+
+
+    def test_immutable_horizon_targets_and_thresholds(self):
+        for h in ('1h','4h','24h'):
+            p,w,s=sample()
+            p['three_way'][h]['horizon_target_utc']=(ANCHOR+dt.timedelta(minutes=5)).isoformat()
+            with self.assertRaises(ValueError):resolved_endpoint(p,w,s,PUB.isoformat(),(ANCHOR+dt.timedelta(days=2)).isoformat())
+            p,w,s=sample()
+            p['three_way'][h]['endpoint_threshold_fraction']*=2
+            with self.assertRaises(ValueError):resolved_endpoint(p,w,s,PUB.isoformat(),(ANCHOR+dt.timedelta(days=2)).isoformat())
+            p,w,s=sample()
+            p['three_way'][h]['source_anchor_utc']=(ANCHOR+dt.timedelta(minutes=5)).isoformat()
+            with self.assertRaises(ValueError):resolved_endpoint(p,w,s,PUB.isoformat(),(ANCHOR+dt.timedelta(days=2)).isoformat())
+
+    def test_missing_head_and_no_false_day_credit(self):
+        p,w,s=sample()
+        del p['three_way']['4h']
+        with self.assertRaises(ValueError):resolved_endpoint(p,w,s,PUB.isoformat(),(ANCHOR+dt.timedelta(days=2)).isoformat())
+        p,w,s=sample()
+        s['anchor_utc']=(ANCHOR+dt.timedelta(minutes=5)).isoformat()
+        s['retrieved_at_utc']=(ANCHOR+dt.timedelta(minutes=7)).isoformat()
+        s['five_min_rows']=[]
+        r=resolved_endpoint(p,w,s,PUB.isoformat(),(ANCHOR+dt.timedelta(minutes=8)).isoformat())
+        self.assertEqual(r['independent_prospective_days_count'],0)
+        self.assertEqual(r['fixed_horizon_due_count'],0)
+        self.assertEqual(r['fixed_horizon_resolved_count'],0)
+        self.assertEqual(r['calendar_days_with_any_resolved_endpoint'],0)
+
+    def test_reject_impossible_snapshot_anchor(self):
+        p,w,s=sample()
+        s['anchor_utc']=(ANCHOR+dt.timedelta(hours=25)).isoformat()
+        s['retrieved_at_utc']=(ANCHOR+dt.timedelta(minutes=1)).isoformat()
         with self.assertRaises(ValueError):resolved_endpoint(p,w,s,PUB.isoformat(),(ANCHOR+dt.timedelta(days=2)).isoformat())
 
     def test_cannot_resolve_cross_timestamps(self):

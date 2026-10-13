@@ -1,0 +1,182 @@
+{
+  "schema": "btc-v7r6-research-only-prepublished-HH00-4h-outcomes-and-full-grid-v1",
+  "asof_checked_utc": "2026-10-13T16:28:47Z",
+  "research_branch": "btc-v7r6-forecast-math-diagnostics-20261012",
+  "source_evidence_branch": "btc-v7r5-corrected-signed-evidence-20261013",
+  "weights_blob_sha1": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "frozen_forecast_code_blob_sha1": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+  "frozen_4h_validation_shrink": 0,
+  "frozen_24h_validation_shrink": 0,
+  "frozen_4h_24h_predictors_identically_training_prior": true,
+  "full_HH00_due_grid": [
+    {
+      "hour_slot_utc": "2026-10-13T00:00:00Z",
+      "R5_snapshot_path_present": true,
+      "research_forecast_committed_by_HH13": false,
+      "forecast_status": "MISSING"
+    },
+    {
+      "hour_slot_utc": "2026-10-13T01:00:00Z",
+      "R5_snapshot_path_present": true,
+      "research_forecast_committed_by_HH13": false,
+      "forecast_status": "MISSING"
+    },
+    {
+      "hour_slot_utc": "2026-10-13T02:00:00Z",
+      "R5_snapshot_path_present": false,
+      "research_forecast_committed_by_HH13": false,
+      "forecast_status": "MISSING"
+    },
+    {
+      "hour_slot_utc": "2026-10-13T03:00:00Z",
+      "R5_snapshot_path_present": true,
+      "research_forecast_committed_by_HH13": false,
+      "forecast_status": "MISSING"
+    },
+    {
+      "hour_slot_utc": "2026-10-13T04:00:00Z",
+      "R5_snapshot_path_present": false,
+      "research_forecast_committed_by_HH13": false,
+      "forecast_status": "MISSING"
+    },
+    {
+      "hour_slot_utc": "2026-10-13T05:00:00Z",
+      "R5_snapshot_path_present": true,
+      "research_forecast_committed_by_HH13": true,
+      "forecast_status": "PUBLISHED_ON_TIME"
+    },
+    {
+      "hour_slot_utc": "2026-10-13T06:00:00Z",
+      "R5_snapshot_path_present": false,
+      "research_forecast_committed_by_HH13": false,
+      "forecast_status": "MISSING"
+    },
+    {
+      "hour_slot_utc": "2026-10-13T07:00:00Z",
+      "R5_snapshot_path_present": false,
+      "research_forecast_committed_by_HH13": false,
+      "forecast_status": "MISSING"
+    },
+    {
+      "hour_slot_utc": "2026-10-13T08:00:00Z",
+      "R5_snapshot_path_present": false,
+      "research_forecast_committed_by_HH13": false,
+      "forecast_status": "MISSING"
+    },
+    {
+      "hour_slot_utc": "2026-10-13T09:00:00Z",
+      "R5_snapshot_path_present": true,
+      "research_forecast_committed_by_HH13": false,
+      "forecast_status": "MISSING"
+    },
+    {
+      "hour_slot_utc": "2026-10-13T10:00:00Z",
+      "R5_snapshot_path_present": false,
+      "research_forecast_committed_by_HH13": false,
+      "forecast_status": "MISSING"
+    },
+    {
+      "hour_slot_utc": "2026-10-13T11:00:00Z",
+      "R5_snapshot_path_present": true,
+      "research_forecast_committed_by_HH13": true,
+      "forecast_status": "PUBLISHED_ON_TIME"
+    },
+    {
+      "hour_slot_utc": "2026-10-13T12:00:00Z",
+      "R5_snapshot_path_present": false,
+      "research_forecast_committed_by_HH13": false,
+      "forecast_status": "MISSING"
+    },
+    {
+      "hour_slot_utc": "2026-10-13T13:00:00Z",
+      "R5_snapshot_path_present": true,
+      "research_forecast_committed_by_HH13": false,
+      "forecast_status": "MISSING"
+    },
+    {
+      "hour_slot_utc": "2026-10-13T14:00:00Z",
+      "R5_snapshot_path_present": true,
+      "research_forecast_committed_by_HH13": false,
+      "forecast_status": "MISSING"
+    },
+    {
+      "hour_slot_utc": "2026-10-13T15:00:00Z",
+      "R5_snapshot_path_present": true,
+      "research_forecast_committed_by_HH13": false,
+      "forecast_status": "MISSING"
+    },
+    {
+      "hour_slot_utc": "2026-10-13T16:00:00Z",
+      "R5_snapshot_path_present": false,
+      "research_forecast_committed_by_HH13": false,
+      "forecast_status": "MISSING"
+    }
+  ],
+  "total_hourly_due": 17,
+  "on_time_research_forecasts": 2,
+  "missing_research_forecasts": 15,
+  "R5_source_hourly_snapshot_paths_present": 9,
+  "R5_source_hourly_snapshot_paths_missing": 8,
+  "source_snapshot_present_but_no_forecast": 7,
+  "nonhourly_0445_forecast_excluded_from_HH00_grid": true,
+  "actual_precommitted_4h_scores": [
+    {
+      "slot": "2026-10-13T05:00:00Z",
+      "forecast_commit": "647d67e4272b398f14f5f7b7cda699bca5ff1b93",
+      "forecast_committed_utc": "2026-10-13T05:05:07Z",
+      "forecast_blob": "128383f90a8935845d56ac3a85f3ffc63fe2f69d",
+      "source_commit": "a9e07929b412847aa9b10d4101ad6829efbed61f",
+      "source_committed_utc": "2026-10-13T05:04:18Z",
+      "source_blob": "3930f20ac519b1d67e46c0cc9ecfa39d74dff8fa",
+      "target": "2026-10-13T09:00:00Z",
+      "target_snapshot_path": "btc_v7r3_evidence/slots/20261013T0900Z/snapshot.json",
+      "target_snapshot_blob": "29579e149f272ab79a6f22ccdc645320707f013f",
+      "target_commit": "d2fde13df9c172bfa289285644a41f3062152419",
+      "target_committed_utc": "2026-10-13T09:09:05Z",
+      "target_snapshot_retrieved_utc": "2026-10-13T09:09:01.622000+00:00",
+      "reference_price": 83453.87,
+      "target_closed5m_price": 83587.14,
+      "return_pct": 0.1596930136373631,
+      "actual_class": "RANGE",
+      "Brier_model": 0.003913287903399872,
+      "Brier_training_prior": 0.003913287903399872,
+      "Brier_gain": 0
+    },
+    {
+      "slot": "2026-10-13T11:00:00Z",
+      "forecast_commit": "ef849f0ff6ebd479429ca17f5e12d382b0c3ce62",
+      "forecast_committed_utc": "2026-10-13T11:11:21Z",
+      "forecast_blob": "71abdcaf13e72ef4dfe4486f31a2b6b744fcae1b",
+      "source_commit": "f29e555d2b2fbc5b6f7b4ad7b660e4a24f4276fb",
+      "source_committed_utc": "2026-10-13T11:03:26Z",
+      "source_blob": "741ac20f0a5b018f69677a01acc8a0f5f5730a5a",
+      "target": "2026-10-13T15:00:00Z",
+      "target_snapshot_path": "btc_v7r3_evidence/slots/20261013T1530Z/snapshot.json",
+      "target_snapshot_blob": "80462388e8280b2657e4794041430ff02789005e",
+      "target_commit": "b6ad35962e8287b5ada0322eeeb02ae6d45f2961",
+      "target_committed_utc": "2026-10-13T15:35:24Z",
+      "target_snapshot_retrieved_utc": "2026-10-13T15:35:20.821000+00:00",
+      "reference_price": 83341.42,
+      "target_closed5m_price": 83530.01,
+      "return_pct": 0.22628604120256135,
+      "actual_class": "RANGE",
+      "Brier_model": 0.003913287903399872,
+      "Brier_training_prior": 0.003913287903399872,
+      "Brier_gain": 0
+    }
+  ],
+  "mean_4h_Brier_gain": 0,
+  "already_published_1h_Brier_gain_for_0500": 0.0009870658422853657,
+  "already_published_1h_Brier_gain_for_1100": -0.00047115250171163975,
+  "mean_1h_Brier_gain_two_hours": 0.00025795667028686296,
+  "independent_prospective_calendar_days": 1,
+  "verified_independent_directional_episodes": 0,
+  "prospective_24h_endpoints_matured": false,
+  "actual_OTC_operator_quotes": 0,
+  "actual_OTC_fills": 0,
+  "R5_Cosign_independently_verified": false,
+  "research_forecast_Cosign_independently_verified": false,
+  "trade_admission": false,
+  "trading_authority": false,
+  "interpretation": "Two previously committed research forecasts were issued before HH:13 and their exact 4h Binance 5m endpoints later closed. Both 4h predictions equal the historical training prior exactly, so zero feature-dependent Brier skill. All 15 other due HH:00 research slots are MISSING. Two 1h outcomes on one day do not prove predictive skill. Research scores are not production R6."
+}

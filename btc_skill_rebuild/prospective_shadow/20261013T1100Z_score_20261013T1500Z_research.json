@@ -1,0 +1,82 @@
+{
+  "schema": "btc-v7r6-unpromoted-public-research-exact-endpoint-score-v1",
+  "score_generated_utc": "2026-10-13T19:54:46.276Z",
+  "forecast_anchor_utc": "2026-10-13T11:00:00+00:00",
+  "forecast_original_research_commit": "ef849f0ff6ebd479429ca17f5e12d382b0c3ce62",
+  "forecast_original_commit_utc_verified_from_GitHub": "2026-10-13T11:11:21Z",
+  "forecast_original_Git_blob": "71abdcaf13e72ef4dfe4486f31a2b6b744fcae1b",
+  "weights_original_Git_blob": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "source_R5_first_asof_snapshot_Git_blob": "741ac20f0a5b018f69677a01acc8a0f5f5730a5a",
+  "future_R5_snapshot_path": "btc_v7r3_evidence/slots/20261013T1500Z/snapshot.json",
+  "future_R5_snapshot_Git_blob": "e97ee06f65ccac5fbf1880c6291513871bb2f409",
+  "future_R5_snapshot_retrieved_utc": "2026-10-13T15:08:49.838000+00:00",
+  "future_R5_snapshot_anchor_utc": "2026-10-13T15:00:00+00:00",
+  "source_signatures_cosign_NOT_independently_verified": true,
+  "genuine_pre_target_GitHub_public_research_only": true,
+  "not_frozen_R6_signed_forecast": true,
+  "not_independent_prospective_day_blocks": true,
+  "real_OTC_operator_quote_or_execution": false,
+  "trading_authority": false,
+  "heads": {
+    "1h": {
+      "due": true,
+      "resolved": true,
+      "original_target_utc": "2026-10-13T12:00:00+00:00",
+      "target_exact_closed_5m_open_utc": "2026-10-13T11:55:00.000Z",
+      "target_exact_closed_5m_end_utc": "2026-10-13T12:00:00.000Z",
+      "reference_spot_usdt": 83341.42,
+      "actual_target_spot_close_usdt": 83360.01,
+      "predeclared_endpoint_threshold_fraction": 0.007,
+      "actual_outcome": "RANGE",
+      "public_probabilities": {
+        "UP": 0.038417571938007045,
+        "DOWN": 0.028722266279578187,
+        "RANGE": 0.9328601617824148
+      },
+      "frozen_historical_train_prior_probabilities": {
+        "UP": 0.03281423804226919,
+        "DOWN": 0.027067111605487578,
+        "RANGE": 0.9401186503522432
+      },
+      "strict_3way_Brier_model": 0.002269545429910151,
+      "strict_3way_Brier_train_prior": 0.0017983929281985111,
+      "strict_3way_Brier_gain_vs_train_prior": -0.00047115250171163975,
+      "frozen_validation_shrink": 1
+    },
+    "4h": {
+      "due": true,
+      "resolved": true,
+      "original_target_utc": "2026-10-13T15:00:00+00:00",
+      "target_exact_closed_5m_open_utc": "2026-10-13T14:55:00.000Z",
+      "target_exact_closed_5m_end_utc": "2026-10-13T15:00:00.000Z",
+      "reference_spot_usdt": 83341.42,
+      "actual_target_spot_close_usdt": 83530.01,
+      "predeclared_endpoint_threshold_fraction": 0.012,
+      "actual_outcome": "RANGE",
+      "public_probabilities": {
+        "UP": 0.05128205128205128,
+        "DOWN": 0.03678929765886288,
+        "RANGE": 0.9119286510590858
+      },
+      "frozen_historical_train_prior_probabilities": {
+        "UP": 0.05128205128205128,
+        "DOWN": 0.03678929765886288,
+        "RANGE": 0.9119286510590858
+      },
+      "strict_3way_Brier_model": 0.003913287903399872,
+      "strict_3way_Brier_train_prior": 0.003913287903399872,
+      "strict_3way_Brier_gain_vs_train_prior": 0,
+      "frozen_validation_shrink": 0
+    },
+    "24h": {
+      "due": false,
+      "resolved": false,
+      "original_target_utc": "2026-10-14T11:00:00+00:00",
+      "reason": "target not yet mature at 15:00Z future snapshot"
+    }
+  },
+  "eligible_matured_endpoint_count": 2,
+  "resolved_endpoint_count": 2,
+  "independent_day_blocks_qualified": 0,
+  "minimum_required_independent_days": 20
+}

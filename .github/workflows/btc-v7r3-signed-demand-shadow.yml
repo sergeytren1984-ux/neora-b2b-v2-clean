@@ -1,8 +1,8 @@
-name: BTC core bounded signed forward data only
+name: BTC raw source continuity, separate second registered epoch
 on:
   push:
-    branches: [btc-core-forward-source-20261013]
-    paths: [.github/workflows/btc-v7r3-signed-demand-shadow.yml, btc_core_observer/**]
+    branches: [btc-core-forward-source2-20261014]
+    paths: [.github/workflows/btc-v7r3-signed-demand-shadow.yml, btc_core_extended/**]
   workflow_dispatch:
     inputs:
       action:
@@ -22,7 +22,7 @@ permissions:
   id-token: write
   actions: write
 concurrency:
-  group: btc-core-forward-data-fixed-source
+  group: btc-core-forward-data-second-fixed-source
   cancel-in-progress: false
 jobs:
   collect-only:
@@ -43,9 +43,9 @@ jobs:
         with:
           cosign-release: v3.0.6
       - name: Check fixed grid and no trade authority
-        run: python -m btc_core_observer.test_collector
+        run: python -m btc_core_extended.test_collector
       - name: Signed raw data only, no price forecast and no trade
-        run: python -m btc_core_observer.collector watch --minutes 90
+        run: python -m btc_core_extended.collector watch --minutes 90
       - name: Continue bounded collection until declared end
         if: success()
-        run: python -m btc_core_observer.collector relay
+        run: python -m btc_core_extended.collector relay

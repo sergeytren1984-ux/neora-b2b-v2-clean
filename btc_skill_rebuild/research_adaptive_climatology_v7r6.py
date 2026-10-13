@@ -73,18 +73,36 @@ def independent_due_climatology_population(population,horizon_steps):
     return [r for r in population if r[0]%grid==0]
 
 
-def baseline_probability(name,issue,model,climatology):
-    if name=='frozen_training_prior':return model[3]
+def nonoverlap_training_prior(train,horizon_steps):
+    """Causal TRAIN prior on exactly the same UTC due grid as scored slots.
+
+    The model may fit on many overlapping 15m TRAIN labels, but its fitted
+    class prior is NOT an independent nonoverlap-grid climatology. Use the
+    independent grid for all competing baseline rates, including TRAIN.
+    Never count one underlying 24h movement 96 times in this comparator.
+    """
+    if not isinstance(horizon_steps,int) or horizon_steps<=0:
+        raise ValueError('invalid horizon steps')
+    selected=[y for t,_,y in train if t%(horizon_steps*STEP)==0]
+    if not selected:raise ValueError('no causally matured TRAIN grid labels')
+    if any(y not in (0,1,2) for y in selected):
+        raise ValueError('invalid TRAIN endpoint label')
+    return [(sum(y==k for y in selected)+1)/(len(selected)+3)
+            for k in range(3)]
+
+
+def baseline_probability(name,issue,grid_training_prior,climatology):
+    if name=='frozen_training_prior':return grid_training_prior
     if name=='matured_rolling_7day':return climatology.probability(issue,7)
     if name=='matured_rolling_14day':return climatology.probability(issue,14)
     raise ValueError('unknown baseline')
 
-def matched_score(sample,model,alpha,name,climatology):
+def matched_score(sample,model,alpha,name,climatology,grid_training_prior):
     changes=[];signed=[]
     days={}
     for t,x,y in sample:
         p=predict(model,x,alpha)
-        q=baseline_probability(name,t,model,climatology)
+        q=baseline_probability(name,t,grid_training_prior,climatology)
         gain=brier(q,y)-brier(p,y)
         # Counterfactual uses the IDENTICAL P(UP or DOWN) as model,
         # but no model-specific sign; this is signed skill ALONE.
@@ -133,18 +151,22 @@ def evaluate(raw):
             if absent<0 or min(len(train),len(valid),len(test))<6:
                 raise ValueError('invalid fixed-fold due grid')
             model=fit(train)
+            grid_prior=nonoverlap_training_prior(train,n)
             alpha=min(SHRINK,key=lambda a:statistics.mean(
                 brier(predict(model,x,a),y) for t,x,y in valid))
             # Baseline selection happens on PREVIOUS validation ONLY.
             chosen=min(BASELINES,key=lambda z:statistics.mean(
-                brier(baseline_probability(z,t,model,climate),y)
+                brier(baseline_probability(z,t,grid_prior,climate),y)
                 for t,x,y in valid))
-            test_score=matched_score(test,model,alpha,chosen,climate)
+            test_score=matched_score(test,model,alpha,chosen,climate,grid_prior)
             weekly.append({
                 'week_start_utc':fold.isoformat(),'validation_n':len(valid),
                 'validation_overlapping_15m_slots_not_used_for_selection':len(valid_overlap),
                 'validation_and_forward_identical_nonoverlap_UTC_grid':True,
-                'training_n':len(train),'fixed_due_expected':due,
+                'training_n':len(train),
+                'training_nonoverlap_prior':grid_prior,
+                'training_nonoverlap_due_count':sum(t%(n*STEP)==0 for t,_,_ in train),
+                'fixed_due_expected':due,
                 'fixed_due_resolved':len(test),'missing_or_not_yet_mature':absent,
                 'entire_fixed_due_grid_complete':absent==0,
                 'model_shrink_previous_validation_only':alpha,
@@ -169,6 +191,8 @@ def evaluate(raw):
       'source_asof_maturity_enforced':True,
       'same_timestamp_maturity_excluded':True,
       'rolling_climatology_uses_nonoverlapping_horizon_UTC_grid':True,
+      'training_climatology_uses_same_nonoverlap_UTC_grid':True,
+      'model_fit_may_use_overlapping_training_rows':True,
       'no_production_changes':True,'trading_authority':False,'horizons':results}
 
 def run(raw_path,out):

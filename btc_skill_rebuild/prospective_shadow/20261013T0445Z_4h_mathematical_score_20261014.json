@@ -1,0 +1,18 @@
+{
+  "kind": "research_only_4h_endpoint_score",
+  "forecast_anchor": "2026-10-13T04:45:00Z",
+  "forecast_commit": "5f69e7f842d10fe1d1348adf9fb2f9d1d3d4fa41",
+  "forecast_committed_utc": "2026-10-13T04:56:34Z",
+  "future_snapshot_blob": "29579e149f272ab79a6f22ccdc645320707f013f",
+  "future_snapshot_anchor": "2026-10-13T09:00:00Z",
+  "target": "2026-10-13T08:45:00Z",
+  "reference": 83462.9,
+  "actual": 83807.81,
+  "outcome": "RANGE",
+  "brier_model": 0.003913287903399872,
+  "brier_prior": 0.003913287903399872,
+  "gain": 0,
+  "freeze_shrink": 0,
+  "signature_verification": "not independently verified",
+  "trade_admission": false
+}

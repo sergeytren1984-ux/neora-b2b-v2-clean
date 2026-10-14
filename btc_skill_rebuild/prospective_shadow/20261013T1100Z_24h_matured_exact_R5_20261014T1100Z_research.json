@@ -1,0 +1,41 @@
+{
+  "schema": "btc-v7r6-research-prospective-endpoint-score-v1",
+  "slot_utc": "2026-10-13T11:00:00Z",
+  "forecast_public_commit": "ef849f0ff6ebd479429ca17f5e12d382b0c3ce62",
+  "forecast_public_utc": "2026-10-13T11:11:21Z",
+  "forecast_blob": "71abdcaf13e72ef4dfe4486f31a2b6b744fcae1b",
+  "frozen_weights_sha256": "cddf85d3e8b352b1eae4560ff145e927b9c7f0da5853d48d725e535f0f6f772f",
+  "future_R5_snapshot_path": "btc_v7r3_evidence/slots/20261014T1100Z/snapshot.json",
+  "future_R5_snapshot_blob": "377d8da5c0e50fe149b5b14204f58945deb9d0f3",
+  "future_retrieved_utc": "2026-10-14T11:08:04.717Z",
+  "reference_usdt": 83341.42,
+  "score": {
+    "1h": {
+      "target_utc": "2026-10-13T12:00:00Z",
+      "close_usdt": 83360.01,
+      "outcome": "RANGE",
+      "brier_model": 0.002269545429910151,
+      "brier_prior": 0.0017983929281985111,
+      "gain": -0.00047115250171163975
+    },
+    "4h": {
+      "target_utc": "2026-10-13T15:00:00Z",
+      "close_usdt": 83530.01,
+      "outcome": "RANGE",
+      "brier_model": 0.003913287903399872,
+      "brier_prior": 0.003913287903399872,
+      "gain": 0
+    },
+    "24h": {
+      "target_utc": "2026-10-14T11:00:00Z",
+      "close_usdt": 83470,
+      "outcome": "RANGE",
+      "brier_model": 0.022807300130818543,
+      "brier_prior": 0.022807300130818543,
+      "gain": 0
+    }
+  },
+  "research_only": true,
+  "evidence_not_independently_cosign_verified": true,
+  "trade_authority": false
+}

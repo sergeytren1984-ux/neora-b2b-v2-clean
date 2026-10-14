@@ -1,0 +1,96 @@
+{
+  "schema": "btc-v7r6-hourly-fixed-due-research-prospective-score-reconciliation-v1",
+  "calculated_at_utc": "2026-10-14T15:55:00+00:00",
+  "asof_snapshot_utc": "2026-10-14T15:45:00+00:00",
+  "asof_snapshot_R5_path": "btc_v7r3_evidence/slots/20261014T1545Z/snapshot.json",
+  "asof_snapshot_R5_Git_blob_sha1": "3deb4468ca8647910343696a0100a95309ee565f",
+  "asof_snapshot_retrieved_at_utc": "2026-10-14T15:48:30.324000+00:00",
+  "asof_snapshot_5m_rows": 1000,
+  "asof_source_signature_independently_cosign_verified": false,
+  "forecast_commit_times_verified_via_GitHub_commit_metadata": true,
+  "forecast_weights_pre_epoch_sha256": "cddf85d3e8b352b1eae4560ff145e927b9c7f0da5853d48d725e535f0f6f772f",
+  "score_method": "unchanged btc_skill_rebuild/research_score_public_shadow_v7r6.py exact target 5m close, Brier gain frozen prior minus model; seven negative tests passed on Mac 2026-10-14",
+  "due_grid": "2026-10-13T00:00Z through 2026-10-14T15:00Z, all HH:00 UTC; off-grid 04:45Z excluded",
+  "total_due_hourly_anchors": 40,
+  "horizons": {
+    "1h": {
+      "matured_due": 39,
+      "published_on_time_matured": 3,
+      "missing_forecasts": 36,
+      "valid_outcomes": 3,
+      "range": 3,
+      "up": 0,
+      "down": 0,
+      "mean_Brier_gain_vs_frozen_train_prior": -0.0003374649,
+      "positive": 1,
+      "negative": 2,
+      "zero": 0,
+      "independent_utc_day_blocks": 2
+    },
+    "4h": {
+      "matured_due": 36,
+      "published_on_time_matured": 3,
+      "missing_forecasts": 33,
+      "valid_outcomes": 3,
+      "range": 3,
+      "up": 0,
+      "down": 0,
+      "mean_Brier_gain_vs_frozen_train_prior": 0,
+      "positive": 0,
+      "negative": 0,
+      "zero": 3,
+      "independent_utc_day_blocks": 2
+    },
+    "24h": {
+      "matured_due": 16,
+      "published_on_time_matured": 2,
+      "missing_forecasts": 14,
+      "valid_outcomes": 2,
+      "range": 2,
+      "up": 0,
+      "down": 0,
+      "mean_Brier_gain_vs_frozen_train_prior": 0,
+      "positive": 0,
+      "negative": 0,
+      "zero": 2,
+      "independent_utc_day_blocks": 1
+    }
+  },
+  "actual_valid_hourly_forecasts": [
+    {
+      "slot": "20261013T0500Z",
+      "GitHub_commit_sha": "647d67e4272b398f14f5f7b7cda699bca5ff1b93",
+      "public_utc": "2026-10-13T05:05:07Z",
+      "source_R5_blob_sha1": "3930f20ac519b1d67e46c0cc9ecfa39d74dff8fa",
+      "source_retrieved_utc": "2026-10-13T05:04:14.308000+00:00",
+      "gain_1h": 0.0009870658422853654,
+      "gain_4h": 0,
+      "gain_24h": 0
+    },
+    {
+      "slot": "20261013T1100Z",
+      "GitHub_commit_sha": "ef849f0ff6ebd479429ca17f5e12d382b0c3ce62",
+      "public_utc": "2026-10-13T11:11:21Z",
+      "source_R5_blob_sha1": "741ac20f0a5b018f69677a01acc8a0f5f5730a5a",
+      "source_retrieved_utc": "2026-10-13T11:03:22.442000+00:00",
+      "gain_1h": -0.0004711525017116399,
+      "gain_4h": 0,
+      "gain_24h": 0
+    },
+    {
+      "slot": "20261014T0900Z",
+      "GitHub_commit_sha": "dcce930e64e1db66a2dde60a8d11db62b10edab9",
+      "public_utc": "2026-10-14T09:12:14Z",
+      "source_R5_blob_sha1": "df908a845ff1401cb396a1639ab536ed8fc078e5",
+      "source_retrieved_utc": "2026-10-14T09:10:58.718000+00:00",
+      "gain_1h": -0.0015283080105545543,
+      "gain_4h": 0,
+      "gain_24h": null
+    }
+  ],
+  "excluded_off_grid_public_forecast": "20261013T0445Z",
+  "source_limitations": "R5 evidence is GitHub blob provenance only, not independently verified cryptographic signature. No operator OTC quotes or accepted orders.",
+  "statistical_conclusion": "No directional events among these matured HH00 endpoints, 2 prospective calendar days only. 1h sample mean gain negative; 4h/24h predictions identical to frozen prior; no independent event-level directional skill or +60m early lead evidence.",
+  "trading_authority": false,
+  "research_only": true
+}

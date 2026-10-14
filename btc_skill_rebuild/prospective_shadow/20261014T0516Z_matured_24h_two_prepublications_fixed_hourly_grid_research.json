@@ -1,0 +1,78 @@
+{
+  "schema": "btc-v7r6-research-exact-24h-matured-score-audit-v1",
+  "scored_at_utc": "2026-10-14T05:16:00Z",
+  "research_only": true,
+  "trade_authority": false,
+  "source_snapshot": {
+    "branch": "btc-v7r5-corrected-signed-evidence-20261013",
+    "path": "btc_v7r3_evidence/slots/20261014T0500Z/snapshot.json",
+    "git_blob_sha1": "8925aff563d5534342a7f2ca885424814afff4fa",
+    "anchor_utc": "2026-10-14T05:00:00+00:00",
+    "retrieved_at_utc": "2026-10-14T05:03:14.973000+00:00",
+    "cosign_independently_verified": false
+  },
+  "frozen_math": {
+    "research_code_git_blob_sha1": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+    "historical_weights_sha256": "cddf85d3e8b352b1eae4560ff145e927b9c7f0da5853d48d725e535f0f6f772f"
+  },
+  "prepublished": [
+    {
+      "anchor_utc": "2026-10-13T04:45:00Z",
+      "research_commit": "5f69e7f842d10fe1d1348adf9fb2f9d1d3d4fa41",
+      "published_utc": "2026-10-13T04:56:34Z",
+      "off_hourly_grid": true,
+      "target_utc": "2026-10-14T04:45:00Z",
+      "reference_usdt": 83462.9,
+      "target_close_usdt": 83738.1,
+      "outcome": "RANGE",
+      "probabilities": {
+        "UP": 0.14126744624669935,
+        "DOWN": 0.06808751414560543,
+        "RANGE": 0.7906450396076952
+      },
+      "brier_model": 0.022807300130818543,
+      "brier_frozen_prior": 0.022807300130818543,
+      "brier_gain": 0
+    },
+    {
+      "anchor_utc": "2026-10-13T05:00:00Z",
+      "research_commit": "647d67e4272b398f14f5f7b7cda699bca5ff1b93",
+      "published_utc": "2026-10-13T05:05:07Z",
+      "off_hourly_grid": false,
+      "target_utc": "2026-10-14T05:00:00Z",
+      "reference_usdt": 83453.87,
+      "target_close_usdt": 83743.01,
+      "outcome": "RANGE",
+      "probabilities": {
+        "UP": 0.14126744624669935,
+        "DOWN": 0.06808751414560543,
+        "RANGE": 0.7906450396076952
+      },
+      "brier_model": 0.022807300130818543,
+      "brier_frozen_prior": 0.022807300130818543,
+      "brier_gain": 0
+    }
+  ],
+  "hourly_fixed_due_grid": {
+    "start_utc": "2026-10-13T00:00:00Z",
+    "last_due_slot_utc": "2026-10-14T05:00:00Z",
+    "due_total": 30,
+    "prepublished_on_time_total": 2,
+    "missing_total": 28,
+    "matured_1h_due": 29,
+    "matured_1h_forecasts": 2,
+    "matured_1h_missing": 27,
+    "matured_4h_due": 26,
+    "matured_4h_forecasts": 2,
+    "matured_4h_missing": 24,
+    "matured_24h_due": 6,
+    "matured_24h_forecasts": 1,
+    "matured_24h_missing": 5,
+    "off_grid_0445_excluded_from_hourly_denominator": true
+  },
+  "statistical_independent_day_blocks": 1,
+  "independent_event_count_proven": 0,
+  "model_skill_proven": false,
+  "otc_operator_quotes_available": false,
+  "comment": "Two 24h endpoints overlap 23h45m and are from same forecast calendar day; identical shrink=0 prior probabilities cannot establish any forecast skill. All missing due slots remain in denominator. Future R5 snapshot cryptographic proof not independently verified."
+}

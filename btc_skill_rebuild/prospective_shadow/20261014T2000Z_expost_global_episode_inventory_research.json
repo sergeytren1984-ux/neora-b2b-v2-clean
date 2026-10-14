@@ -1,0 +1,182 @@
+{
+  "schema": "btc-v7r6-expost-future-5m-first-touch-episode-inventory-v1",
+  "calculated_at_utc": "2026-10-14T20:35:17.822Z",
+  "asof_source_anchor_utc": "2026-10-14T20:00:00+00:00",
+  "asof_source_retrieved_utc": "2026-10-14T20:11:14.313000+00:00",
+  "source_R5_branch": "btc-v7r5-corrected-signed-evidence-20261013",
+  "source_R5_path": "btc_v7r3_evidence/slots/20261014T2000Z/snapshot.json",
+  "source_R5_git_blob_sha1": "1d1f3a5d0a208a1897ee986a2d613a89380f3957",
+  "source_five_min_closed_bars": 1000,
+  "source_candles_contiguous": true,
+  "source_Cosign_and_Rekor_independently_verified": false,
+  "prospective_source_snapshot_not_proof_of_preissued_research_predictions": true,
+  "not_an_original_forecast": true,
+  "all_counts_are_expost_market_outcomes_only": true,
+  "reference_price_at_exact_anchor_close": true,
+  "future_first_touch_5m_bar_high_low_not_true_intrabar_timestamp": true,
+  "global_event_dedup_same_direction_within_horizon": true,
+  "fixed_full_market_outcome_grid_15m": true,
+  "forecast_missing_due_not_claimed_as_zero": true,
+  "number_independent_prospective_UTC_days_at_most": 2,
+  "minimum_independent_prospective_days_for_trading": 20,
+  "real_OTC_operator_quotes": 0,
+  "real_OTC_fills": 0,
+  "model_Brier_improvement_proven": false,
+  "early_60m_public_signal_proven": false,
+  "trading_authority": false,
+  "horizons": {
+    "1h": {
+      "threshold_fraction": 0.007,
+      "horizon_minutes": 60,
+      "full_15m_market_outcome_due": 173,
+      "closed_market_outcome_windows": 173,
+      "missing_market_candles": 0,
+      "expost_first_touch_or_endpoint_counts": {
+        "DOWN_FIRST": 9,
+        "NEITHER": 149,
+        "UP_FIRST": 15
+      },
+      "nonoverlap_UTC_midnight_anchored_due": 44,
+      "nonoverlap_outcomes": 44,
+      "nonoverlap_expost_class_counts": {
+        "DOWN_FIRST": 3,
+        "UP_FIRST": 3,
+        "NEITHER": 38
+      },
+      "ambiguous_same_5m_touch": 0,
+      "unique_first_touch_open_timestamp_and_direction": 14,
+      "global_horizon_clustered_episodes": 8,
+      "episode_direction_counts": {
+        "UP": 4,
+        "DOWN": 4
+      },
+      "episodes": [
+        {
+          "direction": "DOWN",
+          "first_5m_bar_open_utc": "2026-10-13T00:30:00.000Z",
+          "last_5m_bar_open_utc": "2026-10-13T00:30:00.000Z",
+          "unique_touch_bars": 1
+        },
+        {
+          "direction": "UP",
+          "first_5m_bar_open_utc": "2026-10-13T01:15:00.000Z",
+          "last_5m_bar_open_utc": "2026-10-13T03:35:00.000Z",
+          "unique_touch_bars": 5
+        },
+        {
+          "direction": "DOWN",
+          "first_5m_bar_open_utc": "2026-10-13T09:00:00.000Z",
+          "last_5m_bar_open_utc": "2026-10-13T09:00:00.000Z",
+          "unique_touch_bars": 1
+        },
+        {
+          "direction": "UP",
+          "first_5m_bar_open_utc": "2026-10-13T14:10:00.000Z",
+          "last_5m_bar_open_utc": "2026-10-13T14:10:00.000Z",
+          "unique_touch_bars": 1
+        },
+        {
+          "direction": "UP",
+          "first_5m_bar_open_utc": "2026-10-14T08:05:00.000Z",
+          "last_5m_bar_open_utc": "2026-10-14T08:05:00.000Z",
+          "unique_touch_bars": 1
+        },
+        {
+          "direction": "DOWN",
+          "first_5m_bar_open_utc": "2026-10-14T12:30:00.000Z",
+          "last_5m_bar_open_utc": "2026-10-14T12:30:00.000Z",
+          "unique_touch_bars": 1
+        },
+        {
+          "direction": "UP",
+          "first_5m_bar_open_utc": "2026-10-14T13:35:00.000Z",
+          "last_5m_bar_open_utc": "2026-10-14T13:35:00.000Z",
+          "unique_touch_bars": 1
+        },
+        {
+          "direction": "DOWN",
+          "first_5m_bar_open_utc": "2026-10-14T14:00:00.000Z",
+          "last_5m_bar_open_utc": "2026-10-14T14:50:00.000Z",
+          "unique_touch_bars": 3
+        }
+      ],
+      "mathematically_early_forecast_hits_proven": 0,
+      "score_against_public_prospective_forecasts_not_computed": true
+    },
+    "4h": {
+      "threshold_fraction": 0.012,
+      "horizon_minutes": 240,
+      "full_15m_market_outcome_due": 161,
+      "closed_market_outcome_windows": 161,
+      "missing_market_candles": 0,
+      "expost_first_touch_or_endpoint_counts": {
+        "UP_FIRST": 13,
+        "NEITHER": 132,
+        "DOWN_FIRST": 16
+      },
+      "nonoverlap_UTC_midnight_anchored_due": 11,
+      "nonoverlap_outcomes": 11,
+      "nonoverlap_expost_class_counts": {
+        "UP_FIRST": 1,
+        "NEITHER": 9,
+        "DOWN_FIRST": 1
+      },
+      "ambiguous_same_5m_touch": 0,
+      "unique_first_touch_open_timestamp_and_direction": 18,
+      "global_horizon_clustered_episodes": 3,
+      "episode_direction_counts": {
+        "UP": 1,
+        "DOWN": 2
+      },
+      "episodes": [
+        {
+          "direction": "UP",
+          "first_5m_bar_open_utc": "2026-10-13T01:40:00.000Z",
+          "last_5m_bar_open_utc": "2026-10-13T05:20:00.000Z",
+          "unique_touch_bars": 9
+        },
+        {
+          "direction": "DOWN",
+          "first_5m_bar_open_utc": "2026-10-13T11:15:00.000Z",
+          "last_5m_bar_open_utc": "2026-10-13T11:15:00.000Z",
+          "unique_touch_bars": 1
+        },
+        {
+          "direction": "DOWN",
+          "first_5m_bar_open_utc": "2026-10-14T12:30:00.000Z",
+          "last_5m_bar_open_utc": "2026-10-14T15:05:00.000Z",
+          "unique_touch_bars": 8
+        }
+      ],
+      "mathematically_early_forecast_hits_proven": 0,
+      "score_against_public_prospective_forecasts_not_computed": true
+    },
+    "24h": {
+      "threshold_fraction": 0.02,
+      "horizon_minutes": 1440,
+      "full_15m_market_outcome_due": 81,
+      "closed_market_outcome_windows": 81,
+      "missing_market_candles": 0,
+      "expost_first_touch_or_endpoint_counts": {
+        "RANGE": 72,
+        "UP": 4,
+        "DOWN": 5
+      },
+      "nonoverlap_UTC_midnight_anchored_due": 1,
+      "nonoverlap_outcomes": 1,
+      "nonoverlap_expost_class_counts": {
+        "RANGE": 1
+      },
+      "ambiguous_same_5m_touch": 0,
+      "unique_first_touch_open_timestamp_and_direction": 0,
+      "global_horizon_clustered_episodes": 0,
+      "episode_direction_counts": {
+        "UP": 0,
+        "DOWN": 0
+      },
+      "episodes": [],
+      "mathematically_early_forecast_hits_proven": 0,
+      "score_against_public_prospective_forecasts_not_computed": true
+    }
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "schema": "btc-v7r6-HH00-asof-20261015-research-math-denominator-v1",
+  "calculated_utc": "2026-10-15T02:38:46.079Z",
+  "source_epoch_start_utc": "2026-10-13T00:00:00.000Z",
+  "source_epoch_end_utc": "2026-10-20T00:00:00.000Z",
+  "last_checked_R5_source_anchor_utc": "2026-10-15T01:45:00Z",
+  "last_checked_R5_source_blob_sha1": "b40d86a12b4133fb4911e80251721f7ed2bc6fcc",
+  "source_20261015T0200Z_snapshot": "MISSING_404_AT_AUDIT",
+  "snapshot_cosign_independently_verified": false,
+  "registered_HH00_due_through_now": 51,
+  "published_original_HH00_forecasts": 3,
+  "missing_forecasts_due": 48,
+  "original_forecasts": [
+    {
+      "slot": "20261013T0500Z",
+      "commit": "647d67e4272b398f14f5f7b7cda699bca5ff1b93",
+      "g1": 0.0009870658422853654,
+      "g4": 0,
+      "g24": 0,
+      "published_utc": "2026-10-13T05:05:07Z"
+    },
+    {
+      "slot": "20261013T1100Z",
+      "commit": "ef849f0ff6ebd479429ca17f5e12d382b0c3ce62",
+      "g1": -0.0004711525017116399,
+      "g4": 0,
+      "g24": 0,
+      "published_utc": "2026-10-13T11:11:21Z"
+    },
+    {
+      "slot": "20261014T0900Z",
+      "commit": "dcce930e64e1db66a2dde60a8d11db62b10edab9",
+      "g1": -0.0015283080105545543,
+      "g4": 0,
+      "g24": null,
+      "published_utc": "2026-10-14T09:12:14Z"
+    }
+  ],
+  "offgrid_20261013T0445Z_excluded": true,
+  "horizons": {
+    "1h": {
+      "horizon_hours": 1,
+      "matured_HH00_due": 50,
+      "published_and_matured": 3,
+      "missing_forecasts_in_matured_due": 47,
+      "nonoverlap_UTC_midnight_due": 50,
+      "nonoverlap_scored": 3,
+      "nonoverlap_missing": 47,
+      "independent_UTC_days_nonoverlap": 2,
+      "all_scored_endpoint_labels": "RANGE",
+      "mean_gain_vs_pre_epoch_train_prior_all_published": -0.0003374648899936096,
+      "mean_gain_vs_prior_nonoverlap": -0.0003374648899936096,
+      "independent_event_skill_proven": false
+    },
+    "4h": {
+      "horizon_hours": 4,
+      "matured_HH00_due": 47,
+      "published_and_matured": 3,
+      "missing_forecasts_in_matured_due": 44,
+      "nonoverlap_UTC_midnight_due": 12,
+      "nonoverlap_scored": 0,
+      "nonoverlap_missing": 12,
+      "independent_UTC_days_nonoverlap": 0,
+      "all_scored_endpoint_labels": "RANGE",
+      "mean_gain_vs_pre_epoch_train_prior_all_published": 0,
+      "mean_gain_vs_prior_nonoverlap": null,
+      "independent_event_skill_proven": false
+    },
+    "24h": {
+      "horizon_hours": 24,
+      "matured_HH00_due": 27,
+      "published_and_matured": 2,
+      "missing_forecasts_in_matured_due": 25,
+      "nonoverlap_UTC_midnight_due": 2,
+      "nonoverlap_scored": 0,
+      "nonoverlap_missing": 2,
+      "independent_UTC_days_nonoverlap": 0,
+      "all_scored_endpoint_labels": "RANGE",
+      "mean_gain_vs_pre_epoch_train_prior_all_published": 0,
+      "mean_gain_vs_prior_nonoverlap": null,
+      "independent_event_skill_proven": false
+    }
+  },
+  "first_7day_R5_epoch_cannot_provide_20_independent_calendar_days": true,
+  "earliest_20th_prospective_calendar_day_from_20261013": "2026-11-01",
+  "confidence_intervals_not_estimable": true,
+  "operator_firm_quotes": 0,
+  "actual_operator_fills": 0,
+  "model_prospective_skill_proven": false,
+  "trading_authority": false,
+  "forecasts_not_modified": true,
+  "pre_epoch_weights_not_modified": true,
+  "technical_infrastructure_not_modified": true
+}

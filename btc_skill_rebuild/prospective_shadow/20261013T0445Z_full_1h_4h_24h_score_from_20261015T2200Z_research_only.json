@@ -1,0 +1,88 @@
+{
+  "schema": "btc-v7r6-research-only-postmaturity-original-3way-score-v1",
+  "forecast_slot_utc": "2026-10-13T04:45:00+00:00",
+  "original_public_forecast_commit_sha": "5f69e7f842d10fe1d1348adf9fb2f9d1d3d4fa41",
+  "original_public_forecast_commit_utc": "2026-10-13T04:56:34Z",
+  "original_public_forecast_blob_sha": "0d9e2946a403ec1701174ad21edce930154194f8",
+  "original_preepoch_weights_blob_sha": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "original_R5_source_snapshot_path": "btc_v7r3_evidence/slots/20261013T0445Z/snapshot.json",
+  "original_R5_source_snapshot_blob_sha": "9514cd08c0db8fcb1dc688b1c8f008132d7e6809",
+  "original_R5_source_retrieved_utc": "2026-10-13T04:48:26.779000+00:00",
+  "postmaturity_R5_snapshot_path": "btc_v7r3_evidence/slots/20261015T2200Z/snapshot.json",
+  "postmaturity_R5_snapshot_blob_sha": "b7074a626b06cb265e9d51d5dd0d1bcaad7c6c6b",
+  "postmaturity_R5_snapshot_anchor_utc": "2026-10-15T22:00:00+00:00",
+  "postmaturity_R5_snapshot_retrieved_utc": "2026-10-15T22:10:58.604000+00:00",
+  "source_and_forecast_crypto_signatures_not_independently_verified": true,
+  "original_forecast_published_before_all_outcomes": true,
+  "all_exact_5m_targets_matured_before_score": true,
+  "post_event_refit_or_threshold_changes": false,
+  "independent_prospective_calendar_days_proven": 0,
+  "operator_firm_OTC_asks_or_fills_available": false,
+  "trade_grade_skill_proven": false,
+  "trading_authority": false,
+  "three_way_horizons": {
+    "1h": {
+      "target_utc": "2026-10-13T05:45:00+00:00",
+      "reference_spot_usdt": 83462.9,
+      "actual_exact_target_spot_close_usdt": 83587.45,
+      "realized_return_fraction": 0.0014922798033618623,
+      "realized_class": "RANGE",
+      "prepublished_probabilities": {
+        "UP": 0.02231836339503352,
+        "DOWN": 0.027799809909358094,
+        "RANGE": 0.9498818266956085
+      },
+      "frozen_historical_prior_probabilities": {
+        "UP": 0.03281423804226919,
+        "DOWN": 0.027067111605487578,
+        "RANGE": 0.9401186503522432
+      },
+      "Brier_model": 0.0012609233569994126,
+      "Brier_frozen_historical_prior": 0.0017983929281985111,
+      "Brier_gain_vs_frozen_historical_prior": 0.0005374695711990985,
+      "label_matured": true
+    },
+    "4h": {
+      "target_utc": "2026-10-13T08:45:00+00:00",
+      "reference_spot_usdt": 83462.9,
+      "actual_exact_target_spot_close_usdt": 83807.81,
+      "realized_return_fraction": 0.004132494797089548,
+      "realized_class": "RANGE",
+      "prepublished_probabilities": {
+        "UP": 0.05128205128205128,
+        "DOWN": 0.03678929765886288,
+        "RANGE": 0.9119286510590858
+      },
+      "frozen_historical_prior_probabilities": {
+        "UP": 0.05128205128205128,
+        "DOWN": 0.03678929765886288,
+        "RANGE": 0.9119286510590858
+      },
+      "Brier_model": 0.003913287903399872,
+      "Brier_frozen_historical_prior": 0.003913287903399872,
+      "Brier_gain_vs_frozen_historical_prior": 0,
+      "label_matured": true
+    },
+    "24h": {
+      "target_utc": "2026-10-14T04:45:00+00:00",
+      "reference_spot_usdt": 83462.9,
+      "actual_exact_target_spot_close_usdt": 83738.1,
+      "realized_return_fraction": 0.0032972733993188452,
+      "realized_class": "RANGE",
+      "prepublished_probabilities": {
+        "UP": 0.14126744624669935,
+        "DOWN": 0.06808751414560543,
+        "RANGE": 0.7906450396076952
+      },
+      "frozen_historical_prior_probabilities": {
+        "UP": 0.14126744624669935,
+        "DOWN": 0.06808751414560543,
+        "RANGE": 0.7906450396076952
+      },
+      "Brier_model": 0.022807300130818543,
+      "Brier_frozen_historical_prior": 0.022807300130818543,
+      "Brier_gain_vs_frozen_historical_prior": 0,
+      "label_matured": true
+    }
+  }
+}

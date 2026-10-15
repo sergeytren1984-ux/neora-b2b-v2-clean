@@ -1,0 +1,63 @@
+{
+  "R5_snapshot_blob_sha1": "4a2603fcc434e6368c1aed082aabeba70f6ffdb4",
+  "R5_snapshot_path": "btc_v7r3_evidence/slots/20261015T0930Z/snapshot.json",
+  "R5_snapshot_retrieved_utc": "2026-10-15T09:33:32.211000+00:00",
+  "R5_snapshot_signature_independently_verified": false,
+  "asof_utc": "2026-10-15T09:52:35.323193+00:00",
+  "caution": "Frozen validation shrink 0 means exact equality to train-prior Brier; directional DOWN outcome alone is not predictive skill. All missing hourly slots remain in due denominator.",
+  "independent_20_prospective_days": false,
+  "negative_and_positive_unit_tests_passed": 7,
+  "new_24h_model_Brier_gain": 0,
+  "new_24h_outcome_20261014T0900Z": {
+    "Brier_gain_vs_frozen_train_prior": 0,
+    "actual_outcome": "DOWN",
+    "actual_target_close_usdt": 81380.29,
+    "due": true,
+    "forecast_probabilities": {
+      "DOWN": 0.06808751414560543,
+      "RANGE": 0.7906450396076952,
+      "UP": 0.14126744624669935
+    },
+    "reference_spot_usdt": 83432.24,
+    "resolved": true,
+    "shrink_previous_validation_only": 0,
+    "strict_3way_Brier_frozen_train_prior": 0.504512317105545,
+    "strict_3way_Brier_model": 0.504512317105545,
+    "target_utc": "2026-10-15T09:00:00+00:00"
+  },
+  "new_4h_model_Brier_gain": 0,
+  "new_4h_outcome_20261015T0500Z": {
+    "Brier_gain_vs_frozen_train_prior": 0,
+    "actual_outcome": "RANGE",
+    "actual_target_close_usdt": 81380.29,
+    "due": true,
+    "forecast_probabilities": {
+      "DOWN": 0.03678929765886288,
+      "RANGE": 0.9119286510590858,
+      "UP": 0.05128205128205128
+    },
+    "reference_spot_usdt": 81597.32,
+    "resolved": true,
+    "shrink_previous_validation_only": 0,
+    "strict_3way_Brier_frozen_train_prior": 0.003913287903399872,
+    "strict_3way_Brier_model": 0.003913287903399872,
+    "target_utc": "2026-10-15T09:00:00+00:00"
+  },
+  "real_operator_fills_count": 0,
+  "real_operator_firm_asks_count": 0,
+  "registered_HH00_due_count_through_20261015T0900Z": 58,
+  "registered_HH00_missing_count": 54,
+  "registered_HH00_on_time_research_forecasts_count": 4,
+  "research_forecast_GH_publication_independently_crypto_verified": false,
+  "research_frozen_weights_validation_shrink_24h": 0,
+  "research_frozen_weights_validation_shrink_4h": 0,
+  "research_new_24h_skill_proven": false,
+  "research_new_4h_skill_proven": false,
+  "research_original_public_commit_times_claimed_external": {
+    "20261014T0900Z": "2026-10-14T09:12:14+00:00",
+    "20261015T0500Z": "2026-10-15T05:07:33+00:00"
+  },
+  "schema": "btc-v7r6-research-only-20261015T0930Z-two-exact-matured-endpoints-v1",
+  "source_exact_score_modules": "btc_skill_rebuild/research_score_public_shadow_v7r6.py",
+  "trading_authority": false
+}

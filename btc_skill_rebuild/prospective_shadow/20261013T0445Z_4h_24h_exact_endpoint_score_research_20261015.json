@@ -1,0 +1,79 @@
+{
+  "schema": "btc-v7r6-research-prospective-previously-published-exact-5m-endpoint-4h-24h-score-v1",
+  "original_forecast_slot_utc": "2026-10-13T04:45:00+00:00",
+  "original_forecast_commit": "5f69e7f842d10fe1d1348adf9fb2f9d1d3d4fa41",
+  "original_forecast_commit_created_utc": "2026-10-13T04:56:34Z",
+  "original_forecast_blob_sha1": "0d9e2946a403ec1701174ad21edce930154194f8",
+  "original_frozen_weights_blob_sha1": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "research_forecaster_code_blob_sha1": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+  "scoring_code_blob_sha1": "17fe99c99f33825f7b410e3f5e91be384582f793",
+  "R5_source_branch": "btc-v7r5-corrected-signed-evidence-20261013",
+  "source_signatures_cosign_NOT_independently_verified": true,
+  "public_research_only_not_signed_R6_production": true,
+  "score_convention": "mean of 3 squared probability residuals, fixed class order UP/DOWN/RANGE, positive gain=baseline Brier minus forecast Brier",
+  "target_closed_5m_only": true,
+  "no_hindsight_retraining": true,
+  "horizons": {
+    "4h": {
+      "target_utc": "2026-10-13T08:45:00Z",
+      "target_exact_closed_5m_bar_open_utc": "2026-10-13T08:40:00Z",
+      "source_R5_snapshot_path": "btc_v7r3_evidence/slots/20261013T0900Z/snapshot.json",
+      "source_R5_snapshot_blob_sha1": "29579e149f272ab79a6f22ccdc645320707f013f",
+      "source_R5_snapshot_retrieved_utc": "2026-10-13T09:09:01.622000+00:00",
+      "reference_price_usdt": 83462.9,
+      "actual_target_close_usdt": 83807.81,
+      "actual_endpoint_return_pct": 0.41324947970895476,
+      "prepublished_threshold_pct": 1.2,
+      "actual_class": "RANGE",
+      "forecast_probabilities_UP_DOWN_RANGE": [
+        0.05128205128205128,
+        0.03678929765886288,
+        0.9119286510590858
+      ],
+      "frozen_train_prior_probabilities_UP_DOWN_RANGE": [
+        0.05128205128205128,
+        0.03678929765886288,
+        0.9119286510590858
+      ],
+      "Brier_model": 0.003913287903399872,
+      "Brier_frozen_train_prior": 0.003913287903399872,
+      "Brier_gain_vs_prior": 0
+    },
+    "24h": {
+      "target_utc": "2026-10-14T04:45:00Z",
+      "target_exact_closed_5m_bar_open_utc": "2026-10-14T04:40:00Z",
+      "source_R5_snapshot_path": "btc_v7r3_evidence/slots/20261014T0500Z/snapshot.json",
+      "source_R5_snapshot_blob_sha1": "8925aff563d5534342a7f2ca885424814afff4fa",
+      "source_R5_snapshot_retrieved_utc": "2026-10-14T05:03:14.973000+00:00",
+      "reference_price_usdt": 83462.9,
+      "actual_target_close_usdt": 83738.1,
+      "actual_endpoint_return_pct": 0.3297273399318845,
+      "prepublished_threshold_pct": 2,
+      "actual_class": "RANGE",
+      "forecast_probabilities_UP_DOWN_RANGE": [
+        0.14126744624669935,
+        0.06808751414560543,
+        0.7906450396076952
+      ],
+      "frozen_train_prior_probabilities_UP_DOWN_RANGE": [
+        0.14126744624669935,
+        0.06808751414560543,
+        0.7906450396076952
+      ],
+      "Brier_model": 0.022807300130818543,
+      "Brier_frozen_train_prior": 0.022807300130818543,
+      "Brier_gain_vs_prior": 0
+    }
+  },
+  "previously_scored_1h_research_path": "btc_skill_rebuild/prospective_shadow/20261013T0445Z_score_20261013T0615Z_research.json",
+  "previously_scored_1h_Brier_gain_vs_prior": 0.0005374695711990985,
+  "distinct_public_research_forecast_events_counted": 1,
+  "distinct_prospective_calendar_days_for_this_forecast": 1,
+  "independent_significant_directional_events_confirmed": 0,
+  "early_directional_60min_public_lead_confirmed": 0,
+  "real_operator_firm_OTC_asks": 0,
+  "real_operator_fills": 0,
+  "statistically_proven_skill": false,
+  "trading_authority": false,
+  "caveat": "Only one 2026-10-13T04:45Z public research forecast; 4h/24h probabilities exactly equal frozen training priors. These labels and gains cannot establish independent-day significance, early warnings or OTC advantage."
+}

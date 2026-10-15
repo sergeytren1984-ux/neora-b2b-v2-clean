@@ -1,0 +1,97 @@
+{
+  "schema": "btc-v7r6-research-HH00-due-day-block-audit-20261015T0826Z-v1",
+  "asof_utc": "2026-10-15T08:26:19Z",
+  "branch": "btc-v7r6-forecast-math-diagnostics-20261012",
+  "epoch_start_utc": "2026-10-13T00:00:00Z",
+  "HH00_registered_due_count": 57,
+  "HH00_published_before_HH13_count": 4,
+  "HH00_missing_never_backfill_count": 53,
+  "HH00_20261015T0800Z": {
+    "R5_snapshot_sha1": "ea557bc8963faa157f3aff9fb58271bcc5f1eb63",
+    "R5_source_retrieved_utc": "2026-10-15T08:08:52.920000+00:00",
+    "original_research_forecast": "MISSING_AT_AUDIT_AFTER_HH13",
+    "retroactive_prediction_allowed": false
+  },
+  "matured_fixed_HH00_due_grid": {
+    "h1": 56,
+    "h4": 53,
+    "h24": 33
+  },
+  "matured_on_time_research_predictions": {
+    "h1": 4,
+    "h4": 3,
+    "h24": 2
+  },
+  "h1_published_scored": [
+    {
+      "slot": "20261013T0500Z",
+      "day": "2026-10-13",
+      "gain": 0.0009870658422853657,
+      "y": "RANGE"
+    },
+    {
+      "slot": "20261013T1100Z",
+      "day": "2026-10-13",
+      "gain": -0.00047115250171163975,
+      "y": "RANGE"
+    },
+    {
+      "slot": "20261014T0900Z",
+      "day": "2026-10-14",
+      "gain": -0.0015283080105545543,
+      "y": "RANGE"
+    },
+    {
+      "slot": "20261015T0500Z",
+      "day": "2026-10-15",
+      "gain": 0.022590574068342306,
+      "y": "DOWN"
+    }
+  ],
+  "h1_observed_directional_count": 1,
+  "h1_observed_range_count": 3,
+  "h1_mean_Brier_gain_over_four_slots": 0.00539454484959037,
+  "h1_daily_block_means": [
+    {
+      "day": "2026-10-13",
+      "n": 2,
+      "mean_gain": 0.00025795667028686296
+    },
+    {
+      "day": "2026-10-14",
+      "n": 1,
+      "mean_gain": -0.0015283080105545543
+    },
+    {
+      "day": "2026-10-15",
+      "n": 1,
+      "mean_gain": 0.022590574068342306
+    }
+  ],
+  "h1_equal_day_mean_gain": 0.0071067409093582045,
+  "h1_exact_3_day_resample_bootstrap_CI95_percentile_nearest_rank": [
+    -0.0015283080105545543,
+    0.022590574068342306
+  ],
+  "h1_daily_block_n": 3,
+  "h1_positive_day_blocks": 2,
+  "h4_frozen_shrink": 0,
+  "h24_frozen_shrink": 0,
+  "h4_h24_probabilities_identical_to_train_prior": true,
+  "h4_h24_incremental_Brier_gain_for_any_outcome": 0,
+  "full_day_blocks_required": 20,
+  "prospective_cosign_independently_verified": false,
+  "real_operator_firm_quotes": 0,
+  "real_operator_fills": 0,
+  "prospective_early_direction_60min_lead_proven": false,
+  "price_MAE_better_than_persistence_proven": false,
+  "positive_OTC_net_BTC_lower_CI_proven": false,
+  "trading_authority": false,
+  "source_score_paths": [
+    "btc_skill_rebuild/prospective_shadow/20261013T0500Z_1h_score_research.json",
+    "btc_skill_rebuild/prospective_shadow/20261013T1100Z_1h_score_20261013T1420Z_research.json",
+    "btc_skill_rebuild/prospective_shadow/20261014T0900Z_1h_exact_R5_1100Z_score_research.json",
+    "btc_skill_rebuild/prospective_shadow/20261015T0500Z_1h_exact_R5_0615Z_research_score.json"
+  ],
+  "method": "Original published hourly HH00 forecasts only; 1h strict three-way Brier gain=training-prior minus published probability; 3 UTC-day means; exact 3^3 equal-day bootstrap resamples, no overlapping-slot inflation; all due grid missing preserved."
+}

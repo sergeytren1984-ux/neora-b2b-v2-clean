@@ -1,0 +1,46 @@
+{
+  "schema": "btc-v7r6-research-hourly-publication-due-grid-asof-v1",
+  "checked_utc": "2026-10-15T07:13:08Z",
+  "start": "2026-10-13T00:00:00Z",
+  "last_due": "2026-10-15T07:00:00Z",
+  "hourly_HH00_due_count": 56,
+  "original_on_time_research_forecast_slots": [
+    "20261013T0500Z",
+    "20261013T1100Z",
+    "20261014T0900Z",
+    "20261015T0500Z"
+  ],
+  "original_on_time_research_forecasts": 4,
+  "missing_on_time_forecasts": 52,
+  "slot_20261015T0700Z_R5_snapshot_at_deadline": "NOT_FOUND_404",
+  "slot_20261015T0700Z_research_forecast_at_deadline": "NOT_FOUND_404",
+  "slot_20261015T0700Z_due_result": "MISSING_NEVER_BACKFILL",
+  "published_offgrid_20261013T0445Z_excluded": true,
+  "matured_due_grid_including_missing": {
+    "1h": 55,
+    "4h": 52,
+    "24h": 32
+  },
+  "matured_on_time_research_forecasts": {
+    "1h": 4,
+    "4h": 3,
+    "24h": 2
+  },
+  "newly_scored_20261015T0500Z_1h": {
+    "target_exact_5m_close": "2026-10-15T06:00:00Z",
+    "R5_future_snapshot_blob": "4f4147c68a874c423826e1e5d9af0a85eaf7b3c4",
+    "outcome": "DOWN",
+    "Brier_model": 0.5879088446910266,
+    "Brier_train_prior": 0.6104994187593689,
+    "gain": 0.022590574068342306,
+    "source_signature_independently_verified": false,
+    "single_sample_not_directional_skill": true
+  },
+  "original_forecast_model_code_blob": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+  "frozen_weights_blob": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "cosign_independently_verified": false,
+  "independent_prospective_day_blocks_at_least_20": false,
+  "actual_operator_quotes_count": 0,
+  "actual_operator_fills_count": 0,
+  "trading_authority": false
+}

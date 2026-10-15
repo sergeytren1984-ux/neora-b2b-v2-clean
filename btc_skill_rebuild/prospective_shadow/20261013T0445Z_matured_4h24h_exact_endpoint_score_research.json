@@ -1,0 +1,59 @@
+{
+  "schema": "btc-v7r6-unverified-public-research-exact-4h24h-matured-score-v1",
+  "forecast_slot_utc": "2026-10-13T04:45:00+00:00",
+  "original_forecast_commit_sha": "5f69e7f842d10fe1d1348adf9fb2f9d1d3d4fa41",
+  "original_forecast_commit_utc": "2026-10-13T04:56:34Z",
+  "original_forecast_git_blob": "0d9e2946a403ec1701174ad21edce930154194f8",
+  "original_frozen_weights_git_blob": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "fixed_reference_spot_usdt": 83462.9,
+  "scores": {
+    "4h": {
+      "target_utc": "2026-10-13T08:45:00+00:00",
+      "threshold_fraction": 0.012,
+      "actual_close_usdt": 83807.81,
+      "actual_return_pct": 0.41324947970895476,
+      "outcome": "RANGE",
+      "probabilities_up_down_range": [
+        0.05128205128205128,
+        0.03678929765886288,
+        0.9119286510590858
+      ],
+      "validation_selected_shrink": 0,
+      "strict_three_class_Brier_model": 0.003913287903399872,
+      "strict_three_class_Brier_frozen_train_prior": 0.003913287903399872,
+      "Brier_gain_vs_train_prior": 0,
+      "exact_closed_5m_bar_matches": 1,
+      "outcome_R5_snapshot": "btc_v7r3_evidence/slots/20261013T0900Z/snapshot.json",
+      "outcome_snapshot_git_blob": "29579e149f272ab79a6f22ccdc645320707f013f",
+      "outcome_snapshot_anchor_utc": "2026-10-13T09:00:00+00:00",
+      "outcome_snapshot_claimed_retrieved_utc": "2026-10-13T09:09:01.622000+00:00"
+    },
+    "24h": {
+      "target_utc": "2026-10-14T04:45:00+00:00",
+      "threshold_fraction": 0.02,
+      "actual_close_usdt": 83738.1,
+      "actual_return_pct": 0.3297273399318845,
+      "outcome": "RANGE",
+      "probabilities_up_down_range": [
+        0.14126744624669935,
+        0.06808751414560543,
+        0.7906450396076952
+      ],
+      "validation_selected_shrink": 0,
+      "strict_three_class_Brier_model": 0.022807300130818543,
+      "strict_three_class_Brier_frozen_train_prior": 0.022807300130818543,
+      "Brier_gain_vs_train_prior": 0,
+      "exact_closed_5m_bar_matches": 1,
+      "outcome_R5_snapshot": "btc_v7r3_evidence/slots/20261014T0500Z/snapshot.json",
+      "outcome_snapshot_git_blob": "8925aff563d5534342a7f2ca885424814afff4fa",
+      "outcome_snapshot_anchor_utc": "2026-10-14T05:00:00+00:00",
+      "outcome_snapshot_claimed_retrieved_utc": "2026-10-14T05:03:14.973000+00:00"
+    }
+  },
+  "fixed_due_grid_includes_missing_slots": true,
+  "source_evidence_cosign_independently_verified": false,
+  "forecast_independently_cosign_verified": false,
+  "research_only": true,
+  "mathematical_note": "Frozen 4h and 24h validation shrink is exactly zero, hence forecast probabilities equal training prior for any source. These matured outcomes therefore give exactly zero model-vs-prior Brier gain, not evidence of predictive skill. One published slot is not an independent multi-day sample.",
+  "trading_authority": false
+}

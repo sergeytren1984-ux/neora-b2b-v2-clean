@@ -1,0 +1,36 @@
+{
+  "schema": "btc-v7r6-research-1h-exact-R5-endpoint-score-v1",
+  "forecast_slot_utc": "2026-10-15T05:00:00Z",
+  "forecast_original_commit": "0247f22d21353c038696b7b402dd1e8ad01a1374",
+  "forecast_original_commit_utc": "2026-10-15T05:07:33Z",
+  "forecast_blob": "8f9524e7b75758df5e0992610d5541484d50318d",
+  "frozen_code_blob": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+  "frozen_weights_blob": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "R5_future_snapshot": "btc_v7r3_evidence/slots/20261015T0615Z/snapshot.json",
+  "R5_future_snapshot_blob": "4f4147c68a874c423826e1e5d9af0a85eaf7b3c4",
+  "R5_future_snapshot_commit": "e1fd1be2f41974f1bd8c20903f0d0252b04ff09e",
+  "R5_future_snapshot_commit_utc": "2026-10-15T06:22:40Z",
+  "R5_future_snapshot_retrieved_utc": "2026-10-15T06:22:35.950000+00:00",
+  "exact_5m_target_utc": "2026-10-15T06:00:00Z",
+  "reference_spot_usdt": 81597.32,
+  "exact_target_spot_usdt": 80591.73,
+  "return_pct": -1.2323811615381652,
+  "fixed_threshold_fraction": 0.007,
+  "outcome": "DOWN",
+  "published_UP_DOWN_RANGE": [
+    0.04842954194272541,
+    0.037646539048870394,
+    0.9139239190084042
+  ],
+  "prior_UP_DOWN_RANGE": [
+    0.03281423804226919,
+    0.027067111605487578,
+    0.9401186503522432
+  ],
+  "Brier_model": 0.5879088446910266,
+  "Brier_prior": 0.6104994187593689,
+  "Brier_gain": 0.022590574068342306,
+  "other_horizons_not_mature_at_scoring": true,
+  "cryptographically_verified": false,
+  "trading_authority": false
+}

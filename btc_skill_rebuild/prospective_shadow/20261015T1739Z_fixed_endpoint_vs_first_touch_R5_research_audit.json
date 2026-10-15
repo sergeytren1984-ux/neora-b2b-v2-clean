@@ -1,0 +1,71 @@
+{
+  "schema": "btc-v7r6-research-fixed-endpoint-vs-first-touch-real-R5-20261015T1739Z-v1",
+  "computed_asof_utc": "2026-10-15T17:39:00Z",
+  "source_branch": "btc-v7r5-corrected-signed-evidence-20261013",
+  "source_path": "btc_v7r3_evidence/slots/20261015T1600Z/snapshot.json",
+  "source_git_blob_sha1": "65547b808c9c337cb43271888f4a737320093656",
+  "source_anchor_utc": "2026-10-15T16:00:00+00:00",
+  "source_retrieved_at_utc": "2026-10-15T16:09:26.803000+00:00",
+  "cryptographic_Sigstore_independently_verified": false,
+  "observations": [
+    {
+      "horizon": "4h",
+      "start_utc": "2026-10-15T12:00:00Z",
+      "target_utc": "2026-10-15T16:00:00Z",
+      "predeclared_threshold_fraction": 0.012,
+      "reference_spot_usdt": 80980.01,
+      "target_close_usdt": 82418,
+      "return_pct": 1.7757345300402072,
+      "exact_endpoint": "UP",
+      "first_barrier_touch": "DOWN",
+      "first_touch_bar_end_utc": "2026-10-15T13:55:00Z",
+      "complete_closed_5m_bars": 48,
+      "interpretation": "4h endpoint UP and first-touch DOWN are different labels; a retrospective barrier label must never be scored as a previously published endpoint forecast",
+      "published_early_directional_signal_at_least_60min_before_touch": false,
+      "early_R5_signal_grid_utc": [
+        "2026-10-15T12:00:00Z",
+        "2026-10-15T12:15:00Z",
+        "2026-10-15T12:30:00Z",
+        "2026-10-15T12:45:00Z"
+      ],
+      "early_R5_signal_grid_status": [
+        "MISSING",
+        "INSUFFICIENT_ASOF_HISTORY",
+        "MISSING",
+        "MISSING"
+      ]
+    },
+    {
+      "horizon": "1h",
+      "start_utc": "2026-10-15T15:00:00Z",
+      "target_utc": "2026-10-15T16:00:00Z",
+      "predeclared_threshold_fraction": 0.007,
+      "reference_spot_usdt": 81871.95,
+      "target_close_usdt": 82418,
+      "return_pct": 0.6669561430990845,
+      "exact_endpoint": "RANGE",
+      "first_barrier_touch": "UP",
+      "first_touch_bar_end_utc": "2026-10-15T15:40:00Z",
+      "complete_closed_5m_bars": 12,
+      "interpretation": "1h endpoint RANGE and first-touch UP differ; this observation is an outcome only, not a prospective direction forecast"
+    }
+  ],
+  "registered_HH00_due_count_20261013T0000_through_20261015T1700": 66,
+  "on_time_preexisting_research_HH00_forecast_slots": [
+    "20261013T0500Z",
+    "20261013T1100Z",
+    "20261014T0900Z",
+    "20261015T0500Z"
+  ],
+  "on_time_research_HH00_forecast_count": 4,
+  "missing_forecast_due_count": 62,
+  "latest_20261015T1700Z_R5_snapshot": "MISSING_AT_20261015T1739Z",
+  "late_20261015T1700Z_research_forecast_allowed": false,
+  "on_time_1h4h24h_new_forecasts_published_this_run": 0,
+  "new_model_fit_or_threshold_change": false,
+  "outcome_labels_used_as_forecast_features": false,
+  "independent_20_prospective_day_blocks_met": false,
+  "real_OTC_firm_asks_count": 0,
+  "real_OTC_fills_count": 0,
+  "trading_authority": false
+}

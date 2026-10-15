@@ -1,0 +1,85 @@
+{
+  "schema": "btc-v7r6-hourly-research-asof-due-and-conditional-Brier-audit-v1",
+  "calculated_utc": "2026-10-15T06:18:47.934Z",
+  "epoch_start_utc": "2026-10-13T00:00:00Z",
+  "last_checked_due_utc": "2026-10-15T06:00:00Z",
+  "hourly_HH00_due_count": 55,
+  "published_original_on_time_HH00_count": 4,
+  "original_on_time_forecasts": [
+    "20261013T0500Z",
+    "20261013T1100Z",
+    "20261014T0900Z",
+    "20261015T0500Z"
+  ],
+  "offgrid_20261013T0445Z_excluded": true,
+  "missing_original_forecasts_in_due_grid": 51,
+  "source_20261015T0600Z_snapshot": "NOT_FOUND_404_AT_CHECK_AFTER_HH13",
+  "source_20261015T0615Z_snapshot": "NOT_FOUND_404_AT_CHECK",
+  "missing_slot_0600_never_backfilled": true,
+  "forecast_20261015T0500Z": {
+    "original_commit_sha": "0247f22d21353c038696b7b402dd1e8ad01a1374",
+    "original_commit_utc": "2026-10-15T05:07:33Z",
+    "forecast_blob_git_sha1": "8f9524e7b75758df5e0992610d5541484d50318d",
+    "source_R5_snapshot_blob_git_sha1": "ff1b8eee0d1c16fe6fa8b790131ca04e5e8c424c",
+    "source_snapshot_original_retrieved_utc": "2026-10-15T05:04:20.533000+00:00",
+    "source_anchor_utc": "2026-10-15T05:00:00Z",
+    "reference_spot_usdt": 81597.32,
+    "target_1h_utc": "2026-10-15T06:00:00Z",
+    "target_4h_utc": "2026-10-15T09:00:00Z",
+    "target_24h_utc": "2026-10-16T05:00:00Z",
+    "one_hour_actual_exact_closed_5m_R5_label": "NOT_AVAILABLE_AS_OF_CHECK",
+    "conditional_Brier_by_unknown_1h_outcome_NOT_ACTUAL_SCORE": {
+      "UP": {
+        "Brier_model": 0.5807201760951232,
+        "Brier_train_prior": 0.6066680011348478,
+        "Brier_gain_vs_prior": 0.025947825039724592
+      },
+      "DOWN": {
+        "Brier_model": 0.5879088446910266,
+        "Brier_train_prior": 0.6104994187593689,
+        "Brier_gain_vs_prior": 0.022590574068342306
+      },
+      "RANGE": {
+        "Brier_model": 0.0037239247180040277,
+        "Brier_train_prior": 0.0017983929281985111,
+        "Brier_gain_vs_prior": -0.0019255317898055166
+      }
+    },
+    "conditional_score_is_not_skill_evidence": true
+  },
+  "pre_epoch_frozen_weights_git_blob_sha1": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "frozen_forecast_code_git_blob_sha1": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+  "frozen_4h_shrink_alpha": 0,
+  "frozen_24h_shrink_alpha": 0,
+  "frozen_4h_24h_Brier_gain_vs_prior_for_any_actual_outcome": 0,
+  "matured_HH00_grid_count_including_missing": {
+    "1h": 54,
+    "4h": 51,
+    "24h": 31
+  },
+  "matured_published_HH00": {
+    "1h": 4,
+    "4h": 3,
+    "24h": 2
+  },
+  "matured_with_exact_5m_outcome_already_verified_in_prior_research": {
+    "1h": 3,
+    "4h": 3,
+    "24h": 2
+  },
+  "matured_published_but_unscored_due_to_missing_exact_R5_target": {
+    "1h": 1,
+    "4h": 0,
+    "24h": 0
+  },
+  "nonoverlap_4h_UTC_midnight_anchored_due": 13,
+  "nonoverlap_4h_original_public_forecasts": 0,
+  "nonoverlap_24h_UTC_midnight_anchored_due": 2,
+  "nonoverlap_24h_original_public_forecasts": 0,
+  "cosign_independently_verified": false,
+  "operator_firm_quotes_count": 0,
+  "operator_actual_fills_count": 0,
+  "independent_prospective_day_blocks_below_20": true,
+  "retrospective_fitting_or_late_republication": false,
+  "trading_authority": false
+}

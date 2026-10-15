@@ -1,0 +1,50 @@
+{
+  "schema": "btc-v7r6-research-only-20261015T1800Z-endpoint-audit-v1",
+  "R5_snapshot_path": "btc_v7r3_evidence/slots/20261015T1800Z/snapshot.json",
+  "R5_snapshot_blob_sha1": "250c9c97a1046aa45597c1c1249f6bfab08818b8",
+  "R5_retrieved_utc": "2026-10-15T18:03:56.397000+00:00",
+  "prepublished_HH00_forecasts": [
+    "20261013T0500Z",
+    "20261013T1100Z",
+    "20261014T0900Z",
+    "20261015T0500Z"
+  ],
+  "fixed_hourly_due_count": 67,
+  "on_time_forecasts": 4,
+  "missing_forecasts": 63,
+  "matured_1h": 4,
+  "matured_4h": 4,
+  "matured_24h": 3,
+  "normalized_Brier_gain_1h": [
+    0.0009870658422853657,
+    -0.00047115250171163975,
+    -0.0015283080105545543,
+    0.022590574068342306
+  ],
+  "mean_Brier_gain_1h": 0.00539454484959037,
+  "mean_Brier_gain_4h": 0,
+  "mean_Brier_gain_24h": 0,
+  "actual_1h_classes": [
+    "RANGE",
+    "RANGE",
+    "RANGE",
+    "DOWN"
+  ],
+  "actual_4h_classes": [
+    "RANGE",
+    "RANGE",
+    "RANGE",
+    "RANGE"
+  ],
+  "actual_24h_classes": [
+    "RANGE",
+    "RANGE",
+    "DOWN"
+  ],
+  "distinct_day_blocks_1h": 3,
+  "distinct_day_blocks_24h": 2,
+  "real_OTC_operator_quotes": 0,
+  "cryptographic_Sigstore_independently_verified": false,
+  "insufficient_independent_days": true,
+  "trade_authority": false
+}

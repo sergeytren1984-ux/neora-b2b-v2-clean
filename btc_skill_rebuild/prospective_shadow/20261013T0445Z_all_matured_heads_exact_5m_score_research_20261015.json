@@ -1,0 +1,124 @@
+{
+  "schema": "btc-v7r6-research-only-original-public-3head-completed-endpoint-score-v1",
+  "original_public_forecast_anchor_utc": "2026-10-13T04:45:00+00:00",
+  "original_forecast_commit_sha": "5f69e7f842d10fe1d1348adf9fb2f9d1d3d4fa41",
+  "original_forecast_commit_time_utc": "2026-10-13T04:56:34Z",
+  "original_forecast_Git_blob_SHA1": "0d9e2946a403ec1701174ad21edce930154194f8",
+  "original_frozen_weights_Git_blob_SHA1": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "original_forecast_code_Git_blob_SHA1": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+  "source_R5_Git_blob_sha1_original": "9514cd08c0db8fcb1dc688b1c8f008132d7e6809",
+  "source_R5_snapshot_Cosign_independently_verified": false,
+  "research_forecast_Cosign_independently_verified": false,
+  "source_no_backfill_required": true,
+  "scored_only_after_target_maturity": true,
+  "endpoint_label_order": [
+    "UP",
+    "DOWN",
+    "RANGE"
+  ],
+  "future_R5_snapshots": {
+    "1h": {
+      "path": "btc_v7r3_evidence/slots/20261013T0615Z/snapshot.json",
+      "Git_blob_SHA1": "f173ff0d821a1ca0c80530705453c145969ef484",
+      "retrieved_at_utc": "2026-10-13T06:18:25.985000+00:00",
+      "anchor_utc": "2026-10-13T06:15:00+00:00",
+      "no_backfill": true
+    },
+    "4h": {
+      "path": "btc_v7r3_evidence/slots/20261013T0900Z/snapshot.json",
+      "Git_blob_SHA1": "29579e149f272ab79a6f22ccdc645320707f013f",
+      "retrieved_at_utc": "2026-10-13T09:09:01.622000+00:00",
+      "anchor_utc": "2026-10-13T09:00:00+00:00",
+      "no_backfill": true
+    },
+    "24h": {
+      "path": "btc_v7r3_evidence/slots/20261014T0500Z/snapshot.json",
+      "Git_blob_SHA1": "8925aff563d5534342a7f2ca885424814afff4fa",
+      "retrieved_at_utc": "2026-10-14T05:03:14.973000+00:00",
+      "anchor_utc": "2026-10-14T05:00:00+00:00",
+      "no_backfill": true
+    }
+  },
+  "scores": {
+    "1h": {
+      "target_utc": "2026-10-13T05:45:00+00:00",
+      "target_closed_5m_open_utc": "2026-10-13T05:40:00.000Z",
+      "target_close_usdt": 83587.45,
+      "reference_usdt": 83462.9,
+      "endpoint_threshold_fraction": 0.007,
+      "actual_outcome": "RANGE",
+      "probabilities_UP_DOWN_RANGE": [
+        0.02231836339503352,
+        0.027799809909358094,
+        0.9498818266956085
+      ],
+      "baseline_frozen_train_prior_UP_DOWN_RANGE": [
+        0.03281423804226919,
+        0.027067111605487578,
+        0.9401186503522432
+      ],
+      "strict_three_way_brier_model": 0.0012609233569994126,
+      "strict_three_way_brier_frozen_train_prior": 0.0017983929281985111,
+      "brier_gain_vs_frozen_train_prior": 0.0005374695711990985
+    },
+    "4h": {
+      "target_utc": "2026-10-13T08:45:00+00:00",
+      "target_closed_5m_open_utc": "2026-10-13T08:40:00.000Z",
+      "target_close_usdt": 83807.81,
+      "reference_usdt": 83462.9,
+      "endpoint_threshold_fraction": 0.012,
+      "actual_outcome": "RANGE",
+      "probabilities_UP_DOWN_RANGE": [
+        0.05128205128205128,
+        0.03678929765886288,
+        0.9119286510590858
+      ],
+      "baseline_frozen_train_prior_UP_DOWN_RANGE": [
+        0.05128205128205128,
+        0.03678929765886288,
+        0.9119286510590858
+      ],
+      "strict_three_way_brier_model": 0.003913287903399872,
+      "strict_three_way_brier_frozen_train_prior": 0.003913287903399872,
+      "brier_gain_vs_frozen_train_prior": 0
+    },
+    "24h": {
+      "target_utc": "2026-10-14T04:45:00+00:00",
+      "target_closed_5m_open_utc": "2026-10-14T04:40:00.000Z",
+      "target_close_usdt": 83738.1,
+      "reference_usdt": 83462.9,
+      "endpoint_threshold_fraction": 0.02,
+      "actual_outcome": "RANGE",
+      "probabilities_UP_DOWN_RANGE": [
+        0.14126744624669935,
+        0.06808751414560543,
+        0.7906450396076952
+      ],
+      "baseline_frozen_train_prior_UP_DOWN_RANGE": [
+        0.14126744624669935,
+        0.06808751414560543,
+        0.7906450396076952
+      ],
+      "strict_three_way_brier_model": 0.022807300130818543,
+      "strict_three_way_brier_frozen_train_prior": 0.022807300130818543,
+      "brier_gain_vs_frozen_train_prior": 0
+    }
+  },
+  "model_weights_4h_shrink": 0,
+  "model_weights_24h_shrink": 0,
+  "unique_original_forecast_anchor_count": 1,
+  "independent_prospective_calendar_day_blocks": 1,
+  "three_heads_are_same_anchor_not_three_independent_events": true,
+  "score_has_no_actual_OTC_operator_quotes": true,
+  "score_has_no_real_execution_fills": true,
+  "not_first_touch_direction_or_60min_early_warning_test": true,
+  "trading_authority": false,
+  "negative_checks_passed": [
+    "no_exact_5m_target",
+    "future_anchor_before_target",
+    "unclosed_5m_row",
+    "future_bar_after_anchor",
+    "nonfinite_close"
+  ],
+  "research_note": "Research-only post-maturity scoring of original published October 13 04:45Z probabilities. R5 Git blobs have not been independently Cosign authenticated. Exact 5m target from later no-backfill R5 snapshot; the source receipt is a declared field, not independent proof of cryptographic provenance. The 4h and 24h frozen weights use shrink=0, hence their forecast equals train prior; a correct RANGE label does not establish forecast skill. This score does not retroactively publish any missing 15m or hourly forecast."
+}

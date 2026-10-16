@@ -1,0 +1,46 @@
+{
+  "schema": "btc-v7r6-research-matured-1h-score-v1",
+  "original_forecast_slot": "20261016T1800Z",
+  "original_forecast_commit": "e1b60addda1eb83e309fa1d4faba915af3e19400",
+  "original_forecast_commit_utc": "2026-10-16T18:11:47Z",
+  "original_forecast_blob_sha1": "e477a40798436e89db8c239a5011cd5e339a6a5a",
+  "source_R5_blob_sha1": "6ac19e27f0e2fd89ec98d786003b219c7d1237ed",
+  "source_retrieved_utc": "2026-10-16T18:06:19.490000+00:00",
+  "future_R5_blob_sha1": "3c8c4f395413ddf0236fdac9551c3fd54f592ce3",
+  "future_retrieved_utc": "2026-10-16T19:04:18.793000+00:00",
+  "target_exact_closed_5m_utc": "2026-10-16T19:00:00Z",
+  "reference_price_usdt": 81217.13,
+  "target_close_usdt": 81145.73,
+  "threshold_fraction": 0.007,
+  "outcome": "RANGE",
+  "published_probabilities_UP_DOWN_RANGE": [
+    0.031302971783637265,
+    0.029138426069849035,
+    0.9395586021465138
+  ],
+  "frozen_train_prior_UP_DOWN_RANGE": [
+    0.03281423804226919,
+    0.027067111605487578,
+    0.9401186503522432
+  ],
+  "Brier_model": 0.001827362163599553,
+  "Brier_prior": 0.0017983929281985111,
+  "Brier_gain_prior_minus_model": -0.000028969235401041975,
+  "HH00_due_through_20261016T2000Z": 93,
+  "HH00_original_public_forecasts": 5,
+  "HH00_missing": 88,
+  "scored_1h_forecasts": 5,
+  "independent_day_blocks": 4,
+  "mean_five_1h_Brier_gain": 0.004309842032592087,
+  "equal_day_mean_gain": 0.005322813373168393,
+  "exact_day_bootstrap_95pct_nearest_rank_bounds": [
+    -0.0010817418403442,
+    0.01693568824240647
+  ],
+  "asof_7_14d_baseline_not_available": true,
+  "source_sigstore_independently_verified": false,
+  "research_forecast_cosign_verified": false,
+  "real_OTC_firm_quotes": 0,
+  "real_OTC_fills": 0,
+  "trading_authority": false
+}

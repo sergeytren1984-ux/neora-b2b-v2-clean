@@ -1,0 +1,49 @@
+{
+  "schema": "btc-v7r6-unpromoted-ex-ante-research-spot-probabilities-v1",
+  "clock_anchor_utc": "2026-10-16T18:00:00+00:00",
+  "input_R5_spot_source_blob_GitHub_sha1": "6ac19e27f0e2fd89ec98d786003b219c7d1237ed",
+  "input_R5_spot_source_path": "btc_v7r3_evidence/slots/20261016T1800Z/snapshot.json",
+  "source_retrieved_at_utc": "2026-10-16T18:06:19.490000+00:00",
+  "generated_utc": "2026-10-16T18:11:46.148Z",
+  "training_weights_GitHub_blob_sha1": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "training_weights_file": "btc_skill_rebuild/prospective_shadow/frozen_historical_weights_first_asof_20261013.json",
+  "original_forecast_code_GitHub_blob_sha1": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+  "mathematical_implementation": "exact original asof_last_feature and softmax/predict equations evaluated independently in JS; 1000 source closed bars include last 289 and all features",
+  "evidence_signature_not_independently_verified": true,
+  "not_GitHub_signed_prospective_v7r6": true,
+  "publication_must_be_committed_BEFORE_outcome_and_within_13m_for_slot_admission": true,
+  "has_real_operator_OTC_quotes": false,
+  "trading_authority": false,
+  "three_way": {
+    "1h": {
+      "up": 0.031302971783637265,
+      "down": 0.029138426069849035,
+      "range": 0.9395586021465138,
+      "source_anchor_utc": "2026-10-16T18:00:00+00:00",
+      "horizon_target_utc": "2026-10-16T19:00:00+00:00",
+      "reference_spot_usdt": 81217.13,
+      "endpoint_threshold_fraction": 0.007,
+      "estimated_probabilities_sum_to_one": true
+    },
+    "24h": {
+      "up": 0.14126744624669935,
+      "down": 0.06808751414560543,
+      "range": 0.7906450396076952,
+      "source_anchor_utc": "2026-10-16T18:00:00+00:00",
+      "horizon_target_utc": "2026-10-17T18:00:00+00:00",
+      "reference_spot_usdt": 81217.13,
+      "endpoint_threshold_fraction": 0.02,
+      "estimated_probabilities_sum_to_one": true
+    },
+    "4h": {
+      "up": 0.05128205128205128,
+      "down": 0.03678929765886288,
+      "range": 0.9119286510590858,
+      "source_anchor_utc": "2026-10-16T18:00:00+00:00",
+      "horizon_target_utc": "2026-10-16T22:00:00+00:00",
+      "reference_spot_usdt": 81217.13,
+      "endpoint_threshold_fraction": 0.012,
+      "estimated_probabilities_sum_to_one": true
+    }
+  }
+}

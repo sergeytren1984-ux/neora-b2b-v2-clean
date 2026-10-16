@@ -1,0 +1,47 @@
+{
+  "schema": "btc-v7r6-research-prospective-fixed-endpoint-own-slot-v1",
+  "clock_anchor_utc": "2026-10-13T04:45:00+00:00",
+  "forecast_original_commit_sha": "5f69e7f842d10fe1d1348adf9fb2f9d1d3d4fa41",
+  "forecast_public_commit_time_utc_claimed_external": "2026-10-13T04:56:34Z",
+  "forecast_Git_blob_sha1": "0d9e2946a403ec1701174ad21edce930154194f8",
+  "frozen_weights_Git_blob_sha1": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "original_R5_source_Git_blob_sha1": "9514cd08c0db8fcb1dc688b1c8f008132d7e6809",
+  "future_R5_snapshot_Git_blob_sha1": "8925aff563d5534342a7f2ca885424814afff4fa",
+  "future_R5_snapshot_anchor_utc": "2026-10-14T05:00:00+00:00",
+  "future_R5_snapshot_retrieved_at_utc": "2026-10-14T05:03:14.973000+00:00",
+  "source_signatures_independently_verified": false,
+  "score_computed_from_exact_closed_5m_endpoints": true,
+  "minimum_independent_prospective_days_required": 20,
+  "independent_prospective_days_observed": 1,
+  "real_OTC_operator_quotes": false,
+  "trading_authority": false,
+  "three_way_horizons": {
+    "1h": {
+      "target_utc": "2026-10-13T05:45:00+00:00",
+      "close_usdt": 83587.45,
+      "reference_usdt": 83462.9,
+      "outcome": "RANGE",
+      "Brier_model": 0.0012609233569994126,
+      "Brier_frozen_prior": 0.0017983929281985111,
+      "Brier_gain": 0.0005374695711990985
+    },
+    "4h": {
+      "target_utc": "2026-10-13T08:45:00+00:00",
+      "close_usdt": 83807.81,
+      "reference_usdt": 83462.9,
+      "outcome": "RANGE",
+      "Brier_model": 0.003913287903399872,
+      "Brier_frozen_prior": 0.003913287903399872,
+      "Brier_gain": 0
+    },
+    "24h": {
+      "target_utc": "2026-10-14T04:45:00+00:00",
+      "close_usdt": 83738.1,
+      "reference_usdt": 83462.9,
+      "outcome": "RANGE",
+      "Brier_model": 0.022807300130818543,
+      "Brier_frozen_prior": 0.022807300130818543,
+      "Brier_gain": 0
+    }
+  }
+}

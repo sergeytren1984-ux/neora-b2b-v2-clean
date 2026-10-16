@@ -1,0 +1,87 @@
+{
+  "schema": "btc-v7r6-research-public-forecast-matured-4h24h-score-v1",
+  "forecast_original_research_commit": "5f69e7f842d10fe1d1348adf9fb2f9d1d3d4fa41",
+  "forecast_original_public_commit_utc_verified_from_GitHub": "2026-10-13T04:56:34Z",
+  "forecast_anchor_utc": "2026-10-13T04:45:00+00:00",
+  "forecast_original_Git_blob": "0d9e2946a403ec1701174ad21edce930154194f8",
+  "weights_original_Git_blob": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "weights_sha256_declared_by_original_forecast": "cddf85d3e8b352b1eae4560ff145e927b9c7f0da5853d48d725e535f0f6f772f",
+  "frozen_historical_model_code_Git_blob": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+  "source_R5_original_spot_snapshot_Git_blob": "9514cd08c0db8fcb1dc688b1c8f008132d7e6809",
+  "future_R5_snapshot_path": "btc_v7r3_evidence/slots/20261016T2000Z/snapshot.json",
+  "future_R5_snapshot_Git_blob": "5ab68586fa18c5f70d82508c36417396dba19f5c",
+  "future_R5_snapshot_anchor_utc": "2026-10-16T20:00:00+00:00",
+  "future_R5_snapshot_retrieved_utc": "2026-10-16T20:08:41.121000+00:00",
+  "future_R5_closed_5m_rows": 1000,
+  "future_R5_first_closed_5m_utc": "2026-10-13T08:45:00Z",
+  "future_R5_last_closed_5m_utc": "2026-10-16T20:00:00Z",
+  "score_generated_after_maturity_utc": "2026-10-16T22:35:35Z",
+  "no_backfill_R5_snapshot_flag": true,
+  "original_research_publication_before_both_targets": true,
+  "evidence_signatures_cosign_NOT_independently_verified": true,
+  "research_only_not_production_v7R6": true,
+  "real_OTC_operator_quote_or_execution": false,
+  "original_horizons_not_changed": true,
+  "scores": {
+    "1h": {
+      "status": "PREVIOUSLY_SCORED_IN_SEPARATE_SOURCE",
+      "previous_research_score_path": "btc_skill_rebuild/prospective_shadow/20261013T0445Z_score_20261013T0615Z_research.json",
+      "target_utc": "2026-10-13T05:45:00+00:00",
+      "actual_outcome": "RANGE",
+      "strict_3way_Brier_model": 0.0012609233569994126,
+      "strict_3way_Brier_train_prior": 0.0017983929281985111,
+      "Brier_gain_vs_prior": 0.0005374695711990985
+    },
+    "4h": {
+      "status": "MATURED_EXACT_5M_TARGET",
+      "target_utc": "2026-10-13T08:45:00+00:00",
+      "reference_spot_usdt": 83462.9,
+      "actual_target_close_usdt": 83807.81,
+      "return_pct": 0.41324947970895476,
+      "threshold_fraction": 0.012,
+      "actual_outcome": "RANGE",
+      "prepublished_probabilities_UP_DOWN_RANGE": [
+        0.05128205128205128,
+        0.03678929765886288,
+        0.9119286510590858
+      ],
+      "frozen_prior_UP_DOWN_RANGE": [
+        0.05128205128205128,
+        0.03678929765886288,
+        0.9119286510590858
+      ],
+      "strict_3way_Brier_model": 0.003913287903399872,
+      "strict_3way_Brier_train_prior": 0.003913287903399872,
+      "Brier_gain_vs_prior": 0
+    },
+    "24h": {
+      "status": "MATURED_EXACT_5M_TARGET",
+      "target_utc": "2026-10-14T04:45:00+00:00",
+      "reference_spot_usdt": 83462.9,
+      "actual_target_close_usdt": 83738.1,
+      "return_pct": 0.3297273399318845,
+      "threshold_fraction": 0.02,
+      "actual_outcome": "RANGE",
+      "prepublished_probabilities_UP_DOWN_RANGE": [
+        0.14126744624669935,
+        0.06808751414560543,
+        0.7906450396076952
+      ],
+      "frozen_prior_UP_DOWN_RANGE": [
+        0.14126744624669935,
+        0.06808751414560543,
+        0.7906450396076952
+      ],
+      "strict_3way_Brier_model": 0.022807300130818543,
+      "strict_3way_Brier_train_prior": 0.022807300130818543,
+      "Brier_gain_vs_prior": 0
+    }
+  },
+  "math_note": "The 4h and 24h original frozen probabilities equal the historical TRAIN prior exactly. Thus even correct RANGE outcomes demonstrate zero incremental 4h/24h Brier skill for this sole prepublished research slot. One original forecast is not an independent multi-day sample. The 1h score comes from the earlier independent exact-target 5m receipt. Do not count 3 horizons as 3 independent days.",
+  "independent_prospective_calendar_day_blocks_verified": 0,
+  "required_independent_prospective_calendar_day_blocks": 20,
+  "positive_lower_confidence_bound_proven": false,
+  "directional_lead_ge_60m_proven": false,
+  "OTC_real_operator_economic_edge_proven": false,
+  "trading_authority": false
+}

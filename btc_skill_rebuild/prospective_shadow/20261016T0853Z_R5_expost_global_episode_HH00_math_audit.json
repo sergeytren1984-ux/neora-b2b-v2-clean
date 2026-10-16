@@ -1,0 +1,133 @@
+{
+  "schema": "btc-v7r6-research-R5-asof-expost-global-market-episodes-HH00-grid-v1",
+  "calculated_at_utc": "2026-10-16T08:58:34.923Z",
+  "scope": "RESEARCH_ONLY_EX_POST_MATHEMATICS_NOT_A_PUBLISHED_FORECAST",
+  "R5_source_branch": "btc-v7r5-corrected-signed-evidence-20261013",
+  "R5_source_path": "btc_v7r3_evidence/slots/20261016T0845Z/snapshot.json",
+  "R5_snapshot_Git_blob_sha1": "a159863f23a488e716e0a394684c9b8c8fcda1ca",
+  "R5_source_GitHub_commit": "cfd0799b5d0cdb8d647ee430bca1c9e4e82c1041",
+  "R5_source_GitHub_commit_utc": "2026-10-16T08:48:27Z",
+  "R5_snapshot_retrieved_utc": "2026-10-16T08:48:23.640000+00:00",
+  "R5_snapshot_anchor_utc": "2026-10-16T08:45:00+00:00",
+  "R5_closed_5m_rows": 1000,
+  "R5_Cosign_Rekor_independently_verified": false,
+  "method": "Exact existing research_competing_barriers_v7r6 labels from complete closed 5m high/low, 15m anchor fixed from 2026-10-13T00Z, global (timestamp,side) dedup, transitive cross-side market episodes within horizon, strict nonoverlap 1h/4h UTC; JS reproduction matched prior 2026-10-16T0700Z audit exactly on all 16 count fields",
+  "prior_snapshot_reproduction": {
+    "R5_snapshot_blob": "8591820adc7f196096f6aac9c449ce516b3e68c8",
+    "matches_existing_20261016T0752Z_report_exactly": true,
+    "prior_1h": {
+      "matured": 313,
+      "UP": 27,
+      "DOWN": 24,
+      "NEITHER": 262,
+      "AMBIGUOUS": 0,
+      "unique": 31,
+      "side_episodes": 16,
+      "cross_side_market_episodes": 9,
+      "nonoverlap_due": 79
+    },
+    "prior_4h": {
+      "matured": 301,
+      "UP": 22,
+      "DOWN": 50,
+      "NEITHER": 229,
+      "AMBIGUOUS": 0,
+      "unique": 32,
+      "side_episodes": 7,
+      "cross_side_market_episodes": 5,
+      "nonoverlap_due": 19
+    }
+  },
+  "new_asof_0845_expost_first_touch": {
+    "h1": {
+      "barrier_fraction": 0.007,
+      "matured_overlapping_15m_windows": 320,
+      "overlapping_EX_POST_labels": {
+        "UP": 27,
+        "DOWN": 24,
+        "NEITHER": 269,
+        "AMBIGUOUS": 0
+      },
+      "unique_first_touch_timestamp_side": 31,
+      "side_specific_global_episodes": 16,
+      "conservative_cross_side_market_episodes": 9,
+      "mixed_UP_DOWN_market_episodes": 4,
+      "strict_nonoverlapping_due": 80,
+      "strict_nonoverlapping_EX_POST_labels": {
+        "UP": 7,
+        "DOWN": 7,
+        "NEITHER": 66,
+        "AMBIGUOUS": 0
+      }
+    },
+    "h4": {
+      "barrier_fraction": 0.012,
+      "matured_overlapping_15m_windows": 308,
+      "overlapping_EX_POST_labels": {
+        "UP": 22,
+        "DOWN": 50,
+        "NEITHER": 236,
+        "AMBIGUOUS": 0
+      },
+      "unique_first_touch_timestamp_side": 32,
+      "side_specific_global_episodes": 7,
+      "conservative_cross_side_market_episodes": 5,
+      "mixed_UP_DOWN_market_episodes": 2,
+      "strict_nonoverlapping_due": 20,
+      "strict_nonoverlapping_EX_POST_labels": {
+        "UP": 1,
+        "DOWN": 3,
+        "NEITHER": 16,
+        "AMBIGUOUS": 0
+      }
+    }
+  },
+  "delta_since_0700": {
+    "additional_matured_overlapping_15m_windows_per_horizon": 7,
+    "additional_directional_first_touch_events": 0,
+    "additional_independent_market_episodes": 0,
+    "additional_strict_nonoverlap_due_per_horizon": 1,
+    "additional_strict_nonoverlap_directional_events": 0
+  },
+  "fixed_HH00_due_grid": {
+    "epoch_start_utc": "2026-10-13T00:00:00Z",
+    "last_HH00_due_anchor_utc": "2026-10-16T08:00:00Z",
+    "total_HH00_due": 81,
+    "original_on_time_public_research_forecasts": [
+      "20261013T0500Z",
+      "20261013T1100Z",
+      "20261014T0900Z",
+      "20261015T0500Z"
+    ],
+    "original_forecast_count": 4,
+    "missing_forecasts_no_backfill": 77,
+    "matured_HH00_due": {
+      "h1": 80,
+      "h4": 77,
+      "h24": 57
+    },
+    "matured_on_time_research_forecasts": {
+      "h1": 4,
+      "h4": 4,
+      "h24": 4
+    },
+    "matured_missing_research_forecasts": {
+      "h1": 76,
+      "h4": 73,
+      "h24": 53
+    },
+    "strict_nonoverlap_4h_due": 20,
+    "strict_nonoverlap_4h_public_forecasts": 0,
+    "strict_nonoverlap_24h_due": 3,
+    "strict_nonoverlap_24h_public_forecasts": 0
+  },
+  "independent_prospective_day_blocks_with_original_public_forecasts": 3,
+  "required_independent_prospective_day_blocks": 20,
+  "public_directional_first_touch_signals_with_60m_verified_lead": 0,
+  "real_OTC_operator_asks": 0,
+  "real_OTC_fills": 0,
+  "proper_Brier_MAE_or_economic_skill_newly_proven": false,
+  "all_derived_first_touch_labels_EX_POST": true,
+  "not_a_model_upgrade": true,
+  "trading_authority": false
+}

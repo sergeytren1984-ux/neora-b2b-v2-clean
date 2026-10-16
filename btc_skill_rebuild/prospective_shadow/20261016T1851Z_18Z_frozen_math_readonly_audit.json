@@ -1,0 +1,57 @@
+{
+  "schema": "btc-v7r6-research-18Z-frozen-math-audit-v1",
+  "asof_utc": "2026-10-16T18:51:09Z",
+  "source_R5_snapshot_path": "btc_v7r3_evidence/slots/20261016T1800Z/snapshot.json",
+  "source_R5_snapshot_blob_sha1": "6ac19e27f0e2fd89ec98d786003b219c7d1237ed",
+  "source_R5_snapshot_commit_utc": "2026-10-16T18:06:48Z",
+  "research_forecast_commit_sha": "e1b60addda1eb83e309fa1d4faba915af3e19400",
+  "research_forecast_commit_utc": "2026-10-16T18:11:47Z",
+  "published_HH00_before_HH13_according_to_GitHub_commit_metadata": true,
+  "original_code_blob": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+  "original_weights_blob": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "closed_5m_rows": 1000,
+  "reference_spot_usdt": 81217.13,
+  "original_vs_python_recomputed_probability_max_abs_difference": {
+    "1h": 0,
+    "4h": 0,
+    "24h": 0
+  },
+  "frozen_shrink": {
+    "1h": 1,
+    "4h": 0,
+    "24h": 0
+  },
+  "target_utc": {
+    "1h": "2026-10-16T19:00:00Z",
+    "4h": "2026-10-16T22:00:00Z",
+    "24h": "2026-10-17T18:00:00Z"
+  },
+  "target_outcomes_not_matured_at_audit": true,
+  "HH00_due_count": 91,
+  "HH00_original_on_time_research_forecast_count": 5,
+  "HH00_missing_forecasts_no_backfill": 86,
+  "matured_due_count": {
+    "1h": 90,
+    "4h": 87,
+    "24h": 67
+  },
+  "matured_published_forecast_count": {
+    "1h": 4,
+    "4h": 4,
+    "24h": 4
+  },
+  "matured_missing_forecast_count": {
+    "1h": 86,
+    "4h": 83,
+    "24h": 63
+  },
+  "strict_nonoverlap_4h_resolved_published_forecast_count": 0,
+  "strict_nonoverlap_24h_resolved_published_forecast_count": 0,
+  "R5_Cosign_independently_verified": false,
+  "research_Cosign_independently_verified": false,
+  "independent_prospective_matured_1h_days": 3,
+  "minimum_independent_prospective_days": 20,
+  "real_OTC_quotes": 0,
+  "real_OTC_fills": 0,
+  "trading_authority": false
+}

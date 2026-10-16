@@ -1,0 +1,95 @@
+{
+  "schema": "btc-v7r6-research-expost-2030Z-closed5m-census-v1",
+  "asof_R5_snapshot_utc": "2026-10-16T20:30:00Z",
+  "source_path": "btc_v7r3_evidence/slots/20261016T2030Z/snapshot.json",
+  "source_blob_sha1": "c7ea8e066403895e3ebfb11b7af781fb9b245cbd",
+  "source_cryptographic_signature_independently_verified": false,
+  "registered_epoch_start": "2026-10-13T00:00:00Z",
+  "closed_5m_candles": 1000,
+  "rolling_source_first_close_utc": "2026-10-13T09:15:00Z",
+  "prior_audit_reproduction": {
+    "source": "20261016T0845Z",
+    "first_touch_1h": {
+      "UP": 27,
+      "DOWN": 24,
+      "NEITHER": 269,
+      "AMBIGUOUS": 0
+    },
+    "first_touch_4h": {
+      "UP": 22,
+      "DOWN": 50,
+      "NEITHER": 236,
+      "AMBIGUOUS": 0
+    },
+    "matched_previously_published_research_counts": true
+  },
+  "first_touch_expost": {
+    "1h": {
+      "matured_15m": 330,
+      "UP": 25,
+      "DOWN": 31,
+      "NEITHER": 274,
+      "AMBIGUOUS": 0,
+      "unique_first_touch_timestamp_side": 34,
+      "side_specific_episodes": 19,
+      "conservative_cross_side_market_episodes": 11,
+      "mixed_direction_market_episodes": 5,
+      "strict_nonoverlap_due": 82,
+      "strict_nonoverlap_UP": 6,
+      "strict_nonoverlap_DOWN": 9,
+      "strict_nonoverlap_NEITHER": 67
+    },
+    "4h": {
+      "matured_15m": 318,
+      "UP": 10,
+      "DOWN": 63,
+      "NEITHER": 245,
+      "AMBIGUOUS": 0,
+      "unique_first_touch_timestamp_side": 30,
+      "side_specific_episodes": 7,
+      "conservative_cross_side_market_episodes": 4,
+      "mixed_direction_market_episodes": 3,
+      "strict_nonoverlap_due": 20,
+      "strict_nonoverlap_UP": 0,
+      "strict_nonoverlap_DOWN": 4,
+      "strict_nonoverlap_NEITHER": 16
+    }
+  },
+  "endpoint_expost": {
+    "1h": {
+      "matured_HH00": 82,
+      "UP": 3,
+      "DOWN": 5,
+      "RANGE": 74
+    },
+    "4h": {
+      "matured_HH00": 79,
+      "UP": 3,
+      "DOWN": 5,
+      "RANGE": 71,
+      "nonoverlap_due": 20,
+      "nonoverlap_UP": 1,
+      "nonoverlap_DOWN": 2,
+      "nonoverlap_RANGE": 17
+    },
+    "24h": {
+      "matured_HH00": 59,
+      "UP": 2,
+      "DOWN": 17,
+      "RANGE": 40,
+      "nonoverlap_due": 2,
+      "nonoverlap_UP": 0,
+      "nonoverlap_DOWN": 0,
+      "nonoverlap_RANGE": 2
+    }
+  },
+  "fixed_HH00_due_through_20261016T2100Z": 94,
+  "previously_public_HH00_research_forecasts": 5,
+  "missing_HH00_forecasts": 89,
+  "rolling_window_not_whole_epoch": true,
+  "expost_outcomes_not_prepublic_signals": true,
+  "source_outcome_and_research_forecast_not_Cosign_verified": true,
+  "real_OTC_operator_quotes": 0,
+  "real_OTC_fills": 0,
+  "trade_authority": false
+}

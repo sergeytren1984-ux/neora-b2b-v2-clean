@@ -1,0 +1,129 @@
+{
+  "schema": "btc-v7r6-research-R5-real-asof-expost-global-market-episodes-and-HH00-grid-v1",
+  "calculated_at_utc": "2026-10-16T07:52:26.388Z",
+  "R5_source_branch": "btc-v7r5-corrected-signed-evidence-20261013",
+  "R5_source_path": "btc_v7r3_evidence/slots/20261016T0700Z/snapshot.json",
+  "R5_snapshot_Git_blob_sha1": "8591820adc7f196096f6aac9c449ce516b3e68c8",
+  "R5_anchor_utc": "2026-10-16T07:00:00+00:00",
+  "R5_retrieved_at_utc": "2026-10-16T07:04:16.456000+00:00",
+  "R5_closed_contiguous_5m_bars": 1000,
+  "R5_first_closed_bar_utc": "2026-10-12T19:45:00.000Z",
+  "R5_last_closed_bar_utc": "2026-10-16T07:00:00.000Z",
+  "R5_snapshot_Cosign_Rekor_independently_verified": false,
+  "method": "Exact existing 5m high/low first-touch label (ambiguous both barriers in same bar), global timestamp+side dedup; transitive side-agnostic market episodes within fixed horizon; all computed EX POST; no model predictions or signs inferred",
+  "existing_mathematical_code": [
+    "btc_skill_rebuild/research_competing_barriers_v7r6.py",
+    "btc_skill_rebuild/research_global_event_dedup_v7r6.py",
+    "btc_skill_rebuild/research_cross_side_market_episodes_v7r6.py"
+  ],
+  "negative_synthetic_invariants_passed": 5,
+  "ex_post_first_touch_census": {
+    "1h": {
+      "barrier_fraction": 0.007,
+      "matured_overlapping_15m_windows": 313,
+      "overlapping_EX_POST_labels": {
+        "UP": 27,
+        "DOWN": 24,
+        "NEITHER": 262,
+        "AMBIGUOUS": 0
+      },
+      "unique_first_touch_timestamp_side": 31,
+      "side_specific_global_episodes": 16,
+      "conservative_cross_side_market_episodes": 9,
+      "mixed_UP_DOWN_market_episodes": 4,
+      "strict_nonoverlapping_due": 79,
+      "strict_nonoverlapping_EX_POST_labels": {
+        "UP": 7,
+        "DOWN": 7,
+        "NEITHER": 65,
+        "AMBIGUOUS": 0
+      },
+      "ambiguous_same_5m_bar_count": 0
+    },
+    "4h": {
+      "barrier_fraction": 0.012,
+      "matured_overlapping_15m_windows": 301,
+      "overlapping_EX_POST_labels": {
+        "UP": 22,
+        "DOWN": 50,
+        "NEITHER": 229,
+        "AMBIGUOUS": 0
+      },
+      "unique_first_touch_timestamp_side": 32,
+      "side_specific_global_episodes": 7,
+      "conservative_cross_side_market_episodes": 5,
+      "mixed_UP_DOWN_market_episodes": 2,
+      "strict_nonoverlapping_due": 19,
+      "strict_nonoverlapping_EX_POST_labels": {
+        "UP": 1,
+        "DOWN": 3,
+        "NEITHER": 15,
+        "AMBIGUOUS": 0
+      },
+      "ambiguous_same_5m_bar_count": 0
+    }
+  },
+  "frozen_HH00_grid": {
+    "epoch_start_utc": "2026-10-13T00:00:00Z",
+    "last_due_anchor_utc": "2026-10-16T07:00:00+00:00",
+    "total_HH00_due": 80,
+    "original_public_forecast_slots": [
+      "20261013T0500Z",
+      "20261013T1100Z",
+      "20261014T0900Z",
+      "20261015T0500Z"
+    ],
+    "original_forecast_GitHub_commits": [
+      "647d67e4272b398f14f5f7b7cda699bca5ff1b93",
+      "ef849f0ff6ebd479429ca17f5e12d382b0c3ce62",
+      "dcce930e64e1db66a2dde60a8d11db62b10edab9",
+      "0247f22d21353c038696b7b402dd1e8ad01a1374"
+    ],
+    "all_four_original_commits_within_HH13_verified_from_GitHub": true,
+    "original_public_forecast_count": 4,
+    "missing_forecasts_no_backfill": 76,
+    "latest_0700_R5_snapshot_available_before_HH13": true,
+    "latest_0700_original_research_forecast_MISSING_after_HH13": true,
+    "matured_HH00_due": {
+      "h1": 79,
+      "h4": 76,
+      "h24": 56
+    },
+    "matured_original_public_forecasts": {
+      "h1": 4,
+      "h4": 4,
+      "h24": 4
+    },
+    "matured_missing_forecasts": {
+      "h1": 75,
+      "h4": 72,
+      "h24": 52
+    },
+    "nonoverlap_4h_UTC_grid_due": 19,
+    "nonoverlap_4h_public_forecasts": 0,
+    "nonoverlap_24h_UTC_midnight_due": 3,
+    "nonoverlap_24h_public_forecasts": 0,
+    "strict_1h_original_four_Brier_gains_prior_minus_model": [
+      0.0009870658422853657,
+      -0.00047115250171163975,
+      -0.0015283080105545543,
+      0.022590574068342306
+    ],
+    "strict_1h_original_four_mean_Brier_gain": 0.00539454484959037,
+    "strict_1h_equal_day_block_bootstrap_95pct_bounds": [
+      -0.0015283080105545543,
+      0.022590574068342306
+    ],
+    "frozen_4h_24h_shrink_zero_Brier_gain_identically_zero": true,
+    "independent_UTC_day_blocks_with_original_public_forecasts": 3,
+    "required_independent_day_blocks": 20
+  },
+  "all_barrier_event_labels_EX_POST_not_early_signals": true,
+  "original_frozen_weights_and_forecasts_unmodified": true,
+  "real_OTC_operator_asks": 0,
+  "real_OTC_fills": 0,
+  "directional_60m_public_lead_proven": false,
+  "price_MAE_gain_proven": false,
+  "net_BTC_OTC_gain_proven": false,
+  "trading_authority": false
+}

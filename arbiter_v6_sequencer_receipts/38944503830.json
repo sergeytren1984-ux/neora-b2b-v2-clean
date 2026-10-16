@@ -1,0 +1,1 @@
+{"arbiter_dispatch_status": 204, "dispatch_mode": "ALL_THREE_SOURCE_EVENTS_OBSERVED", "dispatched_at_utc": "2026-10-16T18:28:48.991960+00:00", "run_id": "38944503830", "schema": "btc-arbiter-v4-source-sequencer-receipt", "slot": "20261016T180000Z", "source_candidates_present": {"directional": true, "downside": true, "regime": true}}

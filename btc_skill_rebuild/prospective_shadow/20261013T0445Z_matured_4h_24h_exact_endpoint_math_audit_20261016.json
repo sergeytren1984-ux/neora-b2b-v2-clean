@@ -1,0 +1,90 @@
+{
+  "schema": "btc-v7r6-research-matured-public-endpoint-score-20261016-v1",
+  "research_only": true,
+  "created_from_preexisting_public_forecast": true,
+  "original_forecast_slot_utc": "2026-10-13T04:45:00+00:00",
+  "original_forecast_commit": "5f69e7f842d10fe1d1348adf9fb2f9d1d3d4fa41",
+  "original_forecast_commit_time_utc": "2026-10-13T04:56:34Z",
+  "original_forecast_git_blob": "0d9e2946a403ec1701174ad21edce930154194f8",
+  "weights_git_blob": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "weights_original_SHA256": "cddf85d3e8b352b1eae4560ff145e927b9c7f0da5853d48d725e535f0f6f772f",
+  "source_R5_snapshot_git_blob": "9514cd08c0db8fcb1dc688b1c8f008132d7e6809",
+  "outcome_sources": [
+    {
+      "horizon": "4h",
+      "snapshot_path": "btc_v7r3_evidence/slots/20261013T0900Z/snapshot.json",
+      "snapshot_git_blob": "29579e149f272ab79a6f22ccdc645320707f013f",
+      "snapshot_retrieved_utc": "2026-10-13T09:09:01.622000+00:00"
+    },
+    {
+      "horizon": "24h",
+      "snapshot_path": "btc_v7r3_evidence/slots/20261014T0500Z/snapshot.json",
+      "snapshot_git_blob": "8925aff563d5534342a7f2ca885424814afff4fa",
+      "snapshot_retrieved_utc": "2026-10-14T05:03:14.973000+00:00"
+    }
+  ],
+  "method": "Exact predeclared 5m bar whose close end equals forecast horizon_target_utc; UP iff target/reference > 1+predeclared threshold; DOWN iff <1-threshold; else RANGE. Three-class Brier = sum_i(p_i-1[i==actual])^2 / 3. No overlapping sample inflation. Frozen train-prior comparison on identical label.",
+  "heads": {
+    "1h": {
+      "source": "btc_skill_rebuild/prospective_shadow/20261013T0445Z_score_20261013T0615Z_research.json",
+      "target_utc": "2026-10-13T05:45:00+00:00",
+      "label": "RANGE",
+      "brier_model": 0.0012609233569994126,
+      "brier_train_prior": 0.0017983929281985111,
+      "gain": 0.0005374695711990985,
+      "previously_scored": true
+    },
+    "4h": {
+      "target_utc": "2026-10-13T08:45:00+00:00",
+      "threshold_fraction": 0.012,
+      "reference_spot_usdt": 83462.9,
+      "exact_target_close_usdt": 83807.81,
+      "return_fraction": 0.004132494797089548,
+      "label": "RANGE",
+      "p_up": 0.05128205128205128,
+      "p_down": 0.03678929765886288,
+      "p_range": 0.9119286510590858,
+      "brier_model": 0.003913287903399872,
+      "brier_train_prior": 0.003913287903399872,
+      "gain": 0,
+      "validation_selected_shrink": 0,
+      "scored_after_maturity": true
+    },
+    "24h": {
+      "target_utc": "2026-10-14T04:45:00+00:00",
+      "threshold_fraction": 0.02,
+      "reference_spot_usdt": 83462.9,
+      "exact_target_close_usdt": 83738.1,
+      "return_fraction": 0.0032972733993188452,
+      "label": "RANGE",
+      "p_up": 0.14126744624669935,
+      "p_down": 0.06808751414560543,
+      "p_range": 0.7906450396076952,
+      "brier_model": 0.022807300130818543,
+      "brier_train_prior": 0.022807300130818543,
+      "gain": 0,
+      "validation_selected_shrink": 0,
+      "scored_after_maturity": true
+    }
+  },
+  "current_hour_research_due": {
+    "slot_utc": "2026-10-16T03:00:00+00:00",
+    "source_R5_snapshot_git_blob": "193cbf6ac160cea9abb4c7d6a699d3a6cd6b71d5",
+    "public_research_forecast_path": "btc_skill_rebuild/prospective_shadow/20261016T0300Z_probabilities_unverified_research.json",
+    "public_forecast_found_on_research_branch": false,
+    "slot_status": "MISSING",
+    "cannot_backfill_after_utc": "2026-10-16T03:13:00Z",
+    "no_forecast_was_created": true
+  },
+  "n_original_public_research_forecast_slots_scored": 1,
+  "n_independent_prospective_calendar_days_for_admission": 0,
+  "source_R5_Cosign_independently_verified": false,
+  "original_research_forecast_Cosign_independently_verified": false,
+  "frozen_R6_production_forecast": false,
+  "new_price_direction_signal": false,
+  "independent_early_first_touch_lead_ge_60m_proven": false,
+  "real_OTC_operator_quotes_or_fills": false,
+  "statistically_significant_skill_proven": false,
+  "trading_authority": false,
+  "user_notification": false
+}

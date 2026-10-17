@@ -1,0 +1,57 @@
+{
+  "schema": "btc-v7r6-research-previously-published-4h-exact-endpoint-score-v1",
+  "math_only": true,
+  "original_prediction_slot": "20261017T0200Z",
+  "original_prediction_path": "btc_skill_rebuild/prospective_shadow/20261017T0200Z_probabilities_unverified_research.json",
+  "original_prediction_blob_sha1": "8f0fd237fa056fc8b97bdab11d42ea2da4ec5a3a",
+  "original_prediction_git_commit": "05d9c6cf307421e08a38d432b7f50a0beba7272c",
+  "original_prediction_git_commit_utc": "2026-10-17T02:11:27Z",
+  "original_prediction_committed_before_HH13": true,
+  "unchanged_forecast_code_git_blob_sha1": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+  "unchanged_frozen_weights_git_blob_sha1": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "future_R5_source_path": "btc_v7r3_evidence/slots/20261017T0945Z/snapshot.json",
+  "future_R5_source_blob_sha1": "5ea0901b5458bb1c25f7a0e48e9a5abd848e6535",
+  "future_R5_source_git_commit": "f381e95b807343bb4c4004a5cbbf738652ded9d5",
+  "future_R5_source_git_commit_utc": "2026-10-17T09:48:32Z",
+  "future_R5_source_retrieved_utc": "2026-10-17T09:48:24.441000+00:00",
+  "exact_5m_targets": {
+    "1h": {
+      "target_utc": "2026-10-17T03:00:00+00:00",
+      "reference_spot_usdt": 81538,
+      "actual_target_close_usdt": 81478.01,
+      "label": "RANGE",
+      "precommitted_threshold_fraction": 0.007,
+      "model_probability_up": 0.03281423804226919,
+      "model_probability_down": 0.027067111605487578,
+      "model_probability_range": 0.9401186503522432,
+      "Brier_model": 0.0017983929281985111,
+      "Brier_frozen_training_prior": 0.0017983929281985111,
+      "Brier_gain_vs_frozen_training_prior": 0
+    },
+    "4h": {
+      "target_utc": "2026-10-17T06:00:00+00:00",
+      "reference_spot_usdt": 81538,
+      "actual_target_close_usdt": 81574.99,
+      "label": "RANGE",
+      "precommitted_threshold_fraction": 0.012,
+      "model_probability_up": 0.022920968901942902,
+      "model_probability_down": 0.015631178641174616,
+      "model_probability_range": 0.9614478524568825,
+      "Brier_model": 0.0007519908804341501,
+      "Brier_frozen_training_prior": 0.003913287903399872,
+      "Brier_gain_vs_frozen_training_prior": 0.0031612970229657218
+    },
+    "24h": {
+      "target_utc": "2026-10-18T02:00:00+00:00",
+      "due": false,
+      "resolved": false
+    }
+  },
+  "scorer_git_blob_sha1": "17fe99c99f33825f7b410e3f5e91be384582f793",
+  "independent_cosign_verification_performed": false,
+  "not_an_independent_prospective_day": false,
+  "sample_size_one_4h_outcome": true,
+  "trade_admission_requirements_satisfied": false,
+  "real_OTC_operator_firm_ask_or_fills": false,
+  "trading_authority": false
+}

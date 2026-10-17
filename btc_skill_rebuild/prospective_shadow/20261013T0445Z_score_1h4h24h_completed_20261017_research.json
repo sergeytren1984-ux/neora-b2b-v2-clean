@@ -1,0 +1,78 @@
+{
+  "schema": "btc-v7r6-unpromoted-public-research-1h4h24h-fully-matured-fixed-endpoint-score-v1",
+  "research_score_asof_utc": "2026-10-17",
+  "original_public_forecast_anchor_utc": "2026-10-13T04:45:00+00:00",
+  "original_forecast_git_commit": "5f69e7f842d10fe1d1348adf9fb2f9d1d3d4fa41",
+  "original_forecast_git_commit_utc": "2026-10-13T04:56:34Z",
+  "original_forecast_git_blob": "0d9e2946a403ec1701174ad21edce930154194f8",
+  "original_forecast_git_path": "btc_skill_rebuild/prospective_shadow/20261013T0445Z_probabilities_unverified_research.json",
+  "original_pre_epoch_weights_git_blob": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "original_forecast_code_git_blob": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+  "original_source_snapshot_git_blob": "9514cd08c0db8fcb1dc688b1c8f008132d7e6809",
+  "original_source_snapshot_publication_precedes_1h_target": true,
+  "all_three_exact_5m_targets_closed_before_scoring": true,
+  "future_R5_snapshot_path": "btc_v7r3_evidence/slots/20261014T0500Z/snapshot.json",
+  "future_R5_snapshot_git_blob": "8925aff563d5534342a7f2ca885424814afff4fa",
+  "future_R5_snapshot_anchor_utc": "2026-10-14T05:00:00+00:00",
+  "future_R5_snapshot_retrieved_utc": "2026-10-14T05:03:14.973000+00:00",
+  "source_and_forecast_Cosign_NOT_independently_verified": true,
+  "mathematical_score_definition": "( (pUP-yUP)^2+(pDOWN-yDOWN)^2+(pRANGE-yRANGE)^2 )/3, gain=prior-model",
+  "endpoint_class_definition": "UP if close>=reference*(1+predeclared_threshold); DOWN if <=reference*(1-threshold); else RANGE",
+  "reference_spot_usdt": 83462.9,
+  "horizons": {
+    "1h": {
+      "target_utc": "2026-10-13T05:45:00+00:00",
+      "exact_closed_5m_open_utc": "2026-10-13T05:40:00Z",
+      "actual_close_usdt": 83587.45,
+      "actual_outcome": "RANGE",
+      "published_probabilities": {
+        "UP": 0.02231836339503352,
+        "DOWN": 0.027799809909358094,
+        "RANGE": 0.9498818266956085
+      },
+      "Brier_model": 0.0012609233569994126,
+      "Brier_frozen_train_prior": 0.0017983929281985111,
+      "gain": 0.0005374695711990985,
+      "validation_selected_shrink": 1
+    },
+    "4h": {
+      "target_utc": "2026-10-13T08:45:00+00:00",
+      "exact_closed_5m_open_utc": "2026-10-13T08:40:00Z",
+      "actual_close_usdt": 83807.81,
+      "actual_outcome": "RANGE",
+      "published_probabilities": {
+        "UP": 0.05128205128205128,
+        "DOWN": 0.03678929765886288,
+        "RANGE": 0.9119286510590858
+      },
+      "Brier_model": 0.003913287903399872,
+      "Brier_frozen_train_prior": 0.003913287903399872,
+      "gain": 0,
+      "validation_selected_shrink": 0
+    },
+    "24h": {
+      "target_utc": "2026-10-14T04:45:00+00:00",
+      "exact_closed_5m_open_utc": "2026-10-14T04:40:00Z",
+      "actual_close_usdt": 83738.1,
+      "actual_outcome": "RANGE",
+      "published_probabilities": {
+        "UP": 0.14126744624669935,
+        "DOWN": 0.06808751414560543,
+        "RANGE": 0.7906450396076952
+      },
+      "Brier_model": 0.022807300130818543,
+      "Brier_frozen_train_prior": 0.022807300130818543,
+      "gain": 0,
+      "validation_selected_shrink": 0
+    }
+  },
+  "resolved_horizons": 3,
+  "independent_prospective_days_count": 1,
+  "independent_price_episodes_verified": 0,
+  "no_claim_of_statistical_significance": true,
+  "no_directional_early_signal_claim": true,
+  "actual_OTC_operator_firm_quotes_or_fills": false,
+  "proxy_not_real_OTC": true,
+  "frozen_production_unmodified": true,
+  "trading_authority": false
+}

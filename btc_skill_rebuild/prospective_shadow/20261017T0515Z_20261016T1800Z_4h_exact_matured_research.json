@@ -1,0 +1,42 @@
+{
+  "schema": "btc-v7r6-research-matured-4h-exact-5m-20261017",
+  "math_only": true,
+  "asof_utc": "2026-10-17T05:15:17Z",
+  "forecast_slot": "20261016T1800Z",
+  "forecast_commit": "e1b60addda1eb83e309fa1d4faba915af3e19400",
+  "forecast_commit_utc": "2026-10-16T18:11:47Z",
+  "original_R5_blob": "6ac19e27f0e2fd89ec98d786003b219c7d1237ed",
+  "original_R5_retrieved_utc": "2026-10-16T18:06:19.490000+00:00",
+  "future_R5_blob": "c1a375d2a73f7a5e23b4f13e07dc1a21e152eb4d",
+  "future_R5_commit_utc": "2026-10-17T04:04:54Z",
+  "exact_target_utc": "2026-10-16T22:00:00Z",
+  "reference_spot": 81217.13,
+  "target_spot": 81684,
+  "realized_return": 0.005748417852243781,
+  "label": "RANGE",
+  "threshold": 0.012,
+  "published_UP_DOWN_RANGE": [
+    0.05128205128205128,
+    0.03678929765886288,
+    0.9119286510590858
+  ],
+  "frozen_prior_UP_DOWN_RANGE": [
+    0.05128205128205128,
+    0.03678929765886288,
+    0.9119286510590858
+  ],
+  "Brier_divisor": 3,
+  "Brier_model": 0.003913287903399872,
+  "Brier_prior": 0.003913287903399872,
+  "Brier_gain": 0,
+  "original_HH00_due_grid_through_20261017T0500Z": 102,
+  "on_time_hourly_publications": 6,
+  "missing_hourly_publications": 96,
+  "original_frozen_weights_blob": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "original_predictor_blob": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+  "source_Cosign_verified": false,
+  "research_Cosign_verified": false,
+  "independent_days_at_least_20": false,
+  "actual_operator_quotes": false,
+  "trading_authority": false
+}

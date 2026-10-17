@@ -1,0 +1,86 @@
+{
+  "schema": "btc-v7r6-research-hourly-fixed-grid-exact-1h-score-20261017-v1",
+  "math_only": true,
+  "frozen_research_branch": "btc-v7r6-forecast-math-diagnostics-20261012",
+  "original_model_git_blob_sha1": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+  "frozen_historical_weights_git_blob_sha1": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "forecast_slot": "20261017T0200Z",
+  "forecast_file": "btc_skill_rebuild/prospective_shadow/20261017T0200Z_probabilities_unverified_research.json",
+  "forecast_blob_sha1": "8f0fd237fa056fc8b97bdab11d42ea2da4ec5a3a",
+  "forecast_GitHub_commit_sha": "05d9c6cf307421e08a38d432b7f50a0beba7272c",
+  "forecast_GitHub_commit_utc": "2026-10-17T02:11:27Z",
+  "forecast_on_time_before_HH13": true,
+  "original_source_blob_sha1": "e5784bf19f78b5dc049800c4f1b2dd3cdfa83c6b",
+  "original_source_anchor_utc": "2026-10-17T02:00:00+00:00",
+  "original_source_retrieved_utc": "2026-10-17T02:06:00.212000+00:00",
+  "original_source_GitHub_commit_utc": "2026-10-17T02:06:09Z",
+  "future_R5_snapshot_blob_sha1": "3f56e15171fa19f6769e24fe7029434c966f2a9f",
+  "future_R5_snapshot_GitHub_commit_sha": "4b0f7ffc1ff86f2dce0ff2d90af3ab3c33717cf6",
+  "future_R5_snapshot_GitHub_commit_utc": "2026-10-17T03:20:03Z",
+  "future_R5_snapshot_anchor_utc": "2026-10-17T03:15:00+00:00",
+  "future_R5_snapshot_retrieved_utc": "2026-10-17T03:19:59.243000+00:00",
+  "future_snapshot_no_backfill_claimed": true,
+  "exact_5m_target_utc": "2026-10-17T03:00:00+00:00",
+  "reference_spot_usdt": 81538,
+  "actual_closed_5m_target_spot_usdt": 81478.01,
+  "actual_return_fraction": -0.0007357305796070746,
+  "outcome_label": "RANGE",
+  "precommitted_threshold_fraction": 0.007,
+  "original_public_probabilities": {
+    "UP": 0.03281423804226919,
+    "DOWN": 0.027067111605487578,
+    "RANGE": 0.9401186503522432
+  },
+  "Brier_three_way_model": 0.0017983929281985111,
+  "Brier_three_way_frozen_training_prior": 0.0017983929281985111,
+  "Brier_gain_model_vs_prior": 0,
+  "matured_original_hourly_due_grid_asof_20261017T0323Z": {
+    "one_hour": 99,
+    "four_hours": 96,
+    "twenty_four_hours": 76
+  },
+  "hourly_publication_due_grid_from_20261013T0000Z_through_20261017T0300Z": {
+    "due": 100,
+    "precommitted_on_time_forecasts": 6,
+    "missing": 94,
+    "off_hour_20261013T0445Z_excluded_from_hourly_grid": true,
+    "all_six_original_publications": [
+      {
+        "slot": "20261013T0500Z",
+        "commit_sha": "647d67e4272b398f14f5f7b7cda699bca5ff1b93",
+        "commit_utc": "2026-10-13T05:05:07Z"
+      },
+      {
+        "slot": "20261013T1100Z",
+        "commit_sha": "ef849f0ff6ebd479429ca17f5e12d382b0c3ce62",
+        "commit_utc": "2026-10-13T11:11:21Z"
+      },
+      {
+        "slot": "20261014T0900Z",
+        "commit_sha": "dcce930e64e1db66a2dde60a8d11db62b10edab9",
+        "commit_utc": "2026-10-14T09:12:14Z"
+      },
+      {
+        "slot": "20261015T0500Z",
+        "commit_sha": "0247f22d21353c038696b7b402dd1e8ad01a1374",
+        "commit_utc": "2026-10-15T05:07:33Z"
+      },
+      {
+        "slot": "20261016T1800Z",
+        "commit_sha": "e1b60addda1eb83e309fa1d4faba915af3e19400",
+        "commit_utc": "2026-10-16T18:11:47Z"
+      },
+      {
+        "slot": "20261017T0200Z",
+        "commit_sha": "05d9c6cf307421e08a38d432b7f50a0beba7272c",
+        "commit_utc": "2026-10-17T02:11:27Z"
+      }
+    ]
+  },
+  "cryptographic_Cosign_verification_performed": false,
+  "prospective_independent_days_observed_at_most": 5,
+  "requires_20_independent_prospective_days": true,
+  "real_operator_quotes_or_fills_verified": false,
+  "market_skill_proven": false,
+  "trading_authority": false
+}

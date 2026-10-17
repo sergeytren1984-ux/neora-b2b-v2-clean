@@ -66,5 +66,11 @@
   "cosign_independent_verification": false,
   "operator_quotes_verified": false,
   "prospective_skill_proven": false,
-  "trading_authority": false
+  "trading_authority": false,
+  "negative_control": {
+    "slot": "20261016T1800Z",
+    "source_blob_sha1": "6ac19e27f0e2fd89ec98d786003b219c7d1237ed",
+    "gap_free_append_rows": 1429,
+    "original_code_matches_published_all_three_horizons": true
+  }
 }

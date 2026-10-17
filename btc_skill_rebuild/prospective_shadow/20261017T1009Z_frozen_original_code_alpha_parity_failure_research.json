@@ -1,0 +1,70 @@
+{
+  "schema": "btc-v7r6-research-frozen-predictor-exact-reproduction-failure-v1",
+  "asof_audit_utc": "2026-10-17T10:08:57Z",
+  "research_only": true,
+  "forecast_slot": "20261017T0200Z",
+  "original_forecast_commit_sha": "05d9c6cf307421e08a38d432b7f50a0beba7272c",
+  "original_forecast_commit_utc": "2026-10-17T02:11:27Z",
+  "original_forecast_blob_sha1": "8f0fd237fa056fc8b97bdab11d42ea2da4ec5a3a",
+  "R5_original_source_blob_sha1": "e5784bf19f78b5dc049800c4f1b2dd3cdfa83c6b",
+  "original_predictor_git_blob_sha1": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+  "imported_predict_git_blob_sha1": "39ce2baec7b539be8adbe5ca454984ca5b9c5252",
+  "frozen_weights_git_blob_sha1": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "historical_archive_and_original_prepublication_R5_snapshots_joined_with_zero_gaps": true,
+  "historical_rows_appended_after_archive": 1525,
+  "exact_source_anchor_utc": "2026-10-17T02:00:00+00:00",
+  "original_frozen_code_uses_alpha_directly": true,
+  "published_values_match_one_minus_frozen_alpha_exactly": true,
+  "per_horizon": {
+    "1h": {
+      "frozen_alpha": 1,
+      "published": [
+        0.03281423804226919,
+        0.027067111605487578,
+        0.9401186503522432
+      ],
+      "original_code": [
+        0.009805208827184376,
+        0.00872565164550865,
+        0.9814691395273071
+      ],
+      "max_abs_error": 0.0413504891750639,
+      "inverted_alpha_max_abs_error": 0
+    },
+    "4h": {
+      "frozen_alpha": 0,
+      "published": [
+        0.022920968901942902,
+        0.015631178641174616,
+        0.9614478524568825
+      ],
+      "original_code": [
+        0.05128205128205128,
+        0.03678929765886288,
+        0.9119286510590858
+      ],
+      "max_abs_error": 0.04951920139779664,
+      "inverted_alpha_max_abs_error": 0
+    },
+    "24h": {
+      "frozen_alpha": 0,
+      "published": [
+        0.10552809640814549,
+        0.04646731714836371,
+        0.8480045864434907
+      ],
+      "original_code": [
+        0.14126744624669935,
+        0.06808751414560543,
+        0.7906450396076952
+      ],
+      "max_abs_error": 0.05735954683579558,
+      "inverted_alpha_max_abs_error": 0
+    }
+  },
+  "scientific_consequence": "Original publicly committed probabilities remain immutable, but cannot be credited as outputs of the pinned frozen predictor code. Published scores describe the published research probabilities only, not the original-code prospective model. Never retrospectively replace probabilities or combine incompatible alpha semantics in one skill estimate.",
+  "cosign_independent_verification": false,
+  "operator_quotes_verified": false,
+  "prospective_skill_proven": false,
+  "trading_authority": false
+}

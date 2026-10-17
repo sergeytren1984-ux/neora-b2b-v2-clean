@@ -1,0 +1,59 @@
+{
+  "anchor_utc": "2026-10-17T11:45:00+00:00",
+  "book": {
+    "book_depth_is_historical": false,
+    "source": "OKX BTC-USDT-SWAP top 10 depth, raw contract size units",
+    "spread_bps": 0.012260047876200582,
+    "top10_size_imbalance": 0.19462749264565898,
+    "vendor_timestamp_ms": 1792237709157
+  },
+  "demand_watch": "NO_EXTREME_FLOW_WATCH",
+  "funding": {
+    "funding_time_ms": 1792252800000,
+    "source": "OKX BTC-USDT-SWAP current projected funding",
+    "value": 0.0001,
+    "vendor_observation_ms": 1792237684195
+  },
+  "oi": {
+    "age_seconds": 209,
+    "numerically_trained_with_binance_oi": false,
+    "oi_change_15m_pct": -0.004982240793494075,
+    "oi_change_60m_pct": 0.03955539101700989,
+    "oi_usd": 3329822907.751,
+    "source": "OKX rubik BTC aggregated contracts open interest USD",
+    "vendor_observation_ms": 1792237500000
+  },
+  "positioning_context": "OI_NEAR_FLAT",
+  "prospective_skill_proven": false,
+  "retrieved_at_utc": "2026-10-17T11:48:29.253000+00:00",
+  "schema": "btc-v7-shadow-observation-v1",
+  "sha256_raw_snapshot": "59474f431c08249941c7c2c26816955207316d5fda7a5802de92bcc61f826438",
+  "source_status": {
+    "book_okx": {
+      "source": "https://www.okx.com/api/v5/market/books",
+      "state": "AVAILABLE"
+    },
+    "funding_okx": {
+      "source": "https://www.okx.com/api/v5/public/funding-rate",
+      "state": "AVAILABLE"
+    },
+    "oi_okx": {
+      "source": "https://www.okx.com/api/v5/rubik/stat/contracts/open-interest-volume",
+      "state": "AVAILABLE"
+    }
+  },
+  "spot": 81593.86,
+  "spot_signal": {
+    "15m_price_change_pct": 0.028601015587370604,
+    "15m_taker_buy_fraction": 0.45160106993239946,
+    "15m_volume_vs_previous_1h_quarter": 0.5050584239903471,
+    "breakout_pct": -0.11886260119847725,
+    "calibrated_prediction": false,
+    "demand_watch": "NO_EXTREME_FLOW_WATCH",
+    "positioning_context": "OI_NEAR_FLAT",
+    "previous_1h_high": 81690.96,
+    "reference_spot": 81593.86,
+    "trading_authority": false
+  },
+  "trading_authority": false
+}

@@ -49,7 +49,7 @@
   },
   "scorer_git_blob_sha1": "17fe99c99f33825f7b410e3f5e91be384582f793",
   "independent_cosign_verification_performed": false,
-  "not_an_independent_prospective_day": false,
+  "not_an_independent_prospective_day": true,
   "sample_size_one_4h_outcome": true,
   "trade_admission_requirements_satisfied": false,
   "real_OTC_operator_firm_ask_or_fills": false,

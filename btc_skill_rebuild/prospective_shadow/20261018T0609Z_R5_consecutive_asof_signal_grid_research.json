@@ -1,0 +1,20 @@
+{
+  "schema": "btc-v7r6-readonly-frozen-R5-15m-grid-math-census-v1",
+  "checked_at_utc": "2026-10-18T06:09:00Z",
+  "R5_evidence_head_sha": "8523a3a98c183c4ea0747308bfdba013f613a48e",
+  "fixed_due_from_utc": "2026-10-13T00:00:00Z",
+  "latest_R5_signal_utc": "2026-10-18T05:30:00Z",
+  "full_15m_due_slots_inclusive": 503,
+  "signal_json_files_present": 292,
+  "signal_json_files_missing": 211,
+  "longest_contiguous_15m_signal_file_streak": 8,
+  "longest_streak_from_utc": "2026-10-13T00:00:00Z",
+  "longest_streak_to_utc": "2026-10-13T01:45:00Z",
+  "frozen_CUSUM_requires_32_consecutive_asof_slots": true,
+  "required_32_slot_streak_observed": false,
+  "consecutive_file_presence_only_not_crypto_verified": true,
+  "actual_early_direction_alert_lead_ge_60m_proven": false,
+  "independent_price_episodes_evaluated": false,
+  "statistical_forecast_skill_proven": false,
+  "trading_authority": false
+}

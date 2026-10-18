@@ -1,0 +1,110 @@
+{
+  "schema": "btc-v7r6-research-only-stable-closed5m-stitched-cross-side-market-episode-audit-v1",
+  "calculated_at_utc": "2026-10-18T12:45:50Z",
+  "research_branch": "btc-v7r6-forecast-math-diagnostics-20261012",
+  "scope": "EX_POST_LABEL_AUDIT_ONLY_NOT_A_NEW_PROSPECTIVE_FORECAST",
+  "r5_evidence_branch": "btc-v7r5-corrected-signed-evidence-20261013",
+  "r5_evidence_head_sha": "7522a9230ecb9535dc1600ae2f431f0c2368bd39",
+  "r5_source_snapshots": [
+    {
+      "slot": "20261016T0845Z",
+      "path": "btc_v7r3_evidence/slots/20261016T0845Z/snapshot.json",
+      "git_blob_sha1": "a159863f23a488e716e0a394684c9b8c8fcda1ca"
+    },
+    {
+      "slot": "20261016T1215Z",
+      "path": "btc_v7r3_evidence/slots/20261016T1215Z/snapshot.json",
+      "git_blob_sha1": "692a76ff51bde9c6fd2621eb8bfe6ff7a277f4be",
+      "original_git_commit_sha": "7522a9230ecb9535dc1600ae2f431f0c2368bd39",
+      "original_git_commit_utc": "2026-10-16T12:21:07Z"
+    }
+  ],
+  "asof_last_closed_5m_utc": "2026-10-16T12:15:00Z",
+  "source_5m_rows_merged_by_original_open_time": 1042,
+  "source_5m_duplicate_overlap_rows_identical": 958,
+  "source_5m_conflicting_duplicate_rows": 0,
+  "source_5m_missing_intervals": 0,
+  "first_source_5m_open_utc": "2026-10-12T21:25:00Z",
+  "methodology": "Merge two previously published R5 as-of 5m OHLCV snapshots by original open_ms; reject conflicting same-time bars; require 300000ms contiguous and fully closed 5m. For each fixed 15m anchor from 2026-10-13T00:00Z, only label if exact +1h/+4h future is fully closed by last snapshot. First-touch UP/DOWN high/low vs original anchor close at +/-0.7% and +/-1.2%, AMBIGUOUS when same 5m bar touches both. Globally deduplicate (first-touch close_ms, side), then transitively cluster across both sides whenever adjacent first touches are within the corresponding 1h/4h horizon. Independently count strict nonoverlapping anchor slots from original epoch start.",
+  "h1": {
+    "horizon_minutes": 60,
+    "barrier_fraction": 0.007,
+    "matured_overlapping_15m_slots": 334,
+    "ex_post_labels": {
+      "UP_FIRST": 31,
+      "DOWN_FIRST": 24,
+      "NEITHER": 279,
+      "AMBIGUOUS_SAME_5M": 0
+    },
+    "unique_first_touch_timestamp_side_pairs": 33,
+    "conservative_cross_side_market_episodes": 10,
+    "mixed_up_down_market_episodes": 4,
+    "strict_nonoverlap_due": 84,
+    "strict_nonoverlap_ex_post_labels": {
+      "UP_FIRST": 8,
+      "DOWN_FIRST": 7,
+      "NEITHER": 69,
+      "AMBIGUOUS_SAME_5M": 0
+    }
+  },
+  "h4": {
+    "horizon_minutes": 240,
+    "barrier_fraction": 0.012,
+    "matured_overlapping_15m_slots": 322,
+    "ex_post_labels": {
+      "UP_FIRST": 22,
+      "DOWN_FIRST": 50,
+      "NEITHER": 250,
+      "AMBIGUOUS_SAME_5M": 0
+    },
+    "unique_first_touch_timestamp_side_pairs": 32,
+    "conservative_cross_side_market_episodes": 5,
+    "mixed_up_down_market_episodes": 2,
+    "strict_nonoverlap_due": 21,
+    "strict_nonoverlap_ex_post_labels": {
+      "UP_FIRST": 1,
+      "DOWN_FIRST": 3,
+      "NEITHER": 17,
+      "AMBIGUOUS_SAME_5M": 0
+    }
+  },
+  "prior_asof_20261016T0845Z_reproduced_report": "btc_skill_rebuild/prospective_shadow/20261016T0853Z_R5_expost_global_episode_HH00_math_audit.json",
+  "changes_since_prior_asof": {
+    "h1": {
+      "additional_matured_15m": 14,
+      "additional_unique_first_touch_pairs": 2,
+      "additional_cross_side_market_episodes": 1,
+      "additional_strict_nonoverlap_due": 4
+    },
+    "h4": {
+      "additional_matured_15m": 14,
+      "additional_unique_first_touch_pairs": 0,
+      "additional_cross_side_market_episodes": 0,
+      "additional_strict_nonoverlap_due": 1
+    }
+  },
+  "fixed_HH00_research_forecast_due_asof_20261018T1200Z": 133,
+  "genuinely_published_original_on_time_HH00_forecasts": 4,
+  "missing_original_HH00_research_forecasts_no_backfill": 129,
+  "mature_asof_last_R5_source_HH00_due": {
+    "h1": 84,
+    "h4": 81,
+    "h24": 61
+  },
+  "mature_asof_last_R5_source_HH00_original_research_forecasts": {
+    "h1": 4,
+    "h4": 4,
+    "h24": 4
+  },
+  "original_research_forecast_independent_calendar_days": 3,
+  "frozen_4h_shrink": 0,
+  "frozen_24h_shrink": 0,
+  "frozen_4h_24h_probability_vs_training_prior_identical_for_every_future_outcome": true,
+  "prospective_signed_signals_with_verified_60m_lead": 0,
+  "independent_cosign_rekor_verification_performed": false,
+  "operator_firm_quotes": 0,
+  "operator_executed_fills": 0,
+  "risk_of_overlap_bias": "334 and 322 overlapping labels do not represent independent predictions or events",
+  "statistical_trading_skill_proven": false,
+  "trading_authority": false
+}

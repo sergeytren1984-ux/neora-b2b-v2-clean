@@ -1,0 +1,59 @@
+{
+  "R5_signed_spot_input_Git_blob": "60924711d7305c4301e583a42bace4f5efed6303",
+  "calendar_days_with_any_resolved_endpoint": 1,
+  "earliest_R5_signed_spot_input_ref": "btc_v7r3_evidence/slots/20261018T0400Z/snapshot.json",
+  "fixed_horizon_due_count": 2,
+  "fixed_horizon_due_missing_count": 0,
+  "fixed_horizon_resolved_count": 2,
+  "future_R5_spot_snapshot_anchor_utc": "2026-10-18T08:00:00+00:00",
+  "future_R5_spot_snapshot_receipt_utc": "2026-10-18T08:06:28.426000+00:00",
+  "has_real_OTC_operator_quotes": false,
+  "independent_days_require_global_precommitted_nonoverlapping_grid": true,
+  "independent_prospective_days_count": 0,
+  "prospective_market_skill_proven": false,
+  "public_model_commit_time_NOT_crypto_checked_inside_this_module": true,
+  "public_model_commit_time_utc_claimed_external": "2026-10-18T04:09:21+00:00",
+  "schema": "btc-v7r6-research-prospective-fixed-endpoint-own-slot-v1",
+  "three_way_horizons": {
+    "1h": {
+      "Brier_gain_vs_frozen_train_prior": 0,
+      "actual_outcome": "RANGE",
+      "actual_target_close_usdt": 81801,
+      "due": true,
+      "forecast_probabilities": {
+        "DOWN": 0.027067111605487578,
+        "RANGE": 0.9401186503522432,
+        "UP": 0.03281423804226919
+      },
+      "reference_spot_usdt": 81960,
+      "resolved": true,
+      "shrink_previous_validation_only": 1,
+      "strict_3way_Brier_frozen_train_prior": 0.0017983929281985111,
+      "strict_3way_Brier_model": 0.0017983929281985111,
+      "target_utc": "2026-10-18T05:00:00+00:00"
+    },
+    "24h": {
+      "due": false,
+      "reason": "target not in as-of future outcome snapshot",
+      "resolved": false
+    },
+    "4h": {
+      "Brier_gain_vs_frozen_train_prior": -0.00004194564047677648,
+      "actual_outcome": "RANGE",
+      "actual_target_close_usdt": 81681.14,
+      "due": true,
+      "forecast_probabilities": {
+        "DOWN": 0.031604319477270305,
+        "RANGE": 0.9121997461296523,
+        "UP": 0.056195934393077476
+      },
+      "reference_spot_usdt": 81960,
+      "resolved": true,
+      "shrink_previous_validation_only": 0,
+      "strict_3way_Brier_frozen_train_prior": 0.003913287903399872,
+      "strict_3way_Brier_model": 0.003955233543876648,
+      "target_utc": "2026-10-18T08:00:00+00:00"
+    }
+  },
+  "trading_authority": false
+}

@@ -1,0 +1,76 @@
+{
+  "schema": "btc-v7r6-research-math-readonly-fixed-due-census-20261018T1224Z-v1",
+  "checked_at_utc": "2026-10-18T12:24:05.107106+00:00",
+  "R5_evidence_branch": "btc-v7r5-corrected-signed-evidence-20261013",
+  "R5_evidence_head_sha": "f62876ebc5fe8a837769ec529edb331a3e3553bd",
+  "research_branch": "btc-v7r6-forecast-math-diagnostics-20261012",
+  "research_head_before_audit": "ce239cd3afca7334727c029b83a7407273bdff15",
+  "method": "Read-only full non-truncated GitHub tree path enumeration, exact original 15-minute/HH:00 due grid; no retroactive inference from later price data.",
+  "frozen_R5_grid": {
+    "start_utc": "2026-10-13T00:00:00Z",
+    "last_elapsed_due_utc": "2026-10-18T12:15:00Z",
+    "expected_15min_slots": 530,
+    "signal_json_present": 306,
+    "signal_json_missing": 224,
+    "snapshot_json_present": 285,
+    "max_consecutive_signal_files": 8,
+    "consecutive_streak_start": "20261013T0000Z",
+    "consecutive_streak_end": "20261013T0145Z",
+    "required_consecutive_for_frozen_CUSUM": 32,
+    "qualifying_streak_exists": false,
+    "signal_file_presence_not_equivalent_to_valid_directional_forecast": true
+  },
+  "frozen_R6_research_hourly_grid": {
+    "start_utc": "2026-10-13T00:00:00Z",
+    "last_elapsed_deadline_slot": "20261018T1200Z",
+    "elapsed_HH00_deadlines": 133,
+    "published_research_forecast_files_on_HH00": 7,
+    "HH00_without_published_forecast_file": 126,
+    "off_hour_forecast_files_excluded": 1,
+    "off_hour_forecast": "20261013T0445Z",
+    "slot_20261018T1200Z_source_snapshot_exists": false,
+    "slot_20261018T1200Z_forecast_missing": true,
+    "backfill_prohibited": true
+  },
+  "latest_matured_4h_mathematics": {
+    "target_slot": "20261018T0400Z",
+    "target_utc": "2026-10-18T08:00:00Z",
+    "actual_outcome": "RANGE",
+    "model_Brier": 0.003955233543876648,
+    "precommitted_prior_Brier": 0.003913287903399872,
+    "paired_gain_prior_minus_model": -0.00004194564047677648,
+    "prior_6_4h_forecasts_across_5_days_mean_day_gain": 0.0006322594045931444,
+    "updated_7_4h_forecasts_across_6_distinct_days_mean_day_gain": 0.0005198918970814909,
+    "updated_4h_days_with_positive_gain": 1,
+    "updated_4h_total_publication_days": 6,
+    "descriptive_one_sided_sign_test_p_for_ge_1_of_6_under_50pct_null": 0.984375,
+    "sign_test_not_primary_skill_estimator": true,
+    "pinned_original_predictor_parity_failure_at_20261017T0200Z": true,
+    "model_skill_from_incompatible_alpha_forecast_must_not_be_credited": true,
+    "source": "btc_skill_rebuild/prospective_shadow/20261018T0825Z_0400Z_exact_4h_R5_0800Z_research_score.json",
+    "prior_source": "btc_skill_rebuild/prospective_shadow/20261018T0603Z_fixed_HH00_exact_R5_math_audit.json",
+    "parity_failure_source": "btc_skill_rebuild/prospective_shadow/20261017T1009Z_frozen_original_code_alpha_parity_failure_research.json"
+  },
+  "other_matured_horizons_from_prior_audit": {
+    "h1": {
+      "n": 7,
+      "distinct_days": 6,
+      "positive_days": 2
+    },
+    "h24": {
+      "n": 6,
+      "distinct_days": 5,
+      "positive_days": 1
+    },
+    "not_independently_rescored_this_run": true
+  },
+  "independent_20_day_requirement_met": false,
+  "unique_directional_episodes_sufficient": false,
+  "price_MAE_advantage_over_persistence_proven": false,
+  "early_direction_lead_ge_60m_proven": false,
+  "actual_OTC_operator_quotes_or_executed_fills_verified": false,
+  "evidence_independently_cosign_verified": false,
+  "research_only": true,
+  "retrospective_probability_changes": false,
+  "trading_authority": false
+}

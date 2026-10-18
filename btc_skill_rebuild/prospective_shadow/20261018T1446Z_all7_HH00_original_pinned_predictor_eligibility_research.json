@@ -1,0 +1,52 @@
+{
+  "schema": "btc-v7r6-research-original-pinned-predictor-eligibility-census-v1",
+  "asof_utc": "2026-10-18T14:46:00Z",
+  "due_grid_start_utc": "2026-10-13T00:00:00Z",
+  "last_due_HH00_utc": "2026-10-18T14:00:00Z",
+  "HH00_due_count": 135,
+  "published_research_HH00_probability_files": 7,
+  "missing_original_HH00_probability_files": 128,
+  "published_forecasts_mathematically_compatible_with_original_frozen_predictor": 5,
+  "published_forecasts_with_inverted_frozen_alpha": 2,
+  "compatible_forecasts_with_nonprior_probabilities_by_horizon": {
+    "1h": 5,
+    "4h": 0,
+    "24h": 0
+  },
+  "compatible_forecast_publication_calendar_days": 4,
+  "source": "Read-only pinned math gate btc_skill_rebuild/research_original_code_parity_gate_v7r6.py, exact 1000 closed R5 5m rows for each original forecast, Git blob sha1 of weights, feature/predict/normalize pinned code, negative controls.",
+  "eligible_original_code_slots": [
+    "20261013T0500Z",
+    "20261013T1100Z",
+    "20261014T0900Z",
+    "20261015T0500Z",
+    "20261016T1800Z"
+  ],
+  "excluded_original_code_slots": [
+    {
+      "slot": "20261017T0200Z",
+      "max_abs_original_code_errors": {
+        "1h": 0.0413504891750639,
+        "4h": 0.04951920139779664,
+        "24h": 0.05735954683579558
+      },
+      "max_abs_error_if_alpha_inverted": 0
+    },
+    {
+      "slot": "20261018T0400Z",
+      "max_abs_original_code_errors": {
+        "1h": 0.023287533034843877,
+        "4h": 0.005184978181592574,
+        "24h": 0.03444814995389289
+      },
+      "max_abs_error_if_alpha_inverted": 0
+    }
+  ],
+  "scope": "Mathematical eligibility to claim original pinned-code skill, NOT a retrospective rewrite of publicly committed forecast distributions and NOT a source authenticity proof.",
+  "eligible_4h_24h_are_exact_frozen_train_prior": true,
+  "original_published_scores_remain_immutable": true,
+  "original_pinned_model_1h_4h_24h_skill_proven": false,
+  "independent_Cosign_verified": false,
+  "actual_OTC_firm_asks_or_fills_verified": false,
+  "trading_authority": false
+}

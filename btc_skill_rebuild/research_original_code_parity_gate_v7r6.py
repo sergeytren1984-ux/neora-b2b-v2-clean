@@ -16,7 +16,7 @@ PINNED_NORMALIZE_BLOB="e5806efd677f5bff31b49c035f521a048da8976c"
 TOL=1e-12
 
 def git_blob_sha1(raw):
-    return hashlib.sha1(("blob "+str(len(raw))+"\\0").encode()+raw).hexdigest()
+    return hashlib.sha1(("blob "+str(len(raw))).encode()+bytes([0])+raw).hexdigest()
 
 def read_pinned(path,expected):
     raw=pathlib.Path(path).read_bytes()
@@ -81,7 +81,7 @@ def main():
     if git_blob_sha1(pathlib.Path(a.snapshot).read_bytes())!=public["input_R5_spot_source_blob_GitHub_sha1"]:
         raise ValueError("R5 snapshot does not match original forecast cited blob")
     result=parity(snapshot,public,weights)
-    pathlib.Path(a.out).write_text(json.dumps(result,indent=2,sort_keys=True)+"\\n")
+    pathlib.Path(a.out).write_text(json.dumps(result,indent=2,sort_keys=True)+chr(10))
     print("PINNED_FORECAST_ELIGIBLE",result["eligible_for_original_pinned_code_skill"])
     for h,r in result["horizons"].items():
         print(h,"original_error",r["max_abs_original_code_error"],

@@ -1,0 +1,52 @@
+{
+  "schema": "btc-v7r6-research-only-fixed-grid-expost-episode-audit-v1",
+  "asof_utc": "2026-10-18T14:27:26Z",
+  "R5_sources": [
+    "20261016T0845Z",
+    "20261018T1345Z"
+  ],
+  "R5_source_sha1": [
+    "a159863f23a488e716e0a394684c9b8c8fcda1ca",
+    "e3155251cf32ee311591ab0d7bc81fa17a97fbed"
+  ],
+  "closed_5m": 1636,
+  "overlap_identical": 364,
+  "gaps": 0,
+  "h1": {
+    "matured_15m": 532,
+    "UP_FIRST": 35,
+    "DOWN_FIRST": 37,
+    "NEITHER": 460,
+    "strict_nonoverlap": 133,
+    "strict_UP": 9,
+    "strict_DOWN": 11,
+    "unique_first_touches": 43,
+    "global_cross_side_episodes": 15
+  },
+  "h4": {
+    "matured_15m": 520,
+    "UP_FIRST": 23,
+    "DOWN_FIRST": 64,
+    "NEITHER": 433,
+    "strict_nonoverlap": 33,
+    "strict_UP": 1,
+    "strict_DOWN": 4,
+    "unique_first_touches": 40,
+    "global_cross_side_episodes": 6
+  },
+  "R5_due": 538,
+  "R5_signal_present": 312,
+  "R5_missing": 226,
+  "R5_longest_consecutive": 8,
+  "R6_HH00_due": 135,
+  "R6_original_forecast_present": 7,
+  "R6_missing": 128,
+  "latest_HH00": "20261018T1400Z",
+  "latest_HH00_source_present": false,
+  "late_backfill": false,
+  "negative_math_tests_passed": 7,
+  "all_directional_events_expost_not_forecasts": true,
+  "independent_cosign_verified": false,
+  "actual_OTC_fills": 0,
+  "trading_authority": false
+}

@@ -1,0 +1,88 @@
+{
+  "schema": "v7r6_research_only_closed_5m_fixed_grid_20261018T1745Z",
+  "asof_utc": "2026-10-18T17:45:00Z",
+  "sources": [
+    "a159863f23a488e716e0a394684c9b8c8fcda1ca",
+    "8549764e076d1915e8d220e92ebe8d3297b331a8"
+  ],
+  "source_independent_signature_verified": false,
+  "unique_closed_5m": 1675,
+  "duplicate_identical": 325,
+  "gaps": 0,
+  "fixed_15m_due": 549,
+  "horizons": {
+    "1h": {
+      "matured": 545,
+      "endpoint_overlapping": [
+        16,
+        511,
+        18
+      ],
+      "nonoverlap": 137,
+      "endpoint_nonoverlap": [
+        4,
+        128,
+        5
+      ],
+      "firsttouch": [
+        35,
+        39,
+        471
+      ],
+      "nonoverlap_firsttouch": [
+        9,
+        12,
+        116
+      ],
+      "unique_touches": 43,
+      "global_episodes": 15
+    },
+    "4h": {
+      "matured": 533,
+      "endpoint_overlapping": [
+        23,
+        488,
+        22
+      ],
+      "nonoverlap": 34,
+      "endpoint_nonoverlap": [
+        2,
+        30,
+        2
+      ],
+      "firsttouch": [
+        23,
+        73,
+        437
+      ],
+      "nonoverlap_firsttouch": [
+        1,
+        5,
+        28
+      ],
+      "unique_touches": 42,
+      "global_episodes": 7
+    },
+    "24h": {
+      "matured": 453,
+      "endpoint_overlapping": [
+        8,
+        382,
+        63
+      ],
+      "nonoverlap": 5,
+      "endpoint_nonoverlap": [
+        0,
+        5,
+        0
+      ]
+    }
+  },
+  "method": "Fixed HH:00/15/30/45 5m endpoint thresholds ±0.7/1.2/2%, strict nonoverlap anchored at 2026-10-13 00:00Z, unique first touches grouped across both directions within horizon. All episode labels EX POST; not early forecasts.",
+  "hourly_due": 138,
+  "original_public_hourly_forecasts": 7,
+  "original_pinned_code_compatible": 5,
+  "missing_hourly_forecasts": 131,
+  "actual_OTC_firm_quotes": 0,
+  "trading_authority": false
+}

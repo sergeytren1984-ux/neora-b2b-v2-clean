@@ -1,0 +1,45 @@
+{
+  "schema": "btc-v7r6-research-published-original-alpha-parity-audit-v1",
+  "asof": "2026-10-18T14:46:00Z",
+  "forecast_slot": "20261018T0400Z",
+  "forecast_blob": "9e042d9a58e535f67b3362f8e054a51d14c7ac05",
+  "R5_source_blob": "60924711d7305c4301e583a42bace4f5efed6303",
+  "source_closed_5m_rows": 1000,
+  "pinned_original_code_blob": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+  "frozen_weights_blob": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "frozen_alpha": {
+    "1h": 1,
+    "4h": 0,
+    "24h": 0
+  },
+  "max_abs_difference_from_original_pinned": {
+    "1h": 0.023287533034843877,
+    "4h": 0.005184978181592574,
+    "24h": 0.03444814995389289
+  },
+  "max_abs_difference_if_alpha_inverted": {
+    "1h": 0,
+    "4h": 0,
+    "24h": 0
+  },
+  "published_gain_vs_train_prior_Brier": {
+    "1h": 0,
+    "4h": -0.00004194564047677648,
+    "24h": null
+  },
+  "unpublished_original_code_gain_expost_NOT_ELIGIBLE": {
+    "1h": 0.0011281792871333826,
+    "4h": 0,
+    "24h": null
+  },
+  "actual_endpoint_matured": {
+    "1h": true,
+    "4h": true,
+    "24h": false
+  },
+  "finding": "A second real published forecast exactly inverts the precommitted alpha across all three horizons. No original pinned-code prospective skill can be credited. Immutable public forecasts unchanged.",
+  "independent_cosign_verified": false,
+  "actual_OTC_operator_fills_verified": false,
+  "original_forecasts_replaced": false,
+  "trading_authority": false
+}

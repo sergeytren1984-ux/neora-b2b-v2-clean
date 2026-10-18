@@ -1,0 +1,38 @@
+{
+  "schema": "btc-v7r6-fixed-HH00-research-math-audit-v1",
+  "asof_utc": "2026-10-18T06:03:00Z",
+  "source_R5_head": "8523a3a98c183c4ea0747308bfdba013f613a48e",
+  "forecast_math_code_blob": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+  "frozen_weights_blob": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "HH00_deadlines_elapsed": 126,
+  "on_time_real_R5_source_research_forecasts": 7,
+  "missing_HH00": 119,
+  "nonhourly_forecasts_excluded": 1,
+  "exact_matured": {
+    "h1": {
+      "n": 7,
+      "UTC_days": 6,
+      "positive_days": 2,
+      "mean_daily_Brier_gain": 0.003548542248778929
+    },
+    "h4": {
+      "n": 6,
+      "UTC_days": 5,
+      "positive_days": 1,
+      "mean_daily_Brier_gain": 0.0006322594045931444
+    },
+    "h24": {
+      "n": 6,
+      "UTC_days": 5,
+      "positive_days": 1,
+      "mean_daily_Brier_gain": 0.0021349269303831925
+    }
+  },
+  "method": "unmodified research_score_public_shadow_v7r6.resolved_endpoint exact 5m R5 future snapshot, original GH commit time and original R5 snapshot blob checks, fixed original prior comparator",
+  "independent_Cosign_verified": false,
+  "independent_price_episodes_proven": false,
+  "actual_OTC_firm_quotes": false,
+  "minimum_20_independent_days_met": false,
+  "positive_statistical_lower_bound_proven": false,
+  "trading_authority": false
+}

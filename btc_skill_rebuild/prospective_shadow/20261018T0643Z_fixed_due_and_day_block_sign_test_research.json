@@ -1,0 +1,64 @@
+{
+  "schema": "btc-v7r6-readonly-mathematical-census-20261018T0643Z-v1",
+  "checked_at_utc": "2026-10-18T06:43:34Z",
+  "immutable_R5_evidence_ref": "btc-v7r5-corrected-signed-evidence-20261013",
+  "R5_evidence_head": "0b3838d3e9fb675a7f7c94850b43f2fc34047d90",
+  "evidence_tree_truncated": false,
+  "prospective_due_grid_15m": {
+    "from_utc": "2026-10-13T00:00:00Z",
+    "through_utc": "2026-10-18T06:30:00Z",
+    "expected_slots": 507,
+    "present_signal_files": 293,
+    "missing_signal_files": 214,
+    "longest_consecutive_file_presence": 8,
+    "example_max_streak_from": "2026-10-17T02:30:00Z",
+    "example_max_streak_through": "2026-10-17T04:15:00Z",
+    "frozen_calibrated_CUSUM_requires_consecutive": 32,
+    "qualifying_consecutive_sequence_observed": false,
+    "independent_Sigstore_verified": false,
+    "no_valid_early_signal_claim": true
+  },
+  "prospective_due_grid_HH00": {
+    "from_utc": "2026-10-13T00:00:00Z",
+    "through_utc": "2026-10-18T06:00:00Z",
+    "expected_hourly_slots": 127,
+    "confirmed_preexisting_on_time_research_forecasts": 7,
+    "hourly_slots_without_confirmed_prepublic_research_forecast": 120,
+    "slot_20261018T0600Z_R5_snapshot_exists": false,
+    "slot_20261018T0500Z_R5_snapshot_exists": true,
+    "missed_0600_deadline_20261018T0613Z": true,
+    "backfill_permitted": false
+  },
+  "prior_exact_matured_HH00_scores_asof_20261018T0603Z": {
+    "source": "btc_skill_rebuild/prospective_shadow/20261018T0603Z_fixed_HH00_exact_R5_math_audit.json",
+    "h1": {
+      "n": 7,
+      "utc_days": 6,
+      "positive_days": 2,
+      "one_sided_sign_test_p_under_equal_daily_chance": 0.890625
+    },
+    "h4": {
+      "n": 6,
+      "utc_days": 5,
+      "positive_days": 1,
+      "one_sided_sign_test_p_under_equal_daily_chance": 0.96875
+    },
+    "h24": {
+      "n": 6,
+      "utc_days": 5,
+      "positive_days": 1,
+      "one_sided_sign_test_p_under_equal_daily_chance": 0.96875
+    },
+    "warning": "Descriptive day-positive sign-test is not a valid primary model skill test; small dependent sample, endpoint overlap, multiple horizons, and day-block return correlations. No positive 95% lower bound established."
+  },
+  "prospective_calendar_days_elapsed_before_20261018T0643Z": 5.28,
+  "minimum_20_independent_prospective_calendar_days_met": false,
+  "enough_unique_directional_events_proven": false,
+  "real_firm_OTC_asks_and_execution_receipts": false,
+  "research_forecast_producer_code_blob": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+  "original_preepoch_weights_blob": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "original_forecast_modified": false,
+  "source_and_forecasts_independently_Cosign_verified": false,
+  "actual_trading_operations": false,
+  "trading_authority": false
+}

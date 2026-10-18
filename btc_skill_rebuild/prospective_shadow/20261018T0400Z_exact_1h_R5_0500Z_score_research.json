@@ -1,0 +1,53 @@
+{
+  "schema": "btc-v7r6-research-prospective-fixed-endpoint-own-slot-v1",
+  "clock_anchor_utc": "2026-10-18T04:00:00+00:00",
+  "original_public_research_commit_sha": "1f39cb4dd04e013b4eb1ba2bd90465199ab08384",
+  "original_public_research_commit_timestamp_utc": "2026-10-18T04:09:21Z",
+  "original_public_commit_timestamp_external_GitHub_not_independently_crypto_verified": true,
+  "original_public_forecast_blob_sha1": "9e042d9a58e535f67b3362f8e054a51d14c7ac05",
+  "original_R5_source_snapshot_blob_sha1": "60924711d7305c4301e583a42bace4f5efed6303",
+  "future_R5_snapshot_blob_sha1": "12be77c57c5b6793348eecec9a995d8ab8c90b12",
+  "future_R5_snapshot_path": "btc_v7r3_evidence/slots/20261018T0500Z/snapshot.json",
+  "future_R5_snapshot_anchor_utc": "2026-10-18T05:00:00+00:00",
+  "future_R5_snapshot_retrieved_at_utc": "2026-10-18T05:05:25.047000+00:00",
+  "source_and_forecast_not_independently_cosign_verified": true,
+  "pre_epoch_weights_blob_sha1": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "original_frozen_code_blob_sha1": "9709e5c8b886f4f362fd003d0af91f74e3e9dc38",
+  "scored_at_utc": "2026-10-18T05:55:46.626Z",
+  "scoring_mathematics": "strict three-class Brier=sum_k (p_k - 1[k=actual])^2 / 3; exact closed 5m target, frozen training prior comparator",
+  "one_hour": {
+    "due": true,
+    "resolved": true,
+    "target_utc": "2026-10-18T05:00:00+00:00",
+    "reference_spot_usdt": 81960,
+    "exact_closed_target_spot_usdt": 81801,
+    "endpoint_threshold_fraction": 0.007,
+    "actual_outcome": "RANGE",
+    "forecast_probabilities": {
+      "UP": 0.03281423804226919,
+      "DOWN": 0.027067111605487578,
+      "RANGE": 0.9401186503522432
+    },
+    "frozen_training_prior_probabilities": {
+      "UP": 0.03281423804226919,
+      "DOWN": 0.027067111605487578,
+      "RANGE": 0.9401186503522432
+    },
+    "strict_3way_Brier_model": 0.0017983929281985111,
+    "strict_3way_Brier_frozen_train_prior": 0.0017983929281985111,
+    "Brier_gain_vs_frozen_train_prior": 0,
+    "model_equals_frozen_train_prior": true
+  },
+  "four_hour": {
+    "due": false,
+    "target_utc": "2026-10-18T08:00:00+00:00"
+  },
+  "twenty_four_hour": {
+    "due": false,
+    "target_utc": "2026-10-19T04:00:00+00:00"
+  },
+  "independent_prospective_days_count": 0,
+  "real_OTC_operator_quotes": false,
+  "prospective_market_skill_proven": false,
+  "trading_authority": false
+}

@@ -1,0 +1,88 @@
+{
+  "schema": "btc-v7r6-research-only-closed-R5-spot-nonoverlap-climatology-20261018-v1",
+  "computed_at_utc": "2026-10-18T18:47:03.047Z",
+  "source_R5_snapshot_path": "btc_v7r3_evidence/slots/20261018T1800Z/snapshot.json",
+  "source_R5_evidence_branch": "btc-v7r5-corrected-signed-evidence-20261013",
+  "source_R5_Git_blob_sha1": "19eb589e96296654b13a1400e80db715661931be",
+  "source_R5_retrieved_at_utc": "2026-10-18T18:07:50.070000+00:00",
+  "source_independently_Cosign_verified": false,
+  "frozen_preepoch_weight_path": "btc_skill_rebuild/prospective_shadow/frozen_historical_weights_first_asof_20261013.json",
+  "frozen_preepoch_weight_Git_blob_sha1": "05e61325250fbd470c988326cbeaf24853bd6947",
+  "observation_window_closed_5m": [
+    "2026-10-15T06:45:00Z",
+    "2026-10-18T18:00:00Z"
+  ],
+  "exact_5m_contiguous_rows": 1000,
+  "missing_5m": 0,
+  "malformed_OHLC": 0,
+  "unclosed_5m": 0,
+  "method": "DESCRIPTIVE EX POST ONLY: for each horizon use fixed nonoverlapping UTC clock grid anchored 2026-10-13 00:00Z, require both 5m endpoint closes inside the same already-retrieved R5 snapshot. UP if return > fixed threshold, DOWN if return < negative threshold, else RANGE. 3-class baseline Brier=sum((prior_k-onehot_k)^2)/3; persistence MAE=abs(close_target-close_anchor). These are NOT public model forecasts or first-touch alerts.",
+  "horizons": {
+    "1h": {
+      "fixed_threshold_fraction": 0.007,
+      "fully_matured_nonoverlap_due": 83,
+      "distinct_UTC_days": 4,
+      "actual_UP_DOWN_RANGE": [
+        2,
+        2,
+        79
+      ],
+      "frozen_train_prior_UP_DOWN_RANGE": [
+        0.03281423804226919,
+        0.027067111605487578,
+        0.9401186503522432
+      ],
+      "mean_baseline_3way_Brier": 0.031041058808627852,
+      "mean_price_persistence_absolute_error_USDT": 178.53614457831324
+    },
+    "4h": {
+      "fixed_threshold_fraction": 0.012,
+      "fully_matured_nonoverlap_due": 20,
+      "distinct_UTC_days": 4,
+      "actual_UP_DOWN_RANGE": [
+        1,
+        1,
+        18
+      ],
+      "frozen_train_prior_UP_DOWN_RANGE": [
+        0.05128205128205128,
+        0.03678929765886288,
+        0.9119286510590858
+      ],
+      "mean_baseline_3way_Brier": 0.0617728196759751,
+      "mean_price_persistence_absolute_error_USDT": 366.44200000000126
+    },
+    "24h": {
+      "fixed_threshold_fraction": 0.02,
+      "fully_matured_nonoverlap_due": 2,
+      "distinct_UTC_days": 2,
+      "actual_UP_DOWN_RANGE": [
+        0,
+        0,
+        2
+      ],
+      "frozen_train_prior_UP_DOWN_RANGE": [
+        0.14126744624669935,
+        0.06808751414560543,
+        0.7906450396076952
+      ],
+      "mean_baseline_3way_Brier": 0.022807300130818543,
+      "mean_price_persistence_absolute_error_USDT": 377.4449999999997
+    }
+  },
+  "fixed_HH00_research_forecast_due_from_20261013T0000Z_through_20261018T1800Z": 139,
+  "original_HH00_research_forecasts_published_before_this_audit": 7,
+  "HH00_missing_research_forecasts": 132,
+  "published_mathematically_compatible_with_original_pinned_alpha": 5,
+  "incompatible_inverted_alpha": 2,
+  "source_at_20261018T1800Z_present_and_retrieved_at_180750Z": true,
+  "research_forecast_at_20261018T1800Z_missing_after_1813Z": true,
+  "backfill_permitted": false,
+  "infer_model_skill_from_market_only_baseline": false,
+  "min_20_independent_prospective_days_met": false,
+  "model_Brier_advantage_proven": false,
+  "model_price_MAE_advantage_proven": false,
+  "model_early_direction_60min_proven": false,
+  "actual_OTC_operator_quotes_or_fills_observed": 0,
+  "trading_authority": false
+}

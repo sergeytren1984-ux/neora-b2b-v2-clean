@@ -3,7 +3,10 @@ name: BTC prospective evidence v5
 on:
   push:
     branches: [main]
-    paths: [.github/workflows/btc-prospective-evidence-v5.yml, btc-evidence-v5-heartbeat.txt]
+    paths:
+      - .github/workflows/btc-prospective-evidence-v5.yml
+      - btc-evidence-v5-heartbeat.txt
+      - btc-1h-v3-heartbeat.txt
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch: {}

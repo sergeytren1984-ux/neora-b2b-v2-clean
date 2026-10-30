@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths: [.github/workflows/btc-evidence-dispatch-guard.yml]
   schedule:
-    - cron: '23 0,6,12,18 * * *'
+    - cron: '23 */2 * * *'
   workflow_dispatch: {}
 
 permissions:
@@ -14,12 +14,12 @@ permissions:
 
 concurrency:
   group: btc-evidence-dispatch-guard
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   continuous-dispatch:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 115
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
@@ -60,7 +60,7 @@ jobs:
           four_h_stages = (2, 12, 22, 32)     # all before registered +45m deadline
           context_stages = (0, 30)             # refresh context at least twice per hour
           sent = set()
-          stop = time.monotonic() + 330 * 60
+          stop = time.monotonic() + 95 * 60
 
           while time.monotonic() < stop:
               now = dt.datetime.now(dt.timezone.utc)
@@ -113,7 +113,7 @@ jobs:
 
               time.sleep(45)
 
-          # Chain the next watchdog run before this runner reaches its six-hour limit.
+          # Hand off before the job timeout; the hourly heartbeat is an independent fallback.
           try:
               dispatch("btc-evidence-dispatch-guard.yml")
           except Exception as e:

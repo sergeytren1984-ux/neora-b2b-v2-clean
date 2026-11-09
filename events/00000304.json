@@ -1,0 +1,1 @@
+{"horizon":"4h","idempotency_key":"missed:20261020T000000Z:4h","previous_hash":"728177fceee59ab1896abdc5bcfbf2b0fee3ab0cea965a49e4166ab8c94e97b4","reason":"no valid timely signed forecast by issuance deadline","schema":"btc-gh-rekor-event-v1","sequence":304,"slot":"20261020T000000Z","type":"SLOT_MISSED","workflow_commit":"fff0b39878f9f393386ce97d9c3e9bed1a85bb60"}
